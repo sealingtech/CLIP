@@ -87,7 +87,7 @@ GREP = /bin/egrep
 MOCK = /usr/bin/mock
 REPO_LINK = /bin/ln -s
 REPO_WGET = /usr/bin/wget
-REPO_CREATE = /usr/bin/createrepo -d -c $(REPO_DIR)/yumcache
+REPO_CREATE = /usr/bin/createrepo -d --workers $(shell /usr/bin/nproc) -c $(REPO_DIR)/yumcache
 REPO_QUERY =  repoquery -c $(YUM_CONF_FILE) --quiet -a --queryformat '%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm'
 MOCK_ARGS += --resultdir=$(MY_REPO_DIR) -r $(MOCK_REL) --configdir=$(MOCK_CONF_DIR) --unpriv --rebuild
 
@@ -135,8 +135,7 @@ define REPO_ADD_FILE
 endef
 
 define CHECK_DEPS
-	@rpm -q $(HOST_RPM_DEPS) 2>&1 >/dev/null || echo "Please ensure the following RPMs are installed: $(HOST_RPM_DEPS)." || exit 1
-	@rpm -q $(HOST_REQD_PKGS) 2>&1 >/dev/null || echo "Pungi must be installed.  Please read Help-Getting-Started.txt." || exit 1
+	@if ! rpm -q $(HOST_RPM_DEPS) 2>&1 >/dev/null; then echo "Please ensure the following RPMs are installed: $(HOST_RPM_DEPS)."; exit 1; fi
 	@if [ x"`cat /selinux/enforce`" == "x1" ]; then echo -e "This is embarassing but due to a bug (bz #861281) you must do builds in permissive.\nhttps://bugzilla.redhat.com/show_bug.cgi?id=861281" && exit 1; fi
 endef
 
