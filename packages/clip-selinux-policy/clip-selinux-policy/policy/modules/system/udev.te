@@ -74,6 +74,10 @@ manage_files_pattern(udev_t, udev_var_run_t, udev_var_run_t)
 manage_lnk_files_pattern(udev_t, udev_var_run_t, udev_var_run_t)
 files_pid_filetrans(udev_t, udev_var_run_t, { dir file })
 
+manage_dirs_pattern(udev_t, udev_rules_t, udev_rules_t)
+manage_files_pattern(udev_t, udev_rules_t, udev_rules_t)
+manage_lnk_files_pattern(udev_t, udev_rules_t, udev_rules_t)
+
 kernel_read_system_state(udev_t)
 kernel_request_load_module(udev_t)
 kernel_getattr_core_if(udev_t)
@@ -109,6 +113,8 @@ dev_manage_generic_symlinks(udev_t)
 domain_read_all_domains_state(udev_t)
 domain_dontaudit_ptrace_all_domains(udev_t) #pidof triggers these
 
+# console_init manages files in /etc/sysconfig
+files_manage_etc_files(udev_t)
 files_read_usr_files(udev_t)
 files_read_etc_runtime_files(udev_t)
 files_read_etc_files(udev_t)

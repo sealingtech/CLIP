@@ -6,18 +6,18 @@
 #
 
 # The name of the package
-PKGNAME := example 
+PKGNAME := cacti
 
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
-VERSION := 1.0
+VERSION := 0.8.8b
 
 # bump this if creating multiple releases from the same
 # version (think about this... why are you doing this?)
-RELEASE := 1
+RELEASE := 1.el6
 
 # snag the architecture, hard code an arch if cross-compiling or going noarch
-ARCH ?= $(shell uname -i)
+ARCH := noarch
 
 
 PACKAGER := Quark Security, Inc
@@ -32,7 +32,7 @@ RPM_BUILDROOT ?= $(RPM_TMPDIR)/rpm-buildroot
 SRPM_OUTPUT_DIR ?= $(RPM_TOPDIR)/SRPMS
 
 # srpm file name
-SRC_SRPM := $(CURDIR)/example-1.0-1.src.rpm
+SRC_SRPM := $(CURDIR)/cacti-0.8.8b-1.rf.src.rpm
 RPM := $(PKGNAME)-$(VERSION)-$(RELEASE).$(ARCH).rpm
 SRPM := $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm
 

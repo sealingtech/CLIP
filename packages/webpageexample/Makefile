@@ -1,34 +1,34 @@
-# Copyright (C) 2012 Tresys Technology, LLC
+# Copyright (C) 2011-2012 Tresys Technology, LLC
+# Copyright (C) 2013 Cubic Corporation
 #
 # Authors: Spencer Shimko <sshimko@tresys.com>
-#
+#          Spencer Shimko <spencer@quarksecurity.com>
+#          John Feehley <jfeehley@quarksecurity.com>
 
 # The name of the package
-PKGNAME := aqueduct
+PKGNAME := webpageexample
 
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
-VERSION := 1.0
+VERSION := 1
 
-# Bump this if creating multiple releases from the same
-# version.
-RELEASE := svn.r381
+# bump this if creating multiple releases from the same
+# version (think about this... why are you doing this?)
+RELEASE := 1
 
 # The name of the Vendor
-VENDOR := Aqueduct
+VENDOR := Quark Security Inc
 
 # The name of the Packager
-PACKAGER ?= Tresys Technology, LLC
+PACKAGER ?= Quark Security Inc
 
-# Snag the architecture.  Assume host arch.
-# Hard code an arch if cross-compiling or going noarch.
-ARCH := noarch
+# snag the architecture, hard code an arch if cross-compiling or going noarch
+ARCH ?= noarch
 
-# This file will be created by tar'ing up $(PKGNAME)/
-TARBALL = $(SRPM_OUTPUT_DIR)/aqueduct-$(VERSION).tar.gz
-# All sources for the package.
+# the filename of the tarball
+TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tgz
 
-# Spec file name
+# spec file name
 RPM_SPEC = $(CURDIR)/$(PKGNAME).spec
 
 ####################################################
@@ -38,7 +38,7 @@ OUTPUT_DIR ?= $(ROOT_DIR)
 SRPM_OUTPUT_DIR ?= $(OUTPUT_DIR)
 
 # exhaustive list of deps for the RPM, used to determine if RPM needs to be rebuilt
-TAR_DEPS := $(shell find $(PKGNAME)/*)
+TAR_DEPS := $(wildcard $(PKGNAME)/*)
 RPM_DEPS := $(TARBALL) $(RPM_SPEC) $(CURDIR)/Makefile
 
 RPM_TMPDIR ?= $(ROOT_DIR)/tmp
@@ -47,9 +47,7 @@ RPM_BUILDROOT ?= $(RPM_TMPDIR)/rpm-buildroot
 
 MKDIR = test -d $(1) || mkdir -p $(1)
 
-RPMBUILD_ARGS := --define '_topdir $(RPM_TOPDIR)'  --define '_tmppath $(RPM_TMPDIR)'
-
-RPMQ_DEFS := --query --define 'pkgname $(PKGNAME)' --define '_sysconfdir /etc' --define 'version $(VERSION)' --define 'release $(RELEASE)' --define 'vendor $(VENDOR)' --define 'packager $(PACKAGER)' --qf '%{NAME}\n'
+RPMBUILD_ARGS := --define '_topdir $(RPM_TOPDIR)'  --define '_tmppath $(RPM_TMPDIR)' --buildroot $(RPM_BUILDROOT)
 
 define rpm-prep
 	$(call MKDIR,$(RPM_TOPDIR)/SOURCES)
@@ -57,12 +55,12 @@ define rpm-prep
 	$(call MKDIR,$(RPM_TOPDIR)/BUILD)
 	$(call MKDIR,$(RPM_TOPDIR)/RPMS/$(ARCH))
 	$(call MKDIR,$(RPM_TOPDIR)/SRPMS)
+	cp $(TARBALL) $(RPM_TOPDIR)/SOURCES/
 endef
 
 all: $(PKGNAME)-rpm $(PKGNAME)-srpm
 
-$(TARBALL): $(TAR_DEPS)
-	tar -czf $@ $(PKGNAME)
+tarball: $(TARBALL)
 
 rpm: $(PKGNAME)-rpm
 
@@ -72,18 +70,22 @@ $(PKGNAME)-rpm: $(OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).$(ARCH).rpm
 
 $(PKGNAME)-srpm: $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm
 
+# Note: if you're carrying a tarball already (e.g., you are using an officially released tarball), just copy it from here to $(TARBALL)
+#      	Something like this should work: "cp $@ $(RPM_TOPDIR)/SOURCES/"
+$(TARBALL): $(TAR_DEPS)
+	@echo "Building $(PKGNAME) source tarball..."
+	tar -czf $@ $(PKGNAME)/
+
 $(OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).$(ARCH).rpm: $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm
 	@echo "Building $(PKGNAME) RPM..."
 	$(call rpm-prep)
-	cd $(RPM_TOPDIR)/SRPMS && rpmbuild --rebuild --target=$(ARCH) $(RPMBUILD_ARGS) --buildroot $(RPM_BUILDROOT) -bb $<
-	if [ $(ARCH) != "noarch" ]; then cp $(RPM_TOPDIR)/RPMS/noarch/* $(OUTPUT_DIR)/ 2>&1 >/dev/null; exit 0; fi
-	mv  $(RPM_TOPDIR)/RPMS/$(ARCH)/*.rpm $(OUTPUT_DIR)
+	cd $(RPM_TOPDIR)/SRPMS && rpmbuild --rebuild $(RPMBUILD_ARGS) -bb $<
+	mv  $(RPM_TOPDIR)/RPMS/$(ARCH)/$(PKGNAME)-$(VERSION)-$(RELEASE)*.rpm $(OUTPUT_DIR)
 
 $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm: $(RPM_DEPS)
 	@echo "Building $(PKGNAME) SRPM..."
 	$(call rpm-prep)
-	cp $(TARBALL) $(RPM_TOPDIR)/SOURCES/
-	echo -e "%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)" > $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
+	echo -e "%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n"> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
 	cat $(RPM_SPEC) >> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
 	cd $(RPM_TOPDIR) && rpmbuild $(RPMBUILD_ARGS) -bs SPECS/$(notdir $(RPM_SPEC)) --nodeps
 	mv  $(RPM_TOPDIR)/SRPMS/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm $(SRPM_OUTPUT_DIR)
@@ -92,7 +94,7 @@ clean:
 	$(RM) -r $(RPM_TMPDIR)
 
 bare: clean
-	$(foreach f,$(shell rpm $(RPMQ_DEFS) --specfile $(RPM_SPEC)),$(RM) $(OUTPUT_DIR)/$(f)*.rpm;)
-	$(RM) $(TARBALL) $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm
+	$(RM) $(OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm $(OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).$(ARCH).rpm
+	$(RM) $(TARBALL)
 
-.PHONY: all rpm srpm $(PKGNAME)-rpm $(PKGNAME)-srpm clean bare
+.PHONY: all rpm srpm tarball $(PKGNAME)-rpm $(PKGNAME)-srpm clean bare

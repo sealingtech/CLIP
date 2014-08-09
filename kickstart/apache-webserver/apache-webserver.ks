@@ -81,9 +81,43 @@ scap-security-guide
 aqueduct
 aqueduct-SSG
 dracut
+webpageexample
 clip-dracut-module
 #aqueduct-ssg-bash
 secstate
+
+#####
+cacti
+mysql
+mysql-server
+mysql-test
+httpd
+php
+php-cli
+php-common
+php-gd
+php-imap
+php-intl
+php-ldap
+php-mbstring
+php-mysql
+php-pdo
+php-pear
+php-pecl-apc
+php-pecl-memcache
+php-pecl-Fileinfo
+php-pgsql
+php-process
+php-pspell
+php-recode
+php-snmp
+php-soap
+php-tidy
+php-xml
+php-xmlrpc
+php-zts
+php-devel
+#####
 
 acl
 aide
@@ -147,7 +181,7 @@ yum
 -bridge-utils
 -cryptsetup-luks
 -dbus
--dhclient
+dhclient
 -dmraid
 -dosfstools
 -fprintd
@@ -165,7 +199,7 @@ yum
 -pinfo
 -postfix
 -prelink
--psacct
+psacct
 -pm-utils
 -redhat-indexhtml
 -rdate
@@ -233,6 +267,13 @@ fi
 
 echo "Installation timestamp: `date`" > /root/clip-info.txt
 echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
+
+#####
+chkconfig httpd on
+chkconfig php on
+chkconfig mysql-server on
+chkconfig mysqld on
+#####
 
 # FIXME: Change the username and password.
 #        If a hashed password is specified it will be used
@@ -311,7 +352,35 @@ secstate import /usr/local/scap-security-guide/RHEL6/output/ssg-rhel6-xccdf.xml 
 
 cd /root
 echo "About to use secstate to do a pre-remediation audit using SSG content..."
-secstate audit 
+
+###### Mitigating the false positives for remediation #####
+secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mountopt_nodev_on_removable_partitions
+secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mountopt_noexec_on_removable_partitions
+secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mountopt_nosuid_on_removable_partitions
+secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mount_option_tmp_nodev
+secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mount_option_tmp_noexec
+secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mount_option_tmp_nosuid
+secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mount_option_dev_shm_nodev
+secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mount_option_dev_shm_noexec
+secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mount_option_dev_shm_nosuid
+secstate mitigate -r "This system does not support external devices." -a "John Feehley" RHEL-6 console_device_restrict_access_desktop 
+secstate mitigate -r "This system does not support more than three attempts." -a "John Feehley" RHEL-6 deny_password_attempts
+secstate mitigate -r "This system only supports SHA512 as a hashing algorithm." -a "John Feehley" RHEL-6 set_password_hashing_algorithm
+secstate mitigate -r "This system's home dirs do not support groupwrite or world read." -a "John Feehley" RHEL-6 homedir_perms_no_groupwrite_worldread
+secstate mitigate -r "This system does not support screen savers." -a "John Feehley" RHEL-6 set_screensaver_inactivity_timeout
+secstate mitigate -r "This system does not support screen savers." -a "John Feehley" RHEL-6 enable_screensaver_after_idle
+secstate mitigate -r "This system does not support screen savers." -a "John Feehley" RHEL-6 enable_screensaver_password_lock
+secstate mitigate -r "This system does not support screen savers." -a "John Feehley" RHEL-6 set_blank_screensaver
+secstate mitigate -r "This system does not support IPv6." -a "John Feehley" RHEL-6 enable_ip6tables
+secstate mitigate -r "This system does support smtp as a mail client." -a "John Feehley" RHEL-6 iptables_smtp_enabled
+secstate mitigate -r "This system does support httpd for web content." -a "John Feehley" RHEL-6 uninstall_httpd
+secstate mitigate -r "This system does restrict access." -a "John Feehley" RHEL-6 console_device_restrict_access_server
+secstate mitigate -r "This system does have a proper login banner." -a "John Feehley" RHEL-6 set_system_login_banner
+secstate mitigate -r "This system does have the proper audit.rules." -a "John Feehley" RHEL-6 audit_mac_changes
+secstate mitigate -r "This system's logs are only owned by administrators, mysqld.log is owned by mysql respectively."  -a "John Feehley" RHEL-6 userowner_rsyslog_files
+##### End of mitigating the false positives#####
+####secstate remediate -y --verbose
+#secstate audit
 
 setsebool secstate_enable_remediation 1
 if [ x"$CONFIG_BUILD_SECSTATE_REMEDIATE" == "xy" ]; then
@@ -351,6 +420,142 @@ if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
 	grubby --update-kernel=ALL --args=enforcing=0
 fi
 ###### END - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
+
+#####Banner Revision#####Secstate does not recognize this as corrected.
+cat << EOF > /etc/issue
+
+You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only. By using this IS (which includes any device attached to this IS), you consent to the following conditions: -The USG routinely intercepts and monitors communications on this IS for purposes including, but not limited to, penetration testing, COMSEC monitoring, network operations and defense, personnel misconduct (PM), law enforcement (LE), and counterintelligence (CI) investigations. -At any time, the USG may inspect and seize data stored on this IS. -Communications using, or data stored on, this IS are not private, are subject to routine monitoring, interception, and search, and may be disclosed or used for any USG-authorized purpose. -This IS includes security measures (e.g., authentication and access controls) to protect USG interests- -not for your personal benefit or privacy. -Notwithstanding the above, using this IS does not constitute consent to PM, LE or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details.
+
+EOF
+#####End Banner Revision#####
+
+#####IPtables Configuration#####
+
+cat << EOF > /etc/sysconfig/iptables
+*filter
+:INPUT DROP [0:0]"
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --sport 22 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --sport 80 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --sport 443 -j ACCEPT
+COMMIT
+# Completed on Thu Jun  5 16:22:41 2014
+EOF
+
+#####IPtables End Configuration#####
+
+#####Audit.rules Configuration#####Secstate does not recognize this as corrected.
+
+cat << EOF > /etc/audit/audit.rules
+
+# This file contains the auditctl rules that are loaded
+# whenever the audit daemon is started via the initscripts.
+# The rules are simply the parameters that would be passed
+# to auditctl.
+
+# First rule - delete all
+-D
+
+# Increase the buffers to survive stress events.
+# Make this bigger for busy systems
+-b 320
+
+# Feel free to add below this line. See auditctl man page
+-w /etc/selinux -p wa -k MAC-policy
+-a always,exit -S init_module -S delete_module -k modules
+-w /sbin/modprobe -p x -k modules
+-w /sbin/rmmod -p x -k modules
+-w /sbin/insmod -p x -k modules
+-w /etc/sudoers -p wa -k actions
+-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=500 -F auid!=4294967295 -k delete
+-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=500 -F auid!=4294967295 -k delete
+-a always,exit -F arch=b64 -S mount -F auid>=500 -F auid!=4294967295 -k media_export
+-a always,exit -F arch=b32 -S mount -F auid>=500 -F auid!=4294967295 -k media_export
+-a always,exit -F arch=b64 -F path=/bin/ping -F perm=x -F auid>=500 -F auid!=4294967295 -k privileged
+-a always,exit -F arch=b32 -F path=/bin/ping -F perm=x -F auid>=500 -F auid!=4294967295 -k privileged
+-a always,exit -F arch=b32 -S setxattr -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S setxattr -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S removexattr -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S removexattr -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S lsetxattr -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S lsetxattr -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S lremovexattr -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S lremovexattr -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S lchown -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S lchown -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S fsetxattr -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S fsetxattr -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S fremovexattr -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S fremovexattr -F auid>=500 -F auid!=4294967295 -k perm_mod
+-always,exit -F arch=b64 -S fchownat -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S fchown -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S fchown -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S fchmodat -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S fchmodat -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S fchmod -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S fchmod -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S chown -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S chown -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S chmod -F auid>=500 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S chmod -F auid>=500 -F auid!=4294967295 -k perm_mod
+
+-a always,exit -F path=/bin/ping -F perm=x -F auid>=500 -F auid!=4294967295 -k privileged
+
+-e 2a always,exit -F arch=b32 -S fchownat -F auid>=500 -F auid!=4294967295 -k perm_modEOF
+
+EOF
+#####Audit.rules End Configuration#####
+
+#####Console Permissions#####Secstate does not recognize this as corrected.
+cat << EOF > /etc/security/console.perms
+# /etc/security/console.perms
+#
+# This file determines the permissions that will be given to priviledged
+# users of the console at login time, and the permissions to which to
+# revert when the users log out.
+
+# format is:
+#   <class>=list of regexps specifying consoles or globs specifying files
+#   file-glob|<class> perm dev-regex|<dev-class> \
+#     revert-mode revert-owner[.revert-group]
+# the revert-mode, revert-owner, and revert-group are optional, and default
+# to 0600, root, and root, respectively.
+#
+# For more information:
+# man 5 console.perms
+#
+# This file should not be modified.
+# Rather a new file in the console.perms.d directory should be created.
+
+# file classes -- these are regular expressions
+<console>=tty[0-9][0-9]* vc/[0-9][0-9]*
+<xconsole>=tty[0-9][0-9]* vc/[0-9][0-9]* :0\.[0-9] :0
+
+# device classes -- see console.perms.d/50-default.perms
+# permission definitions -- see console.perms.d/50-default.perms
+
+EOF
+#####End of Console Permissions#####
+
+#####Network Configuration /etc/sysconfig/network-scripts/ifcfg-eth0#####
+
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
+
+DEVICE=eth0
+TYPE=Ethernet
+ONBOOT=yes
+NM_CONTROLLED=yes
+BOOTPROTO=dhcp
+PV6INIT=yes
+
+EOF
+
+#####End of Network Configuration#####
+
 echo "Done with post install scripts..."
 
 # This is rather unfortunate, but the remediation content
