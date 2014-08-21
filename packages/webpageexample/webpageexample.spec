@@ -41,20 +41,6 @@ rm -rf $RPM_BUILD_ROOT
 %post
 cp -ra /usr/share/webpageex/rootfiles/* /
 
-#php.ini copy
-#cp -r /usr/share/webpageex/rootfiles/etc/php.ini /etc/php.ini 
-
-#extras copy
-#cp -r /usr/share/webpageex/rootfiles/extras/ /home/toor/extras/
-
-#cp -ru /usr/share/webpageex/rootfiles/etc/httpd/* /etc/httpd/
-#cd /etc/httpd/
-#rm modules
-#ln -s /usr/lib64/httpd/modules
-
-mkdir /var/www/webpage/
-cp -ru /usr/share/webpageex/rootfiles/var/www/webpage/* /var/www/webpage/
-
 
 %changelog
 * Wed Jun 11 2014 John Feehley <jfeehley@quarksecurity.com>
