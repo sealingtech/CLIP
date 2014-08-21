@@ -51,6 +51,28 @@ Certifiable Linux Integration Platform SELinux policy documentation package
 %doc %{_usr}/share/doc/%{name}-%{version}
 %attr(755,root,root) %{_usr}/share/selinux/devel/policyhelp
 
+%global genSeparatePolRPM() \
+%package %1 \
+Summary: Certifiable Linux Integration Platform %1 SELinux policy \
+Group: System Environment/Base \
+Requires(pre): clip-selinux-policy = %{version}-%{release} \
+Requires: /usr/bin/xdg-open \
+BuildRequires: policycoreutils-python m4 policycoreutils python make gcc checkpolicy >= %{CHECKPOL_VERSION} \
+\
+%description %1 \
+Certifiable Linux Integration Platform %1 SELinux policy \
+\
+%files %1 \
+%{_usr}/share/selinux/clip/%1.pp.bz2 \
+\
+%post %1 \
+echo %1 >> %{_usr}/share/selinux/clip/modules.lst \
+semodule -n -i %{_usr}/share/selinux/clip/%1.pp.bz2 \
+echo "NOTE: installing the %1 policy RPM *does not reload the policy*." \
+echo "To reload the policy run 'semodule -R'"
+
+%{expand:%( for f in %{separatePkgs}; do echo "%%genSeparatePolRPM $f"; done)}
+
 %define makeCmds() \
 #make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 bare \
 #make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024  conf \
@@ -74,12 +96,16 @@ touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.homedir
 install -m0644 config/setrans.conf %{buildroot}%{_sysconfdir}/selinux/%1/setrans.conf \
 find %{buildroot}/%{_usr}/share/selinux/%1/ -type f |xargs -P `/usr/bin/nproc` -n `/usr/bin/nproc`  bzip2 \
 awk '$1 !~ "/^#/" && $2 == "=" && $3 == "module" { printf "%%s.pp.bz2 ", $1 }' ./policy/modules.conf > %{buildroot}/%{_usr}/share/selinux/%1/modules.lst \
+for f in %{separatePkgs}; do sed -i -e "s/$f.pp.bz2//" %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done \
 [ x""%{enable_modules}"" != "x" ] && for i in %{enable_modules}; do echo ${i}.pp.bz2 >> %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done
 %nil
 
+%global excludes %(for f in %{separatePkgs}; do echo "%exclude %{_usr}/share/selinux/*/$f*"; done )
+ 
 %define fileList() \
 %defattr(-,root,root) \
 %dir %{_usr}/share/selinux/%1 \
+%{_usr}/share/selinux/%1/*.pp.bz2 \
 %{_usr}/share/selinux/%1/*.pp.bz2 \
 %{_usr}/share/selinux/%1/modules.lst \
 %dir %{_sysconfdir}/selinux/%1 \
@@ -258,6 +284,8 @@ exit 0
 %config(noreplace) %{_sysconfdir}/selinux/clip/contexts/users/unconfined_u
 %fileList clip
 
+%excludes
+
 %package mls 
 Summary: Certifiable Linux Integration Platform SELinux mls base policy
 Group: System Environment/Base
@@ -277,7 +305,7 @@ Based off of reference policy refpolicy-2.20110726.tar.bz2
 %saveFileContext mls
 
 %post mls 
-semodule -n -s mls 2>/dev/null
+#semodule -n -s mls 2>/dev/null
 packages=`cat /usr/share/selinux/mls/modules.lst`
 %loadpolicy mls $packages
 
@@ -292,6 +320,8 @@ exit 0
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/selinux/mls/contexts/users/unconfined_u
 %fileList mls
+
+%excludes
 
 
 %changelog

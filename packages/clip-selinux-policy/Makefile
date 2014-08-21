@@ -1,6 +1,8 @@
 # Copyright (C) 2012 Tresys Technology, LLC
+# Copyright (C) 2014 Quark Security, Inc
 #
 # Authors: Spencer Shimko <sshimko@tresys.com>
+# 	   Spencer Shimko <spencer@quarksecurity.com>
 #
 
 # The name of the package
@@ -19,13 +21,17 @@ VERSION := 6.2.0
 RELEASE := 1
 
 # The name of the Vendor
-VENDOR := Tresys Technology, LLC
+VENDOR := Quark Security, Inc 
 
 # The name of the Packager
-PACKAGER ?= Tresys Technology, LLC
+PACKAGER ?= Quark Security, Inc
 
 # snag the architecture, hard code an arch if cross-compiling or going noarch
 ARCH ?= noarch
+
+# Policy modules listed here will be built as separate RPMs
+# e.g., clip-selinux-policy-apache
+SEPARATE_PKGS := apache aide samhain tripwire ssh postfix
 
 # the filename of the tarball
 TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
@@ -73,15 +79,11 @@ else
 	ENABLE_MODULES := %{nil}
 endif
 
-RPMQ_DEFS := --query --define 'pkgname $(PKGNAME)' --define '_sysconfdir /etc' --define 'version $(VERSION)' --define 'release $(RELEASE)' --define 'vendor $(VENDOR)' --define 'packager $(PACKAGER)' --qf '%{NAME}\n'
-
-ifneq ($(ENABLE_MODULES),)
-RPM_DEFS := --define 'enable_modules $(ENABLE_MODULES)' $(RPM_DEFS)
+ifeq ($(SEPARATE_PKGS),)
+SEPARATE_PKGS := %{nil}
 endif
 
-ifneq ($(ENFORCING_MODE),)
-RPM_DEFS := --define 'enforcing_mode $(ENFORCING_MODE)' $(RPM_DEFS)
-endif
+RPMQ_DEFS := --query --define 'separatePkgs $(SEPARATE_PKGS)' --define 'pkgname $(PKGNAME)' --define '_sysconfdir /etc' --define 'version $(VERSION)' --define 'release $(RELEASE)' --define 'vendor $(VENDOR)' --define 'packager $(PACKAGER)' --qf '%{NAME}\n'
 
 all: $(PKGNAME)-rpm $(PKGNAME)-srpm
 
@@ -108,7 +110,7 @@ $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm: $(RPM_DEPS)
 	@echo "Building $(PKGNAME) SRPM..."
 	$(call rpm-prep)
 	cp $(TARBALL) $(RPM_TOPDIR)/SOURCES/
-	echo -e "%define enable_modules $(ENABLE_MODULES)\n%define enforcing_mode $(ENFORCING_MODE)\n%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n"> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
+	echo -e "%define enable_modules $(ENABLE_MODULES)\n%define enforcing_mode $(ENFORCING_MODE)\n%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n%define separatePkgs $(SEPARATE_PKGS)\n"> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
 	cat $(RPM_SPEC) >> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
 	cd $(RPM_TOPDIR) && rpmbuild $(RPMBUILD_ARGS) -bs SPECS/$(notdir $(RPM_SPEC)) --nodeps
 	mv  $(RPM_TOPDIR)/SRPMS/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm $(SRPM_OUTPUT_DIR)
