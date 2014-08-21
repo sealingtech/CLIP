@@ -480,11 +480,13 @@ tunable_policy(`httpd_enable_homedirs && use_samba_home_dirs',`
 	fs_read_cifs_symlinks(httpd_t)
 ')
 
-tunable_policy(`httpd_can_sendmail',`
-	# allow httpd to connect to mail servers
-	corenet_tcp_connect_smtp_port(httpd_t)
-	corenet_sendrecv_smtp_client_packets(httpd_t)
-	mta_send_mail(httpd_t)
+optional_policy(`
+	tunable_policy(`httpd_can_sendmail',`
+		# allow httpd to connect to mail servers
+		corenet_tcp_connect_smtp_port(httpd_t)
+		corenet_sendrecv_smtp_client_packets(httpd_t)
+		mta_send_mail(httpd_t)
+	')
 ')
 
 tunable_policy(`httpd_ssi_exec',`
@@ -799,8 +801,10 @@ ifdef(`distro_redhat',`
 	allow httpd_sys_script_t httpd_log_t:file append_file_perms;
 ')
 
-tunable_policy(`httpd_can_sendmail',`
-	mta_send_mail(httpd_sys_script_t)
+optional_policy(`
+	tunable_policy(`httpd_can_sendmail',`
+		mta_send_mail(httpd_sys_script_t)
+	')
 ')
 
 tunable_policy(`httpd_enable_cgi && httpd_can_network_connect',`
