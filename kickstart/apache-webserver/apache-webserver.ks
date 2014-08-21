@@ -73,6 +73,9 @@ logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=ext4 --size 100  --max
 %packages --excludedocs
 #CONFIG-BUILD-ADDTL-PACKAGES
 clip-selinux-policy
+clip-selinux-policy-apache
+clip-selinux-policy-ssh
+clip-selinux-policy-postfix
 # by default use MCS policy (clip-selinux-policy-clip)
 -clip-selinux-policy-mls
 clip-selinux-policy-clip
