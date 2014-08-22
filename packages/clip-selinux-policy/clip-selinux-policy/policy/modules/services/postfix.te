@@ -142,6 +142,8 @@ setattr_dirs_pattern(postfix_master_t, postfix_spool_maildrop_t, postfix_spool_m
 
 kernel_read_all_sysctls(postfix_master_t)
 
+kernel_request_load_module(postfix_master_t)
+
 corenet_all_recvfrom_unlabeled(postfix_master_t)
 corenet_all_recvfrom_netlabel(postfix_master_t)
 corenet_tcp_sendrecv_generic_if(postfix_master_t)
@@ -385,6 +387,8 @@ allow postfix_pickup_t postfix_spool_maildrop_t:dir list_dir_perms;
 read_files_pattern(postfix_pickup_t, postfix_spool_maildrop_t, postfix_spool_maildrop_t)
 delete_files_pattern(postfix_pickup_t, postfix_spool_maildrop_t, postfix_spool_maildrop_t)
 
+kernel_request_load_module(postfix_pickup_t)
+
 ########################################
 #
 # Postfix pipe local policy
@@ -522,6 +526,8 @@ allow postfix_qmgr_t postfix_spool_bounce_t:file read_file_perms;
 allow postfix_qmgr_t postfix_spool_bounce_t:lnk_file { getattr read };
 
 corecmd_exec_bin(postfix_qmgr_t)
+
+kernel_request_load_module(postfix_qmgr_t)
 
 ########################################
 #

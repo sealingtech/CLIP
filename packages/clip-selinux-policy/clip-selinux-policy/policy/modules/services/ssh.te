@@ -245,6 +245,10 @@ kernel_dontaudit_request_load_module(sshd_t)
 kernel_search_key(sshd_t)
 kernel_link_key(sshd_t)
 
+# SRS: added for CLIP - optional for plain SSH, needed ofr sftp-internal
+domain_dyntrans_type(sshd_t)
+allow sshd_t self:process setcurrent;
+
 kernel_read_crypto_sysctls(sshd_t)
 
 term_use_all_ptys(sshd_t)
