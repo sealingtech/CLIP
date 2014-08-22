@@ -74,6 +74,7 @@ logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=ext4 --size 100  --max
 #CONFIG-BUILD-ADDTL-PACKAGES
 clip-selinux-policy
 clip-selinux-policy-apache
+clip-selinux-policy-mysql
 clip-selinux-policy-ssh
 clip-selinux-policy-postfix
 # by default use MCS policy (clip-selinux-policy-clip)
@@ -89,8 +90,6 @@ clip-dracut-module
 #aqueduct-ssg-bash
 secstate
 
-#####
-cacti
 mysql
 mysql-server
 mysql-test
@@ -202,7 +201,7 @@ dhclient
 -pinfo
 -postfix
 -prelink
-psacct
+-psacct
 -pm-utils
 -redhat-indexhtml
 -rdate
@@ -271,11 +270,6 @@ fi
 echo "Installation timestamp: `date`" > /root/clip-info.txt
 echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 
-#####
-chkconfig httpd on
-chkconfig php on
-chkconfig mysql-server on
-chkconfig mysqld on
 #####
 
 # FIXME: Change the username and password.
@@ -559,7 +553,13 @@ EOF
 
 #####End of Network Configuration#####
 
-echo "Done with post install scripts..."
+#####
+
+chkconfig httpd on
+chkconfig php on
+chkconfig mysqld on
+chkconfig netfs off
+chkconfig restorecond off
 
 # This is rather unfortunate, but the remediation content
 # starts services, which need to be killed/shutdown if
@@ -576,6 +576,9 @@ if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
 	# this one isn't actually due to remediation, but needs to be done too
 	kill $(jobs -p) 2>/dev/null 1>/dev/null
 fi
+
+echo "Done with post install scripts..."
+
 kill $TAILPID 2>/dev/null 1>/dev/null
 
 %end
