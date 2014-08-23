@@ -73,13 +73,11 @@ logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=ext4 --size 100  --max
 %packages --excludedocs
 #CONFIG-BUILD-ADDTL-PACKAGES
 clip-selinux-policy
-clip-selinux-policy-apache
-clip-selinux-policy-mysql
-clip-selinux-policy-ssh
-clip-selinux-policy-postfix
-# by default use MCS policy (clip-selinux-policy-clip)
--clip-selinux-policy-mls
-clip-selinux-policy-clip
+clip-selinux-policy-mcs
+clip-selinux-policy-mcs-apache
+clip-selinux-policy-mcs-mysql
+clip-selinux-policy-mcs-ssh
+clip-selinux-policy-mcs-postfix
 m4
 scap-security-guide
 aqueduct
