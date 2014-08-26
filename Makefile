@@ -126,7 +126,7 @@ SYSTEMS := $(shell ls $(KICKSTART_DIR))
 LIVECDS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -live-iso,$(SYSTEM)))
 
 # These are targets supported by the kickstart/Makefile that will be used to generate installation ISOs.
-INSTISOS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -iso,$(SYSTEM)))
+INSTISOS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -inst-iso,$(SYSTEM)))
 
 # Add a file to a repo by either downloading it (if http/ftp), or symlinking if local.
 # TODO: add support for wget (problem with code below, running echo/GREP for each file instead of once for the whole repo
