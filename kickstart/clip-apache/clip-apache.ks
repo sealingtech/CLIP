@@ -1,4 +1,8 @@
 # Copyright (C) 2012 Tresys Technology, LLC
+# Copyright (C) 2014 Quark Security, Inc
+#
+# Authors:	Spencer Shimko <spencer@quarksecurity.com>
+#		John Feehley <jfeehley@quarksecurity.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
