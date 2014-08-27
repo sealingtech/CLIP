@@ -1,13 +1,13 @@
 Name:	webpageexample	
 Version: 1
 Release: 1
-Summary: CLIP Module for a webserver.
-Requires: dracut, httpd, php 
+Summary: CLIP package for a webserver.
+Requires: httpd, rootfiles 
 
 License: GPL or BSD
 Group: System Environment/Base
 
-BuildRequires: make, coreutils
+BuildRequires: coreutils
 BuildRoot: %{_tmppath}/%{name}-root
 
 Source0: %{pkgname}-%{version}.tgz
