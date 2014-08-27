@@ -82,6 +82,7 @@ clip-selinux-policy-mcs-apache
 clip-selinux-policy-mcs-mysql
 clip-selinux-policy-mcs-ssh
 clip-selinux-policy-mcs-postfix
+clip-miscfiles
 m4
 scap-security-guide
 aqueduct
