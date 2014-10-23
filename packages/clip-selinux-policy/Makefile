@@ -31,7 +31,7 @@ ARCH ?= noarch
 
 # Policy modules listed here will be built as separate RPMs
 # e.g., clip-selinux-policy-apache
-SEPARATE_PKGS := apache aide samhain tripwire ssh postfix mysql
+SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser
 
 # the filename of the tarball
 TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
@@ -74,13 +74,17 @@ else
 	ENFORCING_MODE := permissive
 endif
 ifneq ($(CONFIG_BUILD_UNCONFINED_TOOR),n)
-	ENABLE_MODULES := toor
-else
-	ENABLE_MODULES := %{nil}
+	ENABLE_MODULES += toor
 endif
 
 ifeq ($(SEPARATE_PKGS),)
 SEPARATE_PKGS := %{nil}
+else
+ENABLE_MODULES += $(SEPARATE_PKGS)
+endif
+
+ifeq ($(ENABLE_MODULES),)
+ENABLE_MODULES := %{nil}
 endif
 
 RPMQ_DEFS := --query --define 'separatePkgs $(SEPARATE_PKGS)' --define 'pkgname $(PKGNAME)' --define '_sysconfdir /etc' --define 'version $(VERSION)' --define 'release $(RELEASE)' --define 'vendor $(VENDOR)' --define 'packager $(PACKAGER)' --qf '%{NAME}\n'
@@ -110,7 +114,7 @@ $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm: $(RPM_DEPS)
 	@echo "Building $(PKGNAME) SRPM..."
 	$(call rpm-prep)
 	cp $(TARBALL) $(RPM_TOPDIR)/SOURCES/
-	echo -e "%define enable_modules $(ENABLE_MODULES)\n%define enforcing_mode $(ENFORCING_MODE)\n%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n%define separatePkgs $(SEPARATE_PKGS)\n"> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
+	echo -e "%define enable_modules "\"$(ENABLE_MODULES)\""\n%define enforcing_mode $(ENFORCING_MODE)\n%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n%define separatePkgs $(SEPARATE_PKGS)\n"> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
 	cat $(RPM_SPEC) >> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
 	cd $(RPM_TOPDIR) && rpmbuild $(RPMBUILD_ARGS) -bs SPECS/$(notdir $(RPM_SPEC)) --nodeps
 	mv  $(RPM_TOPDIR)/SRPMS/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm $(SRPM_OUTPUT_DIR)
