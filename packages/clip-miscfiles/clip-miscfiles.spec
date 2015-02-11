@@ -31,22 +31,21 @@ package.
 %build
 
 %install
-mkdir -p $RPM_BUILD_ROOT/usr/share/clip-miscfiles/
-cp -r * $RPM_BUILD_ROOT/usr/share/clip-miscfiles/
+mkdir -p $RPM_BUILD_ROOT/usr/share/clip-miscfiles/root
+cp -a * $RPM_BUILD_ROOT/usr/share/clip-miscfiles/root
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(755,root,root,-)
+%defattr(-,root,root,-)
 /usr/share/clip-miscfiles/*
 
-
 %post
-#TODO: this should create a db of hashes and orivinal files and on uninstall
+#TODO: this should create a db of hashes and original files and on uninstall
 # removal of this package it should restore files that 
 # haven't been modified in the interim.
-cp -ra /usr/share/webpageex/rootfiles/* /
+cp -a /usr/share/clip-miscfiles/root/* /
 
 
 %changelog
