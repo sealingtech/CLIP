@@ -78,6 +78,7 @@ clip-selinux-policy
 clip-selinux-policy-mcs
 clip-selinux-policy-mcs-ssh
 clip-selinux-policy-mcs-unprivuser
+clip-miscfiles
 m4
 scap-security-guide
 aqueduct
