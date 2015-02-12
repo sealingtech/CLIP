@@ -1767,6 +1767,25 @@ interface(`userdom_dontaudit_append_user_home_content_files',`
 
 ########################################
 ## <summary>
+##	Read files inherited
+##	in a user home subdirectory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`userdom_read_inherited_user_home_content_files',`
+	gen_require(`
+		attribute user_home_type;
+	')
+
+	allow $1 user_home_type:file { getattr read };
+')
+
+########################################
+## <summary>
 ##	Do not audit attempts to write user home files.
 ## </summary>
 ## <param name="domain">
@@ -2612,6 +2631,24 @@ interface(`userdom_use_user_ptys',`
 	allow $1 user_devpts_t:chr_file rw_term_perms;
 ')
 
+#####################################
+## <summary>
+##  Read and write inherited user domain pty.
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed access.
+##  </summary>
+## </param>
+#
+interface(`userdom_use_inherited_user_ptys',`
+    gen_require(`
+        type user_devpts_t;
+    ')
+
+    allow $1 user_devpts_t:chr_file { getattr read write append ioctl };
+')
+
 ########################################
 ## <summary>
 ##	Read and write a user TTYs and PTYs.
@@ -2689,6 +2726,24 @@ interface(`userdom_spec_domtrans_all_users',`
 	allow userdomain $1:fd use;
 	allow userdomain $1:fifo_file rw_file_perms;
 	allow userdomain $1:process sigchld;
+')
+
+######################################
+## <summary>
+##  Allow domain dyntrans to unpriv userdomain.
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed access.
+##  </summary>
+## </param>
+#
+interface(`userdom_dyntransition_unpriv_users',`
+    gen_require(`
+        attribute unpriv_userdomain;
+    ')
+
+    allow $1 unpriv_userdomain:process dyntransition;
 ')
 
 ########################################
@@ -3235,5 +3290,89 @@ interface(`userdom_manage_all_users_keys',`
        ')
 
        allow $1 userdomain:key manage_key_perms;
+')
+
+#######################################
+## <summary>
+##	Manage all files/directories in the homedir
+## </summary>
+## <param name="userdomain">
+##	<summary>
+##	The user domain
+##	</summary>
+## </param>
+## <rolebase/>
+#
+interface(`userdom_manage_user_home_content',`
+	gen_require(`
+		type user_home_dir_t, user_home_t;
+		attribute user_home_type;
+	')
+
+	files_list_home($1)
+	manage_dirs_pattern($1, { user_home_dir_t user_home_type }, user_home_type)
+	manage_files_pattern($1, { user_home_dir_t user_home_type }, user_home_type)
+	manage_lnk_files_pattern($1, { user_home_dir_t user_home_type }, user_home_type)
+	manage_sock_files_pattern($1, { user_home_dir_t user_home_type }, user_home_type)
+	manage_fifo_files_pattern($1, { user_home_dir_t user_home_type }, user_home_type)
+	filetrans_pattern($1, user_home_dir_t, user_home_t, { dir file lnk_file sock_file fifo_file })
+
+')
+
+#######################################
+## <summary>
+##	Manage all files/directories in the homedir
+##	but, dont let the user setattr on their top-level
+##	homedir.
+##	This is useful for an chrootd sftp server.
+##	You don't want he user to chmod their
+##	home dir to give access to other users.
+## </summary>
+## <param name="userdomain">
+##	<summary>
+##	The user domain
+##	</summary>
+## </param>
+## <rolebase/>
+#
+interface(`userdom_manage_chroot_user_home_content',`
+	gen_require(`
+		type user_home_dir_t, user_home_t;
+		attribute user_home_type;
+	')
+
+	files_search_home($1)
+	allow $1 user_home_dir_t:dir { open getattr read write link unlink search add_name remove_name lock ioctl }; 
+	allow $1 user_home_t:dir manage_dir_perms;
+
+	allow $1 user_home_type:file manage_file_perms;
+	manage_lnk_files_pattern($1, { user_home_dir_t user_home_type }, user_home_type)
+	filetrans_pattern($1, user_home_dir_t, user_home_t, { dir file lnk_file })
+
+')
+
+########################################
+## <summary>
+##	Create objects in a user home directory
+##	with an automatic type transition to
+##	the user home file type.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="object_class">
+##	<summary>
+##	The class of the object to be created.
+##	</summary>
+## </param>
+#
+interface(`userdom_user_home_dir_filetrans_pattern',`
+	gen_require(`
+		type user_home_dir_t, user_home_t;
+	')
+
+	type_transition $1 user_home_dir_t:$2 user_home_t;
 ')
 

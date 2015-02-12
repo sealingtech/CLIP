@@ -234,6 +234,7 @@ template(`ssh_server_template', `
 	corecmd_getattr_bin_files($1_t)
 
 	domain_interactive_fd($1_t)
+	domain_dyntrans_type($1_t)
 
 	files_read_etc_files($1_t)
 	files_read_etc_runtime_files($1_t)
@@ -462,6 +463,26 @@ interface(`ssh_signal',`
 	allow $1 sshd_t:process signal;
 ')
 
+######################################
+## <summary>
+##  Allow domain dyntransition to chroot_user_t domain.
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed access.
+##  </summary>
+## </param>
+#
+interface(`ssh_dyntransition_chroot_user',`
+	gen_require(`
+		type chroot_user_t;
+	')
+
+	allow $1 chroot_user_t:process dyntransition;
+	allow chroot_user_t $1:process sigchld;
+	allow chroot_user_t $1:fd use;
+')
+
 ########################################
 ## <summary>
 ##	Read a ssh server unnamed pipe.
@@ -513,6 +534,24 @@ interface(`ssh_rw_stream_sockets',`
 	')
 
 	allow $1 sshd_t:unix_stream_socket rw_stream_socket_perms;
+')
+
+#######################################
+## <summary>
+##      Read and write ssh server unix dgram sockets.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`ssh_rw_dgram_sockets',`
+    gen_require(`
+        type sshd_t;
+    ')
+
+    allow $1 sshd_t:unix_dgram_socket rw_stream_socket_perms;
 ')
 
 ########################################
