@@ -1,5 +1,6 @@
 # Copyright (C) 2012 Tresys Technology, LLC
 # Copyright (C) 2013 Cubic Corporation
+# Copyright (C) 2015 Quark Security Inc
 #
 # Authors: Spencer Shimko <sshimko@tresys.com>
 #          Spencer Shimko <spencer@quarksecurity.com>
@@ -14,7 +15,7 @@ VERSION := 13.4.4
 
 # Bump this if creating multiple releases from the same
 # version.
-RELEASE := 99.el6
+RELEASE := 100.el6
 
 # The name of the Vendor
 VENDOR := null
