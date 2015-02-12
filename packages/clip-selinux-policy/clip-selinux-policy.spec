@@ -79,10 +79,10 @@ echo "To reload the policy run 'semodule -R'"
 %{expand:%( for f in %{separatePkgs}; do echo "%%genSeparatePolRPM $f mls"; done)}
 
 %define installCmds() \
-make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS=""%{enable_modules}"" base.pp \
-make %{?_smp_mflags} validate UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS=""%{enable_modules}"" modules \
-make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS=""%{enable_modules}"" install \
-make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS=""%{enable_modules}"" install-appconfig \
+make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" base.pp \
+make %{?_smp_mflags} validate UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" modules \
+make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" install \
+make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" install-appconfig \
 #%{__cp} *.pp %{buildroot}/%{_usr}/share/selinux/%1/ \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/policy \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/modules/active \
@@ -190,7 +190,7 @@ make %{?_smp_mflags} clean
 %installCmds mcs mcs n y deny
 %installCmds mls mls n y deny
 
-make %{?_smp_mflags} UNK_PERMS=deny NAME=mcs TYPE=mcs DISTRO=%{distro} UBAC=y DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name}-%{version} POLY=y MLS_CATS=1024 MCS_CATS=1024 APPS_MODS=""%{enable_modules}"" install-headers install-docs
+make %{?_smp_mflags} UNK_PERMS=deny NAME=mcs TYPE=mcs DISTRO=%{distro} UBAC=y DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name}-%{version} POLY=y MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" install-headers install-docs
 mkdir %{buildroot}%{_usr}/share/selinux/devel/
 mkdir %{buildroot}%{_usr}/share/selinux/packages/
 mv %{buildroot}%{_usr}/share/selinux/mcs/include %{buildroot}%{_usr}/share/selinux/devel/include
