@@ -79,10 +79,10 @@ echo "To reload the policy run 'semodule -R'"
 %{expand:%( for f in %{separatePkgs}; do echo "%%genSeparatePolRPM $f mls"; done)}
 
 %define installCmds() \
-make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" base.pp \
-make %{?_smp_mflags} validate UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" modules \
-make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" install \
-make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" install-appconfig \
+make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}  %{separatePkgs}" base.pp \
+make %{?_smp_mflags} validate UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}  %{separatePkgs}" modules \
+make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}  %{separatePkgs}" install \
+make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules} %{separatePkgs}" install-appconfig \
 #%{__cp} *.pp %{buildroot}/%{_usr}/share/selinux/%1/ \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/policy \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/modules/active \
@@ -98,7 +98,7 @@ install -m0644 config/setrans.conf %{buildroot}%{_sysconfdir}/selinux/%1/setrans
 find %{buildroot}/%{_usr}/share/selinux/%1/ -type f |xargs -P `/usr/bin/nproc` -n `/usr/bin/nproc`  bzip2 \
 awk '$1 !~ "/^#/" && $2 == "=" && $3 == "module" { printf "%%s.pp.bz2 ", $1 }' ./policy/modules.conf > %{buildroot}/%{_usr}/share/selinux/%1/modules.lst \
 for f in %{separatePkgs}; do sed -i -e "s/$f.pp.bz2//" %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done \
-[ x""%{enable_modules}"" != "x" ] && for i in %{enable_modules}; do echo ${i}.pp.bz2 >> %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done
+[ x"%{enable_modules}" != "x" ] && for i in %{enable_modules}; do echo ${i}.pp.bz2 >> %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done
 %nil
 
 %global excludes() %(for f in %{separatePkgs}; do echo "%exclude %{_usr}/share/selinux/%1/${f}.pp.bz2"; done )

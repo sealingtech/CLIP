@@ -14,7 +14,7 @@ BUILD_CONFIG_TOOR ?= n
 
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
-VERSION := 6.5.0
+VERSION := 6.6.0
 
 # bump this if creating multiple releases from the same
 # version (think about this... why are you doing this?)
@@ -77,10 +77,10 @@ ifneq ($(CONFIG_BUILD_UNCONFINED_TOOR),n)
 	ENABLE_MODULES += toor
 endif
 
+ENABLE_MODULES := $(filter-out $(SEPARATE_PKGS),$(ENABLE_MODULES))
+
 ifeq ($(SEPARATE_PKGS),)
 SEPARATE_PKGS := %{nil}
-else
-ENABLE_MODULES += $(SEPARATE_PKGS)
 endif
 
 ifeq ($(ENABLE_MODULES),)
