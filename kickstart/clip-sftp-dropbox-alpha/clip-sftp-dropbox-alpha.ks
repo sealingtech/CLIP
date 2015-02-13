@@ -231,12 +231,26 @@ TAILPID=$!
 # DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
 #CONFIG-BUILD-PLACEHOLDER
 export PATH="/sbin:/usr/sbin:/usr/bin:/bin:/usr/local/bin"
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "y" ]; then
-chvt 7
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "xy" ]; then
+	chvt 7
 fi
 
 echo "Installation timestamp: `date`" > /root/clip-info.txt
 echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
+
+# livecd-creator attempts to fake a /selinux tree
+# and creates some normal files in there but newer
+# libselinux does a statfs and notices things are 
+# kopasetic as /selinux is actually reported as
+# ext4.  So mount the real selinuxfs but anytime
+# we actually muck with files in there, we will
+# bind mount /dev/zero so we don't mess up the build host.
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
+	mount -t selinuxfs none /selinux
+fi
+
+export POLNAME=`sestatus |awk '/Policy from config file:/ { print $5; }'`
+
 
 # FIXME: Change the username and password.
 #        If a hashed password is specified it will be used
@@ -261,9 +275,9 @@ HASHED_PASSWORD='$6$314159265358$ytgatj7CAZIRFMPbEanbdi.krIJs.mS9N2JEl0jkPsCvtwC
 #
 # Don't get lost in the 'if' statement - basically map $USERNAME to the unconfined toor_r:toor_t role if it is enabled.  
 if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
-	semanage user -a -R toor_r -R staff_r -R sysadm_r "${USERNAME}_u" 
+	semanage user -N -a -R toor_r -R staff_r -R sysadm_r "${USERNAME}_u" 
 else
-	semanage user -a -R staff_r -R sysadm_r "${USERNAME}_u" || semanage user -a -R staff_r "${USERNAME}_u"
+	semanage user -N -a -R staff_r -R sysadm_r "${USERNAME}_u" || semanage user -a -R staff_r "${USERNAME}_u"
 fi
 useradd -m "$USERNAME" -G wheel -Z "${USERNAME}_u"
 
@@ -275,31 +289,7 @@ fi
 
 chage -d 0 "$USERNAME"
 
-# Remove sshd if it in a production build
-# If not, just chkconfig it off
-#if [ x"$CONFIG_BUILD_PRODUCTION" == "xy" ]; then
-#    echo "Removing sshd from the system"
-#    /bin/rpm -e openssh openssh-clients openssh-server
-#else
-#    echo "Turning sshd off"
-#    /sbin/chkconfig --level 0123456 sshd off
-#fi 
-
-#set up sftp only group/account
-SFTP_GROUP="sftp-only"
-SFTP_USERNAME="clip-db-user"
-SFTP_PASSWORD="neutronbass"
-
-groupadd "$SFTP_GROUP"
-semanage user -a -R staff_r "${SFTP_USERNAME}_u"
-useradd -m -g "$SFTP_GROUP" -s /sbin/nologin -Z "${SFTP_USERNAME}_u" "$SFTP_USERNAME"
-useradd -m "$SFTP_USERNAME" -g "$SFTP_GROUP"
-passwd --stdin "$SFTP_USERNAME" <<< "$SFTP_PASSWORD"
-
-# create a mapping so that when the user ssh's in they get the correct context
-cat << EOF > /etc/selinux/clip/contexts/users/${SFTP_USERNAME}_u
-system_r:sshd_t:s0              staff_r:staff_t:s0
-EOF
+groupadd "sftp-only"
 
 #modify the ssh config
 #make sure you're using the internal sftp
@@ -312,11 +302,10 @@ echo -e "\tAllowTCPForwarding no" >> /etc/ssh/sshd_config
 echo -e "\tX11Forwarding no" >> /etc/ssh/sshd_config
 echo -e "\tForceCommand internal-sftp" >> /etc/ssh/sshd_config
 
-setsebool -P allow_ssh_keysign true
-setsebool -P ssh_chroot_full_access true
-
-#homedir is now /dropbox b/c it's within the chroot
-usermod -d /${SFTP_USERNAME} ${SFTP_USERNAME}
+semanage boolean -N -S ${POLNAME} -m --on allow_ssh_keysign
+semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
+# Commented out in our policy
+#semanage boolean -N -m --on ssh_chroot_full_access
 
 #####Network Configuration /etc/sysconfig/network-scripts/ifcfg-eth0#####
 
@@ -379,7 +368,7 @@ sed -i -e 's/^remediation_timeout.*/remediation_timeout=30/' /etc/secstate/secst
 ###### START - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
 
 # Disable all that GUI stuff during boot so we can actually see what is going on during boot.
-if [ x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
+if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
 	# The first users of a CLIP system will be devs. Lets make things a little easier on them.
 	# by getting rid of the framebuffer effects, rhgb, and quiet.
 	grubby --update-kernel=ALL --remove-args="rhgb quiet"
@@ -388,13 +377,12 @@ if [ x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
 	# Actually rather benign but may impact developers using grubby who think there is only one kernel to work with.
 	title="$(sed 's/ release.*$//' < /etc/redhat-release) ($(uname -r))"
 	sed -i -e "s;title.*;title $title;" /boot/grub/grub.conf
-    echo "Modifying splash screen with plymouth..."
+	echo "Modifying splash screen with plymouth..."
 	plymouth-set-default-theme details --rebuild-initrd &> /dev/null
 fi
 
 # Set permissive mode
-export POLNAME=`sestatus |awk '/Policy from config file:/ { print $5; }'`
-if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
+if [ -f '/etc/grub.conf' -a x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
     echo "Setting permissive mode..."
     echo -e "#THIS IS A DEBUG BUILD HENCE SELINUX IS IN PERMISSIVE MODE\nSELINUX=permissive\nSELINUXTYPE=$POLNAME\n" > /etc/selinux/config
 	echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
@@ -412,15 +400,16 @@ echo "Done with post install scripts..."
 # we're rolling Live Media.  First, kill the known 
 # problems cleanly, then just kill them all and let
 # <deity> sort them out.
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "y" ]; then
-	service restorecond stop
-	service auditd stop
-	service rsyslog stop
-	[ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
+	service restorecond stop 2>&1 > /dev/null
+	service auditd stop 2>&1 > /dev/null
+	service rsyslog stop 2>&1 > /dev/null
+	[ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop 2>&1 > /dev/null
 
 	# this one isn't actually due to remediation, but needs to be done too
 	kill $TAILPID 2>/dev/null 1>/dev/null
 	kill $(jobs -p) 2>/dev/null 1>/dev/null
+	umount /selinux
 fi
 
 # SFTP dropbox adjustments
@@ -430,14 +419,3 @@ chmod 700 /home/*
 
 %end
 
-%post --nochroot
-
-# DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
-#CONFIG-BUILD-PLACEHOLDER
-
-if [ x"$CONFIG_BUILD_PRODUCTION" == "xy" ]; then
-    echo "Deleting anaconda-ks.cfg as this is a production build" >> /mnt/sysimage/root/clip_post_install.log
-    rm /mnt/sysimage/root/anaconda-ks.cfg
-fi
-
-%end
