@@ -1,0 +1,78 @@
+commit fafed376e7f4bb00014a101f0156c475fd964374
+Author: Tobias Brunner <tobias@strongswan.org>
+Date:   Wed Jul 30 16:01:41 2014 +0200
+
+    imv-swid: Use pkg-config to check for libjson-c
+    
+    The package/library is called libjson-c on recent distributions.
+    Some like Ubuntu 14.04 provide symlinks with the old name but these
+    will eventually disappear.  Using pkg-config allows us to easily check
+    for it (with a fallback) and configure the proper compiler flags.
+    
+    Fixes #663.
+
+diff --git a/configure.ac b/configure.ac
+index 497240f..695fa45 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -876,8 +876,10 @@ if test x$tss = xtrousers; then
+ fi
+ 
+ if test x$imv_swid = xtrue; then
+-	AC_CHECK_LIB([json],[main],[LIBS="$LIBS"],[AC_MSG_ERROR([JSON library libjson not found])],[])
+-	AC_CHECK_HEADER([json/json.h],,[AC_MSG_ERROR([JSON header json/json.h not found!])])
++	PKG_CHECK_MODULES(json, [json-c], [],
++		[PKG_CHECK_MODULES(json, [json])])
++	AC_SUBST(json_CFLAGS)
++	AC_SUBST(json_LIBS)
+ fi
+ 
+ if test x$dumm = xtrue; then
+diff --git a/src/libpts/plugins/imv_swid/Makefile.am b/src/libpts/plugins/imv_swid/Makefile.am
+index 77f33e6..9305484 100644
+--- a/src/libpts/plugins/imv_swid/Makefile.am
++++ b/src/libpts/plugins/imv_swid/Makefile.am
+@@ -5,7 +5,7 @@ AM_CPPFLAGS = \
+ 	-I$(top_srcdir)/src/libpts
+ 
+ AM_CFLAGS = \
+-	$(PLUGIN_CFLAGS)
++	$(PLUGIN_CFLAGS) $(json_CFLAGS)
+ 
+ imcv_LTLIBRARIES = imv-swid.la
+ 
+@@ -13,7 +13,7 @@ imv_swid_la_LIBADD = \
+ 	$(top_builddir)/src/libimcv/libimcv.la \
+ 	$(top_builddir)/src/libpts/libpts.la \
+ 	$(top_builddir)/src/libstrongswan/libstrongswan.la \
+-	-ljson
++	$(json_LIBS)
+ 
+ imv_swid_la_SOURCES = \
+ 	imv_swid.c imv_swid_state.h imv_swid_state.c \
+diff --git a/src/libpts/plugins/imv_swid/imv_swid_rest.h b/src/libpts/plugins/imv_swid/imv_swid_rest.h
+index 93e3d6a..32392cb 100644
+--- a/src/libpts/plugins/imv_swid/imv_swid_rest.h
++++ b/src/libpts/plugins/imv_swid/imv_swid_rest.h
+@@ -26,7 +26,7 @@
+ 
+ #include <library.h>
+ 
+-#include <json/json.h>
++#include <json.h>
+ 
+ typedef struct imv_swid_rest_t imv_swid_rest_t;
+ 
+diff --git a/src/libpts/plugins/imv_swid/imv_swid_state.h b/src/libpts/plugins/imv_swid/imv_swid_state.h
+index 7ffabfd..a6a8d03 100644
+--- a/src/libpts/plugins/imv_swid/imv_swid_state.h
++++ b/src/libpts/plugins/imv_swid/imv_swid_state.h
+@@ -28,7 +28,7 @@
+ #include <swid/swid_inventory.h>
+ #include <library.h>
+ 
+-#include <json/json.h>
++#include <json.h>
+ 
+ typedef struct imv_swid_state_t imv_swid_state_t;
+ typedef enum imv_swid_handshake_state_t imv_swid_handshake_state_t;
