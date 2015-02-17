@@ -1,7 +1,4 @@
 # Copyright (C) 2012 Tresys Technology, LLC
-# Copyright (C) 2014 Quark Security, Inc
-#
-# Authors:	Spencer Shimko <spencer@quarksecurity.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -63,7 +60,7 @@ part pv.os --size=1   --grow        --asprimary
 volgroup vg00 --pesize=65536 pv.os
 logvol /              --vgname=vg00 --name=root  --fstype=ext4 --size 5500 --maxsize 21000 --grow
 logvol /var           --vgname=vg00 --name=var   --fstype=ext4 --size 4000 --fsoptions=defaults,nosuid --grow
-logvol /home          --vgname=vg00 --name=home  --fstype=ext4 --size=1    --fsoptions=defaults,nosuid,nodev --percent=10 --grow
+logvol /home          --vgname=vg00 --name=home  --fstype=ext4 --size=1    --fsoptions=defaults,nosuid,nodev --percent=80 --grow
 logvol swap           --vgname=vg00 --name=swap  --fstype=swap --recommended
 
 logvol /var/log       --vgname=vg00 --name=log   --fstype=ext4 --size 1500 --fsoptions=defaults,nosuid,noexec,nodev --maxsize 25000 --grow
@@ -74,12 +71,13 @@ logvol /tmp           --vgname=vg00 --name=tmp   --fstype=ext4 --size 100  --max
 logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=ext4 --size 100  --maxsize 5000  --grow
 
 %packages --excludedocs
-#CONFIG-BUILD-ADDTL-PACKAGES
+@Base
 clip-selinux-policy
+# by default use MCS policy (clip-selinux-policy-clip)
+-clip-selinux-policy-mls
 clip-selinux-policy-mcs
 clip-selinux-policy-mcs-ssh
 clip-selinux-policy-mcs-unprivuser
-clip-selinux-policy-mcs-aide
 clip-miscfiles
 m4
 scap-security-guide
@@ -116,7 +114,6 @@ openscap-utils
 openssh
 openssh-server
 passwd
-pam_passwdqc
 perl
 policycoreutils
 policycoreutils-newrole
@@ -126,6 +123,7 @@ rootfiles
 rpm
 rsyslog
 ruby
+screen
 -selinux-policy-targeted
 setup
 setools-console
@@ -233,6 +231,7 @@ if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "xy" ]; then
 	chvt 7
 fi
 
+
 echo "Installation timestamp: `date`" > /root/clip-info.txt
 echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 
@@ -246,7 +245,6 @@ echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
 	mount -t selinuxfs none /selinux
 fi
-
 export POLNAME=`sestatus |awk '/Policy from config file:/ { print $5; }'`
 
 
@@ -254,10 +252,10 @@ export POLNAME=`sestatus |awk '/Policy from config file:/ { print $5; }'`
 # CentOS, the results might be wrong in a few places, like FIPS compliance and
 # gpgp keys etc.
 if [ -f /etc/centos-release ]; then
-        awk '/o:redhat:enterprise_linux:6/{print "<platform idref=\"cpe:/o:centos:centos:6\"/>"}1' < /usr/share/xml/scap/ssg/content/ssg-rhel6-xccdf.xml > /usr/share/xml/scap/ssg/content/ssg-centos6-xccdf.xml
-        xccdf='centos6'
-else   
-        xccdf='rhel6'
+	awk '/o:redhat:enterprise_linux:6/{print "<platform idref=\"cpe:/o:centos:centos:6\"/>"}1' < /usr/share/xml/scap/ssg/content/ssg-rhel6-xccdf.xml > /usr/share/xml/scap/ssg/content/ssg-centos6-xccdf.xml
+	xccdf='centos6'
+else
+	xccdf='rhel6'
 fi
 
 mkdir -p /root/scap/{pre,post}/html
@@ -293,7 +291,6 @@ USERNAME="toor"
 PASSWORD="neutronbass"
 HASHED_PASSWORD='$6$314159265358$ytgatj7CAZIRFMPbEanbdi.krIJs.mS9N2JEl0jkPsCvtwC15z07JLzFLSuqiCdionNZ1XNT3gPKkjIG0TTGy1'
 
-######## START DEFAULT USER CONFIG ##########
 # NOTE: The root account is *locked*.  You must create an unprivileged user 
 #       and grant that user administrator capabilities through sudo.
 #       An account will be created below.  This account will be allowed to 
@@ -317,21 +314,35 @@ fi
 
 chage -d 0 "$USERNAME"
 
-# FIXME: uncomment this block to enable DHCP on eth0
-# default network settings
-#cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
-#
-#DEVICE=eth0
-#TYPE=Ethernet
-#ONBOOT=yes
-#NM_CONTROLLED=yes
-#BOOTPROTO=dhcp
-#IPV6_PRIVACY=rfc3041
-#
-#EOF
+groupadd "sftp-only"
 
-echo "Turning sshd off"
-/sbin/chkconfig --level 0123456 sshd off
+#modify the ssh config
+#make sure you're using the internal sftp
+sed -i -r -e "s/Subsystem\s*sftp.*//g" /etc/ssh/sshd_config
+
+echo -e "Subsystem sftp internal-sftp\n" >> /etc/ssh/sshd_config
+echo -e "Match Group sftp-only" >> /etc/ssh/sshd_config
+echo -e "\tChrootDirectory /home" >> /etc/ssh/sshd_config
+echo -e "\tAllowTCPForwarding no" >> /etc/ssh/sshd_config
+echo -e "\tX11Forwarding no" >> /etc/ssh/sshd_config
+echo -e "\tForceCommand internal-sftp" >> /etc/ssh/sshd_config
+
+semanage boolean -N -S ${POLNAME} -m --on allow_ssh_keysign
+semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
+# Commented out in our policy
+#semanage boolean -N -m --on ssh_chroot_full_access
+
+# default network settings
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
+
+DEVICE=eth0
+TYPE=Ethernet
+ONBOOT=yes
+NM_CONTROLLED=yes
+BOOTPROTO=dhcp
+IPV6_PRIVACY=rfc3041
+
+EOF
 
 # Add the user to sudoers and setup an SELinux role/type transition.
 # This line enables a transition via sudo instead of requiring sudo and newrole.
@@ -343,8 +354,6 @@ fi
 
 # Lock the root acct to prevent direct logins
 usermod -L root
-
-######## END DEFAULT USER CONFIG ##########
 
 # Disable all that GUI stuff during boot so we can actually see what is going on during boot.
 if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
@@ -360,21 +369,19 @@ if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
 	plymouth-set-default-theme details --rebuild-initrd &> /dev/null
 fi
 
-###### START - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
 if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
     echo "Setting permissive mode..."
     echo -e "#THIS IS A DEBUG BUILD HENCE SELINUX IS IN PERMISSIVE MODE\nSELINUX=permissive\nSELINUXTYPE=$POLNAME\n" > /etc/selinux/config
-        echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
-        # This line is used to make policy development easier.  It disables the "setfiles" check used by 
-        # semodule/semanage that prevents transactions containing invalid and dupe fc entries from rollin
-g forward.
-        echo -e "module-store = direct\n[setfiles]\npath=/bin/true\n[end]\n" > /etc/selinux/semanage.conf
-        if [ -f /etc/grub.conf ]; then
-                grubby --update-kernel=ALL --remove-args=enforcing
-                grubby --update-kernel=ALL --args=enforcing=0
-        fi 
+	echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
+	# This line is used to make policy development easier.  It disables the "setfiles" check used by 
+	# semodule/semanage that prevents transactions containing invalid and dupe fc entries from rolling forward.
+	echo -e "module-store = direct\n[setfiles]\npath=/bin/true\n[end]\n" > /etc/selinux/semanage.conf
+	if [ -f /etc/grub.conf ]; then
+		grubby --update-kernel=ALL --remove-args=enforcing
+		grubby --update-kernel=ALL --args=enforcing=0
+	fi	
 fi
-###### END - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
+
 
 # We don't want the final remediation script to set the system to targeted
 sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
@@ -391,44 +398,61 @@ chmod +x /root/scap/post/remediation-script.sh
 
 sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
 
+echo "session optional pam_umask.so umask=0077" >> /etc/pam.d/sshd
 
-# This is rather unfortunate, but the remediation content
+# This is rather unfortunate, but the remediation content 
 # starts services, which need to be killed/shutdown if
-# we're rolling Live Media.  First, kill the known
+# we're rolling Live Media.  First, kill the known 
 # problems cleanly, then just kill them all and let
 # <deity> sort them out.
 if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
-	service restorecond stop
-	service auditd stop
-	service rsyslog stop
-	service crond stop
-	[ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop
+	service restorecond stop 2>&1 > /dev/null
+	service auditd stop 2>&1 > /dev/null
+	service rsyslog stop 2>&1 > /dev/null
+	[ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop 2>&1 > /dev/null
 
 	# this one isn't actually due to remediation, but needs to be done too
-	kill $(jobs -p) 2>/dev/null 1>/dev/null
 	kill $TAILPID 2>/dev/null 1>/dev/null
+	kill $(jobs -p) 2>/dev/null 1>/dev/null
+	umount /selinux
 fi
+
+# SFTP dropbox adjustments
+chmod 711 /home
+chmod 700 /home/*
+
+cat << EOF > /etc/sysconfig/iptables
+*filter
+:INPUT DROP [0:0]"
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --sport 22 -j ACCEPT
+COMMIT
+EOF
 
 cat << EOF > /etc/sysconfig/ip6tables
 *filter
 :INPUT DROP [0:0]
 :FORWARD DROP [0:0]
 :OUTPUT DROP [0:0]
+-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --sport 22 -j ACCEPT
 COMMIT
+EOF
+
+cat << EOF >> /home/${USERNAME}/.bashrc
+if [ -S /home/${USERNAME}/.ssh/authorized_keys ]; then
+        if grep -q "^PasswordAuthentication yes" /etc/ssh/sshd_config; then
+                echo "Please disable PasswordAuthentication in /etc/ssh/sshd_config"
+        fi
+else   
+        echo "Please add a public key to ~/.ssh/authorized_keys."
+        echo "Then disable PasswordAuthentication in /etc/ssh/sshd_config"
+fi
 EOF
 
 echo "Done with post install scripts..."
 
 %end
 
-%post --nochroot
-
-# DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
-#CONFIG-BUILD-PLACEHOLDER
-
-if [ x"$CONFIG_BUILD_PRODUCTION" == "xy" ]; then
-    echo "Deleting anaconda-ks.cfg as this is a production build" >> /mnt/sysimage/root/clip_post_install.log
-    rm /mnt/sysimage/root/anaconda-ks.cfg
-fi
-
-%end
