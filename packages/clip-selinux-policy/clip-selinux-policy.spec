@@ -70,7 +70,7 @@ Certifiable Linux Integration Platform SELinux %2 policy for %1 \
 \
 %post %2-%1 \
 echo %1.pp.bz2 >> %{_usr}/share/selinux/%2/modules.lst \
-semodule -n -i %{_usr}/share/selinux/%2/%1.pp.bz2 \
+semodule -n -s %2 -i %{_usr}/share/selinux/%2/%1.pp.bz2 \
 echo "NOTE: installing the %1 policy RPM *does not reload the policy*." \
 echo "To reload the policy run 'semodule -R'" 
 
