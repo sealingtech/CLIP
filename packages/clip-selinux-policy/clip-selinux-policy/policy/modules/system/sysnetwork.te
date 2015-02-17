@@ -65,14 +65,11 @@ manage_files_pattern(dhcpc_t, dhcpc_var_run_t, dhcpc_var_run_t)
 files_pid_filetrans(dhcpc_t, dhcpc_var_run_t, file)
 
 # dhclient-script restorecons resolv.conf etc
-seutil_exec_setfiles(dhcpc_t)
-allow dhcpc_t net_conf_t:file relabelto;
-files_relabelfrom_etc_files(dhcpc_t)
-
-# Allow read/write to /etc/resolv.conf and /etc/ntp.conf. Note that any files
-# in /etc created by dhcpcd will be labelled net_conf_t.
+seutil_exec_setfiles(dhcpc_t,system_r)
 sysnet_manage_config(dhcpc_t)
-files_etc_filetrans(dhcpc_t, net_conf_t, file)
+files_relabelfrom_etc_files(dhcpc_t)
+miscfiles_relabelto_localization(dhcpc_t)
+allow dhcpc_t net_conf_t:file relabelto;
 
 # create temp files
 manage_dirs_pattern(dhcpc_t, dhcpc_tmp_t, dhcpc_tmp_t)

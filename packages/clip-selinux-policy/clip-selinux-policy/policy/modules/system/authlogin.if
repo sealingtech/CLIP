@@ -672,6 +672,26 @@ interface(`auth_manage_shadow',`
 	allow $1 shadow_t:file manage_file_perms;
 	typeattribute $1 can_read_shadow_passwords, can_write_shadow_passwords;
 ')
+#
+########################################
+## <summary>
+##	dontaudit create, read, write, and delete the shadow
+##	password file.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dontaudited access.
+##	</summary>
+## </param>
+#
+interface(`auth_dontaudit_manage_shadow',`
+	gen_require(`
+		attribute can_read_shadow_passwords, can_write_shadow_passwords;
+		type shadow_t;
+	')
+
+	dontaudit $1 shadow_t:file { relabelto relabelfrom manage_file_perms };
+')
 
 #######################################
 ## <summary>

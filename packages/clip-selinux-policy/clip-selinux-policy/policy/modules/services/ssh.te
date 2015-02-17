@@ -53,6 +53,9 @@ type ssh_keygen_exec_t;
 init_system_domain(ssh_keygen_t, ssh_keygen_exec_t)
 role system_r types ssh_keygen_t;
 
+type ssh_keygen_tmp_t;
+files_tmp_file(ssh_keygen_tmp_t)
+
 type sshd_exec_t;
 corecmd_executable_file(sshd_exec_t)
 
@@ -389,6 +392,13 @@ term_dontaudit_use_console(ssh_keygen_t)
 domain_use_interactive_fds(ssh_keygen_t)
 
 files_read_etc_files(ssh_keygen_t)
+files_read_usr_files(ssh_keygen_t)
+
+manage_dirs_pattern(ssh_keygen_t, ssh_keygen_tmp_t, ssh_keygen_tmp_t)
+manage_files_pattern(ssh_keygen_t, ssh_keygen_tmp_t, ssh_keygen_tmp_t)
+files_tmp_filetrans(ssh_keygen_t, ssh_keygen_tmp_t, { dir file })
+
+corecmd_exec_bin(ssh_keygen_t)
 
 init_use_fds(ssh_keygen_t)
 init_use_script_ptys(ssh_keygen_t)

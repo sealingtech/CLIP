@@ -2353,6 +2353,25 @@ interface(`files_dontaudit_write_etc_dirs',`
 
 	dontaudit $1 etc_t:dir write;
 ')
+#
+########################################
+## <summary>
+##	Do not audit attempts to manage to /etc dirs and files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`files_dontaudit_manage_etc',`
+	gen_require(`
+		type etc_t;
+	')
+
+	dontaudit $1 etc_t:dir manage_dir_perms;
+	dontaudit $1 etc_t:file manage_file_perms;
+')
 
 ########################################
 ## <summary>
