@@ -314,21 +314,6 @@ fi
 
 chage -d 0 "$USERNAME"
 
-groupadd "sftp-only"
-
-#modify the ssh config
-#make sure you're using the internal sftp
-sed -i -r -e "s/Subsystem\s*sftp.*//g" /etc/ssh/sshd_config
-
-echo -e "Subsystem sftp internal-sftp\n" >> /etc/ssh/sshd_config
-echo -e "Match Group sftp-only" >> /etc/ssh/sshd_config
-echo -e "\tChrootDirectory /home" >> /etc/ssh/sshd_config
-echo -e "\tAllowTCPForwarding no" >> /etc/ssh/sshd_config
-echo -e "\tX11Forwarding no" >> /etc/ssh/sshd_config
-echo -e "\tForceCommand internal-sftp" >> /etc/ssh/sshd_config
-
-semanage boolean -N -S ${POLNAME} -m --on allow_ssh_keysign
-semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
 # Commented out in our policy
 #semanage boolean -N -m --on ssh_chroot_full_access
 
@@ -416,43 +401,6 @@ if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
 	kill $(jobs -p) 2>/dev/null 1>/dev/null
 	umount /selinux
 fi
-
-# SFTP dropbox adjustments
-chmod 711 /home
-chmod 700 /home/*
-
-cat << EOF > /etc/sysconfig/iptables
-*filter
-:INPUT DROP [0:0]"
-:FORWARD DROP [0:0]
-:OUTPUT DROP [0:0]
--A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
--A OUTPUT -p tcp -m tcp --sport 22 -j ACCEPT
-COMMIT
-EOF
-
-cat << EOF > /etc/sysconfig/ip6tables
-*filter
-:INPUT DROP [0:0]
-:FORWARD DROP [0:0]
-:OUTPUT DROP [0:0]
--A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
--A OUTPUT -p tcp -m tcp --sport 22 -j ACCEPT
-COMMIT
-EOF
-
-cat << EOF >> /home/${USERNAME}/.bashrc
-if [ -S /home/${USERNAME}/.ssh/authorized_keys ]; then
-        if grep -q "^PasswordAuthentication yes" /etc/ssh/sshd_config; then
-                echo "Please disable PasswordAuthentication in /etc/ssh/sshd_config"
-        fi
-else   
-        echo "Please add a public key to ~/.ssh/authorized_keys."
-        echo "Then disable PasswordAuthentication in /etc/ssh/sshd_config"
-fi
-EOF
-
-echo "Done with post install scripts..."
 
 %end
 
