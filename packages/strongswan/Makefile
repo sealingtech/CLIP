@@ -47,7 +47,7 @@ RPM_BUILDROOT ?= $(RPM_TMPDIR)/rpm-buildroot
 
 MKDIR = test -d $(1) || mkdir -p $(1)
 
-RPMBUILD_ARGS := --define '_topdir $(RPM_TOPDIR)'  --define '_tmppath $(RPM_TMPDIR)' --define '_binaries_in_noarch_packages_terminate_build 0'
+RPMBUILD_ARGS := --define '_topdir $(RPM_TOPDIR)'  --define '_tmppath $(RPM_TMPDIR)'
 
 RPMQ_DEFS := --query --define 'pkgname $(PKGNAME)' --define '_sysconfdir /etc' --define 'version $(VERSION)' --define 'release $(RELEASE)' --define 'vendor $(VENDOR)' --define 'packager $(PACKAGER)' --qf '%{NAME}\n'
 

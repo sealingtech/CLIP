@@ -68,6 +68,8 @@ Requires(preun): chkconfig
 Requires(preun): initscripts
 %endif
 
+%define _binaries_in_noarch_packages_terminate_build 0
+
 %description
 The strongSwan IPsec implementation supports both the IKEv1 and IKEv2 key
 exchange protocols in conjunction with the native NETKEY IPsec stack of the
