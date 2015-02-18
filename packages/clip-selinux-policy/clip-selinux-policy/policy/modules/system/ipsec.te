@@ -72,7 +72,7 @@ role system_r types setkey_t;
 # ipsec Local policy
 #
 
-allow ipsec_t self:capability { net_admin dac_override dac_read_search setpcap sys_nice };
+allow ipsec_t self:capability { net_admin dac_override dac_read_search setpcap sys_nice setuid setgid net_raw };
 dontaudit ipsec_t self:capability { sys_ptrace sys_tty_config };
 allow ipsec_t self:process { getcap setcap getsched signal setsched };
 allow ipsec_t self:tcp_socket create_stream_socket_perms;
@@ -110,7 +110,7 @@ corecmd_shell_domtrans(ipsec_t, ipsec_mgmt_t)
 allow ipsec_mgmt_t ipsec_t:fd use;
 allow ipsec_mgmt_t ipsec_t:fifo_file rw_fifo_file_perms;
 allow ipsec_mgmt_t ipsec_t:unix_stream_socket { read write };
-allow ipsec_mgmt_t ipsec_t:process { rlimitinh sigchld };
+allow ipsec_mgmt_t ipsec_t:process { rlimitinh  sigchld signal signull };
 
 kernel_read_kernel_sysctls(ipsec_t)
 kernel_list_proc(ipsec_t)
@@ -449,4 +449,20 @@ miscfiles_read_localization(setkey_t)
 seutil_read_config(setkey_t)
 
 userdom_use_user_terminals(setkey_t)
+
+# added policy for strongswan
+manage_files_pattern(ipsec_t, ipsec_key_file_t, ipsec_key_file_t)
+filetrans_pattern(ipsec_t, ipsec_conf_file_t, ipsec_key_file_t, file)
+corenet_udp_bind_dhcpc_port(ipsec_t)
+kernel_rw_net_sysctls(ipsec_t)
+can_exec(ipsec_t, ipsec_exec_t)
+allow ipsec_t self:packet_socket create_socket_perms;
+allow ipsec_t self:fifo_file { write };
+allow ipsec_t self:netlink_route_socket { create_netlink_socket_perms write };
+allow ipsec_mgmt_t ipsec_t:netlink_route_socket { read write };
+allow ipsec_mgmt_t ipsec_t:netlink_xfrm_socket { read write };
+allow ipsec_mgmt_t ipsec_t:packet_socket { read write };
+
+allow ipsec_t self:rawip_socket { getopt create setopt };
+allow ipsec_t self:unix_stream_socket connectto;
 

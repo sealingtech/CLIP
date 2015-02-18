@@ -369,3 +369,22 @@ interface(`ipsec_run_setkey',`
 	ipsec_domtrans_setkey($1)
 	role $2 types setkey_t;
 ')
+
+########################################
+## <summary>
+##	Execute the IPSEC initrc script in the caller domain
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`ipsec_exec_initrc',`
+	gen_require(`
+		type ipsec_initrc_exec_t;
+	')
+
+	can_exec($1, ipsec_initrc_exec_t)
+')
+

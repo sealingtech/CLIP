@@ -417,6 +417,11 @@ optional_policy(`
 	daemontools_domtrans_start(run_init_t)
 ')
 
+#allow run_init_t to 'run_init /etc/init.d/strongswan restart'
+optional_policy(`
+	ipsec_exec_initrc(run_init_t)
+')
+
 ########################################
 #
 # semodule local policy
