@@ -330,6 +330,7 @@ fi
 %{_datadir}/%{name}/templates/config/
 %{_datadir}/%{name}/templates/database/
 %exclude /usr/lib/debug
+%exclude /usr/src/debug
 
 %files tnc-imcvs
 %dir %{_libdir}/%{name}
