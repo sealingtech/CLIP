@@ -128,6 +128,7 @@ screen
 setup
 setools-console
 shadow-utils
+strongswan
 sudo
 util-linux-ng
 vim-minimal
