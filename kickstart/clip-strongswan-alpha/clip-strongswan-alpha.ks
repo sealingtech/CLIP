@@ -368,7 +368,6 @@ if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
 	fi	
 fi
 
-
 # We don't want the final remediation script to set the system to targeted
 sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
 
@@ -385,6 +384,12 @@ chmod +x /root/scap/post/remediation-script.sh
 sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
 
 echo "session optional pam_umask.so umask=0077" >> /etc/pam.d/sshd
+
+# Turn strongswan on
+chkconfig strongswan on
+
+# Turn on IPV4 forwarding
+sed -i 's/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/' /etc/sysctl.conf
 
 # This is rather unfortunate, but the remediation content 
 # starts services, which need to be killed/shutdown if
