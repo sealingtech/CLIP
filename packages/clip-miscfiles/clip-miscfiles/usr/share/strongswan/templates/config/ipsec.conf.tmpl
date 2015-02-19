@@ -1,0 +1,32 @@
+# ipsec.conf - strongSwan IPsec configuration file
+
+# basic configuration
+
+config setup
+	# strictcrlpolicy=yes
+	# uniqueids = no
+	charondebug="ike 2, knl 2, cfg 2"
+
+conn %default
+	ikelifetime=60m
+	keylife=20m
+	rekeymargin=3m
+	keyingtries=1
+	# as far as I know Android only supports IKEv1
+	# (racoon is an IKEv1 keying daemon)
+	keyexchange=ikev1
+
+conn rw
+	left={LEFTIP}
+	leftcert=server.pem
+	leftsubnet={LEFTSUBNET}
+	leftfirewall=yes
+	leftauth=rsa-2048
+	rightcert=client.pem
+	rightauth=rsa-2048
+	rightauth2=xauth
+	rightsourceip={RIGHTIP}
+	auto=add
+	#cipher suite (exclamation mark means strict)
+	ike=aes256-sha1-modp1024!
+
