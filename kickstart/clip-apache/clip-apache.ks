@@ -85,13 +85,9 @@ clip-selinux-policy-mcs-postfix
 clip-miscfiles
 m4
 scap-security-guide
-aqueduct
-aqueduct-SSG
 dracut
 webpageexample
 clip-dracut-module
-#aqueduct-ssg-bash
-secstate
 
 mysql
 mysql-server
@@ -262,18 +258,62 @@ dhclient
 # DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
 #CONFIG-BUILD-PLACEHOLDER
 export PATH="/sbin:/usr/sbin:/usr/bin:/bin:/usr/local/bin"
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "y" ]; then
-	exec >/root/clip_post_install.log 2>&1
-	# Print the log to tty7 so that the user know what's going on
-	tail -f /root/clip_post_install.log >/dev/tty7 &
-	TAILPID=$!
-	chvt 7
+exec >/root/clip_post_install.log 2>&1
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "xy" ]; then
+        # Print the log to tty7 so that the user know what's going on
+        tail -f /root/clip_post_install.log >/dev/tty7 &
+        TAILPID=$!
+        chvt 7
 fi
 
 echo "Installation timestamp: `date`" > /root/clip-info.txt
 echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 
-#####
+
+# livecd-creator attempts to fake a /selinux tree
+# and creates some normal files in there but newer
+# libselinux does a statfs and notices things are 
+# kopasetic as /selinux is actually reported as
+# ext4.  So mount the real selinuxfs but anytime
+# we actually muck with files in there, we will
+# bind mount /dev/zero so we don't mess up the build host.
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
+        mount -t selinuxfs none /selinux
+fi
+
+export POLNAME=`sestatus |awk '/Policy from config file:/ { print $5; }'`
+
+#NOTE: while the following lines allow the SCAP content to be interprested on
+# CentOS, the results might be wrong in a few places, like FIPS compliance and
+# gpgp keys etc.
+if [ -f /etc/centos-release ]; then
+        awk '/o:redhat:enterprise_linux:6/{print "<platform idref=\"cpe:/o:centos:centos:6\"/>"}1' < /usr/share/xml/scap/ssg/content/ssg-rhel6-xccdf.xml > /usr/share/xml/scap/ssg/content/ssg-centos6-xccdf.xml
+        xccdf='centos6'
+else
+        xccdf='rhel6'
+fi
+
+mkdir -p /root/scap/{pre,post}/html
+oscap xccdf eval --profile stig-rhel6-server-upstream \
+--report /root/scap/pre/html/report.html \
+--results /root/scap/pre/html/results.xml \
+/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
+
+oscap xccdf generate fix \
+--result-id xccdf_org.open-scap_testresult_stig-rhel6-server-upstream \
+/root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
+
+chmod +x /root/scap/pre/remediation-script.sh
+/root/scap/pre/remediation-script.sh
+
+# Un-remeidate things SSG broke...
+sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
+
+cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
+| fold -sw 80 > /etc/issue.net
+cp /etc/issue.net /etc/issue
+
+
 
 # FIXME: Change the username and password.
 #        If a hashed password is specified it will be used
@@ -298,9 +338,9 @@ HASHED_PASSWORD='$6$314159265358$ytgatj7CAZIRFMPbEanbdi.krIJs.mS9N2JEl0jkPsCvtwC
 #
 # Don't get lost in the 'if' statement - basically map $USERNAME to the unconfined toor_r:toor_t role if it is enabled.  
 if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
-	semanage user -a -R toor_r -R staff_r -R sysadm_r "${USERNAME}_u" 
+	semanage user -N -a -R toor_r -R staff_r -R sysadm_r "${USERNAME}_u" 
 else
-	semanage user -a -R staff_r -R sysadm_r "${USERNAME}_u" || semanage user -a -R staff_r "${USERNAME}_u"
+	semanage user -N -a -R staff_r -R sysadm_r "${USERNAME}_u" || semanage user -a -R staff_r "${USERNAME}_u"
 fi
 useradd -m "$USERNAME" -G wheel -Z "${USERNAME}_u"
 
@@ -312,21 +352,26 @@ fi
 
 chage -d 0 "$USERNAME"
 
-# Remove sshd if it in a production build
-# If not, just chkconfig it off
-if [ x"$CONFIG_BUILD_PRODUCTION" == "xy" ]; then
-    echo "Removing sshd from the system"
-    /bin/rpm -e openssh openssh-clients openssh-server
-else
-    echo "Turning sshd off"
-    /sbin/chkconfig --level 0123456 sshd off
-fi
+# FIXME: uncomment this block to enable DHCP on eth0
+# default network settings
+#cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
+#
+#DEVICE=eth0
+#TYPE=Ethernet
+#ONBOOT=yes
+#NM_CONTROLLED=yes
+#BOOTPROTO=dhcp
+#IPV6_PRIVACY=rfc3041
+#
+#EOF
+
+echo "Turning sshd off"
+/sbin/chkconfig --level 0123456 sshd off
 
 # Add the user to sudoers and setup an SELinux role/type transition.
 # This line enables a transition via sudo instead of requiring sudo and newrole.
 if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
 	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
-	echo "WARNING: This is a debug build with a super user present.  DO NOT USE IN PRODUCTION!" > /etc/motd
 else
 	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
 fi
@@ -336,98 +381,36 @@ usermod -L root
 
 ######## END DEFAULT USER CONFIG ##########
 
-###### START SECSTATE AUDIT AND REMEDIATE ###########
-
-# FIXME: Remove <platform> tags from SSG to temporarily resolve non-applicable openscap results
-sed -i -r -e "s/<platform.*//g" /usr/local/scap-security-guide/RHEL6/output/ssg-rhel6-xccdf.xml
-
-# SecState's timeout is too short for some remediation scripts in Aqueduct.
-sed -i -e 's/^remediation_timeout.*/remediation_timeout=30/' /etc/secstate/secstate.conf
-
-# Import SSG into secstate.
-# Running this command again, even after install, will result in a harmless error
-# as you are effectively importing the same IDs again.
-echo "Importing SSG content into secstate..."
-secstate import /usr/local/scap-security-guide/RHEL6/output/ssg-rhel6-xccdf.xml --profile=common
-
-cd /root
-echo "About to use secstate to do a pre-remediation audit using SSG content..."
-
-###### Mitigating the false positives for remediation #####
-secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mountopt_nodev_on_removable_partitions
-secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mountopt_noexec_on_removable_partitions
-secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mountopt_nosuid_on_removable_partitions
-secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mount_option_tmp_nodev
-secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mount_option_tmp_noexec
-secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mount_option_tmp_nosuid
-secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mount_option_dev_shm_nodev
-secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mount_option_dev_shm_noexec
-secstate mitigate -r "This system does not support partitions." -a "John Feehley" RHEL-6 mount_option_dev_shm_nosuid
-secstate mitigate -r "This system does not support external devices." -a "John Feehley" RHEL-6 console_device_restrict_access_desktop 
-secstate mitigate -r "This system does not support more than three attempts." -a "John Feehley" RHEL-6 deny_password_attempts
-secstate mitigate -r "This system only supports SHA512 as a hashing algorithm." -a "John Feehley" RHEL-6 set_password_hashing_algorithm
-secstate mitigate -r "This system's home dirs do not support groupwrite or world read." -a "John Feehley" RHEL-6 homedir_perms_no_groupwrite_worldread
-secstate mitigate -r "This system does not support screen savers." -a "John Feehley" RHEL-6 set_screensaver_inactivity_timeout
-secstate mitigate -r "This system does not support screen savers." -a "John Feehley" RHEL-6 enable_screensaver_after_idle
-secstate mitigate -r "This system does not support screen savers." -a "John Feehley" RHEL-6 enable_screensaver_password_lock
-secstate mitigate -r "This system does not support screen savers." -a "John Feehley" RHEL-6 set_blank_screensaver
-secstate mitigate -r "This system does not support IPv6." -a "John Feehley" RHEL-6 enable_ip6tables
-secstate mitigate -r "This system does support smtp as a mail client." -a "John Feehley" RHEL-6 iptables_smtp_enabled
-secstate mitigate -r "This system does support httpd for web content." -a "John Feehley" RHEL-6 uninstall_httpd
-secstate mitigate -r "This system does restrict access." -a "John Feehley" RHEL-6 console_device_restrict_access_server
-secstate mitigate -r "This system does have a proper login banner." -a "John Feehley" RHEL-6 set_system_login_banner
-secstate mitigate -r "This system does have the proper audit.rules." -a "John Feehley" RHEL-6 audit_mac_changes
-secstate mitigate -r "This system's logs are only owned by administrators, mysqld.log is owned by mysql respectively."  -a "John Feehley" RHEL-6 userowner_rsyslog_files
-##### End of mitigating the false positives#####
-####secstate remediate -y --verbose
-#secstate audit
-
-setsebool secstate_enable_remediation 1
-if [ x"$CONFIG_BUILD_SECSTATE_REMEDIATE" == "xy" ]; then
-	# Remediate w/ secstate using aqueduct content
-	secstate remediate -y --verbose
-	echo "About to use secstate to do a post-remediation audit using SSG content..."
-	secstate audit
-	echo "All done with secstate :)  Now go play with your freshly remediated system!"
+###### START - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
+# Disable all that GUI stuff during boot so we can actually see what is going on during boot.
+if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
+        # The first users of a CLIP system will be devs. Lets make things a little easier on them.
+        # by getting rid of the framebuffer effects, rhgb, and quiet.
+        grubby --update-kernel=ALL --remove-args="rhgb quiet"
+        sed -i -e 's/^\(splashimage.*\)/#\1/' -e 's/^\(hiddenmenu.*\)/#\1/' /boot/grub/grub.conf
+        # This is ugly but when plymouth re-rolls the initrd it creates a new entry in grub.conf that is redundant.
+        # Actually rather benign but may impact developers using grubby who think there is only one kernel to work with.
+        title="$(sed 's/ release.*$//' < /etc/redhat-release) ($(uname -r))"
+        sed -i -e "s;title.*;title $title;" /boot/grub/grub.conf
+        echo "Modifying splash screen with plymouth..."
+        plymouth-set-default-theme details --rebuild-initrd &> /dev/null
 fi
 
-###### END SECSTATE AUDIT AND REMEDIATE ###########
-
-# Disable all that GUI stuff during boot so we can actually see what is going on during boot.
-# The first users of a CLIP system will be devs. Lets make things a little easier on them.
-# by getting rid of the framebuffer effects, rhgb, and quiet.
-grubby --update-kernel=ALL --remove-args="rhgb quiet"
-sed -i -e 's/^\(splashimage.*\)/#\1/' -e 's/^\(hiddenmenu.*\)/#\1/' /boot/grub/grub.conf
-# This is ugly but when plymouth re-rolls the initrd it creates a new entry in grub.conf that is redundant.
-# Actually rather benign but may impact developers using grubby who think there is only one kernel to work with.
-title="$(sed 's/ release.*$//' < /etc/redhat-release) ($(uname -r))"
-sed -i -e "s;title.*;title $title;" /boot/grub/grub.conf
-echo "Modifying splash screen with plymouth..."
-plymouth-set-default-theme details --rebuild-initrd &> /dev/null
-
-###### START - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
 
 # Set permissive mode
-export POLNAME=`sestatus |awk '/Policy from config file:/ { print $5; }'`
-if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
+if [  x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
     echo "Setting permissive mode..."
     echo -e "#THIS IS A DEBUG BUILD HENCE SELINUX IS IN PERMISSIVE MODE\nSELINUX=permissive\nSELINUXTYPE=$POLNAME\n" > /etc/selinux/config
 	echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
 	# This line is used to make policy development easier.  It disables the "setfiles" check used by 
 	# semodule/semanage that prevents transactions containing invalid and dupe fc entries from rolling forward.
 	echo -e "module-store = direct\n[setfiles]\npath=/bin/true\n[end]\n" > /etc/selinux/semanage.conf
-	grubby --update-kernel=ALL --remove-args=enforcing
-	grubby --update-kernel=ALL --args=enforcing=0
+	if [ -f /etc/grub.conf ]; then
+		grubby --update-kernel=ALL --remove-args=enforcing
+		grubby --update-kernel=ALL --args=enforcing=0
+	fi
 fi
 ###### END - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
-
-#####Banner Revision#####Secstate does not recognize this as corrected.
-cat << EOF > /etc/issue
-
-You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only. By using this IS (which includes any device attached to this IS), you consent to the following conditions: -The USG routinely intercepts and monitors communications on this IS for purposes including, but not limited to, penetration testing, COMSEC monitoring, network operations and defense, personnel misconduct (PM), law enforcement (LE), and counterintelligence (CI) investigations. -At any time, the USG may inspect and seize data stored on this IS. -Communications using, or data stored on, this IS are not private, are subject to routine monitoring, interception, and search, and may be disclosed or used for any USG-authorized purpose. -This IS includes security measures (e.g., authentication and access controls) to protect USG interests- -not for your personal benefit or privacy. -Notwithstanding the above, using this IS does not constitute consent to PM, LE or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details.
-
-EOF
-#####End Banner Revision#####
 
 #####IPtables Configuration#####
 
@@ -448,115 +431,22 @@ EOF
 
 #####IPtables End Configuration#####
 
-#####Audit.rules Configuration#####Secstate does not recognize this as corrected.
+# We don't want the final remediation script to set the system to targeted
+sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
 
-cat << EOF > /etc/audit/audit.rules
+oscap xccdf eval --profile stig-rhel6-server-upstream \
+--report /root/scap/post/html/report.html \
+--results /root/scap/post/html/results.xml \
+/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
 
-# This file contains the auditctl rules that are loaded
-# whenever the audit daemon is started via the initscripts.
-# The rules are simply the parameters that would be passed
-# to auditctl.
+oscap xccdf generate fix \
+--result-id xccdf_org.open-scap_testresult_stig-rhel6-server-upstream \
+/root/scap/post/html/results.xml > /root/scap/post/remediation-script.sh
+chmod +x /root/scap/post/remediation-script.sh
 
-# First rule - delete all
--D
+sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
 
-# Increase the buffers to survive stress events.
-# Make this bigger for busy systems
--b 320
-
-# Feel free to add below this line. See auditctl man page
--w /etc/selinux -p wa -k MAC-policy
--a always,exit -S init_module -S delete_module -k modules
--w /sbin/modprobe -p x -k modules
--w /sbin/rmmod -p x -k modules
--w /sbin/insmod -p x -k modules
--w /etc/sudoers -p wa -k actions
--a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=500 -F auid!=4294967295 -k delete
--a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=500 -F auid!=4294967295 -k delete
--a always,exit -F arch=b64 -S mount -F auid>=500 -F auid!=4294967295 -k media_export
--a always,exit -F arch=b32 -S mount -F auid>=500 -F auid!=4294967295 -k media_export
--a always,exit -F arch=b64 -F path=/bin/ping -F perm=x -F auid>=500 -F auid!=4294967295 -k privileged
--a always,exit -F arch=b32 -F path=/bin/ping -F perm=x -F auid>=500 -F auid!=4294967295 -k privileged
--a always,exit -F arch=b32 -S setxattr -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S setxattr -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S removexattr -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S removexattr -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S lsetxattr -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S lsetxattr -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S lremovexattr -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S lremovexattr -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S lchown -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S lchown -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S fsetxattr -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S fsetxattr -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S fremovexattr -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S fremovexattr -F auid>=500 -F auid!=4294967295 -k perm_mod
--always,exit -F arch=b64 -S fchownat -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S fchown -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S fchown -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S fchmodat -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S fchmodat -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S fchmod -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S fchmod -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S chown -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S chown -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S chmod -F auid>=500 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S chmod -F auid>=500 -F auid!=4294967295 -k perm_mod
-
--a always,exit -F path=/bin/ping -F perm=x -F auid>=500 -F auid!=4294967295 -k privileged
-
--e 2a always,exit -F arch=b32 -S fchownat -F auid>=500 -F auid!=4294967295 -k perm_modEOF
-
-EOF
-#####Audit.rules End Configuration#####
-
-#####Console Permissions#####Secstate does not recognize this as corrected.
-cat << EOF > /etc/security/console.perms
-# /etc/security/console.perms
-#
-# This file determines the permissions that will be given to priviledged
-# users of the console at login time, and the permissions to which to
-# revert when the users log out.
-
-# format is:
-#   <class>=list of regexps specifying consoles or globs specifying files
-#   file-glob|<class> perm dev-regex|<dev-class> \
-#     revert-mode revert-owner[.revert-group]
-# the revert-mode, revert-owner, and revert-group are optional, and default
-# to 0600, root, and root, respectively.
-#
-# For more information:
-# man 5 console.perms
-#
-# This file should not be modified.
-# Rather a new file in the console.perms.d directory should be created.
-
-# file classes -- these are regular expressions
-<console>=tty[0-9][0-9]* vc/[0-9][0-9]*
-<xconsole>=tty[0-9][0-9]* vc/[0-9][0-9]* :0\.[0-9] :0
-
-# device classes -- see console.perms.d/50-default.perms
-# permission definitions -- see console.perms.d/50-default.perms
-
-EOF
-#####End of Console Permissions#####
-
-#####Network Configuration /etc/sysconfig/network-scripts/ifcfg-eth0#####
-
-cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
-
-DEVICE=eth0
-TYPE=Ethernet
-ONBOOT=yes
-NM_CONTROLLED=yes
-BOOTPROTO=dhcp
-PV6INIT=yes
-
-EOF
-
-#####End of Network Configuration#####
-
-#####
+# Now fix things that remediation might have broke
 
 chkconfig httpd on
 chkconfig php on
@@ -578,11 +468,12 @@ if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
 
 	# this one isn't actually due to remediation, but needs to be done too
 	kill $(jobs -p) 2>/dev/null 1>/dev/null
+	kill $TAILPID 2>/dev/null 1>/dev/null
+	umount /selinux
 fi
 
 echo "Done with post install scripts..."
 
-kill $TAILPID 2>/dev/null 1>/dev/null
 
 %end
 

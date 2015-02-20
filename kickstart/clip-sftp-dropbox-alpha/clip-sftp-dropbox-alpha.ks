@@ -81,12 +81,8 @@ clip-selinux-policy-mcs-unprivuser
 clip-miscfiles
 m4
 scap-security-guide
-aqueduct
-aqueduct-SSG
 dracut
 clip-dracut-module
-#aqueduct-ssg-bash
-secstate
 
 acl
 aide
@@ -117,7 +113,6 @@ openscap-content
 openscap-utils
 openssh
 openssh-server
-openswan
 passwd
 perl
 policycoreutils
@@ -128,6 +123,7 @@ rootfiles
 rpm
 rsyslog
 ruby
+screen
 -selinux-policy-targeted
 setup
 setools-console
@@ -224,16 +220,17 @@ dhclient
 %end
 
 %post --interpreter=/bin/bash
-exec >/root/clip_post_install.log 2>&1
-# Print the log to tty7 so that the user know what's going on
-tail -f /root/clip_post_install.log >/dev/tty7 &
-TAILPID=$!
 # DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
 #CONFIG-BUILD-PLACEHOLDER
 export PATH="/sbin:/usr/sbin:/usr/bin:/bin:/usr/local/bin"
+exec >/root/clip_post_install.log 2>&1
 if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "xy" ]; then
+	# Print the log to tty7 so that the user know what's going on
+	tail -f /root/clip_post_install.log >/dev/tty7 &
+	TAILPID=$!
 	chvt 7
 fi
+
 
 echo "Installation timestamp: `date`" > /root/clip-info.txt
 echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
@@ -248,9 +245,38 @@ echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
 	mount -t selinuxfs none /selinux
 fi
-
 export POLNAME=`sestatus |awk '/Policy from config file:/ { print $5; }'`
 
+
+#NOTE: while the following lines allow the SCAP content to be interprested on
+# CentOS, the results might be wrong in a few places, like FIPS compliance and
+# gpgp keys etc.
+if [ -f /etc/centos-release ]; then
+	awk '/o:redhat:enterprise_linux:6/{print "<platform idref=\"cpe:/o:centos:centos:6\"/>"}1' < /usr/share/xml/scap/ssg/content/ssg-rhel6-xccdf.xml > /usr/share/xml/scap/ssg/content/ssg-centos6-xccdf.xml
+	xccdf='centos6'
+else
+	xccdf='rhel6'
+fi
+
+mkdir -p /root/scap/{pre,post}/html
+oscap xccdf eval --profile stig-rhel6-server-upstream \
+--report /root/scap/pre/html/report.html \
+--results /root/scap/pre/html/results.xml \
+/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
+
+oscap xccdf generate fix \
+--result-id xccdf_org.open-scap_testresult_stig-rhel6-server-upstream \
+/root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
+
+chmod +x /root/scap/pre/remediation-script.sh
+/root/scap/pre/remediation-script.sh
+
+# Un-remeidate things SSG broke...
+sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
+
+cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
+| fold -sw 80 > /etc/issue.net
+cp /etc/issue.net /etc/issue
 
 # FIXME: Change the username and password.
 #        If a hashed password is specified it will be used
@@ -265,7 +291,6 @@ USERNAME="toor"
 PASSWORD="neutronbass"
 HASHED_PASSWORD='$6$314159265358$ytgatj7CAZIRFMPbEanbdi.krIJs.mS9N2JEl0jkPsCvtwC15z07JLzFLSuqiCdionNZ1XNT3gPKkjIG0TTGy1'
 
-######## START DEFAULT USER CONFIG ##########
 # NOTE: The root account is *locked*.  You must create an unprivileged user 
 #       and grant that user administrator capabilities through sudo.
 #       An account will be created below.  This account will be allowed to 
@@ -307,8 +332,7 @@ semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
 # Commented out in our policy
 #semanage boolean -N -m --on ssh_chroot_full_access
 
-#####Network Configuration /etc/sysconfig/network-scripts/ifcfg-eth0#####
-
+# default network settings
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
 
 DEVICE=eth0
@@ -320,52 +344,16 @@ IPV6_PRIVACY=rfc3041
 
 EOF
 
-#####End of Network Configuration#####
-
 # Add the user to sudoers and setup an SELinux role/type transition.
 # This line enables a transition via sudo instead of requiring sudo and newrole.
 if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
 	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
-	echo "WARNING: This is a debug build with a super user present.  DO NOT USE IN PRODUCTION!" > /etc/motd
 else
 	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
 fi
 
 # Lock the root acct to prevent direct logins
 usermod -L root
-
-######## END DEFAULT USER CONFIG ##########
-
-###### START SECSTATE AUDIT AND REMEDIATE ###########
-
-# FIXME: Remove <platform> tags from SSG to temporarily resolve non-applicable openscap results
-sed -i -r -e "s/<platform.*//g" /usr/local/scap-security-guide/RHEL6/output/ssg-rhel6-xccdf.xml
-
-# SecState's timeout is too short for some remediation scripts in Aqueduct.
-sed -i -e 's/^remediation_timeout.*/remediation_timeout=30/' /etc/secstate/secstate.conf
-
-# Import SSG into secstate.
-# Running this command again, even after install, will result in a harmless error
-# as you are effectively importing the same IDs again.
-#echo "Importing SSG content into secstate..."
-#secstate import /usr/local/scap-security-guide/RHEL6/output/ssg-rhel6-xccdf.xml --profile=common
-
-#cd /root
-#echo "About to use secstate to do a pre-remediation audit using SSG content..."
-#secstate audit 
-
-#setsebool secstate_enable_remediation 1
-#if [ x"$CONFIG_BUILD_SECSTATE_REMEDIATE" == "xy" ]; then
-#	# Remediate w/ secstate using aqueduct content
-#	secstate remediate -y --verbose
-#	echo "About to use secstate to do a post-remediation audit using SSG content..."
-#	secstate audit
-#	echo "All done with secstate :)  Now go play with your freshly remediated system!"
-#fi
-
-###### END SECSTATE AUDIT AND REMEDIATE ###########
-
-###### START - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
 
 # Disable all that GUI stuff during boot so we can actually see what is going on during boot.
 if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
@@ -381,19 +369,34 @@ if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
 	plymouth-set-default-theme details --rebuild-initrd &> /dev/null
 fi
 
-# Set permissive mode
-if [ -f '/etc/grub.conf' -a x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
+if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
     echo "Setting permissive mode..."
     echo -e "#THIS IS A DEBUG BUILD HENCE SELINUX IS IN PERMISSIVE MODE\nSELINUX=permissive\nSELINUXTYPE=$POLNAME\n" > /etc/selinux/config
 	echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
 	# This line is used to make policy development easier.  It disables the "setfiles" check used by 
 	# semodule/semanage that prevents transactions containing invalid and dupe fc entries from rolling forward.
 	echo -e "module-store = direct\n[setfiles]\npath=/bin/true\n[end]\n" > /etc/selinux/semanage.conf
-	grubby --update-kernel=ALL --remove-args=enforcing
-	grubby --update-kernel=ALL --args=enforcing=0
+	if [ -f /etc/grub.conf ]; then
+		grubby --update-kernel=ALL --remove-args=enforcing
+		grubby --update-kernel=ALL --args=enforcing=0
+	fi	
 fi
-###### END - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
-echo "Done with post install scripts..."
+
+
+# We don't want the final remediation script to set the system to targeted
+sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
+
+oscap xccdf eval --profile stig-rhel6-server-upstream \
+--report /root/scap/post/html/report.html \
+--results /root/scap/post/html/results.xml \
+/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
+
+oscap xccdf generate fix \
+--result-id xccdf_org.open-scap_testresult_stig-rhel6-server-upstream \
+/root/scap/post/html/results.xml > /root/scap/post/remediation-script.sh
+chmod +x /root/scap/post/remediation-script.sh
+
+sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
 
 # This is rather unfortunate, but the remediation content 
 # starts services, which need to be killed/shutdown if
@@ -416,6 +419,7 @@ fi
 chmod 711 /home
 chmod 700 /home/*
 
+echo "Done with post install scripts..."
 
 %end
 
