@@ -2984,3 +2984,22 @@ interface(`kernel_stream_connect',`
        allow $1 kernel_t:unix_stream_socket connectto;
 ')
 
+########################################
+## <summary>
+##     Dont audit the specified domain 
+#      getattr on kernel unix socket.
+## </summary>
+## <param name="domain">
+##     <summary>
+##     Domain to dontaudit access access.
+##     </summary>
+## </param>
+#
+interface(`kernel_donaudit_stream_getattr',`
+       gen_require(`
+               type kernel_t;
+       ')
+
+       allow $1 kernel_t:unix_stream_socket getattr;
+')
+

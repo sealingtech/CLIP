@@ -113,6 +113,25 @@ interface(`udev_dontaudit_use_fds',`
 
 ########################################
 ## <summary>
+##	Do not audit attempts to getattr
+##	the udev netlink socket.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`udev_dontaudit_getattr_netlink_socket',`
+	gen_require(`
+		type udev_t;
+	')
+
+	dontaudit $1 udev_t:netlink_kobject_uevent_socket getattr;
+')
+
+########################################
+## <summary>
 ##	Do not audit attempts to read or write
 ##	to a udev unix datagram socket.
 ## </summary>

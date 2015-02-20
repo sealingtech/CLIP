@@ -752,6 +752,15 @@ optional_policy(`
 	mysql_stream_connect(initrc_t)
 	mysql_write_log(initrc_t)
 	mysql_read_config(initrc_t)
+	mysql_setattr_db_files(initrc_t)
+	mysql_setattr_var_run_files(initrc_t)
+
+	# runs fuser
+	logging_dontaudit_getattr_audit_netlink_socket(initrc_t)
+	udev_dontaudit_getattr_netlink_socket(initrc_t)
+
+	kernel_donaudit_stream_getattr(initrc_t)
+	
 ')
 
 optional_policy(`

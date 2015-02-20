@@ -63,6 +63,23 @@ interface(`logging_send_audit_msgs',`
 	allow $1 self:capability audit_write;
 	allow $1 self:netlink_audit_socket { r_netlink_socket_perms nlmsg_relay };
 ')
+#
+#######################################
+## <summary>
+##	 Dontaudit getattr on audit netlink socket.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	dontaudit domain access.
+##	</summary>
+## </param>
+#
+interface(`logging_dontaudit_getattr_audit_netlink_socket',`
+	gen_require(`
+		type auditd_t;
+	')
+	allow $1 auditd_t:netlink_audit_socket getattr; 
+')
 
 #######################################
 ## <summary>
