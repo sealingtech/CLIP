@@ -408,6 +408,15 @@ if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
 	kill $(jobs -p) 2>/dev/null 1>/dev/null
 	kill $TAILPID 2>/dev/null 1>/dev/null
 fi
+
+cat << EOF > /etc/sysconfig/ip6tables
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+COMMIT
+EOF
+
 echo "Done with post install scripts..."
 
 %end
