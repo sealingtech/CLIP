@@ -398,6 +398,8 @@ chmod +x /root/scap/post/remediation-script.sh
 
 sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
 
+echo "session optional pam_umask.so umask=0077" >> /etc/pam.d/sshd
+
 # This is rather unfortunate, but the remediation content 
 # starts services, which need to be killed/shutdown if
 # we're rolling Live Media.  First, kill the known 
