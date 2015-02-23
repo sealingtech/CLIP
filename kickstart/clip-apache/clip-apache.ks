@@ -448,6 +448,17 @@ sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
 
 # Now fix things that remediation might have broke
 
+cat << EOF >> /home/${USERNAME}/.bashrc
+if [ -S /home/${USERNAME}/.ssh/authorized_keys ]; then
+        if grep -q "^PasswordAuthentication yes" /etc/ssh/sshd_config; then
+                echo "Please disable PasswordAuthentication in /etc/ssh/sshd_config"
+        fi
+else   
+        echo "Please add a public key to ~/.ssh/authorized_keys."
+        echo "Then disable PasswordAuthentication in /etc/ssh/sshd_config"
+fi
+EOF
+
 chkconfig httpd on
 chkconfig php on
 chkconfig mysqld on
