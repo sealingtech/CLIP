@@ -15,7 +15,7 @@ ISO_VERSION ?= 1
 
 ROOT_DIR ?= $(CURDIR)
 TMP_DIR ?= $(ROOT_DIR)/tmp
-BUILD_DIR ?= $(TMP_DIR)/clip-iso-build
+BUILD_DIR ?= $(TMP_DIR)/$(NAME)
 SUPPORT_DIR ?= $(ROOT_DIR)/support
 
 OUTPUT_DIR ?= $(ROOT_DIR)
