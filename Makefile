@@ -1,5 +1,5 @@
 # Copyright (C) 2011-2012 Tresys Technology, LLC
-# Copyright (C) 2011-2012 Quark Security, Inc
+# Copyright (C) 2011-2015 Quark Security, Inc
 # Copyright (C) 2013 Cubic Corporation
 # 
 # Authors: Spencer Shimko <sshimko@tresys.com>
@@ -120,7 +120,7 @@ endif
 
 MKDIR = $(VERBOSE)test -d $(1) || mkdir -p $(1)
 
-SYSTEMS := $(shell ls $(KICKSTART_DIR))
+SYSTEMS := $(shell find $(KICKSTART_DIR) -maxdepth 1 ! -name kickstart -type d -printf "%f\n")
 
 # These are targets supported by the kickstart/Makefile that will be used to generate LiveCD images.
 LIVECDS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -live-iso,$(SYSTEM)))
@@ -333,11 +333,11 @@ srpms: $(SRPMS)
 $(LIVECDS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
 	$(call CHECK_LIVE_TOOLS)
-	$(MAKE) -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-live-iso/\1/'`" live-iso
+	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-live-iso/\1/'`" live-iso
 
 $(INSTISOS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
-	$(MAKE) -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
+	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
 
 $(MOCK_CONF_DIR)/$(MOCK_REL).cfg:  $(MOCK_CONF_DIR)/$(MOCK_REL).cfg.tmpl $(CONF_DIR)/pkglist.blacklist
 	$(call CHECK_DEPS)
