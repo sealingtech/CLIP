@@ -29,6 +29,8 @@ PUNGI_ISO_DIR := $(BUILD_DIR)/$(ISO_VERSION)/$(TARGET_ARCH)/iso/
 PUNGI ?= $(SUPPORT_DIR)/pungi
 PUNGI_ARGS := --destdir="$(BUILD_DIR)" --ver="$(ISO_VERSION)" --name="$(NAME)" --nosource --force
 
+CHECK_VOL_ID ?= $(SUPPORT_DIR)/checkVolID.py
+
 LIVECD_CREATOR ?= /usr/bin/livecd-creator
 override LIVECD_ARGS := $(LIVECD_ARGS)
 
@@ -52,7 +54,7 @@ SETUP_DEeS := $(CURDIR)/Makefile $(KS)
 
 all: iso live-iso setup-ks
 
-iso: $(DEPS) $(ADDTL_DEPS) setup-inst-ks
+iso: $(DEPS) $(ADDTL_DEPS) setup-inst-ks check-volume-id
 	@echo "Gathering things with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
 	$(VERBOSE)cd $(BUILD_DIR); sudo $(PUNGI) $(PUNGI_ARGS) -GCB -c "$(INST_KS)"
@@ -82,6 +84,10 @@ setup-inst-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(CONFIG_BUILD_ADDTL_PACKAGES);' $(INST_KS)
 	$(VERBOSE)sed -e 's/^repo/#repo/' $(INST_KS) > $(PUNGI_OS_DIR)/$(notdir $(INST_KS))
 
+check-volume-id:
+	@echo "Validating Volume ID"
+	$(VERBOSE)$(CHECK_VOL_ID) $(NAME) $(ISO_VERSION) $(shell arch)
+
 setup-live-ks: $(SETUP_DEPS)
 	$(VERBOSE)test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)
 	$(VERBOSE)cp --force $(KS) $(LIVE_KS)
@@ -96,4 +102,4 @@ clean:
 VEbare: clean
 	rm -rf $(TMP_DIR)
 
-.PHONY: all live-iso iso clean bare setup-ks
+.PHONY: all live-iso iso clean bare setup-ks check-volume-id
