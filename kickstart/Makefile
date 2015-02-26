@@ -31,7 +31,9 @@ PUNGI_ARGS := --destdir="$(BUILD_DIR)" --ver="$(ISO_VERSION)" --name="$(NAME)" -
 
 CHECK_VOL_ID ?= $(SUPPORT_DIR)/checkVolID.py
 
-LIVECD_CREATOR ?= /usr/bin/livecd-creator
+LIVECD_CREATOR ?= $(TOOLS_DIR)/usr/bin/livecd-creator
+LIVECD_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.6/site-packages/
+
 override LIVECD_ARGS := $(LIVECD_ARGS)
 
 DEBUG ?= y
@@ -70,7 +72,7 @@ iso: $(DEPS) $(ADDTL_DEPS) setup-inst-ks check-volume-id
 
 live-iso: $(DEPS) $(ADDTL_DEPS) setup-live-ks
 	@echo "Live CD Creator needs root permissions - please enter your sudo password if prompted."
-	$(VERBOSE)cd $(BUILD_DIR);sudo $(LIVECD_CREATOR)  $(LIVECD_ARGS) --config="$(LIVE_KS)"
+	$(VERBOSE)cd $(BUILD_DIR);sudo PYTHONPATH=$(LIVECD_PYTHONPATH) $(LIVECD_CREATOR)  $(LIVECD_ARGS) --config="$(LIVE_KS)"
 	$(VERBOSE)mv --force $(BUILD_DIR)/livecd-*.iso $(OUTPUT_DIR)/$(NAME)-$(ISO_VERSION)-live.iso
 
 

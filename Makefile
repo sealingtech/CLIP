@@ -40,6 +40,9 @@ export ROOT_DIR ?= $(CURDIR)
 export OUTPUT_DIR ?= $(ROOT_DIR)
 export RPM_TMPDIR ?= $(ROOT_DIR)/tmp
 export CONF_DIR ?= $(ROOT_DIR)/conf
+export TOOLS_DIR ?= $(ROOT_DIR)/tmp/tools
+export LIVECD_VERSION ?= $(shell rpm --eval `sed -n -e 's/Release: \(.*\)/\1/p' -e 's/Version: \(.*\)/\1/p' \
+                 packages/livecd-tools/livecd-tools.spec| sed 'N;s/\n/-/'`)
 
 # Config deps
 CONFIG_BUILD_DEPS = $(ROOT_DIR)/CONFIG_BUILD $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
@@ -82,7 +85,6 @@ export REPO_LINES := repo --name=clip-repo --baseurl=file://$(CLIP_REPO_DIR)\n
 
 export SRPM_OUTPUT_DIR := $(CLIP_SRPM_REPO_DIR)
 
-export LIVECD_CREATOR := /usr/bin/livecd-creator
 export MAYFLOWER := $(SUPPORT_DIR)/mayflower
 
 SED := /bin/sed
@@ -148,17 +150,15 @@ define CHECK_MOCK
 	@if ps -eo comm= | grep -q mock; then echo "ERROR: Another instance of mock is running.  Please hangup and try your build again later." && exit 1; fi
 endef
 
-define CHECK_LIVE_TOOLS
-	if [ x"`rpm -q livecd-tools --queryformat '%{version}-%{release}\n'`" \
-		!= x"$$( rpm --eval `sed -n -e 's/Release: \(.*\)/\1/p' -e 's/Version: \(.*\)/\1/p' \
-		 packages/livecd-tools/livecd-tools.spec| sed 'N;s/\n/-/'` )" ]; then \
-		echo "Error: you have to use our version of livecd-tools."; \
-		echo "We will attempt to install them now.  Press ctrl-c to cancel."; \
-		sudo yum remove livecd-tools python-imgcreate -y 2>&1 >/dev/null || true ; \
-		$(MAKE) livecd-tools-rpm; \
-		cd $(CLIP_REPO_DIR); \
-		sudo yum localinstall livecd-tools*.noarch.rpm python-imgcreate* -y; \
-	fi
+define MAKE_LIVE_TOOLS
+	$(MAKE) livecd-tools-rpm; \
+	mkdir -p $(TOOLS_DIR); \
+	cp $(CLIP_REPO_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR); \
+	cp $(CLIP_REPO_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR); \
+	rpm2cpio $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio; \
+	rpm2cpio $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio; \
+	cd $(TOOLS_DIR) && cpio -idv < livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio && \
+	cpio -idv < python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio;
 endef
 
 ######################################################
@@ -332,7 +332,7 @@ srpms: $(SRPMS)
 
 $(LIVECDS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
-	$(call CHECK_LIVE_TOOLS)
+	$(call MAKE_LIVE_TOOLS)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-live-iso/\1/'`" live-iso
 
 $(INSTISOS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
@@ -379,7 +379,7 @@ bare-repos: clean-mock
 	$(VERBOSE)$(RM) -r $(CLIP_REPO_DIRS) $(CLIP_REPO_DIR)
 
 clean:
-	@sudo $(RM) -rf $(RPM_TMPDIR)
+	@sudo $(RM) -rf $(RPM_TMPDIR) $(TOOLS_DIR)
 	@$(VERBOSE)for pkg in $(PACKAGES); do $(MAKE) -C $(PKG_DIR)/$$pkg $@; done
 
 bare: bare-repos clean
