@@ -72,9 +72,10 @@ YUM_CONF_FILE := $(CONF_DIR)/yum/yum.conf
 # Pungi needs a comps.xml - why does every single yum front-end suck in different ways?
 COMPS_FILE := $(CONF_DIR)/yum/comps.xml
 
-EC2_TOOLS     := $(ROOT_DIR)/ec2-api-tools
-EC2_TOOLS_ZIP := $(ROOT_DIR)/ec2-api-tools.zip
-EC2_TOOLS_URL := http://s3.amazonaws.com/ec2-downloads/ec2-api-tools.zip
+export EC2_AMI_TOOLS := $(ROOT_DIR)/ec2-ami-tools
+EC2_AMI_TOOLS_ZIP    := $(ROOT_DIR)/ec2-ami-tools.zip
+EC2_AMI_TOOLS_URL    := http://s3.amazonaws.com/ec2-downloads/ec2-ami-tools.zip
+export AWS_KERNEL    ?= aki-88aa75e1
 
 export MOCK_YUM_CONF :=
 export MY_REPO_DEPS :=
@@ -155,6 +156,13 @@ endef
 
 define CHECK_MOCK
 	@if ps -eo comm= | grep -q mock; then echo "ERROR: Another instance of mock is running.  Please hangup and try your build again later." && exit 1; fi
+endef
+
+define CHECK_AWS_VARS
+	@if [ x"$(AWS_CERT)" == "x" ]; then echo -e "You must set AWS_CERT to the path to your AWS certificate"; exit -1; fi
+	@if [ x"$(AWS_PRIV_KEY)" == "x" ]; then echo -e "You must set AWS_PRIV_KEY to the path to your AWS private key"; exit -1; fi
+	@if [ x"$(AWS_USER_ID)" == "x" ]; then echo -e "You must set AWS_USER_ID to your AWS user ID"; exit -1; fi
+	@echo "AWS variables are all set"
 endef
 
 define MAKE_LIVE_TOOLS
@@ -350,13 +358,16 @@ $(INSTISOS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
 
-$(EC2_TOOLS_ZIP):
-	curl -o $@ $(EC2_TOOLS_URL)
+$(EC2_AMI_TOOLS_ZIP):
+	curl -o $@ $(EC2_AMI_TOOLS_URL)
 
-$(EC2_TOOLS): $(EC2_TOOLS_ZIP)
+$(EC2_AMI_TOOLS): $(EC2_AMI_TOOLS_ZIP)
 	unzip -d $@ $^
 
-$(AWSBUNDLES): $(EC2_TOOLS) $(BUILD_CONF_DEPS) create-repos $(RPMS)
+check-vars:
+	$(call CHECK_AWS_VARS)
+
+$(AWSBUNDLES): check-vars $(EC2_AMI_TOOLS) $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_LIVE_TOOLS)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-aws-bundle/\1/'`" aws 
@@ -414,7 +425,7 @@ FORCE:
 # Unfortunately mock isn't exactly "parallel" friendly which sucks since we could roll a bunch of packages in parallel.
 .NOTPARALLEL:
 
-.PHONY:  all all-vm create-repos $(setup_all_repos) srpms rpms clean bare bare-repos $(addsuffix -rpm,$(PACKAGES)) $(addsuffix -srpm,$(PACKAGES)) $(addsuffix -nomock-rpm,$(PACKAGES)) $(addsuffix -clean,$(PACKAGES)) $(LIVECDS) $(INSTISOS) FORCE clean-mock
+.PHONY:  all all-vm create-repos $(setup_all_repos) srpms rpms clean bare bare-repos $(addsuffix -rpm,$(PACKAGES)) $(addsuffix -srpm,$(PACKAGES)) $(addsuffix -nomock-rpm,$(PACKAGES)) $(addsuffix -clean,$(PACKAGES)) $(LIVECDS) $(INSTISOS) FORCE clean-mock check-vars
 
 
 # END RULES

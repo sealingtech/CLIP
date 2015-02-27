@@ -36,6 +36,11 @@ LIVECD_CREATOR ?= $(TOOLS_DIR)/usr/bin/livecd-creator
 LIVECD_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.6/site-packages/
 IMAGE_CREATOR ?= $(TOOLS_DIR)/usr/bin/image-creator
 
+#don't like this wildcard
+AWS_BUNDLE_DIR := $(OUTPUT_DIR)/$(NAME)-$(ISO_VERSION)-aws-bundle
+EC2_BUNDLE_IMAGE := $(EC2_AMI_TOOLS)/*/bin/ec2-bundle-image
+EC2_BUNDLE_IMAGE_ARGS := --image $(BUILD_DIR)/$(NAME)-$(ISO_VERSION).img --cert $(AWS_CERT) --privatekey $(AWS_PRIV_KEY) -u $(AWS_USER_ID) --arch x86_64 --kernel $(AWS_KERNEL) -d $(AWS_BUNDLE_DIR)
+
 override LIVECD_ARGS := $(LIVECD_ARGS)
 
 DEBUG ?= y
@@ -82,7 +87,10 @@ live-iso: $(DEPS) $(ADDTL_DEPS) setup-live-ks
 aws: $(DEPS) $(ADDTL_DEPS) setup-aws-ks
 	@echo "Image Creator needs root permissions - please enter your sudo password if prompted."
 	$(VERBOSE)cd $(BUILD_DIR);sudo PYTHONPATH=$(LIVECD_PYTHONPATH) $(IMAGE_CREATOR)  $(LIVECD_ARGS) --name=$(NAME)-$(ISO_VERSION) $(AWS_KS)
-	$(VERBOSE)mv --force $(BUILD_DIR)/$(NAME)-$(ISO_VERSION).img $(OUTPUT_DIR)/
+	@echo "Creating AWS bundle from image"
+	mkdir -p $(AWS_BUNDLE_DIR)
+	$(EC2_BUNDLE_IMAGE) $(EC2_BUNDLE_IMAGE_ARGS)
+	@echo "AWS Bundle is in $(AWS_BUNDLE_DIR)"
 
 setup-inst-ks: $(SETUP_DEPS)
 	$(VERBOSE)test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)
