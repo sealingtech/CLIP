@@ -72,6 +72,10 @@ YUM_CONF_FILE := $(CONF_DIR)/yum/yum.conf
 # Pungi needs a comps.xml - why does every single yum front-end suck in different ways?
 COMPS_FILE := $(CONF_DIR)/yum/comps.xml
 
+EC2_TOOLS     := $(ROOT_DIR)/ec2-api-tools
+EC2_TOOLS_ZIP := $(ROOT_DIR)/ec2-api-tools.zip
+EC2_TOOLS_URL := http://s3.amazonaws.com/ec2-downloads/ec2-api-tools.zip
+
 export MOCK_YUM_CONF :=
 export MY_REPO_DEPS :=
 export setup_all_repos := setup-clip-repo
@@ -346,7 +350,13 @@ $(INSTISOS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
 
-$(AWSBUNDLES): $(BUILD_CONF_DEPS) create-repos $(RPMS)
+$(EC2_TOOLS_ZIP):
+	curl -o $@ $(EC2_TOOLS_URL)
+
+$(EC2_TOOLS): $(EC2_TOOLS_ZIP)
+	unzip -d $@ $^
+
+$(AWSBUNDLES): $(EC2_TOOLS) $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_LIVE_TOOLS)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-aws-bundle/\1/'`" aws 
