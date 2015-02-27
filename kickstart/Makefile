@@ -17,7 +17,6 @@ ROOT_DIR ?= $(CURDIR)
 TMP_DIR ?= $(ROOT_DIR)/tmp
 BUILD_DIR ?= $(TMP_DIR)/$(NAME)
 SUPPORT_DIR ?= $(ROOT_DIR)/support
-
 OUTPUT_DIR ?= $(ROOT_DIR)
 
 INST_KS := $(BUILD_DIR)/$(NAME)-inst.ks
@@ -36,10 +35,21 @@ LIVECD_CREATOR ?= $(TOOLS_DIR)/usr/bin/livecd-creator
 LIVECD_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.6/site-packages/
 IMAGE_CREATOR ?= $(TOOLS_DIR)/usr/bin/image-creator
 
-#don't like this wildcard
-AWS_BUNDLE_DIR := $(OUTPUT_DIR)/$(NAME)-$(ISO_VERSION)-aws-bundle
+#TODO download a specific version of these tools
+#this will avoid this ugly wildcarding stuff which might break,
+#and this way we'll always be using a known good version of the tools
+AWS_BUNDLE_DIR := $(TMP_DIR)/$(NAME)-$(ISO_VERSION)-aws-bundle
 EC2_BUNDLE_IMAGE := $(EC2_AMI_TOOLS)/*/bin/ec2-bundle-image
 EC2_BUNDLE_IMAGE_ARGS := --image $(BUILD_DIR)/$(NAME)-$(ISO_VERSION).img --cert $(AWS_CERT) --privatekey $(AWS_PRIV_KEY) -u $(AWS_USER_ID) --arch x86_64 --kernel $(AWS_KERNEL) -d $(AWS_BUNDLE_DIR)
+AWS_MANIFEST := $(AWS_BUNDLE_DIR)/$(NAME)-$(ISO_VERSION).img.manifest.xml
+EC2_UPLOAD_BUNDLE := $(EC2_AMI_TOOLS)/*/bin/ec2-upload-bundle
+AWS_BUCKET ?= $(NAME)-$(ISO_VERSION)
+EC2_UPLOAD_BUNDLE_ARGS := -b $(AWS_BUCKET) -a $(AWS_ACCESS_KEY_ID) -s $(AWS_ACCESS_KEY) -m $(AWS_MANIFEST)
+EC2_REGISTER := $(EC2_API_TOOLS)/*/bin/ec2-register
+EC2_REGISTER_ARGS := -O $(AWS_ACCESS_KEY_ID) -W $(AWS_ACCESS_KEY) $(AWS_BUCKET)/$(NAME)-$(ISO_VERSION).img.manifest.xml --name "$(NAME)-$(ISO_VERSION)" --architecture x86_64 --kernel $(AWS_KERNEL)
+#TODO fix this hardcoded version hack
+EC2_HOME := $(EC2_API_TOOLS)/ec2-api-tools-1.7.3.0
+JAVA_HOME ?= /usr/lib/jvm/java
 
 override LIVECD_ARGS := $(LIVECD_ARGS)
 
@@ -84,13 +94,16 @@ live-iso: $(DEPS) $(ADDTL_DEPS) setup-live-ks
 	$(VERBOSE)cd $(BUILD_DIR);sudo PYTHONPATH=$(LIVECD_PYTHONPATH) $(LIVECD_CREATOR)  $(LIVECD_ARGS) --config="$(LIVE_KS)"
 	$(VERBOSE)mv --force $(BUILD_DIR)/livecd-*.iso $(OUTPUT_DIR)/$(NAME)-$(ISO_VERSION)-live.iso
 
-aws: $(DEPS) $(ADDTL_DEPS) setup-aws-ks
+aws: $(ADDTL_DEPS) setup-aws-ks
 	@echo "Image Creator needs root permissions - please enter your sudo password if prompted."
 	$(VERBOSE)cd $(BUILD_DIR);sudo PYTHONPATH=$(LIVECD_PYTHONPATH) $(IMAGE_CREATOR)  $(LIVECD_ARGS) --name=$(NAME)-$(ISO_VERSION) $(AWS_KS)
 	@echo "Creating AWS bundle from image"
 	mkdir -p $(AWS_BUNDLE_DIR)
 	$(EC2_BUNDLE_IMAGE) $(EC2_BUNDLE_IMAGE_ARGS)
 	@echo "AWS Bundle is in $(AWS_BUNDLE_DIR)"
+	$(EC2_UPLOAD_BUNDLE) $(EC2_UPLOAD_BUNDLE_ARGS)
+	@echo "Bundle has been uploaded to AWS"
+	JAVA_HOME=$(JAVA_HOME) EC2_HOME=$(EC2_HOME) $(EC2_REGISTER) $(EC2_REGISTER_ARGS)
 
 setup-inst-ks: $(SETUP_DEPS)
 	$(VERBOSE)test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)

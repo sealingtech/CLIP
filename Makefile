@@ -77,6 +77,10 @@ EC2_AMI_TOOLS_ZIP    := $(ROOT_DIR)/ec2-ami-tools.zip
 EC2_AMI_TOOLS_URL    := http://s3.amazonaws.com/ec2-downloads/ec2-ami-tools.zip
 export AWS_KERNEL    ?= aki-88aa75e1
 
+export EC2_API_TOOLS := $(ROOT_DIR)/ec2-api-tools
+EC2_API_TOOLS_ZIP    := $(ROOT_DIR)/ec2-api-tools.zip
+EC2_API_TOOLS_URL    := http://s3.amazonaws.com/ec2-downloads/ec2-api-tools.zip
+
 export MOCK_YUM_CONF :=
 export MY_REPO_DEPS :=
 export setup_all_repos := setup-clip-repo
@@ -162,6 +166,8 @@ define CHECK_AWS_VARS
 	@if [ x"$(AWS_CERT)" == "x" ]; then echo -e "You must set AWS_CERT to the path to your AWS certificate"; exit -1; fi
 	@if [ x"$(AWS_PRIV_KEY)" == "x" ]; then echo -e "You must set AWS_PRIV_KEY to the path to your AWS private key"; exit -1; fi
 	@if [ x"$(AWS_USER_ID)" == "x" ]; then echo -e "You must set AWS_USER_ID to your AWS user ID"; exit -1; fi
+	@if [ x"$(AWS_ACCESS_KEY_ID)" == "x" ]; then echo -e "You must set AWS_ACCESS_KEY_ID to your AWS access key ID"; exit -1; fi
+	@if [ x"$(AWS_ACCESS_KEY)" == "x" ]; then echo -e "You must set AWS_ACCESS_KEY to your AWS access key"; exit -1; fi
 	@echo "AWS variables are all set"
 endef
 
@@ -364,10 +370,18 @@ $(EC2_AMI_TOOLS_ZIP):
 $(EC2_AMI_TOOLS): $(EC2_AMI_TOOLS_ZIP)
 	unzip -d $@ $^
 
+$(EC2_API_TOOLS_ZIP):
+	curl -o $@ $(EC2_API_TOOLS_URL)
+
+$(EC2_API_TOOLS): $(EC2_API_TOOLS_ZIP)
+	unzip -d $@ $^
+
+ec2-tools: $(EC2_AMI_TOOLS) $(EC2_API_TOOLS)
+
 check-vars:
 	$(call CHECK_AWS_VARS)
 
-$(AWSBUNDLES): check-vars $(EC2_AMI_TOOLS) $(BUILD_CONF_DEPS) create-repos $(RPMS)
+$(AWSBUNDLES): check-vars ec2-tools $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_LIVE_TOOLS)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-aws-bundle/\1/'`" aws 
@@ -425,7 +439,7 @@ FORCE:
 # Unfortunately mock isn't exactly "parallel" friendly which sucks since we could roll a bunch of packages in parallel.
 .NOTPARALLEL:
 
-.PHONY:  all all-vm create-repos $(setup_all_repos) srpms rpms clean bare bare-repos $(addsuffix -rpm,$(PACKAGES)) $(addsuffix -srpm,$(PACKAGES)) $(addsuffix -nomock-rpm,$(PACKAGES)) $(addsuffix -clean,$(PACKAGES)) $(LIVECDS) $(INSTISOS) FORCE clean-mock check-vars
+.PHONY:  all all-vm create-repos $(setup_all_repos) srpms rpms clean bare bare-repos $(addsuffix -rpm,$(PACKAGES)) $(addsuffix -srpm,$(PACKAGES)) $(addsuffix -nomock-rpm,$(PACKAGES)) $(addsuffix -clean,$(PACKAGES)) $(LIVECDS) $(INSTISOS) FORCE clean-mock check-vars ec2-tools
 
 
 # END RULES
