@@ -130,6 +130,9 @@ LIVECDS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -live-iso,$(SYSTEM)))
 # These are targets supported by the kickstart/Makefile that will be used to generate installation ISOs.
 INSTISOS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -inst-iso,$(SYSTEM)))
 
+# These are targets supported by the kickstart/Makefile that will be used to generate AWS bundles
+AWSBUNDLES := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -aws-bundle,$(SYSTEM)))
+
 # Add a file to a repo by either downloading it (if http/ftp), or symlinking if local.
 # TODO: add support for wget (problem with code below, running echo/GREP for each file instead of once for the whole repo
 #@if ( echo "$(2)" | $(GREP) -i -q '^http[s]?://|^ftp://' ); then\
@@ -260,6 +263,10 @@ help:
 	@echo "	all (generate all installation ISOs and Live CDs)"
 	@for cd in $(LIVECDS); do echo "	$$cd"; done
 	@echo
+	@echo "The following make targets are available for generating AWS bundles:"
+	@echo "	all (generate all AWS bundles)"
+	@for cd in $(AWSBUNDLES); do echo "	$$cd"; done
+	@echo
 	@echo "	NOTE: if you need to debug a kickstart post script for Live CDs,"
 	@echo "	      add LIVECD_ARGS='--shell' to the make command-line."
 	@echo
@@ -338,6 +345,11 @@ $(LIVECDS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
 $(INSTISOS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
+
+$(AWSBUNDLES): $(BUILD_CONF_DEPS) create-repos $(RPMS)
+	$(call CHECK_DEPS)
+	$(call MAKE_LIVE_TOOLS)
+	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-aws-bundle/\1/'`" aws 
 
 $(MOCK_CONF_DIR)/$(MOCK_REL).cfg:  $(MOCK_CONF_DIR)/$(MOCK_REL).cfg.tmpl $(CONF_DIR)/pkglist.blacklist
 	$(call CHECK_DEPS)

@@ -22,6 +22,7 @@ OUTPUT_DIR ?= $(ROOT_DIR)
 
 INST_KS := $(BUILD_DIR)/$(NAME)-inst.ks
 LIVE_KS := $(BUILD_DIR)/$(NAME)-live.ks
+AWS_KS  := $(BUILD_DIR)/$(NAME)-aws.ks
 
 PUNGI_OS_DIR := $(BUILD_DIR)/$(ISO_VERSION)/$(TARGET_ARCH)/os/
 PUNGI_ISO_DIR := $(BUILD_DIR)/$(ISO_VERSION)/$(TARGET_ARCH)/iso/
@@ -33,6 +34,7 @@ CHECK_VOL_ID ?= $(SUPPORT_DIR)/checkVolID.py
 
 LIVECD_CREATOR ?= $(TOOLS_DIR)/usr/bin/livecd-creator
 LIVECD_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.6/site-packages/
+IMAGE_CREATOR ?= $(TOOLS_DIR)/usr/bin/image-creator
 
 override LIVECD_ARGS := $(LIVECD_ARGS)
 
@@ -40,11 +42,13 @@ DEBUG ?= y
 
 # These variables are usually passed in from CONFIG_BUILD to the top level Makefile.
 # This will only be set here if we are running setup-ks by hand.
-CONFIG_BUILD_BASH_VARS ?= export CONFIG_BUILD_PRODUCTION=n CONFIG_BUILD_ENFORCING_MODE=y CONFIG_BUILD_UNCONFINED_TOOR=y CONFIG_BUILD_SECSTATE_REMEDIATE=y ISO_VERSION=debug
+CONFIG_BUILD_BASH_VARS ?= export CONFIG_BUILD_PRODUCTION=n CONFIG_BUILD_ENFORCING_MODE=n CONFIG_BUILD_UNCONFINED_TOOR=y CONFIG_BUILD_SECSTATE_REMEDIATE=y ISO_VERSION=debug
 
 # The differences vetween live and installable are addressed via these vars
 LIVE_CONFIG_BUILD_BASH_VARS := $(CONFIG_BUILD_BASH_VARS) CONFIG_BUILD_LIVE_MEDIA=y
 LIVE_CONFIG_BUILD_ADDTL_PACKAGES += $(CONFIG_BUILD_ADDTL_PACKAGES) eject
+
+AWS_CONFIG_BUILD_BASH_VARS := $(CONFIG_BUILD_BASH_VARS) CONFIG_BUILD_AWS=y
 
 # This is only useful for building out of this subdir.  The top-level Makefile passes this variable down
 # pointing to the yum repos CLIP creates and manages in repos/*.  What this means is that you should
@@ -75,6 +79,10 @@ live-iso: $(DEPS) $(ADDTL_DEPS) setup-live-ks
 	$(VERBOSE)cd $(BUILD_DIR);sudo PYTHONPATH=$(LIVECD_PYTHONPATH) $(LIVECD_CREATOR)  $(LIVECD_ARGS) --config="$(LIVE_KS)"
 	$(VERBOSE)mv --force $(BUILD_DIR)/livecd-*.iso $(OUTPUT_DIR)/$(NAME)-$(ISO_VERSION)-live.iso
 
+aws: $(DEPS) $(ADDTL_DEPS) setup-aws-ks
+	@echo "Image Creator needs root permissions - please enter your sudo password if prompted."
+	$(VERBOSE)cd $(BUILD_DIR);sudo PYTHONPATH=$(LIVECD_PYTHONPATH) $(IMAGE_CREATOR)  $(LIVECD_ARGS) --name=$(NAME)-$(ISO_VERSION) $(AWS_KS)
+	$(VERBOSE)mv --force $(BUILD_DIR)/$(NAME)-$(ISO_VERSION).img $(OUTPUT_DIR)/
 
 setup-inst-ks: $(SETUP_DEPS)
 	$(VERBOSE)test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)
@@ -98,10 +106,18 @@ setup-live-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(LIVE_CONFIG_BUILD_BASH_VARS);' $(LIVE_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(LIVE_CONFIG_BUILD_ADDTL_PACKAGES);' $(LIVE_KS)
 
+setup-aws-ks: $(SETUP_DEPS)
+	$(VERBOSE)test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)
+	$(VERBOSE)cp --force $(KS) $(AWS_KS)
+	@echo "Modifying kickstart with build variables..."
+	$(VERBOSE)sed -i -e 's;#REPO-REPLACEMENT-PLACEHOLDER;$(REPO_LINES);' $(AWS_KS)
+	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(AWS_CONFIG_BUILD_BASH_VARS);' $(AWS_KS)
+	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(AWS_CONFIG_BUILD_ADDTL_PACKAGES);' $(AWS_KS)
+
 clean:
 	$(VERBOSE)sudo rm -rf $(BUILD_DIR)
 
 VEbare: clean
 	rm -rf $(TMP_DIR)
 
-.PHONY: all live-iso iso clean bare setup-ks check-volume-id
+.PHONY: all live-iso iso clean bare setup-ks check-volume-id setup-live-ks setup-inst-ks setup-aws-ks

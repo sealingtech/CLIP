@@ -225,7 +225,9 @@ dhclient
 #CONFIG-BUILD-PLACEHOLDER
 export PATH="/sbin:/usr/sbin:/usr/bin:/bin:/usr/local/bin"
 exec >/root/clip_post_install.log 2>&1
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "xy" ]; then
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
+	|| [ x"$CONFIG_BUILD_AWS" == "xy" ];
+then
 	# Print the log to tty7 so that the user know what's going on
 	tail -f /root/clip_post_install.log >/dev/tty7 &
 	TAILPID=$!
@@ -243,7 +245,9 @@ echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 # ext4.  So mount the real selinuxfs but anytime
 # we actually muck with files in there, we will
 # bind mount /dev/zero so we don't mess up the build host.
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
+	|| [ x"$CONFIG_BUILD_AWS" == "xy" ];
+then
 	mount -t selinuxfs none /selinux
 fi
 export POLNAME=`sestatus |awk '/Policy from config file:/ { print $5; }'`
@@ -355,7 +359,7 @@ if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
 	plymouth-set-default-theme details --rebuild-initrd &> /dev/null
 fi
 
-if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
+#if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
     echo "Setting permissive mode..."
     echo -e "#THIS IS A DEBUG BUILD HENCE SELINUX IS IN PERMISSIVE MODE\nSELINUX=permissive\nSELINUXTYPE=$POLNAME\n" > /etc/selinux/config
 	echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
@@ -366,7 +370,7 @@ if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
 		grubby --update-kernel=ALL --remove-args=enforcing
 		grubby --update-kernel=ALL --args=enforcing=0
 	fi	
-fi
+#fi
 
 # We don't want the final remediation script to set the system to targeted
 sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
@@ -390,13 +394,17 @@ chkconfig strongswan on
 
 # Turn on IPV4 forwarding
 sed -i 's/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/' /etc/sysctl.conf
+#TODO masquarading too
 
 # This is rather unfortunate, but the remediation content 
 # starts services, which need to be killed/shutdown if
 # we're rolling Live Media.  First, kill the known 
 # problems cleanly, then just kill them all and let
 # <deity> sort them out.
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
+
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
+	|| [ x"$CONFIG_BUILD_AWS" == "xy" ];
+then
 	service restorecond stop 2>&1 > /dev/null
 	service auditd stop 2>&1 > /dev/null
 	service rsyslog stop 2>&1 > /dev/null
@@ -406,6 +414,30 @@ if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
 	kill $TAILPID 2>/dev/null 1>/dev/null
 	kill $(jobs -p) 2>/dev/null 1>/dev/null
 	umount /selinux
+fi
+
+# Need to do some additional customizations if we're building for AWS
+if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
+
+	#set up /etc/ftsab
+	sed -i -e "s/\/dev\/root/\/dev\/xvde1/" /etc/fstab
+	mkdir -p /boot/grub
+
+	#set up /boot/grub/menu.lst
+	echo "default=0" >> /boot/grub/menu.lst
+	echo -e "timeout=0\n" >> /boot/grub/menu.lst
+	echo "title CLIP-KERNEL" >> /boot/grub/menu.lst
+	echo "        root (hd0)" >> /boot/grub/menu.lst
+	KERNEL=`find /boot -iname vmlinuz*`
+	INITRD=`find /boot -iname initramfs*`
+	echo "        kernel $KERNEL ro root=/dev/xvde1 rd_NO_PLYMOUTH" >> /boot/grub/menu.lst
+	echo "        initrd $INITRD" >> /boot/grub/menu.lst
+
+	# turn on the ssh key script
+	chkconfig --level 34 ec2-get-ssh on
+
+	# disable password auth
+	echo -e "\tPasswordAuthentication no\n" >> /etc/ssh/ssh_config
 fi
 
 %end
