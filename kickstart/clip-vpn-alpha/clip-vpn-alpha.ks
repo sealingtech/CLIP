@@ -359,7 +359,7 @@ if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
 	plymouth-set-default-theme details --rebuild-initrd &> /dev/null
 fi
 
-#if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
+if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
     echo "Setting permissive mode..."
     echo -e "#THIS IS A DEBUG BUILD HENCE SELINUX IS IN PERMISSIVE MODE\nSELINUX=permissive\nSELINUXTYPE=$POLNAME\n" > /etc/selinux/config
 	echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
@@ -370,7 +370,7 @@ fi
 		grubby --update-kernel=ALL --remove-args=enforcing
 		grubby --update-kernel=ALL --args=enforcing=0
 	fi	
-#fi
+fi
 
 # We don't want the final remediation script to set the system to targeted
 sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
