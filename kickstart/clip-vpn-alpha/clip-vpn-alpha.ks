@@ -317,7 +317,8 @@ else
 	usermod --pass="$HASHED_PASSWORD" "$USERNAME"
 fi
 
-chage -d 0 "$USERNAME"
+#chage -d 0 "$USERNAME"
+chage -E -1
 
 # Commented out in our policy
 #semanage boolean -N -m --on ssh_chroot_full_access
