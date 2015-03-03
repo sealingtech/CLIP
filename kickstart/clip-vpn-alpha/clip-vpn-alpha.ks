@@ -458,7 +458,7 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	chkconfig --level 34 ec2-get-ssh on
 
 	# disable password auth
-	echo -e "\tPasswordAuthentication no\n" >> /etc/ssh/ssh_config
+	sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
 fi
 
 %end
