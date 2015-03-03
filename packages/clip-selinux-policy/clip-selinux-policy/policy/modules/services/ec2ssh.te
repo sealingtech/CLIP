@@ -25,8 +25,12 @@ files_read_usr_files(ec2ssh_initrc_t)
 corecmd_exec_bin(ec2ssh_initrc_t)
 dev_read_urand(ec2ssh_initrc_t)
 userdom_list_user_home_content(ec2ssh_initrc_t)
-corenet_tcp_connect_http_port(ec2ssh_initrc_t)
 optional_policy(`
+	create_dirs_pattern(ec2ssh_initrc_t, user_home_dir_t, ssh_home_t)
+	#the script creates /home/toor/.ssh which must be labeled properly
+	userdom_user_home_dir_filetrans(ec2ssh_initrc_t, ssh_home_t, dir)
 	ssh_manage_home_files(ec2ssh_initrc_t)
+	allow ec2ssh_initrc_t ssh_home_t:dir setattr;
 ')
 
+corenet_tcp_connect_http_port(ec2ssh_initrc_t)
