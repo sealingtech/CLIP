@@ -177,6 +177,8 @@ term_list_ptys(load_policy_t)
 init_use_script_fds(load_policy_t)
 init_use_script_ptys(load_policy_t)
 
+usermanage_dontaudit_use_useradd_fds(load_policy_t)
+
 miscfiles_read_localization(load_policy_t)
 
 seutil_libselinux_linked(load_policy_t)

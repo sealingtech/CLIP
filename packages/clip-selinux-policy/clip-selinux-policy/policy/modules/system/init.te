@@ -428,6 +428,7 @@ miscfiles_read_generic_certs(initrc_t)
 
 modutils_read_module_config(initrc_t)
 modutils_domtrans_insmod(initrc_t)
+modutils_read_module_deps(initrc_t)
 
 seutil_read_config(initrc_t)
 

@@ -234,7 +234,14 @@ template(`ssh_server_template', `
 	corecmd_getattr_bin_files($1_t)
 
 	domain_interactive_fd($1_t)
+	
+	# for chrootd sftp
+	domain_subj_id_change_exemption($1_t)
 	domain_dyntrans_type($1_t)
+	tunable_policy(`ssh_enable_sftp_chroot_dyntrans',`
+		allow $1_t self:process setcurrent;
+        	ssh_dyntransition_chroot_user($1_t)
+	')
 
 	files_read_etc_files($1_t)
 	files_read_etc_runtime_files($1_t)
