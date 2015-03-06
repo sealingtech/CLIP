@@ -317,6 +317,17 @@ chage -d 0 "$USERNAME"
 groupadd "sftp-only"
 
 #modify the ssh config
+
+# tweak auth 
+# NOTE: password auth is left on but after initial login
+# add a key to /home/toor/.ssh/authorized_keys and run this
+# command:
+# sed -i -e 's/.*PasswordAuthentication .*/PasswordAuthentication/' /etc/ssh/sshd_config
+sed -i -e 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i -e 's/#\s*RSAAuthentication .*/RSAAuthentication yes/' /etc/ssh/sshd_config
+sed -i -e 's/#\s*PubkeyAuthentication .*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+sed -i -e 's;.*AuthorizedKeysFile.*;AuthorizedKeysFile /home/%u/.ssh/authorized_keys;' /etc/ssh/sshd_config
+sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
 #make sure you're using the internal sftp
 sed -i -r -e "s/Subsystem\s*sftp.*//g" /etc/ssh/sshd_config
 
@@ -329,6 +340,7 @@ echo -e "\tForceCommand internal-sftp" >> /etc/ssh/sshd_config
 
 semanage boolean -N -S ${POLNAME} -m --on allow_ssh_keysign
 semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
+semanage boolean -N -S ${POLNAME} -m --on ssh_enable_sftp_chroot_dyntrans 
 # Commented out in our policy
 #semanage boolean -N -m --on ssh_chroot_full_access
 
