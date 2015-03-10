@@ -269,14 +269,15 @@ oscap xccdf generate fix \
 /root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
 
 chmod +x /root/scap/pre/remediation-script.sh
-/root/scap/pre/remediation-script.sh
+if [ x"$CONFIG_BUILD_REMEDIATE" == "xy" ]; then
+        /root/scap/pre/remediation-script.sh
+        # Un-remeidate things SSG broke...
+        sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
 
-# Un-remeidate things SSG broke...
-sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
-
-cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
-| fold -sw 80 > /etc/issue.net
-cp /etc/issue.net /etc/issue
+        cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
+        | fold -sw 80 > /etc/issue.net
+        cp /etc/issue.net /etc/issue
+fi
 
 # FIXME: Change the username and password.
 #        If a hashed password is specified it will be used
@@ -344,17 +345,16 @@ semanage boolean -N -S ${POLNAME} -m --on ssh_enable_sftp_chroot_dyntrans
 # Commented out in our policy
 #semanage boolean -N -m --on ssh_chroot_full_access
 
-# default network settings
+if [ x"$CONFIG_BUILD_ENABLE_DHCP" == "xy" ]; then
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
-
 DEVICE=eth0
 TYPE=Ethernet
 ONBOOT=yes
 NM_CONTROLLED=yes
 BOOTPROTO=dhcp
 IPV6_PRIVACY=rfc3041
-
 EOF
+fi
 
 # Add the user to sudoers and setup an SELinux role/type transition.
 # This line enables a transition via sudo instead of requiring sudo and newrole.
