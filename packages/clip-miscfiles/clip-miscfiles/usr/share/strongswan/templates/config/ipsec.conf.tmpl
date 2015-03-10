@@ -19,7 +19,7 @@ conn %default
 conn rw
 	left={LEFTIP}
 	leftcert=server.pem
-	leftsubnet={LEFTSUBNET}
+	leftsubnet=0.0.0.0/0
 	leftfirewall=yes
 	leftauth=rsa-2048
 	rightcert=client.pem

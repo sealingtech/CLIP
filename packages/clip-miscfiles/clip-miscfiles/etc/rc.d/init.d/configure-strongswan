@@ -1,0 +1,144 @@
+#!/bin/bash
+# chkconfig: 2345 47 99
+# processname: configure-strongswan
+# description: setup strongswan configuration
+
+. /etc/rc.d/init.d/functions
+
+WORKDIR="/tmp/strongswan"
+CA_KEY="$WORKDIR/rootCA.key"
+CA_PEM="$WORKDIR/ca.pem"
+CA_P12="$WORKDIR/ca.crt"
+SERVER_KEY="$WORKDIR/server.key"
+SERVER_PEM="$WORKDIR/server.pem"
+CLIENT_KEY="$WORKDIR/client.key"
+CLIENT_PEM="$WORKDIR/client.pem"
+CLIENT_P12="$WORKDIR/client.p12"
+IPSEC_CONF="$WORKDIR/ipsec.conf"
+IPSEC_SECRETS="$WORKDIR/ipsec.secrets"
+IPSEC_CONF_TMPL="$WORKDIR/ipsec.conf.tmpl"
+IPSEC_SECRETS_TMPL="$WORKDIR/ipsec.secrets.tmpl"
+ANDROID_CERTS="/tmp/android_certs"
+CA_SUBJ="/C=US/ST=MD/L=Columbia/O=Quark\ Security/CN=quarksecurity.com/emailAddress=ca@quarksecurity.com"
+CA_PASSWD="passwd"
+SERVER_SUBJ="/C=US/ST=MD/L=Columbia/O=Quark\ Security/CN=quarksecurity.com/emailAddress=server@quarksecurity.com"
+SERVER_PASSWD="passwd"
+CLIENT_SUBJ="/C=US/ST=MD/L=Columbia/O=Quark\ Security/CN=quarksecurity.com/emailAddress=client@quarksecurity.com"
+CLIENT_PASSWD="passwd"
+RIGHT_IP="192.168.31.201"
+XAUTH_USER="client"
+XAUTH_PASSWD="passwd"
+STRONGSWANDIR=/etc/strongswan
+IPSECDIR=$STRONGSWANDIR/ipsec.d
+CERTDIR=$IPSECDIR/certs
+PRIVATEDIR=$IPSECDIR/private
+CACERTDIR=$IPSECDIR/cacerts
+DAYS=1024
+
+install_files() {
+	cp $CA_PEM $CACERTDIR
+	cp $SERVER_PEM $CERTDIR
+	cp $CLIENT_PEM $CERTDIR
+	cp $SERVER_KEY $PRIVATEDIR
+	cp $IPSEC_CONF $STRONGSWANDIR
+	cp $IPSEC_SECRETS $STRONGSWANDIR
+	mkdir -p $ANDROID_CERTS
+	cp $CLIENT_P12 $ANDROID_CERTS
+	cp $CA_P12 $ANDROID_CERTS
+}
+
+# args $1 - filename, $2 password
+gen_key() {
+	openssl genrsa -passout pass:$2 -out $1 2048
+}
+
+# args $1 - filename, $2 keyfile, $3 subject
+self_sign() {
+	openssl req -x509 -new -nodes -key $2 -days $DAYS -out $1 -subj "$3"
+	openssl x509 -inform PEM -outform DER -in $1 -out $CA_P12
+}
+
+# args:
+# $1 - key
+# $2 - key password
+# $3 - subject
+# $4 - output file
+ca_sign() {
+	openssl req -new -key $1 -out request.csr -subj "$3" -passin pass:$2
+	openssl x509 -req -in request.csr -CA $CA_PEM -CAkey $CA_KEY -CAcreateserial -out $4 -days $DAYS -passin pass:$2
+}
+
+# args
+# $1 server key pass
+# $2 xauth user
+# $3 xauth pass
+update_ipsec_secrets() {
+	sed "s/{SERVERPASS}/$1/" $IPSEC_SECRETS_TMPL > $IPSEC_SECRETS
+  	sed -i "s/{XAUTHUSER}/$2/" $IPSEC_SECRETS
+	sed -i "s/{XAUTHPASS}/$3/" $IPSEC_SECRETS
+}
+
+# args
+# $1 server IP
+# $3 tun IP address assigned to client
+update_ipsec_conf() {
+        sed "s/{LEFTIP}/$1/" $IPSEC_CONF_TMPL > $IPSEC_CONF
+	sed -i "s/{RIGHTIP}/$2/" $IPSEC_CONF
+}
+
+start() {
+  mkdir -p $WORKDIR
+  cd $WORKDIR
+
+  cp /usr/share/strongswan/templates/config/ipsec.conf.tmpl $WORKDIR/
+  cp /usr/share/strongswan/templates/config/ipsec.secrets.tmpl $WORKDIR/ 
+  gen_key $CA_KEY $CA_PASSWD
+  self_sign $CA_PEM $CA_KEY "$CA_SUBJ"
+
+  gen_key $SERVER_KEY $SERVER_PASSWD
+  ca_sign $SERVER_KEY $SERVER_PASSWD "$SERVER_SUBJ" $SERVER_PEM
+
+  gen_key $CLIENT_KEY $CLIENT_PASSWD
+  ca_sign $CLIENT_KEY $CLIENT_PASSWD "$CLIENT_SUBJ" $CLIENT_PEM
+  #export a pkcs12 file for using on the client
+  openssl pkcs12 -export -out $CLIENT_P12 -inkey $CLIENT_KEY -in $CLIENT_PEM -passin pass:$CLIENT_PASSWD -passout pass:$CLIENT_PASSWD
+
+  #we run after networking is up
+  SERVER_IP=`ifconfig eth0 | grep "inet addr" | cut -d: -f2 | cut -d" " -f1`
+
+  update_ipsec_secrets $SERVER_PASSWD $XAUTH_USER $XAUTH_PASSWD
+  update_ipsec_conf $SERVER_IP $RIGHT_IP
+
+  install_files
+
+  echo -e "All setup!\nInstall $ANDROID_CERTS/ca.crt and $ANDROID_CERTS/client.p12 on your device to connect!"
+  rm -rf $WORKDIR
+}
+
+stop() {
+  echo "Nothing to do here"
+}
+ 
+restart() {
+  stop
+  start
+}
+
+# See how we were called.
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    restart
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|restart}"
+    exit 1
+esac
+ 
+exit $?
+
