@@ -473,6 +473,8 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 
 	# turn on the ssh key script
 	chkconfig --level 34 ec2-get-ssh on
+	# turn on the configure-strongswan service
+	chkconfig --level 34 configure-strongswan on
 
 	# disable password auth
 	sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
