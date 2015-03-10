@@ -395,6 +395,8 @@ chkconfig strongswan on
 
 # Turn on IPV4 forwarding
 sed -i 's/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/' /etc/sysctl.conf
+sed -i 's/net.ipv4.ip_no_pmtu_disc = 0//' /etc/sysctl.conf
+echo "net.ipv4.ip_no_pmtu_disc = 1" >> /etc/sysctl.conf
 
 #####IPtables Configuration#####
 cat << EOF > /etc/sysconfig/iptables
