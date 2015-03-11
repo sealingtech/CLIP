@@ -31,7 +31,7 @@ ARCH ?= noarch
 
 # Policy modules listed here will be built as separate RPMs
 # e.g., clip-selinux-policy-apache
-SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser
+SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser ec2ssh config-strongswan
 
 # the filename of the tarball
 TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz

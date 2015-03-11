@@ -210,6 +210,49 @@ interface(`ipsec_read_config',`
 
 ########################################
 ## <summary>
+##	Write the IPSEC configuration
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`ipsec_write_config',`
+	gen_require(`
+		type ipsec_conf_file_t;
+	')
+
+	files_search_etc($1)
+	allow $1 ipsec_conf_file_t:file write_file_perms;
+')
+
+########################################
+## <summary>
+##	Write the IPSEC key file
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`ipsec_write_keys',`
+	gen_require(`
+		type ipsec_conf_file_t;
+		type ipsec_key_file_t;
+	')
+
+	files_search_etc($1)
+	allow $1 ipsec_key_file_t:dir rw_dir_perms;
+	allow $1 ipsec_key_file_t:file { create_file_perms write_file_perms };
+	filetrans_pattern($1, ipsec_conf_file_t, ipsec_key_file_t, file)
+')
+
+########################################
+## <summary>
 ##	Match the default SPD entry.
 ## </summary>
 ## <param name="domain">

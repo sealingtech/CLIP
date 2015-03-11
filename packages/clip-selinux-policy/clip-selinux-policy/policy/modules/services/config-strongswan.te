@@ -1,0 +1,30 @@
+policy_module(config-strongswan, 0.0.1)
+
+type config_strongswan_initrc_t;
+role system_r types config_strongswan_initrc_t;
+type config_strongswan_initrc_exec_t;
+type config_strongswan_tmp_t;
+
+allow config_strongswan_initrc_t self:process { setfscreate };
+allow config_strongswan_initrc_t self:fifo_file manage_fifo_file_perms;
+files_tmp_file(config_strongswan_tmp_t)
+files_tmp_filetrans(config_strongswan_initrc_t, config_strongswan_tmp_t, dir)
+manage_dirs_pattern(config_strongswan_initrc_t, tmp_t, config_strongswan_tmp_t)
+manage_files_pattern(config_strongswan_initrc_t, config_strongswan_tmp_t, config_strongswan_tmp_t)
+
+init_script_domain(config_strongswan_initrc_t, config_strongswan_initrc_exec_t)
+term_use_console(config_strongswan_initrc_t)
+init_use_fds(config_strongswan_initrc_t)
+miscfiles_read_localization(config_strongswan_initrc_t)
+kernel_read_system_state(config_strongswan_initrc_t)
+files_read_config_files(config_strongswan_initrc_t)
+corecmd_exec_bin(config_strongswan_initrc_t)
+files_read_usr_files(config_strongswan_initrc_t)
+ipsec_write_config(config_strongswan_initrc_t)
+ipsec_write_keys(config_strongswan_initrc_t)
+#openssl roots around in cert_t dirs
+miscfiles_read_generic_certs(config_strongswan_initrc_t)
+#exec ifconfig to get the IP address
+sysnet_domtrans_ifconfig(config_strongswan_initrc_t)
+dev_read_urand(config_strongswan_initrc_t)
+dev_read_rand(config_strongswan_initrc_t)
