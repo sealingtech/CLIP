@@ -2746,6 +2746,24 @@ interface(`userdom_dyntransition_unpriv_users',`
     allow $1 unpriv_userdomain:process dyntransition;
 ')
 
+######################################
+## <summary>
+## Dont audit domain dyntrans to userdomain.
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed access.
+##  </summary>
+## </param>
+#
+interface(`userdom_dontaudit_dyntransition_users',`
+    gen_require(`
+        attribute userdomain;
+    ')
+
+    dontaudit $1 userdomain:process dyntransition;
+')
+
 ########################################
 ## <summary>
 ##	Execute an Xserver session in all unprivileged user domains.  This

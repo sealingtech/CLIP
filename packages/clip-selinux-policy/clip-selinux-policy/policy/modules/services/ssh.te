@@ -449,9 +449,10 @@ userdom_read_inherited_user_home_content_files(chroot_user_t)
 userdom_read_user_home_content_symlinks(chroot_user_t)
 userdom_exec_user_home_content_files(chroot_user_t)
 userdom_use_inherited_user_ptys(chroot_user_t)
-userdom_dyntransition_unpriv_users(sshd_t)
 
 logging_send_syslog_msg(chroot_user_t)
+
+locallogin_signull(sshd_t)
 
 #tunable_policy(`ssh_chroot_full_access',`
 #    allow chroot_user_t self:capability { dac_override dac_read_search };
@@ -499,9 +500,9 @@ tunable_policy(`ssh_chroot_rw_homedirs',`
 #    fs_read_nfs_symlinks(chroot_user_t)
 #')
 
-# SRS: huh?  Why the optical block?
-optional_policy(`
-    ssh_rw_stream_sockets(chroot_user_t)
-    ssh_rw_tcp_sockets(chroot_user_t)
-    ssh_rw_dgram_sockets(chroot_user_t)
-')
+ssh_rw_stream_sockets(chroot_user_t)
+ssh_rw_tcp_sockets(chroot_user_t)
+ssh_rw_dgram_sockets(chroot_user_t)
+
+dontaudit chroot_user_t ssh_home_t:dir list_dir_perms;
+
