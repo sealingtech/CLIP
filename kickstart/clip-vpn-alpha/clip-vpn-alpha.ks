@@ -436,26 +436,6 @@ EOF
 
 #####IPtables End Configuration#####
 
-# This is rather unfortunate, but the remediation content 
-# starts services, which need to be killed/shutdown if
-# we're rolling Live Media.  First, kill the known 
-# problems cleanly, then just kill them all and let
-# <deity> sort them out.
-
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
-	|| [ x"$CONFIG_BUILD_AWS" == "xy" ];
-then
-	service restorecond stop 2>&1 > /dev/null
-	service auditd stop 2>&1 > /dev/null
-	service rsyslog stop 2>&1 > /dev/null
-	[ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop 2>&1 > /dev/null
-
-	# this one isn't actually due to remediation, but needs to be done too
-	kill $TAILPID 2>/dev/null 1>/dev/null
-	kill $(jobs -p) 2>/dev/null 1>/dev/null
-	umount /selinux
-fi
-
 # Need to do some additional customizations if we're building for AWS
 if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 
@@ -480,8 +460,47 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
 fi
 
+#make sure you're using the internal sftp
+sed -i -r -e "s/Subsystem\s*sftp.*//g" /etc/ssh/sshd_config
+
+echo -e "Subsystem sftp internal-sftp\n" >> /etc/ssh/sshd_config
+echo -e "Match Group client\n" >> /etc/ssh/sshd_config
+echo -e "        AllowTCPForwarding no\n" >> /etc/ssh/sshd_config
+echo -e "        X11Forwarding no\n" >> /etc/ssh/sshd_config
+echo -e "        ChrootDirectory /home\n" >> /etc/ssh/sshd_config
+echo -e "        ForceCommand internal-sftp\n" >> /etc/ssh/sshd_config
+
+semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
+
+# add an sftp user
+semanage user -N -a -R "staff_r" client_u
+useradd -m client -Z "client_u"
+mkdir -m 700 /home/client/.ssh
+chown client:client /home/client/.ssh
+usermod -s /sbin/nologin client
+
 # turn on the configure-strongswan service
 chkconfig --level 34 configure-strongswan on
+
+# This is rather unfortunate, but the remediation content 
+# starts services, which need to be killed/shutdown if
+# we're rolling Live Media.  First, kill the known 
+# problems cleanly, then just kill them all and let
+# <deity> sort them out.
+
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
+	|| [ x"$CONFIG_BUILD_AWS" == "xy" ];
+then
+	service restorecond stop 2>&1 > /dev/null
+	service auditd stop 2>&1 > /dev/null
+	service rsyslog stop 2>&1 > /dev/null
+	[ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop 2>&1 > /dev/null
+
+	# this one isn't actually due to remediation, but needs to be done too
+	kill $TAILPID 2>/dev/null 1>/dev/null
+	kill $(jobs -p) 2>/dev/null 1>/dev/null
+	umount /selinux
+fi
 
 %end
 

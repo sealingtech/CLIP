@@ -24,6 +24,11 @@ start() {
     chmod 700 /home/toor/.ssh
     chown toor:toor /home/toor/.ssh
   fi
+  if [ ! -d /home/client/.ssh ]; then
+    mkdir -p /home/client/.ssh
+    chmod 700 /home/client/.ssh
+    chown client:client /home/client/.ssh
+  fi
   # Retrieve public key from metadata server using HTTP
   curl -f http://169.254.169.254/latest/meta-data/public-keys/0/openssh-key > /tmp/my-public-key
   if [ $? -eq 0 ]; then
@@ -31,6 +36,9 @@ start() {
     cat /tmp/my-public-key >> /home/toor/.ssh/authorized_keys
     chmod 600 /home/toor/.ssh/authorized_keys
     chown toor:toor /home/toor/.ssh/authorized_keys
+    cat /tmp/my-public-key >> /home/client/.ssh/authorized_keys
+    chmod 600 /home/client/.ssh/authorized_keys
+    chown client:client /home/client/.ssh/authorized_keys
     rm /tmp/my-public-key
   fi
 }

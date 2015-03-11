@@ -5,12 +5,17 @@ role system_r types config_strongswan_initrc_t;
 type config_strongswan_initrc_exec_t;
 type config_strongswan_tmp_t;
 
+allow config_strongswan_initrc_t self:capability { fowner chown fsetid dac_override };
 allow config_strongswan_initrc_t self:process { setfscreate };
 allow config_strongswan_initrc_t self:fifo_file manage_fifo_file_perms;
 files_tmp_file(config_strongswan_tmp_t)
 files_tmp_filetrans(config_strongswan_initrc_t, config_strongswan_tmp_t, dir)
 manage_dirs_pattern(config_strongswan_initrc_t, tmp_t, config_strongswan_tmp_t)
 manage_files_pattern(config_strongswan_initrc_t, config_strongswan_tmp_t, config_strongswan_tmp_t)
+files_search_home(config_strongswan_initrc_t)
+userdom_user_home_dir_filetrans_user_home_content(config_strongswan_initrc_t, dir)
+userdom_manage_user_home_content_dirs(config_strongswan_initrc_t)
+userdom_manage_user_home_content_files(config_strongswan_initrc_t)
 
 init_script_domain(config_strongswan_initrc_t, config_strongswan_initrc_exec_t)
 term_use_console(config_strongswan_initrc_t)
