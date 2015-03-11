@@ -243,6 +243,11 @@ template(`ssh_server_template', `
         	ssh_dyntransition_chroot_user($1_t)
 	')
 
+	# Even though it is configured to use PAM, ssh handles
+	# password changes without PAM... check out do_pwchange
+	# in the ssh sources.
+	usermanage_domtrans_passwd($1_t)
+
 	files_read_etc_files($1_t)
 	files_read_etc_runtime_files($1_t)
 	files_read_usr_files($1_t)
