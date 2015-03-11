@@ -97,7 +97,8 @@ touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.homedir
 install -m0644 config/setrans.conf %{buildroot}%{_sysconfdir}/selinux/%1/setrans.conf \
 find %{buildroot}/%{_usr}/share/selinux/%1/ -type f |xargs -P `/usr/bin/nproc` -n `/usr/bin/nproc`  bzip2 \
 awk '$1 !~ "/^#/" && $2 == "=" && $3 == "module" { printf "%%s.pp.bz2 ", $1 }' ./policy/modules.conf > %{buildroot}/%{_usr}/share/selinux/%1/modules.lst \
-for f in %{separatePkgs}; do sed -i -e "s/$f.pp.bz2//" %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done \
+SORTED_PKGS=`for p in %{separatePkgs}; do echo $p | awk '{ print length($0) " " $0; }'; done | sort -r -n | cut -d ' ' -f 2` \
+for f in ${SORTED_PKGS}; do grep $f\.pp\.bz2 %{buildroot}/%{_usr}/share/selinux/%1/modules.lst || (echo "failed to update module.lst for module $f" && exit -1); sed -i -e "s/$f.pp.bz2//" %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done \
 [ x"%{enable_modules}" != "x" ] && for i in %{enable_modules}; do echo ${i}.pp.bz2 >> %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done
 %nil
 
