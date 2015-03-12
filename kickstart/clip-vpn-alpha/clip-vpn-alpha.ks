@@ -294,7 +294,7 @@ cp /etc/issue.net /etc/issue
 #        Note that the "\$6" indicates it is SHA512 and must remain in place.
 #        Further, make sure you specify a salt such as "314159265358."
 #        Finally, make sure the hashed password is in single quotes to prevent expansion of the dollar signs.
-USERNAME="toor"
+#USERNAME="toor"
 PASSWORD="neutronbass"
 HASHED_PASSWORD='$6$314159265358$ytgatj7CAZIRFMPbEanbdi.krIJs.mS9N2JEl0jkPsCvtwC15z07JLzFLSuqiCdionNZ1XNT3gPKkjIG0TTGy1'
 
@@ -306,18 +306,18 @@ HASHED_PASSWORD='$6$314159265358$ytgatj7CAZIRFMPbEanbdi.krIJs.mS9N2JEl0jkPsCvtwC
 #       USERNAME and PASSWORD values defined a few lines above.
 #
 # Don't get lost in the 'if' statement - basically map $USERNAME to the unconfined toor_r:toor_t role if it is enabled.  
-if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
-	semanage user -N -a -R toor_r -R staff_r -R sysadm_r "${USERNAME}_u" 
-else
-	semanage user -N -a -R staff_r -R sysadm_r "${USERNAME}_u" || semanage user -a -R staff_r "${USERNAME}_u"
-fi
-useradd -m "$USERNAME" -G wheel -Z "${USERNAME}_u"
+#if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
+#	semanage user -N -a -R toor_r -R staff_r -R sysadm_r "${USERNAME}_u" 
+#else
+#	semanage user -N -a -R staff_r -R sysadm_r "${USERNAME}_u" || semanage user -a -R staff_r "${USERNAME}_u"
+#fi
+#useradd -m "$USERNAME" -G wheel -Z "${USERNAME}_u"
 
-if [ x"$HASHED_PASSWORD" == "x" ]; then
-	passwd --stdin "$USERNAME" <<< "$PASSWORD"
-else
-	usermod --pass="$HASHED_PASSWORD" "$USERNAME"
-fi
+#if [ x"$HASHED_PASSWORD" == "x" ]; then
+#	passwd --stdin "$USERNAME" <<< "$PASSWORD"
+#else
+#	usermod --pass="$HASHED_PASSWORD" "$USERNAME"
+#fi
 
 #chage -d 0 "$USERNAME"
 chage -E -1
@@ -339,11 +339,11 @@ EOF
 
 # Add the user to sudoers and setup an SELinux role/type transition.
 # This line enables a transition via sudo instead of requiring sudo and newrole.
-if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
-	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
-else
-	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
-fi
+#if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
+#	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
+#else
+#	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
+#fi
 
 # Lock the root acct to prevent direct logins
 usermod -L root
@@ -478,6 +478,7 @@ useradd -m client -Z "client_u"
 mkdir -m 700 /home/client/.ssh
 chown client:client /home/client/.ssh
 usermod -s /sbin/nologin client
+usermod --pass="$HASHED_PASSWORD" client
 
 # turn on the configure-strongswan service
 chkconfig --level 34 configure-strongswan on
