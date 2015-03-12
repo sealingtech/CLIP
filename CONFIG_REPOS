@@ -12,8 +12,6 @@
 # ./kickstarts/<name>/<name>.ks.  The packages from the repos below will be 
 # included in generated ISOs.
 #
-# Some basic repos *must* be available for CLIP itself.  They are RHEL/CentOS,
-# EPEL, and RHEL/CentOS Optional repos.
 #
 # Note that for now, these must be local repos.  We plan on adding FTP/HTTP
 # support in the future.  One of the issues we are trying to wrap our heads
@@ -25,6 +23,7 @@
 
 # NOTE: this is the right path for Quark Security's build VM
 centos6.6 = /opt/repos/centos6.6
+centos6.6-updates = /opt/repos/centos6.6-updates
 
 # A RHEL/CentOS repo must be available. Must be a local path (we use NFS mounts).
 # rhel = /mnt/repos-6-3/rhel-6-3-x86_64/rhel-x86_64-server-6/getPackage
