@@ -235,15 +235,21 @@ template(`ssh_server_template', `
 
 	domain_interactive_fd($1_t)
 	
-	# for chrootd sftp
+	# Allows ssh privelege separation to work
+	# where ssh brackets down in privileges
+	# in the child process.
 	domain_subj_id_change_exemption($1_t)
 	domain_dyntrans_type($1_t)
+	tunable_policy(ssh_enable_priv_sep,`
+		allow $1_t self:process setcurrent;
+		userdom_dyntransition_all_users($1_t)
+	')
+
+	# for chrootd sftp
 	tunable_policy(`ssh_enable_sftp_chroot_dyntrans',`
 		allow $1_t self:process setcurrent;
         	ssh_dyntransition_chroot_user($1_t)
 	')
-
-	userdom_dontaudit_dyntransition_users($1_t)
 
 	# Even though it is configured to use PAM, ssh handles
 	# password changes without PAM... check out do_pwchange
@@ -787,4 +793,30 @@ interface(`ssh_delete_tmp',`
 
 	files_search_tmp($1)
 	delete_files_pattern($1, sshd_tmp_t, sshd_tmp_t)
+')
+
+#######################################
+## <summary>
+##	Enable SSH privilege separation for user domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	User domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`ssh_priv_sep_user',`
+        # If ssh priv sep is on,
+        # userdom needs to write to ssh tcp sockets
+        # Also, if ssh is anabled and a user logs in
+        # and needs to change their password in priv sep
+        #
+        tunable_policy(ssh_enable_priv_sep,`
+		ssh_rw_tcp_sockets($1)
+		logging_send_syslog_msg($1)
+		ssh_rw_dgram_sockets($1)
+
+		allow $1 self:process { setexec };
+		dontaudit $1 self: process { setcurrent };
+	')
 ')

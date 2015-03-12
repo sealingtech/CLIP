@@ -34,6 +34,14 @@ gen_tunable(ssh_chroot_rw_homedirs, false)
 ## </desc>
 gen_tunable(ssh_enable_sftp_chroot_dyntrans, false)
 
+## <desc>
+## <p>
+## Enable privilege separation in ssh (on by default)
+## </p>
+## </desc>
+gen_tunable(ssh_enable_priv_sep, true)
+
+
 ### <desc>
 ### <p>
 ### Allow ssh with chroot env to manage all files 
@@ -272,8 +280,6 @@ optional_policy(`
 # so a tunnel can point to another ssh tunnel
 allow sshd_t self:netlink_route_socket r_netlink_socket_perms;
 allow sshd_t self:key { search link write };
-
-allow sshd_t self:process setcurrent;
 
 manage_dirs_pattern(sshd_t, sshd_tmp_t, sshd_tmp_t)
 manage_files_pattern(sshd_t, sshd_tmp_t, sshd_tmp_t)

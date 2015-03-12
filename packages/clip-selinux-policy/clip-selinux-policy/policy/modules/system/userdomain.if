@@ -514,8 +514,6 @@ template(`userdom_common_user_template',`
 
 	corecmd_exec_bin($1_t)
 
-	corenet_udp_bind_generic_node($1_t)
-	corenet_udp_bind_generic_port($1_t)
 
 	dev_read_rand($1_t)
 	dev_write_sound($1_t)
@@ -685,6 +683,15 @@ template(`userdom_common_user_template',`
 
 	optional_policy(`
 		usernetctl_run($1_t, $1_r)
+	')
+
+	# If ssh is enabled, and priv sep is on,
+	# userdom needs to write to ssh tcp sockets
+	# Also, if ssh is anabled and a user logs in
+	# and needs to change their password in priv sep
+	#
+	optional_policy(`
+		ssh_priv_sep_user($1_t)
 	')
 ')
 
@@ -2748,7 +2755,7 @@ interface(`userdom_dyntransition_unpriv_users',`
 
 ######################################
 ## <summary>
-## Dont audit domain dyntrans to userdomain.
+## Allow domain dyntrans to userdomain.
 ## </summary>
 ## <param name="domain">
 ##  <summary>
@@ -2756,12 +2763,12 @@ interface(`userdom_dyntransition_unpriv_users',`
 ##  </summary>
 ## </param>
 #
-interface(`userdom_dontaudit_dyntransition_users',`
+interface(`userdom_dyntransition_all_users',`
     gen_require(`
         attribute userdomain;
     ')
 
-    dontaudit $1 userdomain:process dyntransition;
+    allow $1 userdomain:process dyntransition;
 ')
 
 ########################################
