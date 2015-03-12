@@ -5,6 +5,21 @@
 #          Spencer Shimko <spencer@quarksecurity.com>
 #
 
+# These values can be used to tweak the build to facilitate development and debugging.
+# CONFIG_BUILD_ENFORCING_MODE is used to put the system in permissive mode or enforcing mode after install.
+# CONFIG_BUILD_REMEDIATE openscap (oscap) audits the system using SCAP content then remediates issues by 
+#                                 modifying the system to resolve identified problems.  CLIP uses oscap in 
+#                                 %post of the kickstart.  If this is set to "n" oscap is used to audit but
+#                                 not remediate.  You can still remediate at run-time after deployment.
+# CONFIG_BUILD_UNCONFINED_TOOR allows the toor user to run the unconfined (read->all powerful) toor_r:toor_t role.
+#                              Normally the toor user is confined in the sysadm_r:sysadm_t role.
+# CONFIG_BUILD_ENABLE_DHCP enable DHCP for eth0                             
+# Note: these variables and values will be inserted into /root/clip-info.txt for inspection at run-time.
+CONFIG_BUILD_ENFORCING_MODE := y
+CONFIG_BUILD_REMEDIATE := y
+CONFIG_BUILD_UNCONFINED_TOOR := y
+CONFIG_BUILD_ENABLE_DHCP := n
+
 # List of RPMs that are pre-rolled.  These will be linked into our custom yum repo during the build process.
 # Once referenced here you can start using them in the kickstart.
 # NOTE: You could perform the same task by putting the packages in a directory, creating a yum repo, then adding the path
@@ -22,20 +37,6 @@ ifeq ($(strip $(ISO_VERSION)),)
   ISO_VERSION := 0.1
 endif
 
-# These values can be used to tweak the build to facilitate development and debugging.
-# CONFIG_BUILD_ENFORCING_MODE is used to put the system in permissive mode or enforcing mode after install.
-# CONFIG_BUILD_REMEDIATE openscap (oscap) audits the system using SCAP content then remediates issues by 
-#                                 modifying the system to resolve identified problems.  CLIP uses oscap in 
-#                                 %post of the kickstart.  If this is set to "n" oscap is used to audit but
-#                                 not remediate.  You can still remediate at run-time after deployment.
-# CONFIG_BUILD_UNCONFINED_TOOR allows the toor user to run the unconfined (read->all powerful) toor_r:toor_t role.
-#                              Normally the toor user is confined in the sysadm_r:sysadm_t role.
-# CONFIG_BUILD_ENABLE_DHCP enable DHCP for eth0                             
-# Note: these variables and values will be inserted into /root/clip-info.txt for inspection at run-time.
-CONFIG_BUILD_ENFORCING_MODE := y
-CONFIG_BUILD_REMEDIATE := y
-CONFIG_BUILD_UNCONFINED_TOOR := y
-CONFIG_BUILD_ENABLE_DHCP := n
 
 ################################################
 ### STOP USER CONFIG 
