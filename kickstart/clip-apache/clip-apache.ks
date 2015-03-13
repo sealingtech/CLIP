@@ -272,11 +272,9 @@ echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 
 # livecd-creator attempts to fake a /selinux tree
 # and creates some normal files in there but newer
-# libselinux does a statfs and notices things are 
+# libselinux does a statfs and notices things are not 
 # kopasetic as /selinux is actually reported as
-# ext4.  So mount the real selinuxfs but anytime
-# we actually muck with files in there, we will
-# bind mount /dev/zero so we don't mess up the build host.
+# ext4.  So mount the real selinuxfs...
 if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
         mount -t selinuxfs none /selinux
 fi
@@ -341,7 +339,8 @@ if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
 else
 	semanage user -N -a -R staff_r -R sysadm_r "${USERNAME}_u" || semanage user -a -R staff_r "${USERNAME}_u"
 fi
-useradd -m "$USERNAME" -G wheel -Z "${USERNAME}_u"
+useradd -m "$USERNAME" -G wheel
+semanage login -N -a -s "${USERNAME}_u" "${USERNAME}"
 
 if [ x"$HASHED_PASSWORD" == "x" ]; then
 	passwd --stdin "$USERNAME" <<< "$PASSWORD"

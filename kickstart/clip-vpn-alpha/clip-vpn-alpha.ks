@@ -242,11 +242,9 @@ echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 
 # livecd-creator attempts to fake a /selinux tree
 # and creates some normal files in there but newer
-# libselinux does a statfs and notices things are 
+# libselinux does a statfs and notices things are not
 # kopasetic as /selinux is actually reported as
-# ext4.  So mount the real selinuxfs but anytime
-# we actually muck with files in there, we will
-# bind mount /dev/zero so we don't mess up the build host.
+# ext4.  So mount the real selinuxfs...
 if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
 	|| [ x"$CONFIG_BUILD_AWS" == "xy" ];
 then
@@ -311,7 +309,8 @@ HASHED_PASSWORD='$6$314159265358$ytgatj7CAZIRFMPbEanbdi.krIJs.mS9N2JEl0jkPsCvtwC
 #else
 #	semanage user -N -a -R staff_r -R sysadm_r "${USERNAME}_u" || semanage user -a -R staff_r "${USERNAME}_u"
 #fi
-#useradd -m "$USERNAME" -G wheel -Z "${USERNAME}_u"
+# useradd -m "$USERNAME" -G wheel
+# semanage login -N -a -s "${USERNAME}_u" "${USERNAME}"
 
 #if [ x"$HASHED_PASSWORD" == "x" ]; then
 #	passwd --stdin "$USERNAME" <<< "$PASSWORD"
@@ -473,8 +472,9 @@ echo -e "        ForceCommand internal-sftp\n" >> /etc/ssh/sshd_config
 semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
 
 # add an sftp user
-semanage user -N -a -R "staff_r" client_u
-useradd -m client -Z "client_u"
+semanage user -N -a -R "user_r" client_u
+useradd -d /client -m client
+semanage login -N -a -s client_u client 
 mkdir -m 700 /home/client/.ssh
 chown client:client /home/client/.ssh
 usermod -s /sbin/nologin client
