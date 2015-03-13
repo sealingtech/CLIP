@@ -274,14 +274,16 @@ oscap xccdf generate fix \
 /root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
 
 chmod +x /root/scap/pre/remediation-script.sh
-/root/scap/pre/remediation-script.sh
+if [ x"$CONFIG_BUILD_REMEDIATE" == "xy" ]; then
+        /root/scap/pre/remediation-script.sh
+        # Un-remeidate things SSG broke...
+        sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
 
-# Un-remeidate things SSG broke...
-sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
+        cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
+        | fold -sw 80 > /etc/issue.net
+        cp /etc/issue.net /etc/issue
+fi
 
-cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
-| fold -sw 80 > /etc/issue.net
-cp /etc/issue.net /etc/issue
 
 # FIXME: Change the username and password.
 #        If a hashed password is specified it will be used
