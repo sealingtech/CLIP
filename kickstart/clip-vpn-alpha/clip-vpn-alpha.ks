@@ -240,18 +240,7 @@ fi
 echo "Installation timestamp: `date`" > /root/clip-info.txt
 echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 
-# livecd-creator attempts to fake a /selinux tree
-# and creates some normal files in there but newer
-# libselinux does a statfs and notices things are not
-# kopasetic as /selinux is actually reported as
-# ext4.  So mount the real selinuxfs...
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
-	|| [ x"$CONFIG_BUILD_AWS" == "xy" ];
-then
-	mount -t selinuxfs none /selinux
-fi
-export POLNAME=`sestatus |awk '/Policy from config file:/ { print $5; }'`
-
+export POLNAME=$(awk -F= '/^SELINUXTYPE/ { print $2; }' /etc/selinux/config)
 
 #NOTE: while the following lines allow the SCAP content to be interprested on
 # CentOS, the results might be wrong in a few places, like FIPS compliance and
@@ -500,7 +489,6 @@ then
 	# this one isn't actually due to remediation, but needs to be done too
 	kill $TAILPID 2>/dev/null 1>/dev/null
 	kill $(jobs -p) 2>/dev/null 1>/dev/null
-	umount /selinux
 fi
 
 %end
