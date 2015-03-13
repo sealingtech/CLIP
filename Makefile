@@ -72,13 +72,13 @@ YUM_CONF_FILE := $(CONF_DIR)/yum/yum.conf
 # Pungi needs a comps.xml - why does every single yum front-end suck in different ways?
 COMPS_FILE := $(CONF_DIR)/yum/comps.xml
 
-export EC2_AMI_TOOLS := $(ROOT_DIR)/ec2-ami-tools
-EC2_AMI_TOOLS_ZIP    := $(ROOT_DIR)/ec2-ami-tools.zip
+export EC2_AMI_TOOLS := $(RPM_TMPDIR)/ec2-ami-tools
+EC2_AMI_TOOLS_ZIP    := $(RPM_TMPDIR)/ec2-ami-tools.zip
 EC2_AMI_TOOLS_URL    := http://s3.amazonaws.com/ec2-downloads/ec2-ami-tools.zip
 export AWS_KERNEL    ?= aki-88aa75e1
 
-export EC2_API_TOOLS := $(ROOT_DIR)/ec2-api-tools
-EC2_API_TOOLS_ZIP    := $(ROOT_DIR)/ec2-api-tools.zip
+export EC2_API_TOOLS := $(RPM_TMPDIR)/ec2-api-tools
+EC2_API_TOOLS_ZIP    := $(RPM_TMPDIR)/ec2-api-tools.zip
 EC2_API_TOOLS_URL    := http://s3.amazonaws.com/ec2-downloads/ec2-api-tools.zip
 
 export MOCK_YUM_CONF :=
