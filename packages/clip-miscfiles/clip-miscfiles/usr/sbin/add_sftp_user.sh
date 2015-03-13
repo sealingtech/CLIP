@@ -5,7 +5,7 @@
 #	  Spencer Shimko <spencer@quarksecurity.com>
 
 add_user() {
-        semanage user -a -R "staff_r" $1_u
+        semanage user -a -R "user_r" $1_u
         useradd -g sftp-only -Z $1_u $1
         mkdir -m 710 /home/$1/.ssh
         touch /home/$1/.ssh/authorized_keys
