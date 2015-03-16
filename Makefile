@@ -365,12 +365,14 @@ $(INSTISOS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
 
 $(EC2_AMI_TOOLS_ZIP):
+	@test -d $(RPM_TMPDIR) || mkdir -p $(RPM_TMPDIR)
 	curl -o $@ $(EC2_AMI_TOOLS_URL)
 
 $(EC2_AMI_TOOLS): $(EC2_AMI_TOOLS_ZIP)
 	unzip -d $@ $^
 
 $(EC2_API_TOOLS_ZIP):
+	@test -d $(RPM_TMPDIR) || mkdir -p $(RPM_TMPDIR)
 	curl -o $@ $(EC2_API_TOOLS_URL)
 
 $(EC2_API_TOOLS): $(EC2_API_TOOLS_ZIP)
