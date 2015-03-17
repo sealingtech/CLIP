@@ -278,9 +278,7 @@ if [ x"$CONFIG_BUILD_REMEDIATE" == "xy" ]; then
         /root/scap/pre/remediation-script.sh
         # Un-remeidate things SSG broke...
         sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
-
-        cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
-        | fold -sw 80 > /etc/issue.net
+        cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' | fold -sw 80 > /etc/issue.net
         cp /etc/issue.net /etc/issue
 fi
 
@@ -311,8 +309,8 @@ HASHED_PASSWORD='$6$314159265358$ytgatj7CAZIRFMPbEanbdi.krIJs.mS9N2JEl0jkPsCvtwC
 #else
 #	semanage user -N -a -R staff_r -R sysadm_r "${USERNAME}_u" || semanage user -a -R staff_r "${USERNAME}_u"
 #fi
-# useradd -m "$USERNAME" -G wheel
-# semanage login -N -a -s "${USERNAME}_u" "${USERNAME}"
+#useradd -m "$USERNAME" -G wheel
+#semanage login -N -a -s "${USERNAME}_u" "${USERNAME}"
 
 #if [ x"$HASHED_PASSWORD" == "x" ]; then
 #	passwd --stdin "$USERNAME" <<< "$PASSWORD"
@@ -321,10 +319,17 @@ HASHED_PASSWORD='$6$314159265358$ytgatj7CAZIRFMPbEanbdi.krIJs.mS9N2JEl0jkPsCvtwC
 #fi
 
 #chage -d 0 "$USERNAME"
-chage -E -1
 
-# Commented out in our policy
-#semanage boolean -N -m --on ssh_chroot_full_access
+# Add the user to sudoers and setup an SELinux role/type transition.
+# This line enables a transition via sudo instead of requiring sudo and newrole.
+#if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
+#	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
+#else
+#	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
+#fi
+
+# Lock the root acct to prevent direct logins
+usermod -L root
 
 # default network settings
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
@@ -337,17 +342,6 @@ BOOTPROTO=dhcp
 IPV6_PRIVACY=rfc3041
 
 EOF
-
-# Add the user to sudoers and setup an SELinux role/type transition.
-# This line enables a transition via sudo instead of requiring sudo and newrole.
-#if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
-#	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
-#else
-#	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
-#fi
-
-# Lock the root acct to prevent direct logins
-usermod -L root
 
 # Disable all that GUI stuff during boot so we can actually see what is going on during boot.
 if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
@@ -376,8 +370,8 @@ if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
 	fi	
 fi
 
-# We don't want the final remediation script to set the system to targeted
-sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
+-# We don't want the final remediation script to set the system to targeted
+-sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
 
 oscap xccdf eval --profile stig-rhel6-server-upstream \
 --report /root/scap/post/html/report.html \
@@ -432,9 +426,6 @@ COMMIT
 COMMIT
 EOF
 
-# Completed on Tue Mar  3 17:48:37 2015
-EOF
-
 #####IPtables End Configuration#####
 
 # Need to do some additional customizations if we're building for AWS
@@ -461,6 +452,12 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
 fi
 
+sed -i -e 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i -e 's/#\s*RSAAuthentication .*/RSAAuthentication yes/' /etc/ssh/sshd_config
+sed -i -e 's/#\s*PubkeyAuthentication .*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+sed -i -e 's;.*AuthorizedKeysFile.*;AuthorizedKeysFile /home/%u/.ssh/authorized_keys;' /etc/ssh/sshd_config
+sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
+
 #make sure you're using the internal sftp
 sed -i -r -e "s/Subsystem\s*sftp.*//g" /etc/ssh/sshd_config
 
@@ -475,11 +472,12 @@ semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
 
 # add an sftp user
 semanage user -N -a -R "user_r" client_u
-useradd -d /client -m client
+useradd -m client
 semanage login -N -a -s client_u client 
 mkdir -m 700 /home/client/.ssh
 chown client:client /home/client/.ssh
 usermod -s /sbin/nologin client
+usermod -d /client client
 usermod --pass="$HASHED_PASSWORD" client
 
 # turn on the configure-strongswan service
