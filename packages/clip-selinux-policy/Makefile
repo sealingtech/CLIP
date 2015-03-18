@@ -29,9 +29,11 @@ PACKAGER ?= Quark Security, Inc
 # snag the architecture, hard code an arch if cross-compiling or going noarch
 ARCH ?= noarch
 
-# Policy modules listed here will be built as separate RPMs
+# Policy modules listed here will be built as separate RPMs.
 # e.g., clip-selinux-policy-apache
-SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser ec2ssh config-strongswan
+# Listing a module here will also cause it to be enabled even if it
+# disabled in modules.conf.
+SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser ec2ssh config-strongswan samba ftp
 
 # the filename of the tarball
 TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
@@ -77,13 +79,13 @@ ifneq ($(CONFIG_BUILD_UNCONFINED_TOOR),n)
 	ENABLE_MODULES += toor
 endif
 
-ENABLE_MODULES := $(filter-out $(SEPARATE_PKGS),$(ENABLE_MODULES))
+ENABLE_MODULES := $(ENABLE_MODULES) $(SEPARATE_PKGS)
 
-ifeq ($(SEPARATE_PKGS),)
+ifeq ($(strip $(SEPARATE_PKGS)),)
 SEPARATE_PKGS := %{nil}
 endif
 
-ifeq ($(ENABLE_MODULES),)
+ifeq ($(strip $(ENABLE_MODULES)),)
 ENABLE_MODULES := %{nil}
 endif
 
