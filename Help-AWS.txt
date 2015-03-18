@@ -1,0 +1,14 @@
+CLIP can now roll a image and upload it to Amazon's AWS as an AMI you can use
+to create an instance.  This help document assumes familiarity with AWS and
+AWS terminology.  1. Only clip-vpn-alpja currently has support for AWS.  
+
+2. You must create an AWS account and provide the following either on the
+command-line at build time or as environment variables:
+
+export AWS_CERT=~<path to aws cert.pen> export AWS_PRIV_KEY=<path to your AWS
+users private key> export AWS_USER_ID=<your AWS user ID or IAM acount ID>
+export AWS_ACCESS_KEY_ID=<your access key ID> export AWS_ACCESS_KEY=<your
+access key>
+
+3. When finished, login to your AWS account and go to your AMIs section.
+There will be a clip-vpn-<commitish>.  Create an instance from this AMI.
