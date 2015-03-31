@@ -9,6 +9,8 @@ Group:          Development/Tools
 License:        GPLv2
 URL:            https://fedorahosted.org/pungi
 Source0:        https://fedorahosted.org/pungi/attachment/wiki/%{version}/%{name}-%{version}.tar.bz2
+Patch0:         buildinstall_updates.patch
+Patch1:         symlink_option.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires:       anaconda-runtime >= 11.4.1.5, yum => 3.2.19, repoview, createrepo >= 0.4.11
 BuildRequires:  python-devel
@@ -21,7 +23,8 @@ A tool to create anaconda based installation trees/isos of a set of rpms.
 
 %prep
 %setup -q
-
+%patch0 -p1
+%patch1 -p1
 
 %build
 %{__python} setup.py build

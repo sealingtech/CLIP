@@ -26,7 +26,8 @@ AWS_KS  := $(BUILD_DIR)/$(NAME)-aws.ks
 PUNGI_OS_DIR := $(BUILD_DIR)/$(ISO_VERSION)/$(TARGET_ARCH)/os/
 PUNGI_ISO_DIR := $(BUILD_DIR)/$(ISO_VERSION)/$(TARGET_ARCH)/iso/
 
-PUNGI ?= $(SUPPORT_DIR)/pungi
+PUNGI ?= $(TOOLS_DIR)/usr/bin/pungi
+PUNGI_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.6/site-packages/
 PUNGI_ARGS := --destdir="$(BUILD_DIR)" --ver="$(ISO_VERSION)" --name="$(NAME)" --nosource --force
 
 CHECK_VOL_ID ?= $(SUPPORT_DIR)/checkVolID.py
@@ -34,6 +35,10 @@ CHECK_VOL_ID ?= $(SUPPORT_DIR)/checkVolID.py
 LIVECD_CREATOR ?= $(TOOLS_DIR)/usr/bin/livecd-creator
 LIVECD_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.6/site-packages/
 IMAGE_CREATOR ?= $(TOOLS_DIR)/usr/bin/image-creator
+
+UPDATES_IMG := $(TMP_DIR)/updates.img
+MK_UPDATES_IMG := $(SUPPORT_DIR)/mk-anaconda-update-img.sh
+UPDATES_DIR := $(TMP_DIR)/updates
 
 #TODO download a specific version of these tools
 #this will avoid this ugly wildcarding stuff which might break,
@@ -74,18 +79,24 @@ SETUP_DEeS := $(CURDIR)/Makefile $(KS)
 
 all: iso live-iso setup-ks
 
-iso: $(DEPS) $(ADDTL_DEPS) setup-inst-ks check-volume-id
+
+$(UPDATES_IMG): $(YUM_CONF_FILE)
+	$(MK_UPDATES_IMG) $@ $(UPDATES_DIR) $(YUM_CONF_FILE)
+
+iso: $(DEPS) $(ADDTL_DEPS) $(UPDATES_IMG) setup-inst-ks check-volume-id
 	@echo "Gathering things with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
-	$(VERBOSE)cd $(BUILD_DIR); sudo $(PUNGI) $(PUNGI_ARGS) -GCB -c "$(INST_KS)"
+	$(VERBOSE)cd $(BUILD_DIR); sudo PYTHONPATH=$(PUNGI_PYTHONPATH) $(PUNGI) $(PUNGI_ARGS) -GCB -c "$(INST_KS)"
 	@echo "Fixing the boot menu..."
 	$(VERBOSE)sudo sed -i -e "s/^label linux$$/label $(NAME)/" \
 	       -e "s/append initrd=initrd.img$$/append initrd=initrd.img ks=cdrom:$(notdir $(INST_KS))/" \
 	       -e "s/or upgrade an existing system/$(NAME)/" \
 	$(PUNGI_OS_DIR)/isolinux/isolinux.cfg
+	@echo "Adding updates.img so this sucker boots"
+	$(VERBOSE) sudo cp $(UPDATES_IMG) $(PUNGI_OS_DIR)/images/
 	@echo "Building ISO with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
-	$(VERBOSE)cd $(BUILD_DIR);sudo $(PUNGI) $(PUNGI_ARGS) -I -c $(INST_KS)
+	$(VERBOSE)cd $(BUILD_DIR);sudo PYTHONPATH=$(PUNGI_PYTHONPATH) $(PUNGI) $(PUNGI_ARGS) -I -c $(INST_KS)
 	$(VERBOSE)sudo mv --force $(PUNGI_ISO_DIR)/$(NAME)-$(ISO_VERSION)-*.iso $(OUTPUT_DIR)/
 
 live-iso: $(DEPS) $(ADDTL_DEPS) setup-live-ks

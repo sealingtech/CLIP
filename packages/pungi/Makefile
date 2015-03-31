@@ -24,7 +24,7 @@ PACKAGER ?= Tresys Technology, LLC
 # Hard code an arch if cross-compiling or going noarch.
 ARCH := noarch
 
-SOURCES := $(PKGNAME)-$(VERSION).tar.bz2
+SOURCES := $(PKGNAME)-$(VERSION).tar.bz2 *.patch
 
 # Spec file name
 RPM_SPEC := $(PKGNAME).spec

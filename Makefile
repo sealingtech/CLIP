@@ -45,6 +45,8 @@ export TOOLS_DIR ?= $(ROOT_DIR)/tmp/tools
 export LIVECD_VERSION ?= $(shell rpm --eval `sed -n -e 's/Release: \(.*\)/\1/p' -e 's/Version: \(.*\)/\1/p' \
                  packages/livecd-tools/livecd-tools.spec| sed 'N;s/\n/-/'`)
 
+export PUNGI_VERSION ?= 2.0.22-1
+
 # Config deps
 CONFIG_BUILD_DEPS = $(ROOT_DIR)/CONFIG_BUILD $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
 
@@ -68,7 +70,7 @@ SUPPORT_DIR := $(CURDIR)/support
 MOCK_CONF_DIR := $(CONF_DIR)/mock
 
 # we need a yum.conf to use for repo querying (to determine appropriate package versions when multiple version are present)
-YUM_CONF_FILE := $(CONF_DIR)/yum/yum.conf
+export YUM_CONF_FILE := $(CONF_DIR)/yum/yum.conf
 
 # Pungi needs a comps.xml - why does every single yum front-end suck in different ways?
 COMPS_FILE := $(CONF_DIR)/yum/comps.xml
@@ -183,6 +185,14 @@ define MAKE_LIVE_TOOLS
 	cpio -idv < python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio;
 endef
 
+define MAKE_PUNGI
+	$(MAKE) pungi-rpm; \
+	mkdir -p $(TOOLS_DIR); \
+	cp $(CLIP_REPO_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm $(TOOLS_DIR); \
+	rpm2cpio $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm > $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm.cpio; \
+	cd $(TOOLS_DIR) && cpio -idv < pungi-$(PUNGI_VERSION).noarch.rpm.cpio
+endef
+
 ######################################################
 # BEGIN RPM GENERATION RULES (BEWARE OF DRAGONS)
 # This define directive is used to generate build rules.
@@ -257,11 +267,8 @@ $(REPO_DIR)/$(REPO_ID)-repo/last-updated: $(CONF_DIR)/pkglist.$(REPO_ID) $(CONFI
 # Then you can consistently rebuild an ISO using the exact same package versions as the last time.
 # Effectively versioning the packages you use when rolling RPMs and ISOs.
 $(CONF_DIR)/pkglist.$(REPO_ID) ./$(shell basename $(CONF_DIR))/pkglist.$(REPO_ID): $(filter-out $(ROOT_DIR)/CONFIG_BUILD,$(CONFIG_BUILD_DEPS)) $(CONF_DIR)/pkglist.blacklist
-	$(VERBOSE)rm -rf $(REPO_DIR)/$(REPO_ID)-repo
-	$(VERBOSE)$(RM) $(YUM_CONF_FILE)
 	$(VERBOSE)$(RM) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg
 	@echo "Generating list of packages for $(call GET_REPO_ID,$(1))$(RHEL_VER)"
-	$(VERBOSE)cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_FILE)
 	echo -e $(YUM_CONF) >> $(YUM_CONF_FILE)
 	$(VERBOSE)$(REPO_QUERY) --repoid=$(REPO_ID) |sort 1>$(CONF_DIR)/pkglist.$(REPO_ID)
 
@@ -330,7 +337,14 @@ $(foreach RPM,$(RPMS),$(eval $(call RPM_RULE_template,$(RPM))))
 # We need some packages on the build host that aren't available in EPEL, RHEL, Opt.
 SRPMS := $(SRPMS) $(addprefix $(SRPM_OUTPUT_DIR)/,$(foreach RPM,$(HOST_RPMS),$(call SRPM_FROM_RPM,$(notdir $(RPM)))))
 
-create-repos: $(setup_all_repos)
+init_yum_conf:
+	$(VERBOSE)$(RM) $(YUM_CONF_FILE)
+	@echo "Adding yum.conf header"
+	$(VERBOSE)cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_FILE)
+
+$(YUM_CONF_FILE): create-repos
+
+create-repos: init_yum_conf $(setup_all_repos)
 
 setup-clip-repo: setup-pre-rolled-packages $(RPMS)
 	$(call CHECK_DEPS)
@@ -364,6 +378,7 @@ $(LIVECDS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
 
 $(INSTISOS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
+	$(call MAKE_PUNGI)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
 
 $(EC2_AMI_TOOLS_ZIP):
