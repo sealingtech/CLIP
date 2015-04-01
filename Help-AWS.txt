@@ -1,14 +1,47 @@
 CLIP can now roll a image and upload it to Amazon's AWS as an AMI you can use
 to create an instance.  This help document assumes familiarity with AWS and
-AWS terminology.  1. Only clip-vpn-alpja currently has support for AWS.  
+AWS terminology.  Only clip-vpn-alpja and clip-minimal currently have support for AWS.  
 
-2. You must create an AWS account and provide the following either on the
-command-line at build time or as environment variables:
+If you already have a fully configured AWS user you may skip steps 1-12.
 
-export AWS_CERT=~<path to aws cert.pen> export AWS_PRIV_KEY=<path to your AWS
-users private key> export AWS_USER_ID=<your AWS user ID or IAM acount ID>
-export AWS_ACCESS_KEY_ID=<your access key ID> export AWS_ACCESS_KEY=<your
-access key>
+1. Create am AWS user in IAM.
 
-3. When finished, login to your AWS account and go to your AMIs section.
-There will be a clip-vpn-<commitish>.  Create an instance from this AMI.
+2. Download the generated credential CSV.
+
+3. Add the access key ID and secret key to the CONFIG_BUILD file at the
+top-level.
+
+4. In the IAM interface click on encryption keys in the lower left hand
+column.
+
+5. Click "Create Key" in the upper portion of the interface.
+
+6. Create and download a key.
+
+7. Create a private key using openssl:
+openssl genrsa 1024 > private-key.pem
+
+8. Create the user signing certificate:
+openssl req -new -x509 -nodes -sha1 -days 365 -key private-key.pem -outform PEM > certificate.pem
+
+9. Uplodae the user signing certificate by going to IAM->Users and the
+specific user for the signing certificate.
+
+10.  Click "Manage Signing Certificates" then "Upload Singing Certificate"/
+
+11. Open the generate .pem certificate file and copy/paste the contents into
+the text field and upload the certificate.
+
+12. Add the path to the signing certificate and private key to the
+CONFIG_BUILD file at the top-level.
+
+13. Build you AWS bundle which will automatically be uploaded to AWS as an
+AMI:
+make clip-vpn-alpha-aws-bundle 
+or
+make clip-minimal-aws-bundle 
+
+14. When finished, login to your AWS account and go to your AMIs section.
+There will be a clip-vpn-<commitish>.  
+
+15. Create an instance from this AMI.
