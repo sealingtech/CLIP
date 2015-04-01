@@ -40,7 +40,7 @@ IMAGE_CREATOR ?= $(TOOLS_DIR)/usr/bin/image-creator
 #and this way we'll always be using a known good version of the tools
 AWS_BUNDLE_DIR := $(TMP_DIR)/$(NAME)-$(ISO_VERSION)-aws-bundle
 EC2_BUNDLE_IMAGE := $(EC2_AMI_TOOLS)/*/bin/ec2-bundle-image
-EC2_BUNDLE_IMAGE_ARGS := --image $(BUILD_DIR)/$(NAME)-$(ISO_VERSION).img --cert $(AWS_CERT) --privatekey $(AWS_PRIV_KEY) -u $(AWS_USER_ID) --arch x86_64 --kernel $(AWS_KERNEL) -d $(AWS_BUNDLE_DIR)
+EC2_BUNDLE_IMAGE_ARGS := --image $(BUILD_DIR)/$(NAME)-$(ISO_VERSION).img --cert $(AWS_SIGNING_CERT) --privatekey $(AWS_PRIV_KEY) -u $(AWS_ACCT_ID) --arch x86_64 --kernel $(AWS_KERNEL) -d $(AWS_BUNDLE_DIR)
 AWS_MANIFEST := $(AWS_BUNDLE_DIR)/$(NAME)-$(ISO_VERSION).img.manifest.xml
 EC2_UPLOAD_BUNDLE := $(EC2_AMI_TOOLS)/*/bin/ec2-upload-bundle
 AWS_BUCKET ?= $(NAME)-$(ISO_VERSION)

@@ -8,8 +8,12 @@ If you already have a fully configured AWS user you may skip steps 1-12.
 
 2. Download the generated credential CSV.
 
-3. Add the access key ID and secret key to the CONFIG_BUILD file at the
+3. Add the access key ID and secret key to the CONFIG_AWS file at the
 top-level.
+
+4. Add the AWS account ID to CONFIG_AWS at the top-level.  This can be
+obtained by logging into AWS, and clicking your username in the top right
+corner.  It will be a series of digits of the format ####-####-####.
 
 4. In the IAM interface click on encryption keys in the lower left hand
 column.
@@ -33,7 +37,7 @@ specific user for the signing certificate.
 the text field and upload the certificate.
 
 12. Add the path to the signing certificate and private key to the
-CONFIG_BUILD file at the top-level.
+CONFIG_AWS file at the top-level.
 
 13. Build you AWS bundle which will automatically be uploaded to AWS as an
 AMI:

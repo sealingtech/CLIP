@@ -14,6 +14,7 @@
 ######################################################
 # Import build config (version, release, repos, etc)
 include CONFIG_BUILD
+include CONFIG_AWS
 
 # This is the RHEL version supported by this release of CLIP.  Do not alter.
 export RHEL_VER := 6
@@ -163,12 +164,12 @@ define CHECK_MOCK
 endef
 
 define CHECK_AWS_VARS
-	@if [ x"$(AWS_CERT)" == "x" ]; then echo -e "You must set AWS_CERT to the path to your AWS certificate"; exit -1; fi
-	@if [ x"$(AWS_PRIV_KEY)" == "x" ]; then echo -e "You must set AWS_PRIV_KEY to the path to your AWS private key"; exit -1; fi
-	@if [ x"$(AWS_USER_ID)" == "x" ]; then echo -e "You must set AWS_USER_ID to your AWS user ID"; exit -1; fi
-	@if [ x"$(AWS_ACCESS_KEY_ID)" == "x" ]; then echo -e "You must set AWS_ACCESS_KEY_ID to your AWS access key ID"; exit -1; fi
-	@if [ x"$(AWS_ACCESS_KEY)" == "x" ]; then echo -e "You must set AWS_ACCESS_KEY to your AWS access key"; exit -1; fi
-	@echo "AWS variables are all set"
+	@if [ x"$(AWS_SIGNING_CERT)" == "x" ]; then echo -e "In CONFIG_ZAAWS, set AWS_SIGNING_CERT to the path to your AWS certificate"; exit -1; fi
+	@if [ x"$(AWS_PRIV_KEY)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_PRIV_KEY to the path to your AWS private key"; exit -1; fi
+	@if [ x"$(AWS_ACCT_ID)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_ACCT_ID to your AWS account ID"; exit -1; fi
+	@if [ x"$(AWS_ACCESS_KEY_ID)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_ACCESS_KEY_ID to your AWS access key ID"; exit -1; fi
+	@if [ x"$(AWS_ACCESS_KEY)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_ACCESS_KEY to your AWS access key"; exit -1; fi
+	@echo "AWS variables are all set.
 endef
 
 define MAKE_LIVE_TOOLS
