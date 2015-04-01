@@ -1,6 +1,6 @@
 # See Help-AWS.txt for help.
 # Path to your AWS signing cert
-#AWS_CERT=~/aws/cert.pem
+#AWS_SIGNING_CERT=~/aws/cert.pem
 
 # Path to your AWS private key
 #AWS_PRIV_KEY=~/aws/key.pem

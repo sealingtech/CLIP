@@ -10,3 +10,4 @@ repos/*/last-updated
 repos/clip-srpms/*
 conf/yum/yum.conf
 *CHECKSUM
+CONFIG_AWS
