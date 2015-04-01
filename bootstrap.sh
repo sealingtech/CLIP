@@ -99,15 +99,6 @@ read foo
 /usr/bin/sudo /usr/sbin/setenforce 0
 /usr/bin/sudo /bin/sed -i -e 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 
-# Fourth, roll pungi
-if ! rpm -q pungi >/dev/null; then
-	/usr/bin/make pungi-rpm
-	pushd . > /dev/null  
-	cd repos/clip-repo
-	/usr/bin/sudo /usr/bin/yum localinstall -y pungi*
-	popd > /dev/null
-fi
-
 /bin/echo -e "Basic bootstrapping of build host is complete.\nPress 'enter' to run 'make clip-minimal-iso' or ctrl-c to quit."
 read foo
 /usr/bin/make clip-minimal-iso
