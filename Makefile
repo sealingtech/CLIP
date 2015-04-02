@@ -164,12 +164,12 @@ define CHECK_MOCK
 endef
 
 define CHECK_AWS_VARS
-	@if [ x"$(AWS_SIGNING_CERT)" == "x" ]; then echo -e "In CONFIG_ZAAWS, set AWS_SIGNING_CERT to the path to your AWS certificate"; exit -1; fi
+	@if [ x"$(AWS_SIGNING_CERT)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_SIGNING_CERT to the path to your AWS signing certificate"; exit -1; fi
 	@if [ x"$(AWS_PRIV_KEY)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_PRIV_KEY to the path to your AWS private key"; exit -1; fi
 	@if [ x"$(AWS_ACCT_ID)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_ACCT_ID to your AWS account ID"; exit -1; fi
 	@if [ x"$(AWS_ACCESS_KEY_ID)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_ACCESS_KEY_ID to your AWS access key ID"; exit -1; fi
 	@if [ x"$(AWS_ACCESS_KEY)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_ACCESS_KEY to your AWS access key"; exit -1; fi
-	@echo "AWS variables are all set.
+	@echo "AWS variables are all set."
 endef
 
 define MAKE_LIVE_TOOLS
@@ -388,7 +388,9 @@ check-vars:
 $(AWSBUNDLES): check-vars ec2-tools $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_LIVE_TOOLS)
-	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-aws-bundle/\1/'`" aws 
+	# TODO: this awk expression relies heavily on the tool name prefix length, better option?
+	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-aws-bundle/\1/'`" \
+		EC2_API_TOOLS_VER=$$(unzip -l $(EC2_API_TOOLS_ZIP)|awk '/^.*[0-9]\/$$/ { print substr($$4,15,length($$4)-15); }') aws 
 
 $(MOCK_CONF_DIR)/$(MOCK_REL).cfg:  $(MOCK_CONF_DIR)/$(MOCK_REL).cfg.tmpl $(CONF_DIR)/pkglist.blacklist
 	$(call CHECK_DEPS)

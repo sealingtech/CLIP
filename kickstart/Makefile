@@ -1,5 +1,5 @@
 # Copyright (C) 2011-2012 Tresys Technology, LLC
-# Copyright (C) 2014 Quark Security, Inc
+# Copyright (C) 2014-215 Quark Security, Inc
 #
 # Authors: Francisco Slavin <fslavin@tresys.com>
 #          Spencer Shimko <sshimko@tresys.com>
@@ -47,8 +47,7 @@ AWS_BUCKET ?= $(NAME)-$(ISO_VERSION)
 EC2_UPLOAD_BUNDLE_ARGS := -b $(AWS_BUCKET) -a $(AWS_ACCESS_KEY_ID) -s $(AWS_ACCESS_KEY) -m $(AWS_MANIFEST)
 EC2_REGISTER := $(EC2_API_TOOLS)/*/bin/ec2-register
 EC2_REGISTER_ARGS := -O $(AWS_ACCESS_KEY_ID) -W $(AWS_ACCESS_KEY) $(AWS_BUCKET)/$(NAME)-$(ISO_VERSION).img.manifest.xml --name "$(NAME)-$(ISO_VERSION)" --architecture x86_64 --kernel $(AWS_KERNEL)
-#TODO fix this hardcoded version hack
-EC2_HOME := $(EC2_API_TOOLS)/ec2-api-tools-1.7.3.0
+EC2_HOME := $(EC2_API_TOOLS)/ec2-api-tools-$(EC2_API_TOOLS_VER)
 JAVA_HOME ?= /usr/lib/jvm/java
 
 override LIVECD_ARGS := $(LIVECD_ARGS)
