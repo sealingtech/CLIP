@@ -349,8 +349,8 @@ if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
 fi
 
 if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
-    echo "Setting permissive mode..."
-    echo -e "#THIS IS A DEBUG BUILD HENCE SELINUX IS IN PERMISSIVE MODE\nSELINUX=permissive\nSELINUXTYPE=$POLNAME\n" > /etc/selinux/config
+	echo "Setting permissive mode..."
+	echo -e "#THIS IS A DEBUG BUILD HENCE SELINUX IS IN PERMISSIVE MODE\nSELINUX=permissive\nSELINUXTYPE=$POLNAME\n" > /etc/selinux/config
 	echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
 	# This line is used to make policy development easier.  It disables the "setfiles" check used by 
 	# semodule/semanage that prevents transactions containing invalid and dupe fc entries from rolling forward.
@@ -410,8 +410,6 @@ COMMIT
 -A OUTPUT -p udp -m udp --sport 500 -j ACCEPT
 -A INPUT -p udp -m udp --dport 4500 -j ACCEPT
 -A OUTPUT -p udp -m udp --sport 4500 -j ACCEPT
--A INPUT -p tcp -m tcp --sport 80 -s 169.254.169.254 -j ACCEPT
--A OUTPUT -p tcp -m tcp --dport 80 -d 169.254.169.254 -j ACCEPT
 COMMIT
 EOF
 
@@ -443,6 +441,19 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	# Turn strongswan on in AWS as it will be configured by the scripts above.
 	chkconfig strongswan on
 
+	# if you're the Government deploying to AWS and want to monitor people feel free to remove these lines.
+	# But for our purposes, we explicitly don't want monitoring or logging
+	> /etc/issue
+	> /etc/issue.net
+	chkconfig rsyslog off
+	chkconfig auditd off
+	# TODO: this should really be done via policy
+	# the #*/ makes vim highlighting normal again (or as normal as it is for a ks)
+	rm -rf /var/log/* #*/
+	touch /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
+	chmod 000 /var/log/* #*/
+	chattr +i /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
+	rm -rf /root/* #*/
 
 	# disable password auth
 	sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
@@ -456,6 +467,42 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	usermod -s /sbin/nologin client
 	usermod -d /client client
 	usermod --pass="$HASHED_PASSWORD" client
+	sed -i -e 's/__USERNAME__/client/g' /etc/rc.d/init.d/ec2-get-ssh
+
+	cat << EOF > /etc/sysconfig/iptables
+*mangle
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+-A FORWARD -o eth0 -p tcp -m tcp --tcp-flags SYN,RST SYN -m tcpmss --mss 1361:1536 -j TCPMSS --set-mss 1360
+COMMIT
+*nat
+:PREROUTING ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A POSTROUTING -j MASQUERADE 
+COMMIT
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --sport 22 -j ACCEPT
+-A INPUT -p udp -m udp --dport 500 -j ACCEPT
+-A OUTPUT -p udp -m udp --sport 500 -j ACCEPT
+-A INPUT -p udp -m udp --dport 4500 -j ACCEPT
+-A OUTPUT -p udp -m udp --sport 4500 -j ACCEPT
+-A INPUT -p tcp -m tcp --sport 80 -s 169.254.169.254 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --dport 80 -d 169.254.169.254 -j ACCEPT
+COMMIT
+EOF
+
+else
+
+rpm -e clip-selinux-policy-mcs-ec2ssh
+
 fi
 
 sed -i -e 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config

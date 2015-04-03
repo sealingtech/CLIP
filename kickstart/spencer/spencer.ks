@@ -79,8 +79,8 @@ clip-selinux-policy
 clip-selinux-policy-mcs
 clip-selinux-policy-mcs-ssh
 clip-selinux-policy-mcs-unprivuser
-clip-selinux-policy-mcs-aide
-clip-selinux-policy-mcs-ec2ssh
+clip-selinux-policy-mcs-ftp
+clip-selinux-policy-mcs-samba
 clip-miscfiles
 m4
 scap-security-guide
@@ -220,6 +220,9 @@ dhclient
 -xorg-x11-drv-ati-firmware
 -zd1211-firmware
 
+vsftpd
+samba
+
 %end
 
 %post --interpreter=/bin/bash
@@ -227,13 +230,11 @@ dhclient
 #CONFIG-BUILD-PLACEHOLDER
 export PATH="/sbin:/usr/sbin:/usr/bin:/bin:/usr/local/bin"
 exec >/root/clip_post_install.log 2>&1
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
-        || [ x"$CONFIG_BUILD_AWS" == "xy" ];
-then
-        # Print the log to tty7 so that the user know what's going on
-        tail -f /root/clip_post_install.log >/dev/tty7 &
-        TAILPID=$!
-        chvt 7
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "xy" ]; then
+	# Print the log to tty7 so that the user know what's going on
+	tail -f /root/clip_post_install.log >/dev/tty7 &
+	TAILPID=$!
+	chvt 7
 fi
 
 echo "Installation timestamp: `date`" > /root/clip-info.txt
@@ -315,22 +316,9 @@ else
 	usermod --pass="$HASHED_PASSWORD" "$USERNAME"
 fi
 
-# Add the user to sudoers and setup an SELinux role/type transition.
-# This line enables a transition via sudo instead of requiring sudo and newrole.
-if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
-	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
-else
-	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
-fi
-
 chage -d 0 "$USERNAME"
 
-# Lock the root acct to prevent direct logins
-usermod -L root
-
-######## END DEFAULT USER CONFIG ##########
-
-if [ x"$CONFIG_BUILD_AWS" == "xy" -o x"$CONFIG_BUILD_ENABLE_DHCP" == "xy" ]; then
+if [ x"$CONFIG_BUILD_ENABLE_DHCP" == "xy" ]; then
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
 DEVICE=eth0
 TYPE=Ethernet
@@ -344,6 +332,18 @@ fi
 echo "Turning sshd off"
 /sbin/chkconfig --level 0123456 sshd off
 
+# Add the user to sudoers and setup an SELinux role/type transition.
+# This line enables a transition via sudo instead of requiring sudo and newrole.
+if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
+	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
+else
+	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
+fi
+
+# Lock the root acct to prevent direct logins
+usermod -L root
+
+######## END DEFAULT USER CONFIG ##########
 
 # Disable all that GUI stuff during boot so we can actually see what is going on during boot.
 if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
@@ -390,96 +390,13 @@ chmod +x /root/scap/post/remediation-script.sh
 
 sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
 
-# Need to do some additional customizations if we're building for AWS
-if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
-
-        #set up /etc/ftsab
-        sed -i -e "s/\/dev\/root/\/dev\/xvde1/" /etc/fstab
-        mkdir -p /boot/grub
-
-        #set up /boot/grub/menu.lst
-        echo "default=0" >> /boot/grub/menu.lst
-        echo -e "timeout=0\n" >> /boot/grub/menu.lst
-        echo "title CLIP-KERNEL" >> /boot/grub/menu.lst
-        echo "        root (hd0)" >> /boot/grub/menu.lst
-        KERNEL=`find /boot -iname vmlinuz*`
-        INITRD=`find /boot -iname initramfs*`
-        echo "        kernel $KERNEL ro root=/dev/xvde1 rd_NO_PLYMOUTH" >> /boot/grub/menu.lst
-        echo "        initrd $INITRD" >> /boot/grub/menu.lst
-
-        # turn on the ssh key script
-        chkconfig --level 34 ec2-get-ssh on
-	/sbin/chkconfig sshd on
-
-        # disable password auth
-        #sed -i -e "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
-
-	sed -i -e "s/__USERNAME__/${USERNAME}/g" /etc/rc.d/init.d/ec2-get-ssh
-	
-	# if you're the Government deploying to AWS and want to monitor people feel free to remove these lines.
-	# But for our purposes, we explicitly don't want monitoring or logging
-	> /etc/issue
-	> /etc/issue.net
-	chkconfig rsyslog off
-	chkconfig auditd off
-	# the #*/ makes vim highlighting normal again (or as normal as it is for a ks)
-	rm -rf /var/log/* #*/
-	touch /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
-	chmod 000 /var/log/* #*/
-	chattr +i /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
-	rm -rf /root/* #*/
-
-	cat << EOF > /etc/sysconfig/iptables
-*mangle
-:PREROUTING ACCEPT [0:0]
-:INPUT ACCEPT [0:0]
-:FORWARD ACCEPT [0:0]
-:OUTPUT ACCEPT [0:0]
-:POSTROUTING ACCEPT [0:0]
-COMMIT
-*nat
-:PREROUTING ACCEPT [0:0]
-:POSTROUTING ACCEPT [0:0]
-:OUTPUT ACCEPT [0:0]
-COMMIT
-*filter
-:INPUT DROP [0:0]
-:FORWARD DROP [0:0]
-:OUTPUT DROP [0:0]
--A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
--A OUTPUT -p tcp -m tcp --sport 22 -j ACCEPT
--A INPUT -p tcp -m tcp --sport 80 -s 169.254.169.254 -j ACCEPT
--A OUTPUT -p tcp -m tcp --dport 80 -d 169.254.169.254 -j ACCEPT
-COMMIT
-EOF
-
-else
-
-rpm -e clip-selinux-policy-mcs-ec2ssh
-
-fi
-
-cat << EOF > /etc/sysconfig/ip6tables
-*filter
-:INPUT DROP [0:0]
-:FORWARD DROP [0:0]
-:OUTPUT DROP [0:0]
-COMMIT
-EOF
-
-
-sed -i -e 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
-sed -i -e 's/#\s*RSAAuthentication .*/RSAAuthentication yes/' /etc/ssh/sshd_config
-sed -i -e 's/#\s*PubkeyAuthentication .*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
-sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
 
 # This is rather unfortunate, but the remediation content
 # starts services, which need to be killed/shutdown if
 # we're rolling Live Media.  First, kill the known
 # problems cleanly, then just kill them all and let
 # <deity> sort them out.
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
-        || [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
 	service restorecond stop
 	service auditd stop
 	service rsyslog stop
@@ -490,6 +407,14 @@ if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
 	kill $(jobs -p) 2>/dev/null 1>/dev/null
 	kill $TAILPID 2>/dev/null 1>/dev/null
 fi
+
+cat << EOF > /etc/sysconfig/ip6tables
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+COMMIT
+EOF
 
 echo "Done with post install scripts..."
 
