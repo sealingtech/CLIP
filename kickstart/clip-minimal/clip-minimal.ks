@@ -410,7 +410,7 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	/sbin/chkconfig sshd on
 
         # disable password auth
-        #sed -i -e "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
+        sed -i -e "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
 
 	sed -i -e "s/__USERNAME__/${USERNAME}/g" /etc/rc.d/init.d/ec2-get-ssh
 	
