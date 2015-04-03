@@ -469,6 +469,8 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	usermod --pass="$HASHED_PASSWORD" client
 	sed -i -e 's/__USERNAME__/client/g' /etc/rc.d/init.d/ec2-get-ssh
 
+	chage -d -1 "$USERNAME"
+
 	cat << EOF > /etc/sysconfig/iptables
 *mangle
 :PREROUTING ACCEPT [0:0]

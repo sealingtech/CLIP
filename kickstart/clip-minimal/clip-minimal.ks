@@ -323,8 +323,6 @@ else
 	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
 fi
 
-chage -d 0 "$USERNAME"
-
 # Lock the root acct to prevent direct logins
 usermod -L root
 
@@ -429,6 +427,8 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	chattr +i /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
 	rm -rf /root/* #*/
 
+	chage -d -1 "$USERNAME"
+
 	cat << EOF > /etc/sysconfig/iptables
 *mangle
 :PREROUTING ACCEPT [0:0]
@@ -454,9 +454,8 @@ COMMIT
 EOF
 
 else
-
-rpm -e clip-selinux-policy-mcs-ec2ssh
-
+	rpm -e clip-selinux-policy-mcs-ec2ssh
+	chage -d 0 "$USERNAME"
 fi
 
 cat << EOF > /etc/sysconfig/ip6tables
