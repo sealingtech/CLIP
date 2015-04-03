@@ -17,6 +17,8 @@ Source0:        http://download.strongswan.org/%{name}-%{version}%{?prerelease}.
 # Initscript for epel6
 Source1:        %{name}.sysvinit
 Patch0:         strongswan-5.2.0-json.patch
+Patch1:         fix_updown.patch
+
 # Use RTLD_GLOBAL when loading plugins and link them to libstrongswan
 #
 # The patch hasn't been accepted upstream because of insufficient
@@ -108,6 +110,7 @@ PT-TLS to support TNC over TLS.
 %prep
 %setup -q -n %{name}-%{version}%{?prerelease}
 %patch0 -p1
+%patch1 -p1
 #%patch1 -p1
 
 echo "For migration from 4.6 to 5.0 see http://wiki.strongswan.org/projects/strongswan/wiki/CharonPlutoIKEv1" > README.Fedora

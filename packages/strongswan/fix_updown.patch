@@ -1,0 +1,29 @@
+diff -purN strongswan-5.2.0/src/_updown/_updown.in strongswan-5.2.0.new/src/_updown/_updown.in
+--- strongswan-5.2.0/src/_updown/_updown.in	2015-04-03 15:38:11.266926830 -0400
++++ strongswan-5.2.0.new/src/_updown/_updown.in	2015-04-03 15:39:21.493926827 -0400
+@@ -472,10 +472,10 @@ up-client:iptables)
+ 	# ones, so do not mess with it; see CAUTION comment up at top.
+ 	if [ "$PLUTO_PEER_CLIENT" != "$PLUTO_MY_SOURCEIP/32" ]
+ 	then
+-	  iptables -I FORWARD 1 -o $PLUTO_INTERFACE -p $PLUTO_PEER_PROTOCOL \
++	  iptables -A FORWARD -o $PLUTO_INTERFACE -p $PLUTO_PEER_PROTOCOL \
+ 	      -s $PLUTO_MY_CLIENT $S_MY_PORT \
+ 	      -d $PLUTO_PEER_CLIENT $D_PEER_PORT $IPSEC_POLICY_OUT -j ACCEPT
+-	  iptables -I FORWARD 1 -i $PLUTO_INTERFACE -p $PLUTO_MY_PROTOCOL \
++	  iptables -A FORWARD -i $PLUTO_INTERFACE -p $PLUTO_MY_PROTOCOL \
+ 	      -s $PLUTO_PEER_CLIENT $S_PEER_PORT \
+ 	      -d $PLUTO_MY_CLIENT $D_MY_PORT $IPSEC_POLICY_IN -j ACCEPT
+ 	fi
+@@ -647,10 +647,10 @@ up-client-v6:iptables)
+ 	# ones, so do not mess with it; see CAUTION comment up at top.
+ 	if [ "$PLUTO_PEER_CLIENT" != "$PLUTO_MY_SOURCEIP/128" ]
+ 	then
+-	  ip6tables -I FORWARD 1 -o $PLUTO_INTERFACE -p $PLUTO_PEER_PROTOCOL \
++	  ip6tables -A FORWARD -o $PLUTO_INTERFACE -p $PLUTO_PEER_PROTOCOL \
+ 	      -s $PLUTO_MY_CLIENT $S_MY_PORT \
+ 	      -d $PLUTO_PEER_CLIENT $D_PEER_PORT $IPSEC_POLICY_OUT -j ACCEPT
+-	  ip6tables -I FORWARD 1 -i $PLUTO_INTERFACE -p $PLUTO_MY_PROTOCOL \
++	  ip6tables -A FORWARD -i $PLUTO_INTERFACE -p $PLUTO_MY_PROTOCOL \
+ 	      -s $PLUTO_PEER_CLIENT $S_PEER_PORT \
+ 	      -d $PLUTO_MY_CLIENT $D_MY_PORT $IPSEC_POLICY_IN -j ACCEPT
+ 	fi
