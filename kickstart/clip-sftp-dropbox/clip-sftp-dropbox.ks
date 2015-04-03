@@ -78,6 +78,7 @@ clip-selinux-policy
 clip-selinux-policy-mcs
 clip-selinux-policy-mcs-ssh
 clip-selinux-policy-mcs-unprivuser
+clip-selinux-policy-mcs-ec2ssh
 clip-miscfiles
 m4
 scap-security-guide
@@ -304,7 +305,17 @@ else
 	usermod --pass="$HASHED_PASSWORD" "$USERNAME"
 fi
 
-chage -d 0 "$USERNAME"
+# Lock the root acct to prevent direct logins
+usermod -L root
+
+# Add the user to sudoers and setup an SELinux role/type transition.
+# This line enables a transition via sudo instead of requiring sudo and newrole.
+if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
+	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
+else
+	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
+fi
+
 
 groupadd "sftp-only"
 
@@ -336,7 +347,7 @@ semanage boolean -N -S ${POLNAME} -m --on ssh_enable_sftp_chroot_dyntrans
 # Commented out in our policy
 #semanage boolean -N -m --on ssh_chroot_full_access
 
-if [ x"$CONFIG_BUILD_ENABLE_DHCP" == "xy" ]; then
+if [ x"$CONFIG_BUILD_AWS" == "xy" -o x"$CONFIG_BUILD_ENABLE_DHCP" == "xy" ]; then
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
 DEVICE=eth0
 TYPE=Ethernet
@@ -346,17 +357,6 @@ BOOTPROTO=dhcp
 IPV6_PRIVACY=rfc3041
 EOF
 fi
-
-# Add the user to sudoers and setup an SELinux role/type transition.
-# This line enables a transition via sudo instead of requiring sudo and newrole.
-if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
-	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
-else
-	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
-fi
-
-# Lock the root acct to prevent direct logins
-usermod -L root
 
 # Disable all that GUI stuff during boot so we can actually see what is going on during boot.
 if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
@@ -403,21 +403,6 @@ sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
 
 echo "session optional pam_umask.so umask=0077" >> /etc/pam.d/sshd
 
-# This is rather unfortunate, but the remediation content 
-# starts services, which need to be killed/shutdown if
-# we're rolling Live Media.  First, kill the known 
-# problems cleanly, then just kill them all and let
-# <deity> sort them out.
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
-	service restorecond stop 2>&1 > /dev/null
-	service auditd stop 2>&1 > /dev/null
-	service rsyslog stop 2>&1 > /dev/null
-	[ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop 2>&1 > /dev/null
-
-	# this one isn't actually due to remediation, but needs to be done too
-	kill $TAILPID 2>/dev/null 1>/dev/null
-	kill $(jobs -p) 2>/dev/null 1>/dev/null
-fi
 
 # SFTP dropbox adjustments
 chmod 711 /home
@@ -425,7 +410,7 @@ chmod 700 /home/*
 
 cat << EOF > /etc/sysconfig/iptables
 *filter
-:INPUT DROP [0:0]"
+:INPUT DROP [0:0]
 :FORWARD DROP [0:0]
 :OUTPUT DROP [0:0]
 -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
@@ -438,21 +423,96 @@ cat << EOF > /etc/sysconfig/ip6tables
 :INPUT DROP [0:0]
 :FORWARD DROP [0:0]
 :OUTPUT DROP [0:0]
--A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
--A OUTPUT -p tcp -m tcp --sport 22 -j ACCEPT
 COMMIT
 EOF
 
+# Need to do some additional customizations if we're building for AWS
+if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
+
+        #set up /etc/ftsab
+        sed -i -e "s/\/dev\/root/\/dev\/xvde1/" /etc/fstab
+        mkdir -p /boot/grub
+
+        #set up /boot/grub/menu.lst
+        echo "default=0" >> /boot/grub/menu.lst
+        echo -e "timeout=0\n" >> /boot/grub/menu.lst
+        echo "title CLIP-KERNEL" >> /boot/grub/menu.lst
+        echo "        root (hd0)" >> /boot/grub/menu.lst
+        KERNEL=`find /boot -iname vmlinuz*`
+        INITRD=`find /boot -iname initramfs*`
+        echo "        kernel $KERNEL ro root=/dev/xvde1 rd_NO_PLYMOUTH" >> /boot/grub/menu.lst
+        echo "        initrd $INITRD" >> /boot/grub/menu.lst
+
+        # turn on the ssh key script
+        chkconfig --level 34 ec2-get-ssh on
+
+	sed -i -e "s/__USERNAME__/$USERNAME/g" /etc/rc.d/init.d/ec2-get-ssh
+
+        # if you're the Government deploying to AWS and want to monitor people feel free to remove these lines.
+        # But for our purposes, we explicitly don't want monitoring or logging
+        > /etc/issue
+        > /etc/issue.net
+        chkconfig rsyslog off
+        chkconfig auditd off
+        # TODO: this should really be done via policy
+        # the #*/ makes vim highlighting normal again (or as normal as it is for a ks)
+        rm -rf /var/log/* #*/
+        touch /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
+        chmod 000 /var/log/* #*/
+        chattr +i /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
+        rm -rf /root/* #*/
+
+        # disable password auth
+        sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
+
+	chage -E -1 $USERNAME
+
+cat << EOF > /etc/sysconfig/iptables
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --sport 22 -j ACCEPT
+-A INPUT -p tcp -m tcp --sport 80 -s 169.254.169.254 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --dport 80 -d 169.254.169.254 -j ACCEPT
+COMMIT
+EOF
+
+else
+
 cat << EOF >> /home/${USERNAME}/.bashrc
 if [ -S /home/${USERNAME}/.ssh/authorized_keys ]; then
-        if grep -q "^PasswordAuthentication yes" /etc/ssh/sshd_config; then
-                echo "Please disable PasswordAuthentication in /etc/ssh/sshd_config"
-        fi
+	if grep -q "^PasswordAuthentication yes" /etc/ssh/sshd_config; then
+		echo "Please disable PasswordAuthentication in /etc/ssh/sshd_config"
+	fi
 else   
-        echo "Please add a public key to ~/.ssh/authorized_keys."
-        echo "Then disable PasswordAuthentication in /etc/ssh/sshd_config"
+	echo "Please add a public key to ~/.ssh/authorized_keys."
+	echo "Then disable PasswordAuthentication in /etc/ssh/sshd_config"
 fi
 EOF
+
+	rpm -e clip-selinux-policy-mcs-ec2ssh
+	chage -d 0 "$USERNAME"
+fi
+
+# This is rather unfortunate, but the remediation content 
+# starts services, which need to be killed/shutdown if
+# we're rolling Live Media.  First, kill the known 
+# problems cleanly, then just kill them all and let
+# <deity> sort them out.
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
+        || [ x"$CONFIG_BUILD_AWS" == "xy" ];
+then
+	service restorecond stop 2>&1 > /dev/null
+	service auditd stop 2>&1 > /dev/null
+	service rsyslog stop 2>&1 > /dev/null
+	[ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop 2>&1 > /dev/null
+
+	# this one isn't actually due to remediation, but needs to be done too
+	kill $TAILPID 2>/dev/null 1>/dev/null
+	kill $(jobs -p) 2>/dev/null 1>/dev/null
+fi
 
 echo "Done with post install scripts..."
 
