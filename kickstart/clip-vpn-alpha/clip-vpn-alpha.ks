@@ -361,8 +361,8 @@ if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
 	fi	
 fi
 
--# We don't want the final remediation script to set the system to targeted
--sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
+# We don't want the final remediation script to set the system to targeted
+sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
 
 oscap xccdf eval --profile stig-rhel6-server-upstream \
 --report /root/scap/post/html/report.html \
@@ -469,7 +469,7 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	usermod --pass="$HASHED_PASSWORD" client
 	sed -i -e 's/__USERNAME__/client/g' /etc/rc.d/init.d/ec2-get-ssh
 
-	chage -d -1 "$USERNAME"
+	chage -E -1 client
 
 	cat << EOF > /etc/sysconfig/iptables
 *mangle

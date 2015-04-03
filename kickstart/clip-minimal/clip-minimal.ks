@@ -427,7 +427,7 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	chattr +i /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
 	rm -rf /root/* #*/
 
-	chage -d -1 "$USERNAME"
+	chage -E -1 "$USERNAME"
 
 	cat << EOF > /etc/sysconfig/iptables
 *mangle
