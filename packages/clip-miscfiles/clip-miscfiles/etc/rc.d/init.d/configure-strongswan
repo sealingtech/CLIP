@@ -25,7 +25,7 @@ SERVER_SUBJ="/C=US/ST=MD/L=Columbia/O=Quark\ Security/CN=quarksecurity.com/email
 SERVER_PASSWD="passwd"
 CLIENT_SUBJ="/C=US/ST=MD/L=Columbia/O=Quark\ Security/CN=quarksecurity.com/emailAddress=client@quarksecurity.com"
 CLIENT_PASSWD="passwd"
-RIGHT_IP="192.168.31.201"
+RIGHT_IP="192.168.31.0\/24"
 XAUTH_USER="client"
 XAUTH_PASSWD="passwd"
 STRONGSWANDIR=/etc/strongswan

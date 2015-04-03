@@ -12,21 +12,20 @@ conn %default
 	keylife=20m
 	rekeymargin=3m
 	keyingtries=1
-	# as far as I know Android only supports IKEv1
-	# (racoon is an IKEv1 keying daemon)
-	keyexchange=ikev1
+        left={LEFTIP}
+        leftcert=server.pem
+        leftsubnet=0.0.0.0/0
+        leftfirewall=yes
+        leftauth=rsa-4096
+        rightcert=client.pem
+        rightauth=rsa-4096
+        rightsourceip={RIGHTIP}
+        auto=add
 
-conn rw
-	left={LEFTIP}
-	leftcert=server.pem
-	leftsubnet=0.0.0.0/0
-	leftfirewall=yes
-	leftauth=rsa-2048
-	rightcert=client.pem
-	rightauth=rsa-2048
-	rightauth2=xauth
-	rightsourceip={RIGHTIP}
-	auto=add
-	#cipher suite (exclamation mark means strict)
+conn rw-ikev2
+        ike=aes256-sha256-ecp384!
+        keyexchange=ikev2
+
+conn rw-ikev1
 	ike=aes256-sha1-modp1024!
-
+	keyexchange=ikev1
