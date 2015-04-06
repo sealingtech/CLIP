@@ -18,7 +18,7 @@ IPSEC_CONF="$WORKDIR/ipsec.conf"
 IPSEC_SECRETS="$WORKDIR/ipsec.secrets"
 IPSEC_CONF_TMPL="$WORKDIR/ipsec.conf.tmpl"
 IPSEC_SECRETS_TMPL="$WORKDIR/ipsec.secrets.tmpl"
-ANDROID_CERTS="/home/client/android_certs"
+ANDROID_CERTS="/home/__USERNAME__/android_certs"
 CA_SUBJ="/C=US/ST=MD/L=Columbia/O=Quark\ Security/CN=quarksecurity.com/emailAddress=ca@quarksecurity.com"
 CA_PASSWD="passwd"
 SERVER_SUBJ="/C=US/ST=MD/L=Columbia/O=Quark\ Security/CN=quarksecurity.com/emailAddress=server@quarksecurity.com"
@@ -46,7 +46,7 @@ install_files() {
 	mkdir -p $ANDROID_CERTS
 	cp $CLIENT_P12 $ANDROID_CERTS
 	cp $CA_P12 $ANDROID_CERTS
-	chown -R client:client $ANDROID_CERTS
+	chown -R __USERNAME__:__USERNAME__ $ANDROID_CERTS
 }
 
 # args $1 - filename, $2 password
