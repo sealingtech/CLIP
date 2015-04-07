@@ -3,15 +3,15 @@
 # basic configuration
 
 config setup
-	# strictcrlpolicy=yes
-	# uniqueids = no
-	charondebug="asn -1, cfg - 1, chd -1, dmn -1, enc -1, esp -1, ike -1, imc -1, imv -1, job -1, knl -1, lib -1, mgr -1, net -1, pts -1, tls -1, tnc -1"
+        # strictcrlpolicy=yes
+        # uniqueids = no
+        charondebug="asn -1, cfg - 1, chd -1, dmn -1, enc -1, esp -1, ike -1, imc -1, imv -1, job -1, knl -1, lib -1, mgr -1, net -1, pts -1, tls -1, tnc -1"
 
 conn %default
-	ikelifetime=60m
-	keylife=20m
-	rekeymargin=3m
-	keyingtries=1
+        ikelifetime=60m
+        keylife=20m
+        rekeymargin=3m
+        keyingtries=1
         left={LEFTIP}
         leftcert=server.pem
         leftsubnet=0.0.0.0/0
@@ -27,5 +27,6 @@ conn rw-ikev2
         keyexchange=ikev2
 
 conn rw-ikev1
-	ike=aes256-sha1-modp1024!
-	keyexchange=ikev1
+        rightauth2=xauth
+        ike=aes256-sha1-modp1024!
+        keyexchange=ikev1
