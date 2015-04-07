@@ -479,29 +479,12 @@ sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_co
 # <deity> sort them out.
 if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
         || [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
-	service restorecond stop
-	service auditd stop
-	service rsyslog stop
-	service crond stop
-	[ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop
-
-	# this one isn't actually due to remediation, but needs to be done too
-	kill $(jobs -p) 2>/dev/null 1>/dev/null
-	kill $TAILPID 2>/dev/null 1>/dev/null
+	rm /.autorelabel
 fi
+kill $(jobs -p) 2>/dev/null 1>/dev/null
+kill $TAILPID 2>/dev/null 1>/dev/null
 
 echo "Done with post install scripts..."
 
 %end
 
-%post --nochroot
-
-# DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
-#CONFIG-BUILD-PLACEHOLDER
-
-if [ x"$CONFIG_BUILD_PRODUCTION" == "xy" ]; then
-    echo "Deleting anaconda-ks.cfg as this is a production build" >> /mnt/sysimage/root/clip_post_install.log
-    rm /mnt/sysimage/root/anaconda-ks.cfg
-fi
-
-%end

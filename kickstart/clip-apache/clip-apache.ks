@@ -523,33 +523,12 @@ fi
 # <deity> sort them out.
 if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
         || [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
-        service restorecond stop
-        service auditd stop
-        service rsyslog stop
-        service crond stop
-        [ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop
-
-        # this one isn't actually due to remediation, but needs to be done too
-        kill $(jobs -p) 2>/dev/null 1>/dev/null
-        kill $TAILPID 2>/dev/null 1>/dev/null
+	rm -f /.autorelabel
 fi
 
-# This is rather unfortunate, but the remediation content
-# starts services, which need to be killed/shutdown if
-# we're rolling Live Media.  First, kill the known
-# problems cleanly, then just kill them all and let
-# <deity> sort them out.
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
-	service restorecond stop
-	service auditd stop
-	service rsyslog stop
-	service crond stop
-	[ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop
-
-	# this one isn't actually due to remediation, but needs to be done too
-	kill $(jobs -p) 2>/dev/null 1>/dev/null
-	kill $TAILPID 2>/dev/null 1>/dev/null
-fi
+# this one isn't actually due to remediation, but needs to be done too
+kill $(jobs -p) 2>/dev/null 1>/dev/null
+kill $TAILPID 2>/dev/null 1>/dev/null
 
 echo "Done with post install scripts..."
 

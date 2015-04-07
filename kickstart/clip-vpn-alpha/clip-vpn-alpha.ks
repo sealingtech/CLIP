@@ -550,17 +550,12 @@ semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
 # <deity> sort them out.
 
 if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
-	|| [ x"$CONFIG_BUILD_AWS" == "xy" ];
-then
-	service restorecond stop 2>&1 > /dev/null
-	service auditd stop 2>&1 > /dev/null
-	service rsyslog stop 2>&1 > /dev/null
-	[ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop 2>&1 > /dev/null
-
-	# this one isn't actually due to remediation, but needs to be done too
-	kill $TAILPID 2>/dev/null 1>/dev/null
-	kill $(jobs -p) 2>/dev/null 1>/dev/null
+	|| [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
+	rm /.autorelabel
 fi
+
+kill $TAILPID 2>/dev/null 1>/dev/null
+kill $(jobs -p) 2>/dev/null 1>/dev/null
 
 %end
 
