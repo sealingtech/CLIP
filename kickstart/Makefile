@@ -74,7 +74,6 @@ AWS_CONFIG_BUILD_BASH_VARS := $(CONFIG_BUILD_BASH_VARS) CONFIG_BUILD_AWS=y
 # probably just ignore this.
 REPO_LINES ?= repo --name=centos --baseurl=http://mirror.centos.org/centos/6.2/os/$$basearch\nrepo --name=epel   --baseurl=http://download.fedora.redhat.com/pub/epel/$(RHEL_VER)/$$basearch
 
-DEPS := $(PUNGI)
 SETUP_DEeS := $(CURDIR)/Makefile $(KS)
 
 all: iso live-iso setup-ks
@@ -83,7 +82,7 @@ all: iso live-iso setup-ks
 $(UPDATES_IMG): $(YUM_CONF_FILE)
 	$(MK_UPDATES_IMG) $@ $(UPDATES_DIR) $(YUM_CONF_FILE)
 
-iso: $(DEPS) $(ADDTL_DEPS) $(UPDATES_IMG) setup-inst-ks check-volume-id
+iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) $(UPDATES_IMG) setup-inst-ks check-volume-id
 	@echo "Gathering things with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
 	$(VERBOSE)cd $(BUILD_DIR); sudo PYTHONPATH=$(PUNGI_PYTHONPATH) $(PUNGI) $(PUNGI_ARGS) -GCB -c "$(INST_KS)"
