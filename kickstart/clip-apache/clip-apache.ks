@@ -82,6 +82,7 @@ clip-selinux-policy-mcs-apache
 clip-selinux-policy-mcs-mysql
 clip-selinux-policy-mcs-ssh
 clip-selinux-policy-mcs-postfix
+clip-selinux-policy-mcs-ec2ssh
 clip-miscfiles
 m4
 scap-security-guide
@@ -92,6 +93,8 @@ clip-dracut-module
 mysql
 mysql-server
 mysql-test
+openssh
+openssh-server
 httpd
 php
 php-cli
@@ -339,9 +342,37 @@ else
 	usermod --pass="$HASHED_PASSWORD" "$USERNAME"
 fi
 
-chage -d 0 "$USERNAME"
+# Add the user to sudoers and setup an SELinux role/type transition.
+# This line enables a transition via sudo instead of requiring sudo and newrole.
+if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
+	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
+else
+	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
+fi
 
-if [ x"$CONFIG_BUILD_ENABLE_DHCP" == "xy" ]; then
+# We don't want the final remediation script to set the system to targeted
+sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
+
+oscap xccdf eval --profile stig-rhel6-server-upstream \
+--report /root/scap/post/html/report.html \
+--results /root/scap/post/html/results.xml \
+/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
+
+oscap xccdf generate fix \
+--result-id xccdf_org.open-scap_testresult_stig-rhel6-server-upstream \
+/root/scap/post/html/results.xml > /root/scap/post/remediation-script.sh
+chmod +x /root/scap/post/remediation-script.sh
+
+sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
+
+# Now fix things that remediation might have broke
+
+
+# Lock the root acct to prevent direct logins
+usermod -L root
+
+
+if [ x"$CONFIG_BUILD_AWS" == "xy" -o x"$CONFIG_BUILD_ENABLE_DHCP" == "xy" ]; then
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
 DEVICE=eth0
 TYPE=Ethernet
@@ -352,23 +383,111 @@ IPV6_PRIVACY=rfc3041
 EOF
 fi
 
-echo "Turning sshd off"
-/sbin/chkconfig --level 0123456 sshd off
+cat << EOF > /etc/sysconfig/iptables
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --sport 80 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --sport 443 -j ACCEPT
+COMMIT
+EOF
 
-# Add the user to sudoers and setup an SELinux role/type transition.
-# This line enables a transition via sudo instead of requiring sudo and newrole.
-if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
-	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
+# Need to do some additional customizations if we're building for AWS
+if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
+
+        #set up /etc/ftsab
+        sed -i -e "s/\/dev\/root/\/dev\/xvde1/" /etc/fstab
+        mkdir -p /boot/grub
+
+        #set up /boot/grub/menu.lst
+        echo "default=0" >> /boot/grub/menu.lst
+        echo -e "timeout=0\n" >> /boot/grub/menu.lst
+        echo "title CLIP-KERNEL" >> /boot/grub/menu.lst
+        echo "        root (hd0)" >> /boot/grub/menu.lst
+        KERNEL=`find /boot -iname vmlinuz*`
+        INITRD=`find /boot -iname initramfs*`
+        echo "        kernel $KERNEL ro root=/dev/xvde1 rd_NO_PLYMOUTH" >> /boot/grub/menu.lst
+        echo "        initrd $INITRD" >> /boot/grub/menu.lst
+
+        # turn on the ssh key script
+        chkconfig --level 34 ec2-get-ssh on
+        /sbin/chkconfig sshd on
+
+        # disable password auth
+        sed -i -e "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
+
+        sed -i -e "s/__USERNAME__/${USERNAME}/g" /etc/rc.d/init.d/ec2-get-ssh
+
+        # if you're the Government deploying to AWS and want to monitor people feel free to remove these lines.
+        # But for our purposes, we explicitly don't want monitoring or logging
+        > /etc/issue
+        > /etc/issue.net
+        chkconfig rsyslog off
+        chkconfig auditd off
+        # the #*/ makes vim highlighting normal again (or as normal as it is for a ks)
+        rm -rf /var/log/* #*/
+        touch /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
+        chmod 000 /var/log/* #*/
+        chattr +i /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
+	mkdir /var/log/httpd
+	ln -s /dev/null /var/log/httpd/error_log
+	ln -s /dev/null /var/log/httpd/access_log
+        rm -rf /root/* #*/
+
+        chage -E -1 "$USERNAME"
+
+        cat << EOF > /etc/sysconfig/iptables
+*mangle
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+COMMIT
+*nat
+:PREROUTING ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+COMMIT
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+-A INPUT -p tcp -m tcp --sport 80 -s 169.254.169.254 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --dport 80 -d 169.254.169.254 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --sport 22 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --sport 80 -j ACCEPT
+-A OUTPUT -p tcp -m tcp --sport 443 -j ACCEPT
+COMMIT
+EOF
 else
-	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
+        rpm -e clip-selinux-policy-mcs-ec2ssh
+        chage -d 0 "$USERNAME"
+	/sbin/chkconfig sshd off
 fi
 
-# Lock the root acct to prevent direct logins
-usermod -L root
+chkconfig httpd on
 
-######## END DEFAULT USER CONFIG ##########
+cat << EOF > /etc/sysconfig/ip6tables
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+COMMIT
+EOF
 
-###### START - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
+sed -i -e 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i -e 's/#\s*RSAAuthentication .*/RSAAuthentication yes/' /etc/ssh/sshd_config
+sed -i -e 's/#\s*PubkeyAuthentication .*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
+
+
 # Disable all that GUI stuff during boot so we can actually see what is going on during boot.
 if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
         # The first users of a CLIP system will be devs. Lets make things a little easier on them.
@@ -397,60 +516,23 @@ if [  x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
 		grubby --update-kernel=ALL --args=enforcing=0
 	fi
 fi
-###### END - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
 
-#####IPtables Configuration#####
+# starts services, which need to be killed/shutdown if
+# we're rolling Live Media.  First, kill the known
+# problems cleanly, then just kill them all and let
+# <deity> sort them out.
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
+        || [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
+        service restorecond stop
+        service auditd stop
+        service rsyslog stop
+        service crond stop
+        [ -f /etc/init.d/vmtoolsd ] && service vmtoolsd stop
 
-cat << EOF > /etc/sysconfig/iptables
-*filter
-:INPUT DROP [0:0]"
-:FORWARD DROP [0:0]
-:OUTPUT DROP [0:0]
--A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
--A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
--A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
--A OUTPUT -p tcp -m tcp --sport 22 -j ACCEPT
--A OUTPUT -p tcp -m tcp --sport 80 -j ACCEPT
--A OUTPUT -p tcp -m tcp --sport 443 -j ACCEPT
-COMMIT
-# Completed on Thu Jun  5 16:22:41 2014
-EOF
-
-#####IPtables End Configuration#####
-
-# We don't want the final remediation script to set the system to targeted
-sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
-
-oscap xccdf eval --profile stig-rhel6-server-upstream \
---report /root/scap/post/html/report.html \
---results /root/scap/post/html/results.xml \
-/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
-
-oscap xccdf generate fix \
---result-id xccdf_org.open-scap_testresult_stig-rhel6-server-upstream \
-/root/scap/post/html/results.xml > /root/scap/post/remediation-script.sh
-chmod +x /root/scap/post/remediation-script.sh
-
-sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
-
-# Now fix things that remediation might have broke
-
-cat << EOF >> /home/${USERNAME}/.bashrc
-if [ -S /home/${USERNAME}/.ssh/authorized_keys ]; then
-        if grep -q "^PasswordAuthentication yes" /etc/ssh/sshd_config; then
-                echo "Please disable PasswordAuthentication in /etc/ssh/sshd_config"
-        fi
-else   
-        echo "Please add a public key to ~/.ssh/authorized_keys."
-        echo "Then disable PasswordAuthentication in /etc/ssh/sshd_config"
+        # this one isn't actually due to remediation, but needs to be done too
+        kill $(jobs -p) 2>/dev/null 1>/dev/null
+        kill $TAILPID 2>/dev/null 1>/dev/null
 fi
-EOF
-
-chkconfig httpd on
-chkconfig php on
-chkconfig mysqld on
-chkconfig netfs off
-chkconfig restorecond off
 
 # This is rather unfortunate, but the remediation content
 # starts services, which need to be killed/shutdown if
