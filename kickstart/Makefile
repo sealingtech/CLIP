@@ -66,9 +66,7 @@ CONFIG_BUILD_BASH_VARS ?= export CONFIG_BUILD_PRODUCTION=n CONFIG_BUILD_ENFORCIN
 # The differences vetween live and installable are addressed via these vars
 LIVE_CONFIG_BUILD_BASH_VARS := $(CONFIG_BUILD_BASH_VARS) CONFIG_BUILD_LIVE_MEDIA=y
 LIVE_CONFIG_BUILD_ADDTL_PACKAGES += $(CONFIG_BUILD_ADDTL_PACKAGES) eject
-
-CONFIG_BUILD_INCLUDE_TOOR ?= n
-AWS_CONFIG_BUILD_BASH_VARS := $(CONFIG_BUILD_BASH_VARS) CONFIG_BUILD_AWS=y CONFIG_BUILD_INCLUDE_TOOR=$(CONFIG_BUILD_INCLUDE_TOOR)
+AWS_CONFIG_BUILD_BASH_VARS := $(CONFIG_BUILD_BASH_VARS) CONFIG_BUILD_AWS=y CONFIG_BUILD_VPN_ENABLE_TOOR=$(CONFIG_BUILD_VPN_ENABLE_TOOR)
 
 # This is only useful for building out of this subdir.  The top-level Makefile passes this variable down
 # pointing to the yum repos CLIP creates and manages in repos/*.  What this means is that you should

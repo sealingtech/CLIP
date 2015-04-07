@@ -276,7 +276,7 @@ if [ x"$CONFIG_BUILD_REMEDIATE" == "xy" ]; then
 fi
 
 
-if [ x"$CONFIG_BUILD_AWS" != "xy" -o x"$CONFIG_BUILD_INCLUDE_TOOR" == "xy" ]; then
+if [ x"$CONFIG_BUILD_AWS" != "xy" -o x"$CONFIG_BUILD_VPN_ENABLE_TOOR" == "xy" ]; then
 	# FIXME: Change the username and password.
 	#        If a hashed password is specified it will be used
 	#        and the PASSWORD field will be ignored.
@@ -312,8 +312,10 @@ if [ x"$CONFIG_BUILD_AWS" != "xy" -o x"$CONFIG_BUILD_INCLUDE_TOOR" == "xy" ]; th
 		usermod --pass="$HASHED_PASSWORD" "$USERNAME"
 	fi
 
-	chage -d 0 "$USERNAME"
-
+	if [ x"$CONFIG_BUILD_AWS" != "xy" ]; then
+		chage -d 0 "$USERNAME"
+	fi
+	
 	# Add the user to sudoers and setup an SELinux role/type transition.
 	# This line enables a transition via sudo instead of requiring sudo and newrole.
 	if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
@@ -450,7 +452,7 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	> /etc/issue
 	> /etc/issue.net
 	#well logs are still useful for debugging purposes :)
-	if [ x"$CONFIG_BUILD_INCLUDE_TOOR" != "xy" ]
+	if [ x"$CONFIG_BUILD_VPN_ENABLE_TOOR" != "xy" ]
 	then
                 chkconfig rsyslog off
                 chkconfig auditd off
@@ -466,7 +468,7 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	# disable password auth
 	sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
 
-	if [ x"$CONFIG_BUILD_INCLUDE_TOOR" != "xy" ]
+	if [ x"$CONFIG_BUILD_VPN_ENABLE_TOOR" != "xy" ]
 	then
 		# add an sftp user
 		semanage user -N -a -R "user_r" client_u
@@ -481,9 +483,9 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 		sed -i -e 's/__USERNAME__/client/g' /etc/rc.d/init.d/configure-strongswan
 		chage -E -1 client
 	else
-		sed -i -e 's/__USERNAME__/toor/g' /etc/rc.d/init.d/ec2-get-ssh
-		sed -i -e 's/__USERNAME__/toor/g' /etc/rc.d/init.d/configure-strongswan
-
+		sed -i -e "s/__USERNAME__/$USERNAME/g" /etc/rc.d/init.d/ec2-get-ssh
+		sed -i -e "s/__USERNAME__/$USERNAME/g" /etc/rc.d/init.d/configure-strongswan
+		chage -E -1 $USERNAME 
 	fi
 
 	cat << EOF > /etc/sysconfig/iptables
