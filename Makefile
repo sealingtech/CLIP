@@ -78,7 +78,27 @@ COMPS_FILE := $(CONF_DIR)/yum/comps.xml
 export EC2_AMI_TOOLS := $(RPM_TMPDIR)/ec2-ami-tools
 EC2_AMI_TOOLS_ZIP    := $(RPM_TMPDIR)/ec2-ami-tools.zip
 EC2_AMI_TOOLS_URL    := http://s3.amazonaws.com/ec2-downloads/ec2-ami-tools.zip
-export AWS_KERNEL    ?= aki-88aa75e1
+
+ifeq ($(AWS_AVAIL_ZONE),us-east-1)
+export AWS_KERNEL    ?= aki-919dcaf8
+else ifeq ($(AWS_AVAIL_ZONE),us-west-1)
+export AWS_KERNEL    ?= aki-880531cd
+else ifeq ($(AWS_AVAIL_ZONE),us-west-2)
+export AWS_KERNEL    ?= aki-fc8f11cc
+else ifeq ($(AWS_AVAIL_ZONE),eu-west-1)
+export AWS_KERNEL    ?= aki-52a34525
+else ifeq ($(AWS_AVAIL_ZONE),eu-central-1)
+export AWS_KERNEL    ?= aki-184c7a05
+else ifeq ($(AWS_AVAIL_ZONE),ap-southeast-1)
+export AWS_KERNEL    ?= aki-503e7402
+else ifeq ($(AWS_AVAIL_ZONE),ap-southeast-2)
+export AWS_KERNEL    ?= aki-c362fff9
+else ifeq ($(AWS_AVAIL_ZONE),ap-northeast-1)
+export AWS_KERNEL    ?= aki-176bf516
+else ifeq ($(AWS_AVAIL_ZONE),sa-east-1)
+export AWS_KERNEL    ?= aki-5553f448
+endif
+export AWS_AVAIL_ZONE
 
 export EC2_API_TOOLS := $(RPM_TMPDIR)/ec2-api-tools
 EC2_API_TOOLS_ZIP    := $(RPM_TMPDIR)/ec2-api-tools.zip
@@ -165,12 +185,17 @@ define CHECK_MOCK
 	@if ps -eo comm= | grep -q mock; then echo "ERROR: Another instance of mock is running.  Please hangup and try your build again later." && exit 1; fi
 endef
 
+AVAIL_ZONES := us-east-1 us-west-1 us-west-2 eu-west-1 eu-central-1 ap-southeast-1 ap-southeast-2 ap-northeast-1 sa-east-1
+FILTERED_ZONE := $(filter $(AVAIL_ZONES), $(AWS_AVAIL_ZONE))
+
 define CHECK_AWS_VARS
 	@if [ x"$(AWS_SIGNING_CERT)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_SIGNING_CERT to the path to your AWS signing certificate"; exit -1; fi
 	@if [ x"$(AWS_PRIV_KEY)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_PRIV_KEY to the path to your AWS private key"; exit -1; fi
 	@if [ x"$(AWS_ACCT_ID)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_ACCT_ID to your AWS account ID"; exit -1; fi
 	@if [ x"$(AWS_ACCESS_KEY_ID)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_ACCESS_KEY_ID to your AWS access key ID"; exit -1; fi
 	@if [ x"$(AWS_ACCESS_KEY)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_ACCESS_KEY to your AWS access key"; exit -1; fi
+	@if [ x"$(AWS_AVAIL_ZONE)" == "x" ]; then echo -e "In CONFIG_AWS, set AWS_AVAIL_ZONE to your desired AWS availability zone"; exit -1; fi
+	@if [ x"$(FILTERED_ZONE)" == "x" ]; then echo -e "AWS_AVAIL_ZONE is invalid, should be one of \"$(AVAIL_ZONES)\"" ; exit -1; fi
 	@echo "AWS variables are all set."
 endef
 

@@ -49,9 +49,9 @@ EC2_BUNDLE_IMAGE_ARGS := --image $(BUILD_DIR)/$(NAME)-$(ISO_VERSION).img --cert 
 AWS_MANIFEST := $(AWS_BUNDLE_DIR)/$(NAME)-$(ISO_VERSION).img.manifest.xml
 EC2_UPLOAD_BUNDLE := $(EC2_AMI_TOOLS)/*/bin/ec2-upload-bundle
 AWS_BUCKET ?= $(NAME)-$(ISO_VERSION)
-EC2_UPLOAD_BUNDLE_ARGS := -b $(AWS_BUCKET) -a $(AWS_ACCESS_KEY_ID) -s $(AWS_ACCESS_KEY) -m $(AWS_MANIFEST)
+EC2_UPLOAD_BUNDLE_ARGS := -b $(AWS_BUCKET) -a $(AWS_ACCESS_KEY_ID) -s $(AWS_ACCESS_KEY) -m $(AWS_MANIFEST) --location $(AWS_AVAIL_ZONE)
 EC2_REGISTER := $(EC2_API_TOOLS)/*/bin/ec2-register
-EC2_REGISTER_ARGS := -O $(AWS_ACCESS_KEY_ID) -W $(AWS_ACCESS_KEY) $(AWS_BUCKET)/$(NAME)-$(ISO_VERSION).img.manifest.xml --name "$(NAME)-$(ISO_VERSION)" --architecture x86_64 --kernel $(AWS_KERNEL)
+EC2_REGISTER_ARGS := -O $(AWS_ACCESS_KEY_ID) -W $(AWS_ACCESS_KEY) $(AWS_BUCKET)/$(NAME)-$(ISO_VERSION).img.manifest.xml --name "$(NAME)-$(ISO_VERSION)" --architecture x86_64 --kernel $(AWS_KERNEL) --region $(AWS_AVAIL_ZONE)
 EC2_HOME := $(EC2_API_TOOLS)/ec2-api-tools-$(EC2_API_TOOLS_VER)
 JAVA_HOME ?= /usr/lib/jvm/java
 
