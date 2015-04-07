@@ -34,6 +34,7 @@ CERTDIR=$IPSECDIR/certs
 PRIVATEDIR=$IPSECDIR/private
 CACERTDIR=$IPSECDIR/cacerts
 DAYS=1024
+KEYSIZE=4096
 
 install_files() {
 	cp $CA_PEM $CACERTDIR
@@ -50,7 +51,7 @@ install_files() {
 
 # args $1 - filename, $2 password
 gen_key() {
-	openssl genrsa -passout pass:$2 -out $1 2048
+	openssl genrsa -passout pass:$2 -out $1 $KEYSIZE
 }
 
 # args $1 - filename, $2 keyfile, $3 subject
