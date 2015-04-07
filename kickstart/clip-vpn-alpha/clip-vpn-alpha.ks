@@ -264,7 +264,11 @@ oscap xccdf generate fix \
 
 chmod +x /root/scap/pre/remediation-script.sh
 if [ x"$CONFIG_BUILD_REMEDIATE" == "xy" ]; then
-        /root/scap/pre/remediation-script.sh
+        mkdir -p /tmp/service
+        echo "#!/bin/bash" > /tmp/service/service
+        echo "echo \"ignoring service call \$1\" >> /tmp/service/service.log" >> /tmp/service/service
+        chmod a+x /tmp/service/service
+        PATH=/tmp/service:$PATH /root/scap/pre/remediation-script.sh
         # Un-remeidate things SSG broke...
         sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
         cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' | fold -sw 80 > /etc/issue.net
@@ -449,7 +453,7 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	if [ x"$CONFIG_BUILD_INCLUDE_TOOR" != "xy" ]
 	then
                 chkconfig rsyslog off
-        	chkconfig auditd off
+                chkconfig auditd off
                 # TODO: this should really be done via policy
                 # the #*/ makes vim highlighting normal again (or as normal as it is for a ks)
                 rm -rf /var/log/* #*/
