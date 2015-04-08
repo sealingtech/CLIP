@@ -425,17 +425,6 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
         # But for our purposes, we explicitly don't want monitoring or logging
         > /etc/issue
         > /etc/issue.net
-        chkconfig rsyslog off
-        chkconfig auditd off
-        # the #*/ makes vim highlighting normal again (or as normal as it is for a ks)
-        rm -rf /var/log/* #*/
-        touch /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
-        chmod 000 /var/log/* #*/
-        chattr +i /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
-	mkdir /var/log/httpd
-	ln -s /dev/null /var/log/httpd/error_log
-	ln -s /dev/null /var/log/httpd/access_log
-        rm -rf /root/* #*/
 
         chage -E -1 "$USERNAME"
 
