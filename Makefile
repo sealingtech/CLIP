@@ -228,6 +228,7 @@ $(1): $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1))) $(MY_REPO_DEPS) $(
 	$(call CHECK_MOCK)
 	$(VERBOSE)$(MOCK) $(MOCK_ARGS) $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
 	cd $(CLIP_REPO_DIR) && $(REPO_CREATE) .
+	$(VERBOSE)$(REPO_QUERY) --repoid=clip-repo |sort 1>$(CONF_DIR)/pkglist.clip-repo
 ifeq ($(ENABLE_SIGNING),y)
 	$(RPM) --addsign $(CLIP_REPO_DIR)/*
 endif
@@ -366,6 +367,7 @@ init_yum_conf:
 	$(VERBOSE)$(RM) $(YUM_CONF_FILE)
 	@echo "Adding yum.conf header"
 	$(VERBOSE)cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_FILE)
+	$(VERBOSE)echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_FILE) 
 
 $(YUM_CONF_FILE): create-repos
 
@@ -423,7 +425,8 @@ $(EC2_API_TOOLS): $(EC2_API_TOOLS_ZIP)
 ec2-tools: $(EC2_AMI_TOOLS) $(EC2_API_TOOLS)
 
 check-vars:
-	$(call CHECK_AWS_VARS)
+	$(call CHECK_AWS_VARS)/pkglist
+
 
 $(AWSBUNDLES): check-vars ec2-tools $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
@@ -436,6 +439,7 @@ $(MOCK_CONF_DIR)/$(MOCK_REL).cfg:  $(MOCK_CONF_DIR)/$(MOCK_REL).cfg.tmpl $(CONF_
 	$(call CHECK_DEPS)
 	$(VERBOSE)cat $(MOCK_CONF_DIR)/$(MOCK_REL).cfg.tmpl > $@
 	$(VERBOSE)echo -e $(MOCK_YUM_CONF) >> $@
+	$(VERBOSE)echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $@
 	$(VERBOSE)echo '"""' >> $@
 
 ifneq ($(OVERLAY_HOME_SIZE),)
