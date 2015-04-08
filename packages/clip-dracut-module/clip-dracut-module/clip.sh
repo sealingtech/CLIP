@@ -5,12 +5,6 @@
 # Authors: Spencer Shimko <spencer@quarksecurity.com>
 #
 
-# Generated live media appears to retain the .autorelabel file
-# cuains g relabel on each and every boot when stateless.
-# Remove it here for those environments.
-getarg "liveimg" > /dev/null
-[ $? -eq 0 ] && { [ -f "$NEWROOT"/.autorelabel ] && rm "$NEWROOT"/.autorelabel; }
-
 # If SELinux is disabled exit now
 getarg "selinux=0" > /dev/null && return 0
 
