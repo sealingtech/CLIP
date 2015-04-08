@@ -51,38 +51,10 @@ For more detailed instructions, you may reference the following:
 
    A list of currently known issues and how to get past them.
 
-6. [Help-LiveCDs.txt](Help-LiveCDs.txt)
-   
-   How to generate live CDs.
-
-7. [Help-Released-Upstream-Packages.txt](Help-Released-Upstream-Packages.txt)
-
-   How to add an upstream package and track it.
-
 8. [Help-Releases.txt](Help-Releases.txt)
 
    Help in getting a CLIP release out.
 
-9. [Help-SecState.txt](Help-SecState.txt)
-
-   How to use SecState's remediation functionality.
-
-10. [Help-Updating-Existing-External-Packages.txt](Help-Updating-Existing-External-Packages.txt)
-
-   Hot to update the existing external packages that are used.
-
-11. [Help-Upstream-Git-Repos.txt](Help-Upstream-Git-Repos.txt)
-
-   How to track an upstream repo using a specific git hash.
-
-12. [Help-Upstreams.txt](Help-Upstreams.txt)
-
-   How to add various upstream packages.
-
-13. [Help-Upstream-SVN-Repos.txt](Help-Upstream-SVN-Repos.txt)
-
-   How to track an upstream repo using a specific SVN hash.
-
-14. [Help-Use-Cases.txt](Help-Use-Cases.txt)
+9. [Help-Use-Cases.txt](Help-Use-Cases.txt)
 
    How to best use CLIP for specific scenarios.
