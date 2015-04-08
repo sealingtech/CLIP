@@ -14,7 +14,7 @@
 ######################################################
 # Import build config (version, release, repos, etc)
 include CONFIG_BUILD
-include CONFIG_AWS
+-include CONFIG_AWS
 
 # This is the RHEL version supported by this release of CLIP.  Do not alter.
 export RHEL_VER := 6
