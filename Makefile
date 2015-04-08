@@ -309,19 +309,15 @@ endef
 help:
 	$(call CHECK_DEPS)
 	@echo "The following make targets are available for generating installable ISOs:"
-	@echo "	all (roll all packages and generate all installation ISOs)"
+	@echo "	all"
 	@for cd in $(INSTISOS); do echo "	$$cd"; done
 	@echo
 	@echo "The following make targets are available for generating Live CDs:"
-	@echo "	all (generate all installation ISOs and Live CDs)"
+	@echo "	all"
 	@for cd in $(LIVECDS); do echo "	$$cd"; done
 	@echo
 	@echo "The following make targets are available for generating AWS :"
-	@echo "	all (generate all AWS AMIs)"
 	@for cd in $(AWSBUNDLES); do echo "	$$cd"; done
-	@echo
-	@echo "	NOTE: if you need to debug a kickstart post script for Live CDs,"
-	@echo "	      add LIVECD_ARGS='--shell' to the make command-line."
 	@echo
 	@echo "To burn a livecd image to a thumbdrive:"
 	@echo "	iso-to-disk ISO_FILE=<isofilename> USB_DEV=<devname>"
@@ -352,7 +348,7 @@ help:
 	@echo "	clean-mock (deletes the yum and mock configuration we generate)"
 	@echo "	bare (deletes everything except ISOs)"
 
-all: create-repos $(INSTISOS)
+all: create-repos $(INSTISOS) $(LIVECDS)
 
 # Generate custom targets for managing the yum repos.  We have to generate the rules since the user provides the set of repos.
 $(foreach REPO,$(strip $(shell cat CONFIG_REPOS|$(GREP) -E '^[a-zA-Z].*=.*'|$(SED) -e 's/ \?= \?/=/')),$(eval $(call REPO_RULE_template,$(REPO))))
