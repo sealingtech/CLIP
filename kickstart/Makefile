@@ -43,7 +43,7 @@ UPDATES_DIR := $(TMP_DIR)/updates
 #TODO download a specific version of these tools
 #this will avoid this ugly wildcarding stuff which might break,
 #and this way we'll always be using a known good version of the tools
-AWS_BUNDLE_DIR := $(TMP_DIR)/$(NAME)-$(ISO_VERSION)-aws-bundle
+AWS_BUNDLE_DIR := $(TMP_DIR)/$(NAME)-$(ISO_VERSION)-aws-ami
 EC2_BUNDLE_IMAGE := $(EC2_AMI_TOOLS)/*/bin/ec2-bundle-image
 EC2_BUNDLE_IMAGE_ARGS := --image $(BUILD_DIR)/$(NAME)-$(ISO_VERSION).img --cert $(AWS_SIGNING_CERT) --privatekey $(AWS_PRIV_KEY) -u $(AWS_ACCT_ID) --arch x86_64 --kernel $(AWS_KERNEL) -d $(AWS_BUNDLE_DIR)
 AWS_MANIFEST := $(AWS_BUNDLE_DIR)/$(NAME)-$(ISO_VERSION).img.manifest.xml

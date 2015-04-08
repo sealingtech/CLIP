@@ -1,6 +1,6 @@
 CLIP can now roll a image and upload it to Amazon's AWS as an AMI you can use
 to create an instance.  This help document assumes familiarity with AWS and
-AWS terminology.  Only clip-vpn-alpja and clip-minimal currently have support for AWS.  
+AWS terminology. 
 
 If you already have a fully configured AWS user you may skip steps 1-12.
 
@@ -39,13 +39,17 @@ the text field and upload the certificate.
 12. Add the path to the signing certificate and private key to the
 CONFIG_AWS file at the top-level.
 
-13. Build you AWS bundle which will automatically be uploaded to AWS as an
-AMI:
-make clip-vpn-alpha-aws-bundle 
+13. Build you AWS AMI which will automatically be uploaded to AWS as an
+iimage (AMI):
+make clip-vpn-aws-ami 
 or
-make clip-minimal-aws-bundle 
+make clip-sftp-dropbox-aws-ami
+or
+make clip-apache-aws-ami
+or
+make clip-minimal-aws-ami
 
 14. When finished, login to your AWS account and go to your AMIs section.
-There will be a clip-vpn-<commitish>.  
+There will be a clip-*-<commitish>.  
 
 15. Create an instance from this AMI.

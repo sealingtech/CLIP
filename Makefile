@@ -162,8 +162,8 @@ LIVECDS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -live-iso,$(SYSTEM)))
 # These are targets supported by the kickstart/Makefile that will be used to generate installation ISOs.
 INSTISOS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -inst-iso,$(SYSTEM)))
 
-# These are targets supported by the kickstart/Makefile that will be used to generate AWS bundles
-AWSBUNDLES := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -aws-bundle,$(SYSTEM)))
+# These are targets supported by the kickstart/Makefile that will be used to generate AWS AMI 
+AWSBUNDLES := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -aws-ami,$(SYSTEM)))
 
 # Add a file to a repo by either downloading it (if http/ftp), or symlinking if local.
 # TODO: add support for wget (problem with code below, running echo/GREP for each file instead of once for the whole repo
@@ -315,8 +315,8 @@ help:
 	@echo "	all (generate all installation ISOs and Live CDs)"
 	@for cd in $(LIVECDS); do echo "	$$cd"; done
 	@echo
-	@echo "The following make targets are available for generating AWS bundles:"
-	@echo "	all (generate all AWS bundles)"
+	@echo "The following make targets are available for generating AWS :"
+	@echo "	all (generate all AWS AMIs)"
 	@for cd in $(AWSBUNDLES); do echo "	$$cd"; done
 	@echo
 	@echo "	NOTE: if you need to debug a kickstart post script for Live CDs,"
@@ -429,7 +429,7 @@ $(AWSBUNDLES): check-vars ec2-tools $(BUILD_CONF_DEPS) create-repos $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_LIVE_TOOLS)
 	# TODO: this awk expression relies heavily on the tool name prefix length, better option?
-	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-aws-bundle/\1/'`" \
+	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-aws-ami/\1/'`" \
 		EC2_API_TOOLS_VER=$$(unzip -l $(EC2_API_TOOLS_ZIP)|awk '/^.*[0-9]\/$$/ { print substr($$4,15,length($$4)-15); }') aws 
 
 $(MOCK_CONF_DIR)/$(MOCK_REL).cfg:  $(MOCK_CONF_DIR)/$(MOCK_REL).cfg.tmpl $(CONF_DIR)/pkglist.blacklist
