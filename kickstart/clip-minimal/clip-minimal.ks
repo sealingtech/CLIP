@@ -445,6 +445,8 @@ COMMIT
 COMMIT
 EOF
 
+elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
+        chage -E -1 $USERNAME
 else
 	rpm -e clip-selinux-policy-mcs-ec2ssh
 	chage -d 0 "$USERNAME"

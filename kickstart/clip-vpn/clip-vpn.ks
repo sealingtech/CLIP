@@ -518,10 +518,11 @@ COMMIT
 COMMIT
 EOF
 
+elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
+        chage -E -1 $USERNAME
+
 else
-
-rpm -e clip-selinux-policy-mcs-ec2ssh
-
+	rpm -e clip-selinux-policy-mcs-ec2ssh
 fi
 
 sed -i -e 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config

@@ -426,7 +426,7 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
         > /etc/issue
         > /etc/issue.net
 
-        chage -E -1 "$USERNAME"
+	chage -E -1 $USERNAME
 
         cat << EOF > /etc/sysconfig/iptables
 *mangle
@@ -455,6 +455,8 @@ COMMIT
 -A OUTPUT -p tcp -m tcp --sport 443 -j ACCEPT
 COMMIT
 EOF
+elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
+	chage -E -1 $USERNAME
 else
         rpm -e clip-selinux-policy-mcs-ec2ssh
         chage -d 0 "$USERNAME"

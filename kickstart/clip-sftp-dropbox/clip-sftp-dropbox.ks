@@ -479,6 +479,8 @@ cat << EOF > /etc/sysconfig/iptables
 COMMIT
 EOF
 
+elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
+        chage -E -1 $USERNAME
 else
 
 cat << EOF >> /home/${USERNAME}/.bashrc
