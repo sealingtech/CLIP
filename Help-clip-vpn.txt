@@ -1,0 +1,5 @@
+Once the VPN system has booted, sftp in as "client" using the
+password you specified in the kickstart ("neutronbass" by
+default).  Then, download the key material from android_certs
+and remove them. Use these certificates to connect to the VPB
+endpoint.
