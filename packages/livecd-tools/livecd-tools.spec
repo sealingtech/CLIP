@@ -5,7 +5,7 @@
 Summary: Tools for building live CDs
 Name: livecd-tools
 Version: 13.4.4
-Release: 99%{?dist}
+Release: 101%{?dist}
 Epoch: 1
 License: GPLv2
 Group: System Environment/Base
@@ -21,6 +21,7 @@ Patch1: dracut-live-fix.patch
 Patch2: kargs-and-boot-menu.patch
 Patch3: setfiles-force-all-bits.patch
 Patch4: add-live-sata-mods.patch
+Patch5: setfiles-use-correct-fc.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Requires: python-imgcreate = %{epoch}:%{version}-%{release}
 Requires: mkisofs
@@ -72,6 +73,7 @@ like live image or appliances.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
 
 %build
 make

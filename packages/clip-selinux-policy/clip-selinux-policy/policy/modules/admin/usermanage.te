@@ -274,6 +274,7 @@ allow passwd_t crack_db_t:dir list_dir_perms;
 read_files_pattern(passwd_t, crack_db_t, crack_db_t)
 
 kernel_read_kernel_sysctls(passwd_t)
+kernel_read_crypto_sysctls(passwd_t)
 
 # for SSP
 dev_read_urand(passwd_t)
@@ -427,7 +428,7 @@ optional_policy(`
 #
 
 allow useradd_t self:capability { dac_override chown kill fowner fsetid setuid sys_resource };
-dontaudit useradd_t self:capability sys_tty_config;
+dontaudit useradd_t self:capability { sys_ptrace sys_tty_config };
 allow useradd_t self:process ~{ ptrace setcurrent setexec setfscreate setrlimit execmem execstack execheap };
 allow useradd_t self:process setfscreate;
 allow useradd_t self:fd use;

@@ -395,6 +395,10 @@ selinux_get_enforce_mode(initrc_t)
 storage_getattr_fixed_disk_dev(initrc_t)
 storage_setattr_fixed_disk_dev(initrc_t)
 storage_setattr_removable_dev(initrc_t)
+storage_dontaudit_getattr_removable_dev(initrc_t)
+# lsblk, which has a bug in RHEL 6, attempts to read raw blk devs
+# https://bugzilla.redhat.com/show_bug.cgi?id=818621
+storage_dontaudit_read_removable_device(initrc_t)
 
 term_use_all_terms(initrc_t)
 term_reset_tty_labels(initrc_t)
@@ -424,6 +428,7 @@ miscfiles_read_generic_certs(initrc_t)
 
 modutils_read_module_config(initrc_t)
 modutils_domtrans_insmod(initrc_t)
+modutils_read_module_deps(initrc_t)
 
 seutil_read_config(initrc_t)
 
@@ -748,6 +753,15 @@ optional_policy(`
 	mysql_stream_connect(initrc_t)
 	mysql_write_log(initrc_t)
 	mysql_read_config(initrc_t)
+	mysql_setattr_db_files(initrc_t)
+	mysql_setattr_var_run_files(initrc_t)
+
+	# runs fuser
+	logging_dontaudit_getattr_audit_netlink_socket(initrc_t)
+	udev_dontaudit_getattr_netlink_socket(initrc_t)
+
+	kernel_donaudit_stream_getattr(initrc_t)
+	
 ')
 
 optional_policy(`

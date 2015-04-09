@@ -1,0 +1,33 @@
+# Copy this file to CONFIG_AWS and modify the contents.
+# See Help-AWS.txt for help.
+# Path to your AWS signing cert
+#AWS_SIGNING_CERT=~/aws/cert.pem
+
+# Path to your AWS private key
+#AWS_PRIV_KEY=~/aws/key.pem
+
+# Your AWS account ID
+#AWS_ACCT_ID=123456789101
+
+# Your AWS key ID
+#AWS_ACCESS_KEY_ID=FOO
+
+# Your AWS access key
+#AWS_ACCESS_KEY=BAR
+
+#Availability zone in which the AMI will be placed,
+#acceptable values are:
+#us-east-1,
+#us-west-2,
+#us-west-1,
+#eu-west-1,
+#eu-central-1
+#ap-southeast-1,
+#ap-southeast-2,
+#ap-northeast-1
+#sa-east-1,
+#See: http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region for details
+AWS_AVAIL_ZONE=us-east-1
+
+# Don't touch this line or the universe will come to an end.
+export AWS_SIGNING_CERT AWS_PRIV_KEY AWS_ACCT_ID AWS_ACCESS_KEY_ID AWS_ACCESS_KEY AWS_AVAIL_ZONE

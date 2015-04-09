@@ -8,7 +8,7 @@
 Name:   %{pkgname}
 Version: %{version}
 Release: %{release}
-Summary: Certifiable Linux Integration Platform Policy configuration
+Summary: Certifiable Linux Integration Platform Policy Base Configuration Data
 License: GPLv2+
 Group: System Environment/Base
 Source: %{pkgname}-%{version}.tar.gz
@@ -18,6 +18,10 @@ Requires: coreutils
 
 %description 
 Certifiable Linux Integration Platform SELinux core, non-policy components. 
+This package contains the base components common across policy types.  In
+addition to this package, you will want to choose from:
+clip-selinux-policy-mcs (an MCS policy)
+clip-selinux-policy-mls (an MLS policy)
 
 %files 
 %defattr(-,root,root,-)
@@ -51,20 +55,34 @@ Certifiable Linux Integration Platform SELinux policy documentation package
 %doc %{_usr}/share/doc/%{name}-%{version}
 %attr(755,root,root) %{_usr}/share/selinux/devel/policyhelp
 
-%check
-if /usr/sbin/selinuxenabled; then
-/usr/bin/sepolgen-ifgen -i %{buildroot}%{_usr}/share/selinux/devel/include -o /dev/null 
-fi
+%global genSeparatePolRPM() \
+%package %2-%1 \
+Summary: Certifiable Linux Integration Platform SELinux %2 policy for %1 \
+Group: System Environment/Base \
+Requires(pre): clip-selinux-policy-%2 = %{version}-%{release} \
+BuildRequires: policycoreutils-python m4 policycoreutils python make gcc checkpolicy >= %{CHECKPOL_VERSION} \
+\
+%description %2-%1  \
+Certifiable Linux Integration Platform SELinux %2 policy for %1 \
+\
+%files %2-%1 \
+%{_usr}/share/selinux/%2/%1.pp.bz2 \
+\
+%post %2-%1 \
+echo %1.pp.bz2 >> %{_usr}/share/selinux/%2/modules.lst \
+semodule -n -s %2 -i %{_usr}/share/selinux/%2/%1.pp.bz2 \
+echo "NOTE: installing the %1 policy RPM *does not reload the policy*." \
+echo "To reload the policy run 'semodule -R'" 
 
-%define makeCmds() \
-#make UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 bare \
-#make UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024  conf \
+%{expand:%( for f in %{separatePkgs}; do echo "%%genSeparatePolRPM $f mcs"; done)}
+
+%{expand:%( for f in %{separatePkgs}; do echo "%%genSeparatePolRPM $f mls"; done)}
 
 %define installCmds() \
-make UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS=""%{enable_modules}"" base.pp \
-make validate UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS=""%{enable_modules}"" modules \
-make UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS=""%{enable_modules}"" install \
-make UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS=""%{enable_modules}"" install-appconfig \
+make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}  %{separatePkgs}" base.pp \
+make %{?_smp_mflags} validate UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}  %{separatePkgs}" modules \
+make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}  %{separatePkgs}" install \
+make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules} %{separatePkgs}" install-appconfig \
 #%{__cp} *.pp %{buildroot}/%{_usr}/share/selinux/%1/ \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/policy \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/modules/active \
@@ -77,11 +95,15 @@ touch %{buildroot}%{_sysconfdir}/selinux/%1/policy/policy.%{POLICYVER} \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.homedirs \
 install -m0644 config/setrans.conf %{buildroot}%{_sysconfdir}/selinux/%1/setrans.conf \
-bzip2 %{buildroot}/%{_usr}/share/selinux/%1/*.pp \
+find %{buildroot}/%{_usr}/share/selinux/%1/ -type f |xargs -P `/usr/bin/nproc` -n `/usr/bin/nproc`  bzip2 \
 awk '$1 !~ "/^#/" && $2 == "=" && $3 == "module" { printf "%%s.pp.bz2 ", $1 }' ./policy/modules.conf > %{buildroot}/%{_usr}/share/selinux/%1/modules.lst \
-[ x""%{enable_modules}"" != "x" ] && for i in %{enable_modules}; do echo ${i}.pp.bz2 >> %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done
+[ x"%{enable_modules}" != "x" ] && for i in %{enable_modules}; do echo ${i}.pp.bz2 >> %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done \
+SORTED_PKGS=`for p in %{separatePkgs}; do echo $p | awk '{ print length($0) " " $0; }'; done | sort -r -n | cut -d ' ' -f 2` \
+for f in ${SORTED_PKGS}; do grep $f\.pp\.bz2 %{buildroot}/%{_usr}/share/selinux/%1/modules.lst || (echo "failed to update module.lst for module $f" && exit -1); sed -i -e "s/$f.pp.bz2//g" %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done 
 %nil
 
+%global excludes() %(for f in %{separatePkgs}; do echo "%exclude %{_usr}/share/selinux/%1/${f}.pp.bz2"; done )
+ 
 %define fileList() \
 %defattr(-,root,root) \
 %dir %{_usr}/share/selinux/%1 \
@@ -152,7 +174,6 @@ Certifiable Linux Integration Platform SELinux Reference Policy - modular.
 %setup -n %{pkgname} -q
 
 %install
-# Build clip policy
 %{__rm} -fR %{buildroot}
 mkdir -p %{buildroot}%{_mandir}
 cp -R  man/* %{buildroot}%{_mandir}
@@ -162,23 +183,18 @@ touch %{buildroot}%{_sysconfdir}/selinux/config
 touch %{buildroot}%{_sysconfdir}/sysconfig/selinux
 
 # Always create policy module package directories
-mkdir -p %{buildroot}%{_usr}/share/selinux/{clip,mls,modules}/
+mkdir -p %{buildroot}%{_usr}/share/selinux/{mcs,mls,modules}/
 
 # Install devel
-make clean
-# Build clip policy
+make %{?_smp_mflags} clean
 # installCmds NAME TYPE DIRECT_INITRC POLY UNKNOWN
-%installCmds clip mcs n y deny
-
-# Build mls policy
-#%makeCmds mls mls n y deny
-#installCmds NAME TYPE DIRECT_INITRC POLY UNKNOWN
+%installCmds mcs mcs n y deny
 %installCmds mls mls n y deny
 
-make UNK_PERMS=deny NAME=clip TYPE=mcs DISTRO=%{distro} UBAC=y DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name}-%{version} POLY=y MLS_CATS=1024 MCS_CATS=1024 APPS_MODS=""%{enable_modules}"" install-headers install-docs
+make %{?_smp_mflags} UNK_PERMS=deny NAME=mcs TYPE=mcs DISTRO=%{distro} UBAC=y DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name}-%{version} POLY=y MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" install-headers install-docs
 mkdir %{buildroot}%{_usr}/share/selinux/devel/
 mkdir %{buildroot}%{_usr}/share/selinux/packages/
-mv %{buildroot}%{_usr}/share/selinux/clip/include %{buildroot}%{_usr}/share/selinux/devel/include
+mv %{buildroot}%{_usr}/share/selinux/mcs/include %{buildroot}%{_usr}/share/selinux/devel/include
 install -m 644 config/Makefile.devel %{buildroot}%{_usr}/share/selinux/devel/Makefile
 install -m 644 doc/example.* %{buildroot}%{_usr}/share/selinux/devel/
 install -m 644 doc/policy.* %{buildroot}%{_usr}/share/selinux/devel/
@@ -200,9 +216,9 @@ echo "
 #     disabled - No SELinux policy is loaded.
 SELINUX=%{enforcing_mode}
 # SELINUXTYPE= can take one of these two values:
-#     clip - Targeted processes are protected,
-#     mls - Multi Level Security protection.
-SELINUXTYPE=clip 
+#     mcs - CLIP's standard Multi Category security policy,
+#     mls - CLIP's Multi Level Security security policy.
+SELINUXTYPE=mcs
 
 " > /etc/selinux/config
 
@@ -227,7 +243,7 @@ if [ $1 = 0 ]; then
 fi
 exit 0
 
-%package clip
+%package mcs
 Summary: Certifiable Linux Integration Platform SELinux clip base policy
 Provides: selinux-policy-base = %{version}-%{release}
 Group: System Environment/Base
@@ -238,30 +254,32 @@ Requires: clip-selinux-policy = %{version}-%{release}
 Conflicts:  audispd-plugins <= 1.7.7-1
 Conflicts:  seedit
 
-%description clip
+%description mcs 
 Certifiable Linux Integration Platform policy.
 Based off of reference policy refpolicy-2.20110726.tar.bz2
 
-%pre clip
-%saveFileContext clip
+%pre mcs
+%saveFileContext mcs
 
-%post clip
-packages=`cat /usr/share/selinux/clip/modules.lst`
+%post mcs
+packages=`cat /usr/share/selinux/mcs/modules.lst`
 if [ $1 -eq 1 ]; then
-   %loadpolicy clip $packages
+   %loadpolicy mcs $packages
    restorecon -R /root /var/log /var/run 2> /dev/null
 else
-#   semodule -n -s clip 2>/dev/null
-   %loadpolicy clip $packages
-   %relabel clip
+#   semodule -n -s mcs 2>/dev/null
+   %loadpolicy mcs $packages
+   %relabel mcs
 fi
 touch /.autorelabel
 exit 0
 
-%files clip
+%files mcs 
 %defattr(-,root,root,-)
-%config(noreplace) %{_sysconfdir}/selinux/clip/contexts/users/unconfined_u
-%fileList clip
+%config(noreplace) %{_sysconfdir}/selinux/mcs/contexts/users/unconfined_u
+%fileList mcs
+
+%excludes mcs
 
 %package mls 
 Summary: Certifiable Linux Integration Platform SELinux mls base policy
@@ -282,7 +300,7 @@ Based off of reference policy refpolicy-2.20110726.tar.bz2
 %saveFileContext mls
 
 %post mls 
-semodule -n -s mls 2>/dev/null
+#semodule -n -s mls 2>/dev/null
 packages=`cat /usr/share/selinux/mls/modules.lst`
 %loadpolicy mls $packages
 
@@ -297,6 +315,8 @@ exit 0
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/selinux/mls/contexts/users/unconfined_u
 %fileList mls
+
+%excludes  mls
 
 
 %changelog

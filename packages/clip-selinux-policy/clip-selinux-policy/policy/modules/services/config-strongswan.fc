@@ -1,0 +1,2 @@
+/etc/rc\.d/init\.d/configure-strongswan		--	gen_context(system_u:object_r:config_strongswan_initrc_exec_t,s0)
+

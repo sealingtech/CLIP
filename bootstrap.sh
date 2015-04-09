@@ -99,36 +99,6 @@ read foo
 /usr/bin/sudo /usr/sbin/setenforce 0
 /usr/bin/sudo /bin/sed -i -e 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 
-# Fourth, roll pungi
-if ! rpm -q pungi >/dev/null; then
-	/usr/bin/make pungi-rpm
-	pushd . > /dev/null  
-	cd repos/my-repo
-	/usr/bin/sudo /usr/bin/yum localinstall -y pungi*
-	popd > /dev/null
-fi
-
-if ! rpm -q "livecd-tools-13.4.4-99.el6.noarch" > /dev/null; then 
-	if rpm -q "livecd-tools" > /dev/null; then
-		/bin/echo "You have livecd-tools installed, but not our version. Our version contains 
-fixes for generating live media.  We will compile our version and replace your 
-version free of charge.
-Press the any key to continue or ctrl-c to exit.
-"
-		read foo
-		/usr/bin/sudo /usr/bin/yum remove livecd-tools 2>/dev/null || true
-		/usr/bin/sudo /usr/bin/yum remove python-imgcreate 2>/dev/null || true
-	else 
-		/usr/bin/make livecd-tools-rpm
-		/usr/bin/sudo /usr/bin/yum localinstall -y livecd-tools* python-imgcreate*
-	fi
-	/usr/bin/make livecd-tools-rpm
-	pushd . > /dev/null
-	cd repos/my-repo
-	/usr/bin/sudo /usr/bin/yum localinstall -y livecd-tools* and python-imgcreate*
-	popd > /dev/null
-fi
-
-/bin/echo -e "Basic bootstrapping of build host is complete.\nPress 'enter' to run 'make clip-rhel6-iso' or ctrl-c to quit."
+/bin/echo -e "Basic bootstrapping of build host is complete.\nPress 'enter' to run 'make clip-minimal-iso' or ctrl-c to quit."
 read foo
-/usr/bin/make clip-rhel6-iso
+/usr/bin/make clip-minimal-iso

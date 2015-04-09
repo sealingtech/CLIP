@@ -88,7 +88,7 @@ ifdef(`enable_ubac',`
 	);
 ')
 
-constrain process { transition noatsecure siginh rlimitinh }
+constrain process { transition dyntransition noatsecure siginh rlimitinh }
 (
 	u1 == u2
 	or ( t1 == can_change_process_identity and t2 == process_user_target )
@@ -97,7 +97,7 @@ constrain process { transition noatsecure siginh rlimitinh }
 	or ( t1 == process_uncond_exempt )
 );
 
-constrain process { transition noatsecure siginh rlimitinh }
+constrain process { transition dyntransition noatsecure siginh rlimitinh }
 (
 	r1 == r2 
 	or ( t1 == can_change_process_role and t2 == process_user_target )
@@ -199,11 +199,6 @@ constrain file { all_file_perms }
 	u1 != user_u or ( t1 == semanage_t or t1 == useradd_t )
 );
 # SRS: END user_u stuff
-
-constrain process dyntransition
-(
-	u1 == u2 and r1 == r2
-);
 
 # These permissions do not have ubac constraints:
 # fork

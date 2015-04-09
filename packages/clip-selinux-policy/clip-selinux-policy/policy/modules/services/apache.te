@@ -340,7 +340,8 @@ manage_sock_files_pattern(httpd_t, httpd_tmpfs_t, httpd_tmpfs_t)
 fs_tmpfs_filetrans(httpd_t, httpd_tmpfs_t, { dir file lnk_file sock_file fifo_file })
 
 manage_files_pattern(httpd_t, httpd_var_lib_t, httpd_var_lib_t)
-files_var_lib_filetrans(httpd_t, httpd_var_lib_t, file)
+files_var_lib_filetrans(httpd_t, httpd_var_lib_t, { file dir })
+allow httpd_t httpd_var_lib_t:dir create;
 
 setattr_dirs_pattern(httpd_t, httpd_var_run_t, httpd_var_run_t)
 manage_dirs_pattern(httpd_t, httpd_var_run_t, httpd_var_run_t)
@@ -480,11 +481,13 @@ tunable_policy(`httpd_enable_homedirs && use_samba_home_dirs',`
 	fs_read_cifs_symlinks(httpd_t)
 ')
 
-tunable_policy(`httpd_can_sendmail',`
-	# allow httpd to connect to mail servers
-	corenet_tcp_connect_smtp_port(httpd_t)
-	corenet_sendrecv_smtp_client_packets(httpd_t)
-	mta_send_mail(httpd_t)
+optional_policy(`
+	tunable_policy(`httpd_can_sendmail',`
+		# allow httpd to connect to mail servers
+		corenet_tcp_connect_smtp_port(httpd_t)
+		corenet_sendrecv_smtp_client_packets(httpd_t)
+		mta_send_mail(httpd_t)
+	')
 ')
 
 tunable_policy(`httpd_ssi_exec',`
@@ -799,8 +802,10 @@ ifdef(`distro_redhat',`
 	allow httpd_sys_script_t httpd_log_t:file append_file_perms;
 ')
 
-tunable_policy(`httpd_can_sendmail',`
-	mta_send_mail(httpd_sys_script_t)
+optional_policy(`
+	tunable_policy(`httpd_can_sendmail',`
+		mta_send_mail(httpd_sys_script_t)
+	')
 ')
 
 tunable_policy(`httpd_enable_cgi && httpd_can_network_connect',`

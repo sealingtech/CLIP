@@ -56,6 +56,9 @@ attribute userdomain;
 # unprivileged user domains
 attribute unpriv_userdomain;
 
+# unprivileged user domains
+attribute user_home_type;
+
 attribute untrusted_content_type;
 attribute untrusted_content_tmp_type;
 

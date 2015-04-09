@@ -19,6 +19,47 @@ gen_tunable(allow_ssh_keysign, false)
 ## </desc>
 gen_tunable(ssh_sysadm_login, false)
 
+## <desc>
+## <p>
+## Allow ssh with chroot env to read and write files 
+## in the user home directories
+## </p>
+## </desc>
+gen_tunable(ssh_chroot_rw_homedirs, false)
+
+## <desc>
+## <p>
+## Allow ssh to run sftp-internal chroot via a dynamic transition. 
+## </p>
+## </desc>
+gen_tunable(ssh_enable_sftp_chroot_dyntrans, false)
+
+## <desc>
+## <p>
+## Enable privilege separation in ssh (on by default)
+## </p>
+## </desc>
+gen_tunable(ssh_enable_priv_sep, true)
+
+
+### <desc>
+### <p>
+### Allow ssh with chroot env to manage all files 
+### </p>
+### </desc>
+#gen_tunable(ssh_chroot_full_access,false)
+
+### <desc>
+### <p>
+### Allow ssh with chroot env to apache content
+### </p>
+### </desc>
+#gen_tunable(ssh_chroot_manage_apache_content,false)
+
+type chroot_user_t;
+domain_type(chroot_user_t)
+role system_r types chroot_user_t;
+
 attribute ssh_server;
 attribute ssh_agent_type;
 
@@ -26,6 +67,9 @@ type ssh_keygen_t;
 type ssh_keygen_exec_t;
 init_system_domain(ssh_keygen_t, ssh_keygen_exec_t)
 role system_r types ssh_keygen_t;
+
+type ssh_keygen_tmp_t;
+files_tmp_file(ssh_keygen_tmp_t)
 
 type sshd_exec_t;
 corecmd_executable_file(sshd_exec_t)
@@ -42,6 +86,7 @@ files_poly_parent(sshd_tmp_t)
 
 ifdef(`enable_mcs',`
 	init_ranged_daemon_domain(sshd_t, sshd_exec_t, s0 - mcs_systemhigh)
+	mcs_process_set_categories(sshd_t)
 ')
 
 type ssh_t;
@@ -280,6 +325,10 @@ optional_policy(`
 ')
 
 optional_policy(`
+	ssh_dyntransition_chroot_user(sshd_t)
+')
+
+optional_policy(`
 	rpm_use_script_fds(sshd_t)
 ')
 
@@ -353,6 +402,13 @@ term_dontaudit_use_console(ssh_keygen_t)
 domain_use_interactive_fds(ssh_keygen_t)
 
 files_read_etc_files(ssh_keygen_t)
+files_read_usr_files(ssh_keygen_t)
+
+manage_dirs_pattern(ssh_keygen_t, ssh_keygen_tmp_t, ssh_keygen_tmp_t)
+manage_files_pattern(ssh_keygen_t, ssh_keygen_tmp_t, ssh_keygen_tmp_t)
+files_tmp_filetrans(ssh_keygen_t, ssh_keygen_tmp_t, { dir file })
+
+corecmd_exec_bin(ssh_keygen_t)
 
 init_use_fds(ssh_keygen_t)
 init_use_script_ptys(ssh_keygen_t)
@@ -362,6 +418,8 @@ auth_use_nsswitch(ssh_keygen_t)
 logging_send_syslog_msg(ssh_keygen_t)
 
 userdom_dontaudit_use_unpriv_user_fds(ssh_keygen_t)
+
+userdom_use_user_ttys(ssh_keygen_t)
 
 optional_policy(`
 	nscd_socket_use(ssh_keygen_t)
@@ -374,3 +432,83 @@ optional_policy(`
 optional_policy(`
 	udev_read_db(ssh_keygen_t)
 ')
+
+#######################################
+#
+# chroot_user_t local policy
+#
+
+allow chroot_user_t self:capability { setuid sys_chroot setgid };
+
+allow chroot_user_t self:fifo_file rw_fifo_file_perms;
+allow chroot_user_t self:unix_dgram_socket { create connect };
+
+corecmd_exec_shell(chroot_user_t)
+
+term_search_ptys(chroot_user_t)
+term_use_ptmx(chroot_user_t)
+
+fs_getattr_all_fs(chroot_user_t)
+
+userdom_read_user_home_content_files(chroot_user_t)
+userdom_read_inherited_user_home_content_files(chroot_user_t)
+userdom_read_user_home_content_symlinks(chroot_user_t)
+userdom_exec_user_home_content_files(chroot_user_t)
+userdom_use_inherited_user_ptys(chroot_user_t)
+
+logging_send_syslog_msg(chroot_user_t)
+
+locallogin_signull(sshd_t)
+
+#tunable_policy(`ssh_chroot_full_access',`
+#    allow chroot_user_t self:capability { dac_override dac_read_search };
+#    auth_manage_all_files_except_shadow(chroot_user_t)
+#')
+
+
+tunable_policy(`ssh_chroot_rw_homedirs',`
+        files_list_home(chroot_user_t)
+        userdom_read_user_home_content_files(chroot_user_t)
+        userdom_manage_user_home_content(chroot_user_t)
+	userdom_manage_chroot_user_home_content(chroot_user_t)
+		# for /var/www/ home
+', `
+
+        userdom_user_home_dir_filetrans_pattern(chroot_user_t, { dir file lnk_file })
+')
+
+#optional_policy(`
+#	tunable_policy(`ssh_chroot_manage_apache_content',`
+#		apache_manage_sys_content(chroot_user_t)
+#		apache_manage_sys_content_rw(chroot_user_t)
+#	')
+#')
+
+#tunable_policy(`ssh_chroot_rw_homedirs && use_nfs_home_dirs',`
+#    fs_manage_nfs_dirs(chroot_user_t)
+#    fs_manage_nfs_files(chroot_user_t)
+#    fs_manage_nfs_symlinks(chroot_user_t)
+#')
+
+#tunable_policy(`ssh_chroot_rw_homedirs && use_samba_home_dirs',`
+#    fs_manage_cifs_dirs(chroot_user_t)
+#    fs_manage_cifs_files(chroot_user_t)
+#    fs_manage_cifs_symlinks(chroot_user_t)
+#')
+
+#tunable_policy(`use_samba_home_dirs',`
+#    fs_read_cifs_files(chroot_user_t)
+#    fs_read_cifs_symlinks(chroot_user_t)
+#')
+
+#tunable_policy(`use_nfs_home_dirs',`
+#    fs_read_nfs_files(chroot_user_t)
+#    fs_read_nfs_symlinks(chroot_user_t)
+#')
+
+ssh_rw_stream_sockets(chroot_user_t)
+ssh_rw_tcp_sockets(chroot_user_t)
+ssh_rw_dgram_sockets(chroot_user_t)
+
+dontaudit chroot_user_t ssh_home_t:dir list_dir_perms;
+

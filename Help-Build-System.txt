@@ -89,7 +89,7 @@ on this type of package refer to packages/examples/sources.
 3. Once the package has been added to the packages/ directory you must update
 the PACKAGES variable in the top-level CONFIG_BUILD file to ensure the package is 
 generated as part of any build. Once a package is generated it will appear
-in repos/my-repo.  To add the package to an ISO image update the
+in repos/clip-repo.  To add the package to an ISO image update the
 appropriate kickstart file and add the package name to the kickstart's package
 list.
 
@@ -109,8 +109,8 @@ NOTE: the string #REPO-REPLACEDMENT-PLACEHOLDER *must* appear in the
 kickstart for this to work appropriately.
 
 If you choose to use a hostable kickstart script rather than rebuilding an
-iso, you can run the following from ./kickstart/clip-rhel6:
+iso, you can run the following from ./kickstart/clip-minimal:
 # make setup-ks
 
 A hostable kickstart is then located in
-./tmp/clip-iso-build/1/x86_64/os/clip-rhel6.ks 
+./tmp/clip-iso-build/1/x86_64/os/clip-minimal.ks 

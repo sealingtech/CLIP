@@ -1,0 +1,5 @@
+Once you install the system, login as "toor", sudo, and add an sftp user by
+running:
+add_sftp_user.sh
+
+

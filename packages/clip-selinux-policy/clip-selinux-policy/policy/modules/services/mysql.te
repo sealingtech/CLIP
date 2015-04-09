@@ -99,6 +99,9 @@ corenet_tcp_connect_mysqld_port(mysqld_t)
 corenet_sendrecv_mysqld_client_packets(mysqld_t)
 corenet_sendrecv_mysqld_server_packets(mysqld_t)
 
+corecmd_search_bin(mysqld_t)
+
+
 dev_read_sysfs(mysqld_t)
 dev_read_urand(mysqld_t)
 
@@ -169,15 +172,18 @@ delete_sock_files_pattern(mysqld_safe_t, mysqld_var_run_t, mysqld_var_run_t)
 kernel_read_system_state(mysqld_safe_t)
 kernel_read_kernel_sysctls(mysqld_safe_t)
 
-corecmd_exec_bin(mysqld_safe_t)
-
 dev_list_sysfs(mysqld_safe_t)
+
+dev_read_urand(mysqld_safe_t)
 
 domain_read_all_domains_state(mysqld_safe_t)
 
 files_read_etc_files(mysqld_safe_t)
 files_read_usr_files(mysqld_safe_t)
 files_dontaudit_getattr_all_dirs(mysqld_safe_t)
+files_dontaudit_write_root_dirs(mysqld_safe_t)
+
+corecmd_exec_bin(mysqld_safe_t)
 
 logging_log_filetrans(mysqld_safe_t, mysqld_log_t, file)
 

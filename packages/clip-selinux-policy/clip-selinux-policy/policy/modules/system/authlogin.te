@@ -104,6 +104,8 @@ files_dontaudit_search_var(chkpwd_t)
 
 fs_dontaudit_getattr_xattr_fs(chkpwd_t)
 
+corecmd_exec_bin(chkpwd_t)
+
 term_dontaudit_use_console(chkpwd_t)
 term_dontaudit_use_unallocated_ttys(chkpwd_t)
 term_dontaudit_use_generic_ptys(chkpwd_t)
@@ -341,6 +343,8 @@ auth_manage_shadow(updpwd_t)
 auth_use_nsswitch(updpwd_t)
 
 logging_send_syslog_msg(updpwd_t)
+
+corecmd_exec_bin(updpwd_t)
 
 miscfiles_read_localization(updpwd_t)
 
