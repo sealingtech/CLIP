@@ -35,7 +35,7 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 if [ "$#" -ne 1 ]; then
-        echo "Usage: $0 [customer]"
+        echo "Usage: $0 username"
 else
         add_user $1
 	add_key $1
