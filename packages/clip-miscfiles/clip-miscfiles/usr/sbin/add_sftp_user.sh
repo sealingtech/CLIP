@@ -3,10 +3,18 @@
 #
 # Author: Brandon Whalen <brandon@quarksecurity.com>
 #	  Spencer Shimko <spencer@quarksecurity.com>
-
+set -e
 add_user() {
-        semanage user -a -R "user_r" $1_u
-        useradd -g sftp-only -Z $1_u $1
+	# address case where the username already ex:q!
+	if semanage user -l| awk '{ print $1; }'|grep -q $1_u; then
+		rand=`date|md5sum|head -c 8`
+		semanage user -a -R "user_r" ${1}${rand}_u
+	        useradd -g sftp-only -Z ${1}${rand}_u $1
+	else 
+		semanage user -a -R "user_r" $1_u
+	        useradd -g sftp-only -Z $1_u $1
+	fi
+
         mkdir -m 710 /home/$1/.ssh
         touch /home/$1/.ssh/authorized_keys
         chown -R :sftp-only /home/$1/.ssh/
@@ -37,7 +45,12 @@ fi
 if [ "$#" -ne 1 ]; then
         echo "Usage: $0 username"
 else
-        add_user $1
-	add_key $1
+	if ! id -u $1 2>/dev/null >/dev/null; then
+	        add_user $1
+		add_key $1
+	else 
+		echo "Error: Linux user already exists!"
+		exit 1
+	fi
 fi
 
