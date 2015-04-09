@@ -523,7 +523,7 @@ interface(`cron_use_system_job_fds',`
 
 ########################################
 ## <summary>
-##	Dont audit searh on system cron job keys.
+##	Don't audit search on system cron job keys.
 ## </summary>
 ## <param name="domain">
 ##	<summary>

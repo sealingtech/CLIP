@@ -2025,7 +2025,7 @@ interface(`fs_read_fusefs_symlinks',`
 #
 ########################################
 ## <summary>
-##	Dont audit list hugetlbfs.
+##	Don't audit list hugetlbfs.
 ## </summary>
 ## <param name="domain">
 ##	<summary>

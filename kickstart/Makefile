@@ -63,7 +63,7 @@ DEBUG ?= y
 # This will only be set here if we are running setup-ks by hand.
 CONFIG_BUILD_BASH_VARS ?= export CONFIG_BUILD_PRODUCTION=n CONFIG_BUILD_ENFORCING_MODE=y CONFIG_BUILD_UNCONFINED_TOOR=y CONFIG_BUILD_SECSTATE_REMEDIATE=y ISO_VERSION=debug
 
-# The differences vetween live and installable are addressed via these vars
+# The differences between live and installable are addressed via these vars
 LIVE_CONFIG_BUILD_BASH_VARS := $(CONFIG_BUILD_BASH_VARS) CONFIG_BUILD_LIVE_MEDIA=y
 LIVE_CONFIG_BUILD_ADDTL_PACKAGES += $(CONFIG_BUILD_ADDTL_PACKAGES) eject
 AWS_CONFIG_BUILD_BASH_VARS := $(CONFIG_BUILD_BASH_VARS) CONFIG_BUILD_AWS=y CONFIG_BUILD_VPN_ENABLE_TOOR=$(CONFIG_BUILD_VPN_ENABLE_TOOR)

@@ -9,13 +9,13 @@
 getarg "selinux=0" > /dev/null && return 0
 
 # If we are booting after a rescue mode boot "/" is mnt_t.
-# This is less than ideal, but it happens all too aften not to try to address it somewhat.
+# This is less than ideal, but it happens all too often not to try to address it somewhat.
 ls -Zd /sysroot | grep -q root_t || /sysroot/usr/bin/chcon -t root_t /sysroot
 
 
 getarg "liveimg" > /dev/null
 if [ $? -eq 0 ]; then
-	# TODO: something about live media environments necessitated this.  Unforunately 
+	# TODO: something about live media environments necessitated this.  Unfortunately 
 	# it has been a year and I have forgot what the problem actually is.  But IIRC
 	# it was livecd creator looking at the enforcing mode in the ks and ignoring
 	# it elsewhere and we got "stuck" in either or state.

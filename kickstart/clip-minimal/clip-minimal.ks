@@ -264,7 +264,7 @@ oscap xccdf generate fix \
 chmod +x /root/scap/pre/remediation-script.sh
 if [ x"$CONFIG_BUILD_REMEDIATE" == "xy" ]; then
         /root/scap/pre/remediation-script.sh
-        # Un-remeidate things SSG broke...
+        # Un-remediate things SSG broke...
         sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
 
         cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \

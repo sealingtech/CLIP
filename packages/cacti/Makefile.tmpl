@@ -1,5 +1,5 @@
 # Copyright (C) 2011 Tresys Technology, LLC
-# Copyright (C) 2014 QuarkSecurity, Inc
+# Copyright (C) 2014 Quark Security, Inc
 #
 # Authors: Spencer Shimko <sshimko@tresys.com>
 # Authors: Spencer Shimko <spencer@quarksecurity.com>
@@ -86,7 +86,7 @@ $(RPM_SPEC): $(SRC_SRPM)
 clean:
 	$(RM) -r $(RPM_TMPDIR)
 
-# This is slightly undesirable, but in order to cleanup *all& RONs peroperly we need
+# This is slightly undesirable, but in order to cleanup *all& RONs properly we need
 # to query the spec file, so in the bare target we have to extract the spec file :(
 bare: $(RPM_SPEC) FORCE
 	$(foreach f,$(shell rpm $(RPMQ_DEFS) --specfile $(RPM_SPEC)),export GLOBIGNORE='$(SRC_SRPM)'; $(RM) $(OUTPUT_DIR)/$(f)*.rpm;)

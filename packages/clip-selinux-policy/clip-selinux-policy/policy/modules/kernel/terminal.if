@@ -601,7 +601,7 @@ interface(`term_use_generic_ptys',`
 
 ########################################
 ## <summary>
-##	Write tto he generic pty
+##	Write to the generic pty
 ##	type. 
 ## </summary>
 ## <param name="domain">

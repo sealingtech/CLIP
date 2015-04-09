@@ -28,7 +28,7 @@ openssl genrsa 1024 > private-key.pem
 8. Create the user signing certificate:
 openssl req -new -x509 -nodes -sha1 -days 365 -key private-key.pem -outform PEM > certificate.pem
 
-9. Uplodae the user signing certificate by going to IAM->Users and the
+9. Upload the user signing certificate by going to IAM->Users and the
 specific user for the signing certificate.
 
 10.  Click "Manage Signing Certificates" then "Upload Singing Certificate"/
@@ -40,7 +40,7 @@ the text field and upload the certificate.
 CONFIG_AWS file at the top-level.
 
 13. Build you AWS AMI which will automatically be uploaded to AWS as an
-iimage (AMI):
+image (AMI):
 make clip-vpn-aws-ami 
 or
 make clip-sftp-dropbox-aws-ami

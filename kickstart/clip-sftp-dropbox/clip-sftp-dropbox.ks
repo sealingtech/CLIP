@@ -238,7 +238,6 @@ echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 
 export POLNAME=$(awk -F= '/^SELINUXTYPE/ { print $2; }' /etc/selinux/config)
 
-
 #NOTE: while the following lines allow the SCAP content to be interprested on
 # CentOS, the results might be wrong in a few places, like FIPS compliance and
 # gpgp keys etc.

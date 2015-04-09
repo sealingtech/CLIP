@@ -2986,7 +2986,7 @@ interface(`kernel_stream_connect',`
 
 ########################################
 ## <summary>
-##     Dont audit the specified domain 
+##     Don't audit the specified domain 
 #      getattr on kernel unix socket.
 ## </summary>
 ## <param name="domain">

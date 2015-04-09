@@ -235,7 +235,7 @@ template(`ssh_server_template', `
 
 	domain_interactive_fd($1_t)
 	
-	# Allows ssh privelege separation to work
+	# Allows ssh privilege separation to work
 	# where ssh brackets down in privileges
 	# in the child process.
 	domain_subj_id_change_exemption($1_t)
@@ -808,7 +808,7 @@ interface(`ssh_delete_tmp',`
 interface(`ssh_priv_sep_user',`
         # If ssh priv sep is on,
         # userdom needs to write to ssh tcp sockets
-        # Also, if ssh is anabled and a user logs in
+        # Also, if ssh is enabled and a user logs in
         # and needs to change their password in priv sep
         #
         tunable_policy(ssh_enable_priv_sep,`

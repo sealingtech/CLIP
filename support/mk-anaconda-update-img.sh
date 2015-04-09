@@ -72,6 +72,6 @@ fi
 
 cd $STAGING_DIR
 #this is really just so we don't end up with an empty update
-echo "CLIP UPDPATES TO ANACONDA" > ./description.txt
+echo "CLIP UPDATES TO ANACONDA" > ./description.txt
 find . -type f | xargs $UPD_UPDATES $OUTPUT
 

@@ -1,7 +1,7 @@
 #!/bin/bash
-# Copyright (C) 2014-2015, Quark Securityyyp, Inc.
+# Copyright (C) 2014-2015, Quark Security, Inc.
 #
-# Aurhor: Brandon Whalen <brandon@quarksecurity.com>
+# Author: Brandon Whalen <brandon@quarksecurity.com>
 #	  Spencer Shimko <spencer@quarksecurity.com>
 
 add_user() {

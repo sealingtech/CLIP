@@ -687,7 +687,7 @@ template(`userdom_common_user_template',`
 
 	# If ssh is enabled, and priv sep is on,
 	# userdom needs to write to ssh tcp sockets
-	# Also, if ssh is anabled and a user logs in
+	# Also, if ssh is enabled and a user logs in
 	# and needs to change their password in priv sep
 	#
 	optional_policy(`
