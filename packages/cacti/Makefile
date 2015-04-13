@@ -54,9 +54,10 @@ endef
 
 all: $(PKGNAME)-rpm $(PKGNAME)-srpm
 
-Makefile: Makefile.tmpl $(SRC_SRPM)
-	$(CURDIR)/gen-makefile-from-src-rpm.sh $(notdir $(SRC_SRPM))
-	@echo "$(CURDIR)/Makefile has been updated.  Please re-run 'make'" && exit 1
+Makefile:
+	echo "Eror: you must generate a Makefile for package $(PKGNAME)."
+	echo "$ cd $(CURDIR); ./gen-makefile-from-src-rpm.sh *.src.rpm; cd -"
+	exit 1
 
 rpm: $(PKGNAME)-rpm
 
