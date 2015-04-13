@@ -421,7 +421,7 @@ $(EC2_API_TOOLS): $(EC2_API_TOOLS_ZIP)
 ec2-tools: $(EC2_AMI_TOOLS) $(EC2_API_TOOLS)
 
 check-vars:
-	$(call CHECK_AWS_VARS)/pkglist
+	$(call CHECK_AWS_VARS)
 
 
 $(AWSBUNDLES): check-vars ec2-tools $(BUILD_CONF_DEPS) create-repos $(RPMS)
