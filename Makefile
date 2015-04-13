@@ -70,7 +70,8 @@ SUPPORT_DIR := $(CURDIR)/support
 MOCK_CONF_DIR := $(CONF_DIR)/mock
 
 # we need a yum.conf to use for repo querying (to determine appropriate package versions when multiple version are present)
-export YUM_CONF_FILE := $(CONF_DIR)/yum/yum.conf
+YUM_CONF_FILE := $(CONF_DIR)/yum/yum.conf
+export YUM_CONF_ALL_FILE := $(CONF_DIR)/yum/yum_all.conf
 
 # Pungi needs a comps.xml - why does every single yum front-end suck in different ways?
 COMPS_FILE := $(CONF_DIR)/yum/comps.xml
@@ -273,7 +274,12 @@ $(eval REPO_LINES := $(REPO_LINES)repo --name=$(REPO_ID) --baseurl=file://$(REPO
 $(eval CLIP_REPO_DIRS += "$(REPO_DIR)/$(REPO_ID)-repo")
 $(eval PKG_LISTS += "./$(shell basename $(CONF_DIR))/pkglist.$(REPO_ID)")
 
-setup-$(REPO_ID)-repo:  $(REPO_DIR)/$(REPO_ID)-repo/last-updated $(CONFIG_BUILD_DEPS)
+setup-$(REPO_ID)-repo:  $(REPO_DIR)/$(REPO_ID)-repo/last-updated $(CONFIG_BUILD_DEPS) setup-$(REPO_ID)-yum-conf-all
+
+setup-$(REPO_ID)-yum-conf-all:
+	echo -e $(YUM_CONF) >> $(YUM_CONF_ALL_FILE)
+
+$(eval YUM_CONF_PHONIES += setup-$(REPO_ID)-yum-conf-all)
 
 # This is the key target for managing yum repos.  If the pkg list for the repo
 # is more recent then our private repo regen the repo by symlink'ing the packages into our repo.
@@ -293,8 +299,11 @@ $(REPO_DIR)/$(REPO_ID)-repo/last-updated: $(CONF_DIR)/pkglist.$(REPO_ID) $(CONFI
 # Then you can consistently rebuild an ISO using the exact same package versions as the last time.
 # Effectively versioning the packages you use when rolling RPMs and ISOs.
 $(CONF_DIR)/pkglist.$(REPO_ID) ./$(shell basename $(CONF_DIR))/pkglist.$(REPO_ID): $(filter-out $(ROOT_DIR)/CONFIG_BUILD,$(CONFIG_BUILD_DEPS)) $(CONF_DIR)/pkglist.blacklist $(REPO_PATH)/repodata/repomd.xml
+	$(VERBOSE)rm -rf $(REPO_DIR)/$(REPO_ID)-repo
+	$(VERBOSE)$(RM) $(YUM_CONF_FILE)
 	$(VERBOSE)$(RM) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg
 	@echo "Generating list of packages for $(call GET_REPO_ID,$(1))$(RHEL_VER)"
+	$(VERBOSE)cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_FILE)
 	echo -e $(YUM_CONF) >> $(YUM_CONF_FILE)
 	$(VERBOSE)$(REPO_QUERY) --repoid=$(REPO_ID) |sort 1>$(CONF_DIR)/pkglist.$(REPO_ID)
 
@@ -360,12 +369,12 @@ $(foreach RPM,$(RPMS),$(eval $(call RPM_RULE_template,$(RPM))))
 SRPMS := $(SRPMS) $(addprefix $(SRPM_OUTPUT_DIR)/,$(foreach RPM,$(HOST_RPMS),$(call SRPM_FROM_RPM,$(notdir $(RPM)))))
 
 init_yum_conf:
-	$(VERBOSE)$(RM) $(YUM_CONF_FILE)
+	$(VERBOSE)$(RM) $(YUM_CONF_ALL_FILE)
 	@echo "Adding yum.conf header"
-	$(VERBOSE)cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_FILE)
-	$(VERBOSE)echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_FILE) 
+	$(VERBOSE)cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE)
+	$(VERBOSE)echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_ALL_FILE) 
 
-$(YUM_CONF_FILE): create-repos
+$(YUM_CONF_ALL_FILE): create-repos
 
 create-repos: init_yum_conf $(setup_all_repos)
 
@@ -469,6 +478,7 @@ clean-mock: $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.bl
 	$(VERBOSE)$(RM) -rf $(REPO_DIR)/yumcache
 
 bare-repos: clean-mock
+	$(VERBOSE)$(RM) $(YUM_CONF_ALL_FILE)
 	$(VERBOSE)$(RM) -r $(CLIP_REPO_DIRS) $(CLIP_REPO_DIR)
 
 clean:
@@ -485,7 +495,7 @@ FORCE:
 # Unfortunately mock isn't exactly "parallel" friendly which sucks since we could roll a bunch of packages in parallel.
 .NOTPARALLEL:
 
-.PHONY:  all all-vm create-repos $(setup_all_repos) srpms rpms clean bare bare-repos $(addsuffix -rpm,$(PACKAGES)) $(addsuffix -srpm,$(PACKAGES)) $(addsuffix -nomock-rpm,$(PACKAGES)) $(addsuffix -clean,$(PACKAGES)) $(LIVECDS) $(INSTISOS) FORCE clean-mock check-vars ec2-tools
+.PHONY:  all all-vm create-repos $(setup_all_repos) srpms rpms clean bare bare-repos $(addsuffix -rpm,$(PACKAGES)) $(addsuffix -srpm,$(PACKAGES)) $(addsuffix -nomock-rpm,$(PACKAGES)) $(addsuffix -clean,$(PACKAGES)) $(LIVECDS) $(INSTISOS) $(YUM_CONF_PHONIES) FORCE clean-mock check-vars ec2-tools init_yum_conf
 
 
 # END RULES

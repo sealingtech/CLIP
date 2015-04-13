@@ -78,8 +78,8 @@ SETUP_DEeS := $(CURDIR)/Makefile $(KS)
 all: iso live-iso setup-ks
 
 
-$(UPDATES_IMG): $(YUM_CONF_FILE)
-	$(MK_UPDATES_IMG) $@ $(UPDATES_DIR) $(YUM_CONF_FILE)
+$(UPDATES_IMG): $(YUM_CONF_ALL_FILE)
+	$(MK_UPDATES_IMG) $@ $(UPDATES_DIR) $(YUM_CONF_ALL_FILE)
 
 iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) $(UPDATES_IMG) setup-inst-ks check-volume-id
 	@echo "Gathering things with pungi..."
