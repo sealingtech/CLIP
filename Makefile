@@ -50,7 +50,17 @@ MOCK_REL := rhel-$(RHEL_VER)-$(TARGET_ARCH)
 
 # This directory contains all of our packages we will be building.
 PKG_DIR += $(CURDIR)/packages
+
+#determine which variants we're building
+VARIANTS := $(filter %-inst-iso %-live-iso %-aws-ami,$(MAKECMDGOALS))
+VARIANTS := $(subst -inst-iso,,$(VARIANTS))
+VARIANTS := $(subst -aws-ami,,$(VARIANTS))
+VARIANTS := $(subst -live-iso,,$(VARIANTS))
+ifeq ($(strip $(VARIANTS)),)
 PACKAGES := $(shell ls $(PKG_DIR) | grep -v examples)
+else
+$(foreach VARIANT,$(VARIANTS), $(eval include kickstart/$(VARIANT)/variant_pkgs.mk))
+endif
 
 ifeq ($(CONFIG_BUILD_ENABLE_SSH_6),n)
 PACKAGES := $(filter-out openssh-six,$(PACKAGES))
