@@ -80,6 +80,7 @@ clip-selinux-policy-mcs-ssh
 clip-selinux-policy-mcs-unprivuser
 clip-selinux-policy-mcs-ec2ssh
 clip-selinux-policy-mcs-config-strongswan
+clip-selinux-policy-mcs-vpnadm
 clip-miscfiles
 m4
 scap-security-guide
@@ -96,6 +97,7 @@ bash
 bind-libs
 bind-utils
 chkconfig
+configure_strongswan
 coreutils
 cpio
 device-mapper
@@ -468,25 +470,30 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	# disable password auth
 	sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
 
-	if [ x"$CONFIG_BUILD_VPN_ENABLE_TOOR" != "xy" ]
+	# we need to be vpnadm_u:vpnadm_r:vpnadm_t
+	useradd -m vpn
+	semanage user -N -a -R vpnadm_r vpnadm_u
+	semanage login -N -a -s vpnadm_u vpn
+	usermod -s /usr/bin/strongswan_login.py vpn
+	usermod --pass="$HASHED_PASSWD" 
+	chage -E -1 vpn
+
+	useradd -m sftp
+	semanage login -N -a -s vpnadm_u sftp
+	usermod -d /sftp sftp
+	#the above usermod line mucks up file_contexts.homedirs, fix it
+	semanage fcontext -a -e /sftp /home/sftp
+	usermod --pass="$HASHED_PASSWORD" sftp
+	chage -E -1 sftp
+
+	SSH_USERS="sftp vpn"
+
+	if [ x"$CONFIG_BUILD_VPN_ENABLE_TOOR" == "xy" ]
 	then
-		# add an sftp user
-		semanage user -N -a -R "user_r" client_u
-		useradd -m client
-		semanage login -N -a -s client_u client 
-		mkdir -m 700 /home/client/.ssh
-		chown client:client /home/client/.ssh
-		usermod -s /sbin/nologin client
-		usermod -d /client client
-		usermod --pass="$HASHED_PASSWORD" client
-		sed -i -e 's/__USERNAME__/client/g' /etc/rc.d/init.d/ec2-get-ssh
-		sed -i -e 's/__USERNAME__/client/g' /etc/rc.d/init.d/configure-strongswan
-		chage -E -1 client
-	else
-		sed -i -e "s/__USERNAME__/$USERNAME/g" /etc/rc.d/init.d/ec2-get-ssh
-		sed -i -e "s/__USERNAME__/$USERNAME/g" /etc/rc.d/init.d/configure-strongswan
+		SSH_USERS="$SSH_USERS toor"
 		chage -E -1 $USERNAME 
 	fi
+	sed -i -e "s/__USERS__/$SSH_USERS/g" /etc/rc.d/init.d/ec2-get-ssh
 
 	cat << EOF > /etc/sysconfig/iptables
 *mangle
@@ -535,7 +542,7 @@ sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_co
 sed -i -r -e "s/Subsystem\s*sftp.*//g" /etc/ssh/sshd_config
 
 echo -e "Subsystem sftp internal-sftp\n" >> /etc/ssh/sshd_config
-echo -e "Match Group client\n" >> /etc/ssh/sshd_config
+echo -e "Match Group sftp\n" >> /etc/ssh/sshd_config
 echo -e "        AllowTCPForwarding no\n" >> /etc/ssh/sshd_config
 echo -e "        X11Forwarding no\n" >> /etc/ssh/sshd_config
 echo -e "        ChrootDirectory /home\n" >> /etc/ssh/sshd_config
@@ -543,6 +550,8 @@ echo -e "        ForceCommand internal-sftp\n" >> /etc/ssh/sshd_config
 
 semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
 
+# turn on the configure-strongswan service
+chkconfig --level 34 configure-strongswan on
 
 # This is rather unfortunate, but the remediation content 
 # starts services, which need to be killed/shutdown if

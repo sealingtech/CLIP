@@ -38,6 +38,9 @@ corenet_spd_type(ipsec_spd_t)
 type ipsec_tmp_t;
 files_tmp_file(ipsec_tmp_t)
 
+type ipsec_lock_t;
+files_lock_file(ipsec_lock_t)
+
 # type for runtime files, including pluto.ctl
 type ipsec_var_run_t;
 files_pid_file(ipsec_var_run_t)
@@ -99,6 +102,9 @@ manage_dirs_pattern(ipsec_t, ipsec_var_run_t, ipsec_var_run_t)
 manage_files_pattern(ipsec_t, ipsec_var_run_t, ipsec_var_run_t)
 manage_sock_files_pattern(ipsec_t, ipsec_var_run_t, ipsec_var_run_t)
 files_pid_filetrans(ipsec_t, ipsec_var_run_t, { dir file sock_file })
+
+allow ipsec_t ipsec_lock_t:file manage_file_perms;
+files_lock_filetrans(ipsec_t, ipsec_lock_t, file)
 
 can_exec(ipsec_t, ipsec_mgmt_exec_t)
 

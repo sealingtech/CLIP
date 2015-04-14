@@ -6,6 +6,8 @@
 # Source function library
 . /etc/rc.d/init.d/functions
 
+SSH_USERS="__USERS__"
+
 # Source networking configuration
 [ -r /etc/sysconfig/network ] && . /etc/sysconfig/network
 
@@ -17,22 +19,32 @@ if [ "${NETWORKING}" = "no" ]; then
   echo "Networking is not configured."
   exit 1
 fi
- 
-start() {
-  if [ ! -d /home/__USERNAME__/.ssh ]; then
-    mkdir -p /home/__USERNAME__/.ssh
-    chmod 700 /home/__USERNAME__/.ssh
-    chown __USERNAME__:__USERNAME__ /home/__USERNAME__/.ssh
+
+setup_user() {
+   if [ ! -d /home/$1/.ssh ]; then
+    mkdir -p /home/$1/.ssh
+    chmod 700 /home/$1/.ssh
+    chown $1:$1 /home/$1/.ssh
   fi
-  # Retrieve public key from metadata server using HTTP
-  curl -f http://169.254.169.254/latest/meta-data/public-keys/0/openssh-key > /tmp/my-public-key
   if [ $? -eq 0 ]; then
-    echo "EC2: Retrieve public key from metadata server using HTTP." 
-    cat /tmp/my-public-key >> /home/__USERNAME__/.ssh/authorized_keys
-    chmod 600 /home/__USERNAME__/.ssh/authorized_keys
-    chown __USERNAME__:__USERNAME__ /home/__USERNAME__/.ssh/authorized_keys
-    rm /tmp/my-public-key
+
+    cat /tmp/my-public-key >> /home/$1/.ssh/authorized_keys
+    chmod 600 /home/$1/.ssh/authorized_keys
+    chown $1:$1 /home/$1/.ssh/authorized_keys
   fi
+}
+
+start() {
+
+  # Retrieve public key from metadata server using HTTP
+  echo "EC2: Retrieve public key from metadata server using HTTP." 
+  curl -f http://169.254.169.254/latest/meta-data/public-keys/0/openssh-key > /tmp/my-public-key
+
+  for USER in $SSH_USERS;
+  do
+    setup_user $USER
+  done
+  rm /tmp/my-public-key
 }
  
 stop() {

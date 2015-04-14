@@ -230,6 +230,29 @@ interface(`ipsec_write_config',`
 
 ########################################
 ## <summary>
+##	read adn Write the IPSEC key files
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`ipsec_rw_keys',`
+	gen_require(`
+		type ipsec_conf_file_t;
+		type ipsec_key_file_t;
+	')
+
+	files_search_etc($1)
+	allow $1 ipsec_key_file_t:dir rw_dir_perms;
+	allow $1 ipsec_key_file_t:file { create_file_perms rw_file_perms };
+	filetrans_pattern($1, ipsec_conf_file_t, ipsec_key_file_t, file)
+')
+
+########################################
+## <summary>
 ##	Write the IPSEC key file
 ## </summary>
 ## <param name="domain">

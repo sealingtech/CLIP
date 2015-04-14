@@ -44,7 +44,7 @@
 /usr/sbin/strongswan		--	gen_context(system_u:object_r:ipsec_mgmt_exec_t,s0)
 
 /var/lock/subsys/ipsec		--	gen_context(system_u:object_r:ipsec_mgmt_lock_t,s0)
-/var/lock/subsys/strongswan     --      gen_context(system_u:object_r:ipsec_mgmt_lock_t,s0)
+/var/lock/subsys/strongswan     --      gen_context(system_u:object_r:ipsec_lock_t,s0)
 
 /var/log/pluto\.log		--	gen_context(system_u:object_r:ipsec_log_t,s0)
 

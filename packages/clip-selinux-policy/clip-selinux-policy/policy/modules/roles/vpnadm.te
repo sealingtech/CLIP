@@ -1,0 +1,40 @@
+policy_module(vpnadm, 0.0.1)
+
+########################################
+#
+# Declarations
+
+userdom_unpriv_user_template(vpnadm)
+
+
+
+########################################
+#
+# Local policy
+#
+
+domain_user_exemption_target(vpnadm_t)
+
+# runs a setuid root program to actually do things, not sure why dac_override is needed
+allow vpnadm_t self:capability { setuid dac_override };
+domain_type(vpnadm_t)
+
+# need to be able to ssh in
+ssh_role_template(vpnadm, vpnadm_r, vpnadm_t)
+
+# restart strongswan and have it run in the correct domain
+role vpnadm_r types ipsec_t;
+role vpnadm_r types ipsec_mgmt_t;
+ipsec_domtrans(vpnadm_t)
+ipsec_domtrans_mgmt(vpnadm_t)
+
+ipsec_read_config(vpnadm_t)
+ipsec_write_config(vpnadm_t)
+ipsec_rw_keys(vpnadm_t)
+ipsec_exec_initrc(vpnadm_t)
+
+#to copy certs into /home/sftp
+userdom_manage_user_home_content(vpnadm_t)
+
+# the init script deals with lockfiles
+files_rw_lock_dirs(vpnadm_t)
