@@ -350,6 +350,11 @@ miscfiles_read_localization(updpwd_t)
 
 userdom_use_user_terminals(updpwd_t)
 
+# used to determine if selinux is enabled,
+# and if it should setfscreatecon to label
+# /etc/shadow properly
+selinux_get_fs_mount(updpwd_t)
+
 ifdef(`distro_ubuntu',`
 	optional_policy(`
 		unconfined_domain(updpwd_t)
