@@ -17,7 +17,7 @@ VERSION := 1
 RELEASE := 1
 
 # snag the architecture, hard code an arch if cross-compiling or going noarch
-ARCH := noarch
+ARCH := $(uname -p)
 
 
 PACKAGER := Quark Security, Inc
@@ -71,7 +71,7 @@ $(OUTPUT_DIR)/$(RPM): $(SRPM)
 	@echo "Building $(PKGNAME) RPM..."
 	$(call rpm-prep)
 	cd $(RPM_TOPDIR)/SRPMS && rpmbuild --rebuild $(RPMBUILD_ARGS) -bb $<
-	if [ $(ARCH) != "noarch" ]; then cp $(RPM_TOPDIR)/RPMS/noarch/* $(OUTPUT_DIR)/ 2>&1 >/dev/null; exit 0; fi
+	if [ $(ARCH) != "noarch" ]; then cp $(RPM_TOPDIR)/RPMS/$(ARCH)/* $(OUTPUT_DIR)/ 2>&1 >/dev/null; exit 0; fi
 	mv  $(RPM_TOPDIR)/RPMS/$(ARCH)/$(PKGNAME)-$(VERSION)-$(RELEASE)*.rpm $(OUTPUT_DIR)
 
 $(SRPM): $(SRC_SRPM)
