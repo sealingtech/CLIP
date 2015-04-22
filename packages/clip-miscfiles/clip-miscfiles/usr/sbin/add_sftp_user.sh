@@ -5,7 +5,7 @@
 #	  Spencer Shimko <spencer@quarksecurity.com>
 set -e
 add_user() {
-	# address case where the username already ex:q!
+	# address case where the username already exists 
 	if semanage user -l| awk '{ print $1; }'|grep -q $1_u; then
 		rand=`date|md5sum|head -c 8`
 		semanage user -a -R "user_r" ${1}${rand}_u
