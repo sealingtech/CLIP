@@ -89,6 +89,7 @@ scap-security-guide
 dracut
 webpageexample
 clip-dracut-module
+mod_ssl
 
 mysql
 mysql-server
