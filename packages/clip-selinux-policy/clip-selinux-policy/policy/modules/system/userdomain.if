@@ -1412,6 +1412,24 @@ interface(`userdom_dontaudit_getattr_user_home_dirs',`
 
 ########################################
 ## <summary>
+##	Do not audit attempts to get the attributes of user home.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`userdom_dontaudit_getattr_user_home',`
+	gen_require(`
+		type user_home_t;
+	')
+
+	dontaudit $1 user_home_t:dir { getattr_dir_perms };
+')
+
+########################################
+## <summary>
 ##	Search user home directories.
 ## </summary>
 ## <param name="domain">
