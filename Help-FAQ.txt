@@ -30,7 +30,7 @@ CLIP for RHEL 6 Frequently Asked Questions
    and accreditation process.
 
 1. How do I roll an installation ISO?
-   Run "make clip-minimal-iso"
+   Run "make clip-minimal--inst-iso"
 
 2. What other things can I make?
    Run "make help"
