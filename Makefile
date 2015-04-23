@@ -48,7 +48,7 @@ export LIVECD_VERSION ?= $(shell rpm --eval `sed -n -e 's/Release: \(.*\)/\1/p' 
 export PUNGI_VERSION ?= 2.0.22-1
 
 # Config deps
-CONFIG_BUILD_DEPS = $(ROOT_DIR)/CONFIG_BUILD $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
+CONFIG_BUILD_DEPS := $(ROOT_DIR)/CONFIG_BUILD $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
 
 # MOCK_REL must be configured in MOCK_CONF_DIR/MOCK_REL.cfg
 MOCK_REL := rhel-$(RHEL_VER)-$(TARGET_ARCH)
@@ -106,7 +106,6 @@ EC2_API_TOOLS_ZIP    := $(RPM_TMPDIR)/ec2-api-tools.zip
 EC2_API_TOOLS_URL    := http://s3.amazonaws.com/ec2-downloads/ec2-api-tools.zip
 
 export MOCK_YUM_CONF :=
-export MY_REPO_DEPS :=
 export setup_all_repos := setup-clip-repo
 CLIP_REPO_DIRS :=
 
@@ -126,7 +125,7 @@ MOCK := /usr/bin/mock
 REPO_LINK := /bin/ln -s
 REPO_WGET := /usr/bin/wget
 REPO_CREATE := /usr/bin/createrepo -d --workers $(shell /usr/bin/nproc) -c $(REPO_DIR)/yumcache
-REPO_QUERY :=  repoquery -c $(YUM_CONF_ALL_FILE) --quiet -a --queryformat '%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm'
+REPO_QUERY = repoquery -c $(1) --quiet -a --queryformat '%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm'
 MOCK_ARGS += --resultdir=$(CLIP_REPO_DIR) -r $(MOCK_REL) --configdir=$(MOCK_CONF_DIR) --unpriv --rebuild
 
 # This deps list gets propegated down to sub-makefiles
@@ -223,22 +222,26 @@ endef
 # BEGIN RPM GENERATION RULES (BEWARE OF DRAGONS)
 # This define directive is used to generate build rules.
 define RPM_RULE_template
-$(1): $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1))) $(MY_REPO_DEPS) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg
+$(1): $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1))) $(MY_REPO_DEPS) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg $(YUM_CONF_ALL_FILE) $(CLIP_REPO_DIR)/exists
 	$(call CHECK_DEPS)
 	$(call MKDIR,$(CLIP_REPO_DIR))
 	$(call CHECK_MOCK)
 	$(VERBOSE)$(MOCK) $(MOCK_ARGS) $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
 	cd $(CLIP_REPO_DIR) && $(REPO_CREATE) .
-	$(VERBOSE)$(REPO_QUERY) --repoid=clip-repo |sort 1>$(CONF_DIR)/pkglist.clip-repo
+	$(VERBOSE)$(call REPO_QUERY,$(YUM_CONF_ALL_FILE)) --repoid=clip-repo |sort 1>$(CONF_DIR)/pkglist.clip-repo
 ifeq ($(ENABLE_SIGNING),y)
 	$(RPM) --addsign $(CLIP_REPO_DIR)/*
 endif
+
+$(eval PHONIES += $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-rpm $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-nomock-rpm)
 $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-rpm:  $(1)
 $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-nomock-rpm:  $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
 	$(call CHECK_DEPS)
 	$(call MKDIR,$(CLIP_REPO_DIR))
 	$(VERBOSE)OUTPUT_DIR=$(CLIP_REPO_DIR) $(MAKE) -C $(PKG_DIR)/$(call PKG_NAME_FROM_RPM,$(notdir $(1))) rpm
 	cd $(CLIP_REPO_DIR) && $(REPO_CREATE) .
+
+$(eval PHONIES += $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-srpm $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-clean)
 $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-srpm:  $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
 $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-clean:
 	$(call CHECK_DEPS)
@@ -273,13 +276,10 @@ $(eval REPO_LINES := $(REPO_LINES)repo --name=$(REPO_ID) --baseurl=file://$(REPO
 
 $(eval CLIP_REPO_DIRS += "$(REPO_DIR)/$(REPO_ID)-repo")
 $(eval PKG_LISTS += "./$(shell basename $(CONF_DIR))/pkglist.$(REPO_ID)")
+$(eval REPO_DEPS += $(REPO_DIR)/$(REPO_ID)-repo/last-updated)
 
-setup-$(REPO_ID)-repo:  $(REPO_DIR)/$(REPO_ID)-repo/last-updated $(CONFIG_BUILD_DEPS) setup-$(REPO_ID)-yum-conf-all
-
-setup-$(REPO_ID)-yum-conf-all:
-	echo -e $(YUM_CONF) >> $(YUM_CONF_ALL_FILE)
-
-$(eval YUM_CONF_PHONIES += setup-$(REPO_ID)-yum-conf-all)
+$(eval PHONIES += setup-$(REPO_ID)-repo)
+setup-$(REPO_ID)-repo:  $(REPO_DIR)/$(REPO_ID)-repo/last-updated $(CONFIG_BUILD_DEPS) 
 
 # This is the key target for managing yum repos.  If the pkg list for the repo
 # is more recent then our private repo regen the repo by symlink'ing the packages into our repo.
@@ -292,6 +292,9 @@ $(REPO_DIR)/$(REPO_ID)-repo/last-updated: $(CONF_DIR)/pkglist.$(REPO_ID) $(CONFI
 	$(VERBOSE)while read fil; do $(REPO_LINK) $(REPO_PATH)/$$$$fil $(REPO_DIR)/$(REPO_ID)-repo/$$$$fil; done < $(CONF_DIR)/pkglist.$(REPO_ID)
 	@echo "Generating $(REPO_ID) yum repo metadata, this could take a few minutes..."
 	$(VERBOSE)cd $(REPO_DIR)/$(REPO_ID)-repo && $(REPO_CREATE) .
+	test -f $(YUM_CONF_ALL_FILE) || ( cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE);\
+		echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_ALL_FILE)) 
+	echo -e $(YUM_CONF) >> $(YUM_CONF_ALL_FILE)
 	$(VERBOSE)touch $(REPO_DIR)/$(REPO_ID)-repo/last-updated
 
 # If a pkglist is missing then assume we should generate one ourselves.
@@ -302,10 +305,10 @@ $(CONF_DIR)/pkglist.$(REPO_ID) ./$(shell basename $(CONF_DIR))/pkglist.$(REPO_ID
 	$(VERBOSE)rm -rf $(REPO_DIR)/$(REPO_ID)-repo
 	$(VERBOSE)$(RM) $(YUM_CONF_FILE)
 	$(VERBOSE)$(RM) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg
-	@echo "Generating list of packages for $(call GET_REPO_ID,$(1))$(RHEL_VER)"
+	@echo "Generating list of packages for $(call GET_REPO_ID,$(1))"
 	$(VERBOSE)cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_FILE)
 	echo -e $(YUM_CONF) >> $(YUM_CONF_FILE)
-	$(VERBOSE)$(REPO_QUERY) --repoid=$(REPO_ID) |sort 1>$(CONF_DIR)/pkglist.$(REPO_ID)
+	$(VERBOSE)$(call REPO_QUERY,$(YUM_CONF_FILE)) --repoid=$(REPO_ID) |sort 1>$(CONF_DIR)/pkglist.$(REPO_ID)
 
 endif
 endef
@@ -315,6 +318,7 @@ endef
 ######################################################
 # BEGIN RULES
 
+PHONIES += help
 help:
 	$(call CHECK_DEPS)
 	@echo "The following make targets are available for generating installable ISOs:"
@@ -357,7 +361,8 @@ help:
 	@echo "	clean-mock (deletes the yum and mock configuration we generate)"
 	@echo "	bare (deletes everything except ISOs)"
 
-all: create-repos $(INSTISOS) $(LIVECDS)
+PHONIES += all
+all: $(INSTISOS) $(LIVECDS)
 
 # Generate custom targets for managing the yum repos.  We have to generate the rules since the user provides the set of repos.
 $(foreach REPO,$(strip $(shell cat CONFIG_REPOS|$(GREP) -E '^[a-zA-Z].*=.*'|$(SED) -e 's/ \?= \?/=/')),$(eval $(call REPO_RULE_template,$(REPO))))
@@ -368,24 +373,16 @@ $(foreach RPM,$(RPMS),$(eval $(call RPM_RULE_template,$(RPM))))
 # We need some packages on the build host that aren't available in EPEL, RHEL, Opt.
 SRPMS := $(SRPMS) $(addprefix $(SRPM_OUTPUT_DIR)/,$(foreach RPM,$(HOST_RPMS),$(call SRPM_FROM_RPM,$(notdir $(RPM)))))
 
-init_yum_conf:
-	$(VERBOSE)$(RM) $(YUM_CONF_ALL_FILE)
-	@echo "Adding yum.conf header"
-	$(VERBOSE)cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE)
-	$(VERBOSE)echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_ALL_FILE) 
-
-$(YUM_CONF_ALL_FILE): create-repos
-
-create-repos: init_yum_conf $(setup_all_repos)
-
-setup-clip-repo: setup-pre-rolled-packages $(RPMS)
+# This is a slight hack to make sure we have a valid yum repo here.
+# Problem is, the repodata files are re-generated every time an PRM is built.
+# This means depending on something like repo.md causes every package to be 
+# built every single time.  So we'll use this to fake it.
+$(CLIP_REPO_DIR)/exists:  
 	$(call CHECK_DEPS)
-	@echo "Generating yum repo metadata, this could take a few minutes..."
+	$(call MKDIR,$@)
+	echo "Generating clip-repo metadata."; \
 	$(VERBOSE)cd $(CLIP_REPO_DIR) && $(REPO_CREATE) -g $(COMPS_FILE) .
 
-setup-pre-rolled-packages:
-	$(call CHECK_DEPS)
-	$(call MKDIR,$(CLIP_REPO_DIR))
 	@set -e; for pkg in $(PRE_ROLLED_PACKAGES); do \
            [ -f "$$pkg" ] || ( echo "Failed to find pre-rolled package: $$pkg" && exit 1 );\
            [ -h $(CLIP_REPO_DIR)/`basename $$pkg` ] && rm -f $(CLIP_REPO_DIR)/`basename $$pkg`;\
@@ -393,9 +390,12 @@ setup-pre-rolled-packages:
 	      ( echo "Failed to find pre-rolled package $$pkg - check CONFIG_BUILD and make sure you use quotes around paths with spaces." && exit 1 );\
         done
 	$(VERBOSE)cd $(CLIP_REPO_DIR) && $(REPO_CREATE) -g $(COMPS_FILE) .
+	touch $@
 
+PHONIES += rpms
 rpms: $(RPMS)
 
+PHONIES += srpms
 srpms: $(SRPMS)
 
 %.src.rpm:  FORCE
@@ -403,12 +403,14 @@ srpms: $(SRPMS)
 	$(call MKDIR,$(SRPM_OUTPUT_DIR))
 	$(MAKE) -C $(PKG_DIR)/$(call PKG_NAME_FROM_RPM,$(notdir $@)) srpm
 
-$(LIVECDS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
+PHONIES += $(LIVECDS)
+$(LIVECDS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_LIVE_TOOLS)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-live-iso/\1/'`" live-iso
 
-$(INSTISOS):  $(BUILD_CONF_DEPS) create-repos $(RPMS)
+PHONIES += $(INSTISOS)
+$(INSTISOS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_PUNGI)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
@@ -427,20 +429,22 @@ $(EC2_API_TOOLS_ZIP):
 $(EC2_API_TOOLS): $(EC2_API_TOOLS_ZIP)
 	unzip -d $@ $^
 
+PHONIES += ec2-tools
 ec2-tools: $(EC2_AMI_TOOLS) $(EC2_API_TOOLS)
 
+PHONIES += check-vars
 check-vars:
 	$(call CHECK_AWS_VARS)
 
 
-$(AWSBUNDLES): check-vars ec2-tools $(BUILD_CONF_DEPS) create-repos $(RPMS)
+$(AWSBUNDLES): check-vars ec2-tools $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_LIVE_TOOLS)
 	# TODO: this awk expression relies heavily on the tool name prefix length, better option?
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-aws-ami/\1/'`" \
 		EC2_API_TOOLS_VER=$$(unzip -l $(EC2_API_TOOLS_ZIP)|awk '/^.*[0-9]\/$$/ { print substr($$4,15,length($$4)-15); }') aws 
 
-$(MOCK_CONF_DIR)/$(MOCK_REL).cfg:  $(MOCK_CONF_DIR)/$(MOCK_REL).cfg.tmpl $(CONF_DIR)/pkglist.blacklist
+$(MOCK_CONF_DIR)/$(MOCK_REL).cfg:  $(MOCK_CONF_DIR)/$(MOCK_REL).cfg.tmpl $(CONF_DIR)/pkglist.blacklist $(CLIP_REPO_DIR)/exists
 	$(call CHECK_DEPS)
 	$(VERBOSE)cat $(MOCK_CONF_DIR)/$(MOCK_REL).cfg.tmpl > $@
 	$(VERBOSE)echo -e $(MOCK_YUM_CONF) >> $@
@@ -454,6 +458,7 @@ ifneq ($(OVERLAY_SIZE),)
 OVERLAYS += --overlay-size-mb $(OVERLAY_SIZE)
 endif
 
+PHONIES += iso-to-disk
 iso-to-disk:
 	@if [ x"$(ISO_FILE)" = "x" -o x"$(USB_DEV)" = "x" ]; then echo "Error: set ISO_FILE=<filename> and USB_DEV=<dev> on command line to generate a bootable thumbdrive." && exit 1; fi
 	@if echo "$(USB_DEV)" | $(GREP) -q "^.*[0-9]$$"; then echo "Error: it looks like you gave me a partition.  Set USB_DEV to a device root, eg /dev/sdb." && exit 1; fi
@@ -472,32 +477,37 @@ iso-to-disk:
 	$(VERBOSE)sudo umount $(USB_DEV)1 2>&1 > /dev/null || true
 	@echo "Writing image..."
 	$(VERBOSE)sudo /usr/bin/livecd-iso-to-disk $(OVERLAYS) --resetmbr $(ISO_FILE) $(USB_DEV)1
+
+PHONIES += clean-mock
 clean-mock: $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
 	$(VERBOSE)$(RM) $(YUM_CONF_FILE)
 	$(VERBOSE)$(RM) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg
 	$(VERBOSE)$(RM) -rf $(REPO_DIR)/yumcache
 
+PHONIES += bare-repos
 bare-repos: clean-mock
 	$(VERBOSE)$(RM) $(YUM_CONF_ALL_FILE)
 	$(VERBOSE)$(RM) -r $(CLIP_REPO_DIRS) $(CLIP_REPO_DIR)
 
+PHONIES += clean
 clean:
 	@sudo $(RM) -rf $(RPM_TMPDIR) $(TOOLS_DIR)
 	@$(VERBOSE)for pkg in $(PACKAGES); do $(MAKE) -C $(PKG_DIR)/$$pkg $@; done
 
+PHONIES += bare
 bare: bare-repos clean
 	for pkg in $(PACKAGES); do $(MAKE) -C $(PKG_DIR)/$$pkg $@; done
 	$(VERBOSE)$(RM) $(addprefix $(SRPM_OUTPUT_DIR),$(SRPMS))
 	$(VERBOSE)$(RM) $(addprefix $(OUTPUT_DIR),$(RPMS))
 
+PHONIES += FORCE
 FORCE:
 
 # Unfortunately mock isn't exactly "parallel" friendly which sucks since we could roll a bunch of packages in parallel.
 .NOTPARALLEL:
 
-.PHONY:  all all-vm create-repos $(setup_all_repos) srpms rpms clean bare bare-repos $(addsuffix -rpm,$(PACKAGES)) $(addsuffix -srpm,$(PACKAGES)) $(addsuffix -nomock-rpm,$(PACKAGES)) $(addsuffix -clean,$(PACKAGES)) $(LIVECDS) $(INSTISOS) $(YUM_CONF_PHONIES) FORCE clean-mock check-vars ec2-tools init_yum_conf
+.PHONY: $(PHONIES) $(YUM_CONF_PHONIES) 
 
 
 # END RULES
 ######################################################
-
