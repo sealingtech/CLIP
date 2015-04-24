@@ -105,4 +105,5 @@ bare: clean
 	$(RM) $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm
 	$(RM) -r a b
 
+.SUFFIXES:
 .PHONY: all rpm srpm $(PKGNAME)-rpm $(PKGNAME)-srpm clean bare

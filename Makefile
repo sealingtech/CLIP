@@ -505,7 +505,7 @@ FORCE:
 
 # Unfortunately mock isn't exactly "parallel" friendly which sucks since we could roll a bunch of packages in parallel.
 .NOTPARALLEL:
-
+.SUFFIXES:
 .PHONY: $(PHONIES) $(YUM_CONF_PHONIES) 
 
 

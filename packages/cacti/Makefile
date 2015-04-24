@@ -94,5 +94,5 @@ bare: $(RPM_SPEC) FORCE
 	$(RM) -r $(RPM_TMPDIR)
 
 FORCE:
-
+.SUFFIXES:
 .PHONY: all $(PKGNAME)-rpm $(PKGNAME)-srpm clean bare rpm srpm FORCE

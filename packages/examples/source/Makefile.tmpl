@@ -99,4 +99,5 @@ bare: clean
 	$(RM) $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm
 	$(RM) $(TARBALL)
 
+.SUFFIXES:
 .PHONY: all rpm srpm tarball $(PKGNAME)-rpm $(PKGNAME)-srpm clean bare
