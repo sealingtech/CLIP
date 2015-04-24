@@ -73,7 +73,7 @@ AWS_CONFIG_BUILD_BASH_VARS := $(CONFIG_BUILD_BASH_VARS) CONFIG_BUILD_AWS=y CONFI
 # probably just ignore this.
 REPO_LINES ?= repo --name=centos --baseurl=http://mirror.centos.org/centos/6.2/os/$$basearch\nrepo --name=epel   --baseurl=http://download.fedora.redhat.com/pub/epel/$(RHEL_VER)/$$basearch
 
-SETUP_DEPS := $(CURDIR)/Makefile $(KS)
+SETUP_DEPS := $(CURDIR)/../Makefile $(KS)
 
 all: iso live-iso setup-ks
 
@@ -146,7 +146,8 @@ setup-aws-ks: $(SETUP_DEPS)
 clean:
 	$(VERBOSE)sudo rm -rf $(BUILD_DIR)
 
-VEbare: clean
+bare: clean
 	rm -rf $(TMP_DIR)
 
+.SUFFIXES:
 .PHONY: all live-iso iso clean bare setup-ks check-volume-id setup-live-ks setup-inst-ks setup-aws-ks
