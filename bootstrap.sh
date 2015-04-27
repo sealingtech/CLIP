@@ -100,4 +100,5 @@ read foo
 /usr/bin/sudo /bin/sed -i -e 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 
 /bin/echo -e "Basic bootstrapping of build host is complete.\nPress 'enter' to run 'make clip-minimal-inst-iso' or ctrl-c to quit."
+read
 /usr/bin/make clip-minimal-inst-iso
