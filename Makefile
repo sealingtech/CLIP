@@ -30,11 +30,6 @@ ifeq ($(shell id -u),0)
 $(error Never CLIP as root! It will break things!  Try again as an unprivileged user with sudo access.)
 endif
 
-# Unfortunately there is a package we need that isn't in RHEL/EPEL/Opt.
-# Or they are packages from upstream we have to patch.
-# So we will roll it ourselves inside of mock :)
-HOST_REQD_PKGS := pungi livecd-tools
-
 HOST_RPM_DEPS := rpm-build createrepo mock repoview
 
 export ROOT_DIR ?= $(CURDIR)
@@ -56,6 +51,10 @@ MOCK_REL := rhel-$(RHEL_VER)-$(TARGET_ARCH)
 # This directory contains all of our packages we will be building.
 PKG_DIR += $(CURDIR)/packages
 PACKAGES := $(shell ls $(PKG_DIR) | grep -v examples)
+
+ifeq ($(CONFIG_BUILD_ENABLE_SSH_6),n)
+PACKAGES := $(filter-out openssh-six,$(PACKAGES))
+endif
 
 # This is the directory that will contain all of our yum repos.
 REPO_DIR := $(CURDIR)/repos
