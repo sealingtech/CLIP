@@ -10,6 +10,9 @@
 #define ERR(...) fprintf(stderr, __VA_ARGS__); exit(-1);
 #define PROG "/usr/bin/add_vpn_user.sh"
 
+//#define PROD 0
+#define PROD 1
+
 int main(int argc, char **argv)
 {
 	if (argc != 2) {
@@ -31,6 +34,7 @@ int main(int argc, char **argv)
 	setreuid(geteuid(), geteuid());
 	errno = 0;
 
+#if PROD
 	//redirect stdout and stderr to /dev/null so we don't leak any output
         int fd = open("/dev/null", O_WRONLY);
         if (fd == -1) {
@@ -44,7 +48,7 @@ int main(int argc, char **argv)
                 ERR("dup2 failed\n");
                 exit(-1);
         }
-
+#endif
 	execve(PROG, args, environ);
 	return -1;
 }

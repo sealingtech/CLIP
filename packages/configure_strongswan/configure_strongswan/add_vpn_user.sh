@@ -2,11 +2,12 @@
 
 #TODO source common variables from a script
 
-PASSWD_PROG=/usr/bin/gen_passwd.sh
-SUBJ_PROG=/usr/bin/gen_subj.sh
-WORD_PROG=/usr/bin/gen_word.sh
+. /usr/bin/vpn_funcs.sh
 
-CONN_NAME=`$WORD_PROG`
+gen_cert_subj CLIENT_SUBJ
+gen_random_word CONN_NAME
+gen_passwd CLIENT_PASSWD
+
 WORKDIR=/tmp/add_vpn_user
 CLIENT_KEY=$WORKDIR/$CONN_NAME.key
 CLIENT_PEM=$WORKDIR/$CONN_NAME.pem
@@ -20,8 +21,7 @@ CA_PASSWD_FILE=$PRIVATEDIR/ca_pass.txt
 CA_PASSWD=`cat $CA_PASSWD_FILE`
 DAYS=1024
 REQUEST=$WORKDIR/request.csr
-CLIENT_PASSWD=`$PASSWD_PROG`
-CLIENT_SUBJ=`$SUBJ_PROG`
+
 gen_key() {
         openssl genrsa -passout pass:$2 -out $1 4096
 }
@@ -61,8 +61,9 @@ then
         rightcert=$CONN_NAME.pem\n\
         rightauth2=xauth\n"
 
-	XAUTH_USER=`$WORD_PROG`
-	XAUTH_PASSWD=`$PASSWD_PROG`
+	gen_random_word XAUTH_USER
+	gen_passwd XAUTH_PASSWD
+
 	XAUTH_INFO="$XAUTH_USER : XAUTH $XAUTH_PASSWD"
 else
 	CONN="conn $CONN_NAME\n\
@@ -78,7 +79,7 @@ then
 	echo -e "$XAUTH_INFO" >> /etc/strongswan/ipsec.secrets
 fi
 
-OUTDIR=/home/sftp/android_certs/$EMAIL
+OUTDIR=/home/sftp/android_certs/
 CLIENT_PASSWD_FILE=$OUTDIR/client_pass.txt
 XAUTH_INFO_FILE=$OUTDIR/xauth_info.txt
 

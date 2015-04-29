@@ -4,9 +4,7 @@
 # description: setup strongswan configuration
 
 . /etc/rc.d/init.d/functions
-
-SUBJ_PROG=/usr/bin/gen_subj.sh
-PASSWD_PROG=/usr/bin/gen_passwd.sh
+. /usr/bin/vpn_funcs.sh
 
 WORKDIR="/tmp/strongswan"
 CA_KEY="$WORKDIR/rootCA.key"
@@ -18,10 +16,12 @@ IPSEC_CONF="$WORKDIR/ipsec.conf"
 IPSEC_SECRETS="$WORKDIR/ipsec.secrets"
 IPSEC_CONF_TMPL="$WORKDIR/ipsec.conf.tmpl"
 IPSEC_SECRETS_TMPL="$WORKDIR/ipsec.secrets.tmpl"
-CA_SUBJ=`$SUBJ_PROG`
-CA_PASSWD=`$PASSWD_PROG`
-SERVER_SUBJ=`$SUBJ_PROG`
-SERVER_PASSWD=`$PASSWD_PROG`
+
+gen_cert_subj CA_SUBJ
+gen_passwd CA_PASSWD
+gen_cert_subj SERVER_SUBJ
+gen_passwd SERVER_PASSWD
+
 #TODO allow the user to specify the subnet to use - definitely need this
 RIGHT_IP="192.168.31.0\/24"
 STRONGSWANDIR=/etc/strongswan
