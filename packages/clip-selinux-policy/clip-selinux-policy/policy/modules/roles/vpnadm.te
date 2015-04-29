@@ -25,6 +25,8 @@ ssh_role_template(vpnadm, vpnadm_r, vpnadm_t)
 # restart strongswan and have it run in the correct domain
 role vpnadm_r types ipsec_t;
 role vpnadm_r types ipsec_mgmt_t;
+# need to be able to run iptables when ipsec is being run vpnadm_u:vpnadm_r
+iptables_run(ipsec_t, vpnadm_r)
 ipsec_domtrans(vpnadm_t)
 ipsec_domtrans_mgmt(vpnadm_t)
 
