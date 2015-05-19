@@ -88,9 +88,18 @@ interface(`nis_use_ypbind_uncond',`
 ## <rolecap/>
 #
 interface(`nis_use_ypbind',`
-	tunable_policy(`allow_ypbind',`
-		nis_use_ypbind_uncond($1)
-	')
+#	tunable_policy(`allow_ypbind',`
+#		nis_use_ypbind_uncond($1)
+#	')
+#
+
+	# SRS: this, um, hack (to put it lightly)
+	# is here so all the callers of this interface
+	# that call it in an optional block don't cause
+	# compile errors due to an empty optional block
+	require { type $1; }
+	dontaudit $1 self:fd use;
+	auditdeny $1 self:fd use;
 ')
 
 ########################################
@@ -105,11 +114,18 @@ interface(`nis_use_ypbind',`
 ## <rolecap/>
 #
 interface(`nis_authenticate',`
-	tunable_policy(`allow_ypbind',`
-		nis_use_ypbind_uncond($1)
-		corenet_tcp_bind_all_rpc_ports($1)
-		corenet_udp_bind_all_rpc_ports($1)
-	')
+#	tunable_policy(`allow_ypbind',`
+#		nis_use_ypbind_uncond($1)
+#		corenet_tcp_bind_all_rpc_ports($1)
+#		corenet_udp_bind_all_rpc_ports($1)
+#	')
+	# SRS: this, um, hack (to put it lightly)
+	# is here so all the callers of this interface
+	# that call it in an optional block don't cause
+	# compile errors due to an empty optional block
+	require { type $1; }
+	dontaudit $1 self:fd use;
+	auditdeny $1 self:fd use;
 ')
 
 ########################################

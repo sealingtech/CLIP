@@ -167,13 +167,14 @@ template(`sudo_role_template',`
 		dontaudit $1_sudo_t $3:socket_class_set { read write };
 	')
 
-	tunable_policy(`use_nfs_home_dirs',`
-		fs_manage_nfs_files($1_sudo_t)
-	')
+# SRS: removed for CLIP
+#	tunable_policy(`use_nfs_home_dirs',`
+#		fs_manage_nfs_files($1_sudo_t)
+#	')
 
-	tunable_policy(`use_samba_home_dirs',`
-		fs_manage_cifs_files($1_sudo_t)
-	')
+#	tunable_policy(`use_samba_home_dirs',`
+#		fs_manage_cifs_files($1_sudo_t)
+#	')
 
 	optional_policy(`
 		dbus_system_bus_client($1_sudo_t)

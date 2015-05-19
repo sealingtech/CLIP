@@ -167,27 +167,29 @@ interface(`userdom_ro_home_role',`
 	read_sock_files_pattern($2, { user_home_t user_home_dir_t }, user_home_t)
 	files_list_home($2)
 
-	tunable_policy(`use_nfs_home_dirs',`
-		fs_list_nfs($2)
-		fs_read_nfs_files($2)
-		fs_read_nfs_symlinks($2)
-		fs_read_nfs_named_sockets($2)
-		fs_read_nfs_named_pipes($2)
-	',`
-		fs_dontaudit_list_nfs($2)
-		fs_dontaudit_read_nfs_files($2)
-	')
+# SRS: removed for CLIP
+#	tunable_policy(`use_nfs_home_dirs',`
+#		fs_list_nfs($2)
+#		fs_read_nfs_files($2)
+#		fs_read_nfs_symlinks($2)
+#		fs_read_nfs_named_sockets($2)
+#		fs_read_nfs_named_pipes($2)
+#	',`
+#		fs_dontaudit_list_nfs($2)
+#		fs_dontaudit_read_nfs_files($2)
+#	')
 
-	tunable_policy(`use_samba_home_dirs',`
-		fs_list_cifs($2)
-		fs_read_cifs_files($2)
-		fs_read_cifs_symlinks($2)
-		fs_read_cifs_named_sockets($2)
-		fs_read_cifs_named_pipes($2)
-	',`
-		fs_dontaudit_list_cifs($2)
-		fs_dontaudit_read_cifs_files($2)
-	')
+# SRS: removed for CLIP
+#	tunable_policy(`use_samba_home_dirs',`
+#		fs_list_cifs($2)
+#		fs_read_cifs_files($2)
+#		fs_read_cifs_symlinks($2)
+#		fs_read_cifs_named_sockets($2)
+#		fs_read_cifs_named_pipes($2)
+#	',`
+#		fs_dontaudit_list_cifs($2)
+#		fs_dontaudit_read_cifs_files($2)
+#	')
 ')
 
 #######################################
@@ -246,27 +248,28 @@ interface(`userdom_manage_home_role',`
 	# cjp: this should probably be removed:
 	allow $2 user_home_dir_t:dir { manage_dir_perms relabel_dir_perms };
 
-	tunable_policy(`use_nfs_home_dirs',`
-		fs_manage_nfs_dirs($2)
-		fs_manage_nfs_files($2)
-		fs_manage_nfs_symlinks($2)
-		fs_manage_nfs_named_sockets($2)
-		fs_manage_nfs_named_pipes($2)
-	',`
-		fs_dontaudit_manage_nfs_dirs($2)
-		fs_dontaudit_manage_nfs_files($2)
-	')
+# SRS: removed for CLIP
+#	tunable_policy(`use_nfs_home_dirs',`
+#		fs_manage_nfs_dirs($2)
+#		fs_manage_nfs_files($2)
+#		fs_manage_nfs_symlinks($2)
+#		fs_manage_nfs_named_sockets($2)
+#		fs_manage_nfs_named_pipes($2)
+#	',`
+#		fs_dontaudit_manage_nfs_dirs($2)
+#		fs_dontaudit_manage_nfs_files($2)
+#	')
 
-	tunable_policy(`use_samba_home_dirs',`
-		fs_manage_cifs_dirs($2)
-		fs_manage_cifs_files($2)
-		fs_manage_cifs_symlinks($2)
-		fs_manage_cifs_named_sockets($2)
-		fs_manage_cifs_named_pipes($2)
-	',`
-		fs_dontaudit_manage_cifs_dirs($2)
-		fs_dontaudit_manage_cifs_files($2)
-	')
+#	tunable_policy(`use_samba_home_dirs',`
+#		fs_manage_cifs_dirs($2)
+#		fs_manage_cifs_files($2)
+#		fs_manage_cifs_symlinks($2)
+#		fs_manage_cifs_named_sockets($2)
+#		fs_manage_cifs_named_pipes($2)
+#	',`
+#		fs_dontaudit_manage_cifs_dirs($2)
+#		fs_dontaudit_manage_cifs_files($2)
+#	')
 ')
 
 #######################################
@@ -996,13 +999,15 @@ template(`userdom_unpriv_user_template', `
 		kernel_dontaudit_read_ring_buffer($1_t)
 	')
 
+
+	# SRS: removed ror CLIP
 	# Allow users to run TCP servers (bind to ports and accept connection from
 	# the same domain and outside users) disabling this forces FTP passive mode
 	# and may change other protocols
-	tunable_policy(`user_tcp_server',`
-		corenet_tcp_bind_generic_node($1_t)
-		corenet_tcp_bind_generic_port($1_t)
-	')
+#	tunable_policy(`user_tcp_server',`
+#		corenet_tcp_bind_generic_node($1_t)
+#		corenet_tcp_bind_generic_port($1_t)
+#	')
 
 	optional_policy(`
 		netutils_run_ping_cond($1_t, $1_r)
@@ -1901,13 +1906,14 @@ interface(`userdom_exec_user_home_content_files',`
 	files_search_home($1)
 	exec_files_pattern($1, { user_home_dir_t user_home_t }, user_home_t)
 
-	tunable_policy(`use_nfs_home_dirs',`
-		fs_exec_nfs_files($1)
-	')
+# SRS: removed for CLIP
+#	tunable_policy(`use_nfs_home_dirs',`
+#		fs_exec_nfs_files($1)
+#	')
 
-	tunable_policy(`use_samba_home_dirs',`
-		fs_exec_cifs_files($1)
-	')
+#	tunable_policy(`use_samba_home_dirs',`
+#		fs_exec_cifs_files($1)
+#	')
 ')
 
 ########################################

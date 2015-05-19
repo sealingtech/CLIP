@@ -239,13 +239,15 @@ fs_search_auto_mountpoints(iceauth_t)
 userdom_use_user_terminals(iceauth_t)
 userdom_read_user_tmp_files(iceauth_t)
 
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_files(iceauth_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_files(iceauth_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_files(iceauth_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_files(iceauth_t)
+#')
 
 ########################################
 #
@@ -285,13 +287,15 @@ userdom_read_user_tmp_files(xauth_t)
 
 xserver_rw_xdm_tmp_files(xauth_t)
 
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_files(xauth_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_files(xauth_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_files(xauth_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_files(xauth_t)
+#')
 
 optional_policy(`
 	ssh_sigchld(xauth_t)
@@ -480,19 +484,21 @@ userdom_signal_all_users(xdm_t)
 xserver_rw_session(xdm_t, xdm_tmpfs_t)
 xserver_unconfined(xdm_t)
 
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_dirs(xdm_t)
-	fs_manage_nfs_files(xdm_t)
-	fs_manage_nfs_symlinks(xdm_t)
-	fs_exec_nfs_files(xdm_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_dirs(xdm_t)
+#	fs_manage_nfs_files(xdm_t)
+#	fs_manage_nfs_symlinks(xdm_t)
+#	fs_exec_nfs_files(xdm_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_dirs(xdm_t)
-	fs_manage_cifs_files(xdm_t)
-	fs_manage_cifs_symlinks(xdm_t)
-	fs_exec_cifs_files(xdm_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_dirs(xdm_t)
+#	fs_manage_cifs_files(xdm_t)
+#	fs_manage_cifs_symlinks(xdm_t)
+#	fs_exec_cifs_files(xdm_t)
+#')
 
 tunable_policy(`xdm_sysadm_login',`
 	userdom_xsession_spec_domtrans_all_users(xdm_t)
@@ -694,7 +700,7 @@ files_search_mnt(xserver_t)
 files_dontaudit_search_pids(xserver_t)
 
 fs_getattr_xattr_fs(xserver_t)
-fs_search_nfs(xserver_t)
+#fs_search_nfs(xserver_t)
 fs_search_auto_mountpoints(xserver_t)
 fs_search_ramfs(xserver_t)
 
@@ -836,17 +842,19 @@ init_use_fds(xserver_t)
 # (xauth?)
 userdom_read_user_home_content_files(xserver_t)
 
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_dirs(xserver_t)
-	fs_manage_nfs_files(xserver_t)
-	fs_manage_nfs_symlinks(xserver_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_dirs(xserver_t)
+#	fs_manage_nfs_files(xserver_t)
+#	fs_manage_nfs_symlinks(xserver_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_dirs(xserver_t)
-	fs_manage_cifs_files(xserver_t)
-	fs_manage_cifs_symlinks(xserver_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_dirs(xserver_t)
+#	fs_manage_cifs_files(xserver_t)
+#	fs_manage_cifs_symlinks(xserver_t)
+#')
 
 optional_policy(`
 	dbus_system_bus_client(xserver_t)

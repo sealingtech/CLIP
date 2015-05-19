@@ -72,6 +72,11 @@ Certifiable Linux Integration Platform SELinux %2 policy for %1 \
 echo %1.pp.bz2 >> %{_usr}/share/selinux/%2/modules.lst \
 semodule -n -s %2 -i %{_usr}/share/selinux/%2/%1.pp.bz2 \
 echo "NOTE: installing the %1 policy RPM *does not reload the policy*." \
+echo "To reload the policy run 'semodule -R'" \
+\
+%preun %2-%1 \
+semodule -n -s %2 -l | grep -q %1 && semodule -n -s %2 -r %1 \
+echo "NOTE: removing the %1 policy RPM *does not reload the policy*." \
 echo "To reload the policy run 'semodule -R'" 
 
 %{expand:%( for f in %{separatePkgs}; do echo "%%genSeparatePolRPM $f mcs"; done)}

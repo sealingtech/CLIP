@@ -71,9 +71,10 @@ init_use_script_fds(depmod_t)
 init_use_script_ptys(depmod_t)
 
 userdom_use_user_terminals(depmod_t)
+# SRS: removed for CLIP - and WTF?
 # Read System.map from home directories.
-files_list_home(depmod_t)
-userdom_read_user_home_content_files(depmod_t)
+#files_list_home(depmod_t)
+#userdom_read_user_home_content_files(depmod_t)
 
 ifdef(`distro_ubuntu',`
 	optional_policy(`
@@ -81,23 +82,27 @@ ifdef(`distro_ubuntu',`
 	')
 ')
 
-tunable_policy(`use_nfs_home_dirs',`
-	fs_read_nfs_files(depmod_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_read_nfs_files(depmod_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_read_cifs_files(depmod_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_read_cifs_files(depmod_t)
+#')
 
 optional_policy(`
 	rpm_rw_pipes(depmod_t)
 	rpm_manage_script_tmp_files(depmod_t)
 ')
 
-optional_policy(`
+# SRS: um, wtf. This is like using a sledge hammer instead of
+# of tack hammer.  Removed for CLIP.
+#optional_policy(`
 	# Read System.map from home directories.
-	unconfined_domain(depmod_t)
-')
+#	unconfined_domain(depmod_t)
+#')
 
 ########################################
 #

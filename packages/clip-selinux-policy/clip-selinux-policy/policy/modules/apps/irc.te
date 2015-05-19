@@ -86,17 +86,18 @@ sysnet_read_config(irc_t)
 # Write to the user domain tty.
 userdom_use_user_terminals(irc_t)
 
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_dirs(irc_t)
-	fs_manage_nfs_files(irc_t)
-	fs_manage_nfs_symlinks(irc_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_dirs(irc_t)
+#	fs_manage_nfs_files(irc_t)
+#	fs_manage_nfs_symlinks(irc_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_dirs(irc_t)
-	fs_manage_cifs_files(irc_t)
-	fs_manage_cifs_symlinks(irc_t)
-')
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_dirs(irc_t)
+#	fs_manage_cifs_files(irc_t)
+#	fs_manage_cifs_symlinks(irc_t)
+#')
 
 optional_policy(`
 	nis_use_ypbind(irc_t)

@@ -39,19 +39,19 @@ gen_tunable(allow_execstack,false)
 ## </desc>
 gen_tunable(allow_polyinstantiation,false)
 
-## <desc>
-## <p>
-## Allow system to run with NIS
-## </p>
-## </desc>
-gen_tunable(allow_ypbind,false)
+# <desc>
+# <p>
+# Allow system to run with NIS
+# </p>
+# </desc>
+#gen_tunable(allow_ypbind,false)
 
-## <desc>
-## <p>
-## Allow logging in and using the system from /dev/console.
-## </p>
-## </desc>
-gen_tunable(console_login,true)
+# <desc>
+# <p>
+# Allow logging in and using the system from /dev/console.
+# </p>
+# </desc>
+#gen_tunable(console_login,true)
 
 ## <desc>
 ## <p>
@@ -75,39 +75,39 @@ gen_tunable(global_ssp,false)
 ## </desc>
 gen_tunable(mail_read_content,false)
 
-## <desc>
-## <p>
-## Allow any files/directories to be exported read/write via NFS.
-## </p>
-## </desc>
-gen_tunable(nfs_export_all_rw,false)
+# <desc>
+# <p>
+# Allow any files/directories to be exported read/write via NFS.
+# </p>
+# </desc>
+#gen_tunable(nfs_export_all_rw,false)
 
-## <desc>
-## <p>
-## Allow any files/directories to be exported read/only via NFS.
-## </p>
-## </desc>
-gen_tunable(nfs_export_all_ro,false)
+# <desc>
+# <p>
+# Allow any files/directories to be exported read/only via NFS.
+# </p>
+# </desc>
+#gen_tunable(nfs_export_all_ro,false)
 
-## <desc>
-## <p>
-## Support NFS home directories
-## </p>
-## </desc>
-gen_tunable(use_nfs_home_dirs,false)
+# <desc>
+# <p>
+# Support NFS home directories
+# </p>
+# </desc>
+#gen_tunable(use_nfs_home_dirs,false)
 
-## <desc>
-## <p>
-## Support SAMBA home directories
-## </p>
-## </desc>
-gen_tunable(use_samba_home_dirs,false)
+# <desc>
+# <p>
+# Support SAMBA home directories
+# </p>
+# </desc>
+#gen_tunable(use_samba_home_dirs,false)
 
-## <desc>
-## <p>
-## Allow users to run TCP servers (bind to ports and accept connection from
-## the same domain and outside users)  disabling this forces FTP passive mode
-## and may change other protocols.
-## </p>
-## </desc>
-gen_tunable(user_tcp_server,false)
+# <desc>
+# <p>
+# Allow users to run TCP servers (bind to ports and accept connection from
+# the same domain and outside users)  disabling this forces FTP passive mode
+# and may change other protocols.
+# </p>
+# </desc>
+#gen_tunable(user_tcp_server,false)

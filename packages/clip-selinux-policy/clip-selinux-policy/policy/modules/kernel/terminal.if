@@ -124,11 +124,12 @@ interface(`term_user_tty',`
 		type_change $1 ttynode:chr_file $2;
 	')
 
-	tunable_policy(`console_login',`
+#	# SRS: removed for CLIP
+#	tunable_policy(`console_login',`
 		# When user logs in from /dev/console, relabel it
 		# to user tty type as well.
-		type_change $1 console_device_t:chr_file $2;
-	')
+#		type_change $1 console_device_t:chr_file $2;
+#	')
 ')
 
 ########################################

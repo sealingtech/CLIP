@@ -232,17 +232,19 @@ read_files_pattern(mailserver_delivery, mail_forward_t, mail_forward_t)
 
 read_files_pattern(mailserver_delivery, system_mail_tmp_t, system_mail_tmp_t)
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_dirs(mailserver_delivery)
-	fs_manage_cifs_files(mailserver_delivery)
-	fs_manage_cifs_symlinks(mailserver_delivery)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_dirs(mailserver_delivery)
+#	fs_manage_cifs_files(mailserver_delivery)
+#	fs_manage_cifs_symlinks(mailserver_delivery)
+#')
 
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_dirs(mailserver_delivery)
-	fs_manage_nfs_files(mailserver_delivery)
-	fs_manage_nfs_symlinks(mailserver_delivery)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_dirs(mailserver_delivery)
+#	fs_manage_nfs_files(mailserver_delivery)
+#	fs_manage_nfs_symlinks(mailserver_delivery)
+#')
 
 optional_policy(`
 	dovecot_manage_spool(mailserver_delivery)
@@ -285,10 +287,11 @@ userdom_dontaudit_append_user_tmp_files(user_mail_t)
 # files in an appropriate place for mta_user_agent
 userdom_read_user_tmp_files(mta_user_agent)
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_files(user_mail_t)
-	fs_manage_cifs_symlinks(user_mail_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_files(user_mail_t)
+#	fs_manage_cifs_symlinks(user_mail_t)
+#')
 
 optional_policy(`
 	allow user_mail_t self:capability dac_override;

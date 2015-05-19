@@ -184,12 +184,14 @@ ifdef(`distro_redhat',`
 	fs_tmpfs_filetrans(init_t, initctl_t, fifo_file)
 ')
 
-tunable_policy(`init_upstart',`
-	corecmd_shell_domtrans(init_t, initrc_t)
-',`
-	# Run the shell in the sysadm role for single-user mode.
-	# causes problems with upstart
-	sysadm_shell_domtrans(init_t)
+optional_policy(`
+	tunable_policy(`init_upstart',`
+		corecmd_shell_domtrans(init_t, initrc_t)
+	',`
+		# Run the shell in the sysadm role for single-user mode.
+		# causes problems with upstart
+		sysadm_shell_domtrans(init_t)
+	')
 ')
 
 optional_policy(`

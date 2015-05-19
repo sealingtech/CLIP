@@ -226,42 +226,43 @@ mta_read_config(evolution_t)
 xserver_user_x_domain_template(evolution, evolution_t, evolution_tmpfs_t)
 xserver_read_xdm_tmp_files(evolution_t)
 
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_dirs(evolution_t)
-	fs_manage_nfs_files(evolution_t)
-	fs_manage_nfs_symlinks(evolution_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_dirs(evolution_t)
+#	fs_manage_nfs_files(evolution_t)
+#	fs_manage_nfs_symlinks(evolution_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_dirs(evolution_t)
-	fs_manage_cifs_files(evolution_t)
-	fs_manage_cifs_symlinks(evolution_t)
-')
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_dirs(evolution_t)
+#	fs_manage_cifs_files(evolution_t)
+#	fs_manage_cifs_symlinks(evolution_t)
+#')
 
-tunable_policy(`mail_read_content && use_nfs_home_dirs',`
-	fs_list_auto_mountpoints(evolution_t)
-	files_list_home(evolution_t)
-	fs_read_nfs_files(evolution_t)
-	fs_read_nfs_symlinks(evolution_t)
-
-',`
+#tunable_policy(`mail_read_content && use_nfs_home_dirs',`
+#	fs_list_auto_mountpoints(evolution_t)
+#	files_list_home(evolution_t)
+#	fs_read_nfs_files(evolution_t)
+#	fs_read_nfs_symlinks(evolution_t)
+#
+#',`
 	files_dontaudit_list_home(evolution_t)
 	fs_dontaudit_list_auto_mountpoints(evolution_t)
 	fs_dontaudit_read_nfs_files(evolution_t)
 	fs_dontaudit_list_nfs(evolution_t)
-')
+#')
 
-tunable_policy(`mail_read_content && use_samba_home_dirs',`
-	fs_list_auto_mountpoints(evolution_t)
-	files_list_home(evolution_t)
-	fs_read_cifs_files(evolution_t)
-	fs_read_cifs_symlinks(evolution_t)
-',`
+#tunable_policy(`mail_read_content && use_samba_home_dirs',`
+#	fs_list_auto_mountpoints(evolution_t)
+#	files_list_home(evolution_t)
+#	fs_read_cifs_files(evolution_t)
+#	fs_read_cifs_symlinks(evolution_t)
+#',`
 	files_dontaudit_list_home(evolution_t)
 	fs_dontaudit_list_auto_mountpoints(evolution_t)
 	fs_dontaudit_read_cifs_files(evolution_t)
 	fs_dontaudit_list_cifs(evolution_t)
-')
+#')
 
 tunable_policy(`mail_read_content',`
 	userdom_list_user_tmp(evolution_t)
@@ -388,13 +389,14 @@ userdom_dontaudit_read_user_home_content_files(evolution_alarm_t)
 xserver_user_x_domain_template(evolution_alarm, evolution_alarm_t, evolution_alarm_tmpfs_t)
 
 # Access evolution home
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_files(evolution_alarm_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_files(evolution_alarm_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_files(evolution_alarm_t)
-')
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_files(evolution_alarm_t)
+#')
 
 optional_policy(`
 	dbus_session_bus_client(evolution_alarm_t)
@@ -472,13 +474,14 @@ userdom_dontaudit_read_user_home_content_files(evolution_exchange_t)
 xserver_user_x_domain_template(evolution_exchange, evolution_exchange_t, evolution_exchange_tmpfs_t)
 
 # Access evolution home
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_files(evolution_exchange_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_files(evolution_exchange_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_files(evolution_exchange_t)
-')
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_files(evolution_exchange_t)
+#')
 
 optional_policy(`
 	gnome_stream_connect_gconf(evolution_exchange_t)
@@ -556,13 +559,14 @@ userdom_search_user_home_dirs(evolution_server_t)
 userdom_dontaudit_read_user_home_content_files(evolution_server_t)
 
 # Access evolution home
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_files(evolution_server_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_files(evolution_server_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_files(evolution_server_t)
-')
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_files(evolution_server_t)
+#')
 
 optional_policy(`
 	gnome_stream_connect_gconf(evolution_server_t)

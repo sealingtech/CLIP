@@ -174,11 +174,11 @@ template(`apache_content_template',`
 		miscfiles_read_localization(httpd_$1_script_t)
 	')
 
-	optional_policy(`
-		tunable_policy(`httpd_enable_cgi && allow_ypbind',`
-			nis_use_ypbind_uncond(httpd_$1_script_t)
-		')
-	')
+#	optional_policy(`
+#		tunable_policy(`httpd_enable_cgi && allow_ypbind',`
+#			nis_use_ypbind_uncond(httpd_$1_script_t)
+#		')
+#	')
 
 	optional_policy(`
 		postgresql_unpriv_client(httpd_$1_script_t)

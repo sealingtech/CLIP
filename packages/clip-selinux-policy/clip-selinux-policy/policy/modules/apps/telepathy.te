@@ -98,15 +98,16 @@ tunable_policy(`telepathy_tcp_connect_generic_network_ports',`
 	corenet_sendrecv_generic_client_packets(telepathy_gabble_t)
 ')
 
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_dirs(telepathy_gabble_t)
-	fs_manage_nfs_files(telepathy_gabble_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_dirs(telepathy_gabble_t)
+#	fs_manage_nfs_files(telepathy_gabble_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_dirs(telepathy_gabble_t)
-	fs_manage_cifs_files(telepathy_gabble_t)
-')
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_dirs(telepathy_gabble_t)
+#	fs_manage_cifs_files(telepathy_gabble_t)
+#')
 
 optional_policy(`
 	dbus_system_bus_client(telepathy_gabble_t)
@@ -158,15 +159,16 @@ files_search_pids(telepathy_logger_t)
 
 fs_getattr_all_fs(telepathy_logger_t)
 
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_dirs(telepathy_logger_t)
-	fs_manage_nfs_files(telepathy_logger_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_dirs(telepathy_logger_t)
+#	fs_manage_nfs_files(telepathy_logger_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_dirs(telepathy_logger_t)
-	fs_manage_cifs_files(telepathy_logger_t)
-')
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_dirs(telepathy_logger_t)
+#	fs_manage_cifs_files(telepathy_logger_t)
+#')
 
 #######################################
 #
@@ -184,15 +186,16 @@ fs_getattr_all_fs(telepathy_mission_control_t)
 files_read_etc_files(telepathy_mission_control_t)
 files_read_usr_files(telepathy_mission_control_t)
 
-tunable_policy(`use_nfs_home_dirs',`
-	fs_manage_nfs_dirs(telepathy_mission_control_t)
-	fs_manage_nfs_files(telepathy_mission_control_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`use_nfs_home_dirs',`
+#	fs_manage_nfs_dirs(telepathy_mission_control_t)
+#	fs_manage_nfs_files(telepathy_mission_control_t)
+#')
 
-tunable_policy(`use_samba_home_dirs',`
-	fs_manage_cifs_dirs(telepathy_mission_control_t)
-	fs_manage_cifs_files(telepathy_mission_control_t)
-')
+#tunable_policy(`use_samba_home_dirs',`
+#	fs_manage_cifs_dirs(telepathy_mission_control_t)
+#	fs_manage_cifs_files(telepathy_mission_control_t)
+#')
 
 #######################################
 #

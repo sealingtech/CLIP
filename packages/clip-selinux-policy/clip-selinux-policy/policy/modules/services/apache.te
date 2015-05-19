@@ -41,12 +41,12 @@ gen_tunable(allow_httpd_mod_auth_pam, false)
 ## </desc>
 gen_tunable(httpd_builtin_scripting, false)
 
-## <desc>
-## <p>
-## Allow HTTPD scripts and modules to connect to the network using TCP.
-## </p>
-## </desc>
-gen_tunable(httpd_can_network_connect, false)
+# <desc>
+# <p>
+# Allow HTTPD scripts and modules to connect to the network using TCP.
+# </p>
+# </desc>
+#gen_tunable(httpd_can_network_connect, false)
 
 ## <desc>
 ## <p>
@@ -55,19 +55,19 @@ gen_tunable(httpd_can_network_connect, false)
 ## </desc>
 gen_tunable(httpd_can_network_connect_db, false)
 
-## <desc>
-## <p>
-## Allow httpd to act as a relay
-## </p>
-## </desc>
-gen_tunable(httpd_can_network_relay, false)
+# <desc>
+# <p>
+# Allow httpd to act as a relay
+# </p>
+# </desc>
+#gen_tunable(httpd_can_network_relay, false)
 
-## <desc>
-## <p>
-## Allow http daemon to send mail
-## </p>
-## </desc>
-gen_tunable(httpd_can_sendmail, false)
+# <desc>
+# <p>
+# Allow http daemon to send mail
+# </p>
+# </desc>
+#gen_tunable(httpd_can_sendmail, false)
 
 ## <desc>
 ## <p>
@@ -83,20 +83,20 @@ gen_tunable(httpd_dbus_avahi, false)
 ## </desc>
 gen_tunable(httpd_enable_cgi, false)
 
-## <desc>
-## <p>
-## Allow httpd to act as a FTP server by
-## listening on the ftp port.
-## </p>
-## </desc>
-gen_tunable(httpd_enable_ftp_server, false)
+# <desc>
+# <p>
+# Allow httpd to act as a FTP server by
+# listening on the ftp port.
+# </p>
+# </desc>
+#gen_tunable(httpd_enable_ftp_server, false)
 
-## <desc>
-## <p>
-## Allow httpd to read home directories
-## </p>
-## </desc>
-gen_tunable(httpd_enable_homedirs, false)
+# <desc>
+# <p>
+# Allow httpd to read home directories
+# </p>
+# </desc>
+#gen_tunable(httpd_enable_homedirs, false)
 
 ## <desc>
 ## <p>
@@ -121,12 +121,12 @@ gen_tunable(httpd_tty_comm, false)
 ## </desc>
 gen_tunable(httpd_unified, false)
 
-## <desc>
-## <p>
-## Allow httpd to access cifs file systems
-## </p>
-## </desc>
-gen_tunable(httpd_use_cifs, false)
+# <desc>
+# <p>
+# Allow httpd to access cifs file systems
+# </p>
+# </desc>
+#gen_tunable(httpd_use_cifs, false)
 
 ## <desc>
 ## <p>
@@ -135,12 +135,12 @@ gen_tunable(httpd_use_cifs, false)
 ## </desc>
 gen_tunable(httpd_use_gpg, false)
 
-## <desc>
-## <p>
-## Allow httpd to access nfs file systems
-## </p>
-## </desc>
-gen_tunable(httpd_use_nfs, false)
+# <desc>
+# <p>
+# Allow httpd to access nfs file systems
+# </p>
+# </desc>
+#gen_tunable(httpd_use_nfs, false)
 
 attribute httpdcontent;
 attribute httpd_user_content_type;
@@ -430,30 +430,33 @@ tunable_policy(`allow_httpd_mod_auth_pam',`
 ')
 ')
 
-tunable_policy(`httpd_can_network_connect',`
-	corenet_tcp_connect_all_ports(httpd_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`httpd_can_network_connect',`
+#	corenet_tcp_connect_all_ports(httpd_t)
+#')
 
-tunable_policy(`httpd_can_network_relay',`
+# SRS: removed for CLIP
+#tunable_policy(`httpd_can_network_relay',`
 	# allow httpd to work as a relay
-	corenet_tcp_connect_gopher_port(httpd_t)
-	corenet_tcp_connect_ftp_port(httpd_t)
-	corenet_tcp_connect_http_port(httpd_t)
-	corenet_tcp_connect_http_cache_port(httpd_t)
-	corenet_tcp_connect_memcache_port(httpd_t)
-	corenet_sendrecv_gopher_client_packets(httpd_t)
-	corenet_sendrecv_ftp_client_packets(httpd_t)
-	corenet_sendrecv_http_client_packets(httpd_t)
-	corenet_sendrecv_http_cache_client_packets(httpd_t)
-')
+#	corenet_tcp_connect_gopher_port(httpd_t)
+#	corenet_tcp_connect_ftp_port(httpd_t)
+#	corenet_tcp_connect_http_port(httpd_t)
+#	corenet_tcp_connect_http_cache_port(httpd_t)
+#	corenet_tcp_connect_memcache_port(httpd_t)
+#	corenet_sendrecv_gopher_client_packets(httpd_t)
+#	corenet_sendrecv_ftp_client_packets(httpd_t)
+#	corenet_sendrecv_http_client_packets(httpd_t)
+#	corenet_sendrecv_http_cache_client_packets(httpd_t)
+#')
 
-tunable_policy(`httpd_enable_cgi && httpd_use_nfs',`
-	fs_nfs_domtrans(httpd_t, httpd_sys_script_t)
-')
+# SRS: removed for CLIP
+#tunable_policy(`httpd_enable_cgi && httpd_use_nfs',`
+#	fs_nfs_domtrans(httpd_t, httpd_sys_script_t)
+#')
 
-tunable_policy(`httpd_enable_cgi && httpd_use_cifs',`
-	fs_cifs_domtrans(httpd_t, httpd_sys_script_t)
-')
+#tunable_policy(`httpd_enable_cgi && httpd_use_cifs',`
+#	fs_cifs_domtrans(httpd_t, httpd_sys_script_t)
+#')
 
 tunable_policy(`httpd_enable_cgi && httpd_unified && httpd_builtin_scripting',`
 	domtrans_pattern(httpd_t, httpdcontent, httpd_sys_script_t)
@@ -463,32 +466,32 @@ tunable_policy(`httpd_enable_cgi && httpd_unified && httpd_builtin_scripting',`
 	manage_lnk_files_pattern(httpd_t, httpdcontent, httpdcontent)
 ')
 
-tunable_policy(`httpd_enable_ftp_server',`
-	corenet_tcp_bind_ftp_port(httpd_t)
-')
+#tunable_policy(`httpd_enable_ftp_server',`
+#	corenet_tcp_bind_ftp_port(httpd_t)
+#')
 
-tunable_policy(`httpd_enable_homedirs',`
-	userdom_read_user_home_content_files(httpd_t)
-')
+#tunable_policy(`httpd_enable_homedirs',`
+#	userdom_read_user_home_content_files(httpd_t)
+#')
 
-tunable_policy(`httpd_enable_homedirs && use_nfs_home_dirs',`
-	fs_read_nfs_files(httpd_t)
-	fs_read_nfs_symlinks(httpd_t)
-')
+#tunable_policy(`httpd_enable_homedirs && use_nfs_home_dirs',`
+##	fs_read_nfs_files(httpd_t)
+#	fs_read_nfs_symlinks(httpd_t)
+#')
 
-tunable_policy(`httpd_enable_homedirs && use_samba_home_dirs',`
-	fs_read_cifs_files(httpd_t)
-	fs_read_cifs_symlinks(httpd_t)
-')
+##tunable_policy(`httpd_enable_homedirs && use_samba_home_dirs',`
+#	fs_read_cifs_files(httpd_t)
+#	fs_read_cifs_symlinks(httpd_t)
+#')
 
-optional_policy(`
-	tunable_policy(`httpd_can_sendmail',`
+#optional_policy(`
+#	tunable_policy(`httpd_can_sendmail',`
 		# allow httpd to connect to mail servers
-		corenet_tcp_connect_smtp_port(httpd_t)
-		corenet_sendrecv_smtp_client_packets(httpd_t)
-		mta_send_mail(httpd_t)
-	')
-')
+#		corenet_tcp_connect_smtp_port(httpd_t)
+#		corenet_sendrecv_smtp_client_packets(httpd_t)
+#		mta_send_mail(httpd_t)
+#	')
+#')
 
 tunable_policy(`httpd_ssi_exec',`
 	corecmd_shell_domtrans(httpd_t, httpd_sys_script_t)
@@ -563,9 +566,7 @@ optional_policy(`
 	mysql_stream_connect(httpd_t)
 	mysql_rw_db_sockets(httpd_t)
 
-	tunable_policy(`httpd_can_network_connect_db',`
-		mysql_tcp_connect(httpd_t)
-	')
+	mysql_tcp_connect(httpd_t)
 ')
 
 optional_policy(`
@@ -584,9 +585,7 @@ optional_policy(`
 	postgresql_stream_connect(httpd_t)
 	postgresql_unpriv_client(httpd_t)
 
-	tunable_policy(`httpd_can_network_connect_db',`
-		postgresql_tcp_connect(httpd_t)
-	')
+	postgresql_tcp_connect(httpd_t)
 ')
 
 optional_policy(`
@@ -727,21 +726,21 @@ logging_send_syslog_msg(httpd_suexec_t)
 miscfiles_read_localization(httpd_suexec_t)
 miscfiles_read_public_files(httpd_suexec_t)
 
-tunable_policy(`httpd_can_network_connect',`
-	allow httpd_suexec_t self:tcp_socket create_stream_socket_perms;
-	allow httpd_suexec_t self:udp_socket create_socket_perms;
-
-	corenet_all_recvfrom_unlabeled(httpd_suexec_t)
-	corenet_all_recvfrom_netlabel(httpd_suexec_t)
-	corenet_tcp_sendrecv_generic_if(httpd_suexec_t)
-	corenet_udp_sendrecv_generic_if(httpd_suexec_t)
-	corenet_tcp_sendrecv_generic_node(httpd_suexec_t)
-	corenet_udp_sendrecv_generic_node(httpd_suexec_t)
-	corenet_tcp_sendrecv_all_ports(httpd_suexec_t)
-	corenet_udp_sendrecv_all_ports(httpd_suexec_t)
-	corenet_tcp_connect_all_ports(httpd_suexec_t)
-	corenet_sendrecv_all_client_packets(httpd_suexec_t)
-')
+#tunable_policy(`httpd_can_network_connect',`
+#	allow httpd_suexec_t self:tcp_socket create_stream_socket_perms;
+#	allow httpd_suexec_t self:udp_socket create_socket_perms;
+#
+#	corenet_all_recvfrom_unlabeled(httpd_suexec_t)
+#	corenet_all_recvfrom_netlabel(httpd_suexec_t)
+#	corenet_tcp_sendrecv_generic_if(httpd_suexec_t)
+#	corenet_udp_sendrecv_generic_if(httpd_suexec_t)
+#	corenet_tcp_sendrecv_generic_node(httpd_suexec_t)
+#	corenet_udp_sendrecv_generic_node(httpd_suexec_t)
+#	corenet_tcp_sendrecv_all_ports(httpd_suexec_t)
+#	corenet_udp_sendrecv_all_ports(httpd_suexec_t)
+#	corenet_tcp_connect_all_ports(httpd_suexec_t)
+#	corenet_sendrecv_all_client_packets(httpd_suexec_t)
+#')
 
 tunable_policy(`httpd_enable_cgi && httpd_unified',`
 	allow httpd_sys_script_t httpdcontent:file entrypoint;
@@ -749,17 +748,17 @@ tunable_policy(`httpd_enable_cgi && httpd_unified',`
 
 ')
 
-tunable_policy(`httpd_enable_homedirs && use_nfs_home_dirs',`
-	fs_read_nfs_files(httpd_suexec_t)
-	fs_read_nfs_symlinks(httpd_suexec_t)
-	fs_exec_nfs_files(httpd_suexec_t)
-')
+#tunable_policy(`httpd_enable_homedirs && use_nfs_home_dirs',`
+#	fs_read_nfs_files(httpd_suexec_t)
+#	fs_read_nfs_symlinks(httpd_suexec_t)
+#	fs_exec_nfs_files(httpd_suexec_t)
+#')
 
-tunable_policy(`httpd_enable_homedirs && use_samba_home_dirs',`
-	fs_read_cifs_files(httpd_suexec_t)
-	fs_read_cifs_symlinks(httpd_suexec_t)
-	fs_exec_cifs_files(httpd_suexec_t)
-')
+#tunable_policy(`httpd_enable_homedirs && use_samba_home_dirs',`
+#	fs_read_cifs_files(httpd_suexec_t)
+#	fs_read_cifs_symlinks(httpd_suexec_t)
+#	fs_exec_cifs_files(httpd_suexec_t)
+#')
 
 optional_policy(`
 	mailman_domtrans_cgi(httpd_suexec_t)
@@ -808,37 +807,37 @@ optional_policy(`
 	')
 ')
 
-tunable_policy(`httpd_enable_cgi && httpd_can_network_connect',`
-	allow httpd_sys_script_t self:tcp_socket create_stream_socket_perms;
-	allow httpd_sys_script_t self:udp_socket create_socket_perms;
+#tunable_policy(`httpd_enable_cgi && httpd_can_network_connect',`
+#	allow httpd_sys_script_t self:tcp_socket create_stream_socket_perms;
+#	allow httpd_sys_script_t self:udp_socket create_socket_perms;
+#
+#	corenet_tcp_bind_all_nodes(httpd_sys_script_t)
+#	corenet_udp_bind_all_nodes(httpd_sys_script_t)
+#	corenet_all_recvfrom_unlabeled(httpd_sys_script_t)
+#	corenet_all_recvfrom_netlabel(httpd_sys_script_t)
+#	corenet_tcp_sendrecv_all_if(httpd_sys_script_t)
+#	corenet_udp_sendrecv_all_if(httpd_sys_script_t)
+#	corenet_tcp_sendrecv_all_nodes(httpd_sys_script_t)
+#	corenet_udp_sendrecv_all_nodes(httpd_sys_script_t)
+#	corenet_tcp_sendrecv_all_ports(httpd_sys_script_t)
+#	corenet_udp_sendrecv_all_ports(httpd_sys_script_t)
+#	corenet_tcp_connect_all_ports(httpd_sys_script_t)
+#	corenet_sendrecv_all_client_packets(httpd_sys_script_t)
+#')
 
-	corenet_tcp_bind_all_nodes(httpd_sys_script_t)
-	corenet_udp_bind_all_nodes(httpd_sys_script_t)
-	corenet_all_recvfrom_unlabeled(httpd_sys_script_t)
-	corenet_all_recvfrom_netlabel(httpd_sys_script_t)
-	corenet_tcp_sendrecv_all_if(httpd_sys_script_t)
-	corenet_udp_sendrecv_all_if(httpd_sys_script_t)
-	corenet_tcp_sendrecv_all_nodes(httpd_sys_script_t)
-	corenet_udp_sendrecv_all_nodes(httpd_sys_script_t)
-	corenet_tcp_sendrecv_all_ports(httpd_sys_script_t)
-	corenet_udp_sendrecv_all_ports(httpd_sys_script_t)
-	corenet_tcp_connect_all_ports(httpd_sys_script_t)
-	corenet_sendrecv_all_client_packets(httpd_sys_script_t)
-')
+#tunable_policy(`httpd_enable_homedirs',`
+#	userdom_read_user_home_content_files(httpd_sys_script_t)
+#')
 
-tunable_policy(`httpd_enable_homedirs',`
-	userdom_read_user_home_content_files(httpd_sys_script_t)
-')
+#tunable_policy(`httpd_enable_homedirs && use_nfs_home_dirs',`
+#	fs_read_nfs_files(httpd_sys_script_t)
+#	fs_read_nfs_symlinks(httpd_sys_script_t)
+#')
 
-tunable_policy(`httpd_enable_homedirs && use_nfs_home_dirs',`
-	fs_read_nfs_files(httpd_sys_script_t)
-	fs_read_nfs_symlinks(httpd_sys_script_t)
-')
-
-tunable_policy(`httpd_enable_homedirs && use_samba_home_dirs',`
-	fs_read_cifs_files(httpd_sys_script_t)
-	fs_read_cifs_symlinks(httpd_sys_script_t)
-')
+#tunable_policy(`httpd_enable_homedirs && use_samba_home_dirs',`
+#	fs_read_cifs_files(httpd_sys_script_t)
+#	fs_read_cifs_symlinks(httpd_sys_script_t)
+#')
 
 optional_policy(`
 	clamav_domtrans_clamscan(httpd_sys_script_t)
@@ -899,8 +898,8 @@ tunable_policy(`httpd_enable_cgi && httpd_unified',`
 ')
 
 # allow accessing files/dirs below the users home dir
-tunable_policy(`httpd_enable_homedirs',`
-	userdom_search_user_home_dirs(httpd_t)
-	userdom_search_user_home_dirs(httpd_suexec_t)
-	userdom_search_user_home_dirs(httpd_user_script_t)
-')
+#tunable_policy(`httpd_enable_homedirs',`
+#	userdom_search_user_home_dirs(httpd_t)
+#	userdom_search_user_home_dirs(httpd_suexec_t)
+#	userdom_search_user_home_dirs(httpd_user_script_t)
+#')
