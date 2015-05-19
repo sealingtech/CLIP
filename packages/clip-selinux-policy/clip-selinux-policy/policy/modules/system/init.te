@@ -243,6 +243,7 @@ init_telinit(initrc_t)
 
 can_exec(initrc_t, init_script_file_type)
 
+
 domtrans_pattern(init_run_all_scripts_domain, initrc_exec_t, initrc_t)
 
 manage_dirs_pattern(initrc_t, initrc_state_t, initrc_state_t)
@@ -279,24 +280,8 @@ files_read_var_lib_symlinks(initrc_t)
 files_setattr_pid_dirs(initrc_t)
 
 files_manage_generic_pids_symlinks(initrc_t)
-kernel_stream_connect(initrc_t)
-files_exec_etc_files(initrc_t)
-files_manage_etc_symlinks(initrc_t)
 
 files_read_kernel_symbol_table(initrc_t)
-
-corecmd_exec_all_executables(initrc_t)
-
-corenet_all_recvfrom_unlabeled(initrc_t)
-corenet_all_recvfrom_netlabel(initrc_t)
-corenet_tcp_sendrecv_all_if(initrc_t)
-corenet_udp_sendrecv_all_if(initrc_t)
-corenet_tcp_sendrecv_all_nodes(initrc_t)
-corenet_udp_sendrecv_all_nodes(initrc_t)
-corenet_tcp_sendrecv_all_ports(initrc_t)
-corenet_udp_sendrecv_all_ports(initrc_t)
-corenet_tcp_connect_all_ports(initrc_t)
-corenet_sendrecv_all_client_packets(initrc_t)
 
 dev_read_rand(initrc_t)
 dev_read_urand(initrc_t)
@@ -305,22 +290,13 @@ dev_write_rand(initrc_t)
 dev_write_urand(initrc_t)
 dev_rw_sysfs(initrc_t)
 dev_list_usbfs(initrc_t)
-dev_read_framebuffer(initrc_t)
-dev_write_framebuffer(initrc_t)
 dev_read_realtime_clock(initrc_t)
-dev_read_sound_mixer(initrc_t)
-dev_write_sound_mixer(initrc_t)
-dev_setattr_all_chr_files(initrc_t)
 dev_rw_lvm_control(initrc_t)
 dev_delete_lvm_control_dev(initrc_t)
+
+# SRS: tried removing for CLIP but rc.sysinit touches things (how rude).
 dev_manage_generic_symlinks(initrc_t)
 dev_manage_generic_files(initrc_t)
-# Wants to remove udev.tbl:
-dev_delete_generic_symlinks(initrc_t)
-dev_getattr_all_blk_files(initrc_t)
-dev_getattr_all_chr_files(initrc_t)
-# Early devtmpfs
-dev_rw_generic_chr_files(initrc_t)
 
 domain_kill_all_domains(initrc_t)
 domain_signal_all_domains(initrc_t)
@@ -356,7 +332,6 @@ files_delete_all_pid_dirs(initrc_t)
 files_read_etc_files(initrc_t)
 files_manage_etc_runtime_files(initrc_t)
 files_etc_filetrans_etc_runtime(initrc_t, file)
-files_exec_etc_files(initrc_t)
 files_read_usr_files(initrc_t)
 files_manage_urandom_seed(initrc_t)
 files_manage_generic_spool(initrc_t)
@@ -405,11 +380,9 @@ term_reset_tty_labels(initrc_t)
 
 auth_rw_login_records(initrc_t)
 auth_setattr_login_records(initrc_t)
-auth_rw_lastlog(initrc_t)
 auth_read_pam_pid(initrc_t)
 auth_delete_pam_pid(initrc_t)
 auth_delete_pam_console_data(initrc_t)
-auth_use_nsswitch(initrc_t)
 
 libs_rw_ld_so_cache(initrc_t)
 libs_exec_lib_files(initrc_t)
@@ -417,10 +390,6 @@ libs_exec_ld_so(initrc_t)
 
 logging_send_audit_msgs(initrc_t)
 logging_send_syslog_msg(initrc_t)
-logging_manage_generic_logs(initrc_t)
-logging_read_all_logs(initrc_t)
-logging_append_all_logs(initrc_t)
-logging_read_audit_config(initrc_t)
 
 miscfiles_read_localization(initrc_t)
 # slapd needs to read cert files from its initscript
@@ -437,6 +406,16 @@ userdom_read_user_home_content_files(initrc_t)
 # TTYs to any process in the initrc_t domain. Therefore, daemons and such
 # started from init should be placed in their own domain.
 userdom_use_user_terminals(initrc_t)
+
+# SRS: added for CLIP after removing a ton of extraneous access
+corecmd_exec_bin(initrc_t)
+corecmd_exec_shell(initrc_t)
+optional_policy(`
+	plymouthd_domtrans_plymouth(initrc_t)
+')
+logging_rw_generic_log_dirs(initrc_t)
+logging_write_generic_logs(initrc_t)
+logging_create_generic_logs(initrc_t)
 
 ifdef(`distro_debian',`
 	dev_setattr_generic_dirs(initrc_t)
@@ -516,10 +495,6 @@ ifdef(`distro_redhat',`
 	# during device initialization:
 	dev_create_generic_dirs(initrc_t)
 	dev_rwx_zero(initrc_t)
-	dev_rx_raw_memory(initrc_t)
-	dev_wx_raw_memory(initrc_t)
-	storage_raw_read_fixed_disk(initrc_t)
-	storage_raw_write_fixed_disk(initrc_t)
 
 	files_create_boot_dirs(initrc_t)
 	files_create_boot_flag(initrc_t)

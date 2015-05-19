@@ -8,6 +8,7 @@ policy_module(plymouthd, 1.1.0)
 type plymouth_t;
 type plymouth_exec_t;
 application_domain(plymouth_t, plymouth_exec_t)
+role system_r types plymouth_t;
 
 type plymouthd_t;
 type plymouthd_exec_t;
@@ -92,6 +93,12 @@ miscfiles_read_localization(plymouth_t)
 sysnet_read_config(plymouth_t)
 
 plymouthd_stream_connect(plymouth_t)
+
+# SRS: added for CLIP when stripping initrc perms
+# led to transitioning into plymouth on boot
+term_use_console(plymouth_t)
+init_use_fds(plymouth_t)
+kernel_stream_connect(plymouth_t)
 
 ifdef(`hide_broken_symptoms', `
 	optional_policy(`
