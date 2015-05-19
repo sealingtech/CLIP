@@ -77,7 +77,6 @@ clip-selinux-policy
 -clip-selinux-policy-mls
 clip-selinux-policy-mcs
 clip-selinux-policy-mcs-ssh
-clip-selinux-policy-mcs-unprivuser
 clip-selinux-policy-mcs-ec2ssh
 clip-miscfiles
 m4
@@ -307,13 +306,18 @@ fi
 # Lock the root acct to prevent direct logins
 usermod -L root
 
+# NOTE: Given the restricted use-case of this variant, there is no
+# need for a highly privileged toor user.
+# If you're doing development on this variant, you might want
+# to uncomment the conditional below.
+
 # Add the user to sudoers and setup an SELinux role/type transition.
 # This line enables a transition via sudo instead of requiring sudo and newrole.
-if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
-	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
-else
+#if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
+#	echo "$USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
+#else
 	echo "$USERNAME        ALL=(ALL) ROLE=sysadm_r TYPE=sysadm_t      ALL" >> /etc/sudoers
-fi
+#fi
 
 
 groupadd "sftp-only"
@@ -496,6 +500,8 @@ EOF
 	rpm -e clip-selinux-policy-mcs-ec2ssh
 	chage -d 0 "$USERNAME"
 fi
+
+semodule -r auditadm -r secadm
 
 # This is rather unfortunate, but the remediation content 
 # starts services, which need to be killed/shutdown if
