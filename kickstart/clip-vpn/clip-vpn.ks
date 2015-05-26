@@ -423,6 +423,31 @@ EOF
 
 #####IPtables End Configuration#####
 
+# turn on the configure-strongswan service
+chkconfig --level 34 configure-strongswan on
+
+# Turn strongswan on in AWS as it will be configured by the scripts above.
+chkconfig strongswan on
+
+PASSWORD="neutronbass"
+HASHED_PASSWORD='$6$314159265358$ytgatj7CAZIRFMPbEanbdi.krIJs.mS9N2JEl0jkPsCvtwC15z07JLzFLSuqiCdionNZ1XNT3gPKkjIG0TTGy1'
+
+# we need to be vpnadm_u:vpnadm_r:vpnadm_t
+useradd -m vpn
+semanage user -N -a -R vpnadm_r vpnadm_u
+semanage login -N -a -s vpnadm_u vpn
+usermod -s /usr/bin/strongswan_login.py vpn
+usermod --pass="$HASHED_PASSWD" 
+chage -E -1 vpn
+
+useradd -m sftp
+semanage login -N -a -s vpnadm_u sftp
+usermod -d /sftp sftp
+#the above usermod line mucks up file_contexts.homedirs, fix it
+semanage fcontext -a -e /sftp /home/sftp
+usermod --pass="$HASHED_PASSWORD" sftp
+chage -E -1 sftp
+
 # Need to do some additional customizations if we're building for AWS
 if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 
@@ -440,14 +465,11 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	echo "        kernel $KERNEL ro root=/dev/xvde1 rd_NO_PLYMOUTH" >> /boot/grub/menu.lst
 	echo "        initrd $INITRD" >> /boot/grub/menu.lst
 
+	# disable password auth
+	sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
+
 	# turn on the ssh key script
 	chkconfig --level 34 ec2-get-ssh on
-
-	# turn on the configure-strongswan service
-	chkconfig --level 34 configure-strongswan on
-
-	# Turn strongswan on in AWS as it will be configured by the scripts above.
-	chkconfig strongswan on
 
 	# if you're the Government deploying to AWS and want to monitor people feel free to remove these lines.
 	# But for our purposes, we explicitly don't want monitoring or logging
@@ -466,25 +488,6 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
                 chattr +i /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
                 rm -rf /root/* #*/
 	fi
-
-	# disable password auth
-	sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
-
-	# we need to be vpnadm_u:vpnadm_r:vpnadm_t
-	useradd -m vpn
-	semanage user -N -a -R vpnadm_r vpnadm_u
-	semanage login -N -a -s vpnadm_u vpn
-	usermod -s /usr/bin/strongswan_login.py vpn
-	usermod --pass="$HASHED_PASSWD" 
-	chage -E -1 vpn
-
-	useradd -m sftp
-	semanage login -N -a -s vpnadm_u sftp
-	usermod -d /sftp sftp
-	#the above usermod line mucks up file_contexts.homedirs, fix it
-	semanage fcontext -a -e /sftp /home/sftp
-	usermod --pass="$HASHED_PASSWORD" sftp
-	chage -E -1 sftp
 
 	SSH_USERS="sftp vpn"
 
@@ -549,9 +552,6 @@ echo -e "        ChrootDirectory /home\n" >> /etc/ssh/sshd_config
 echo -e "        ForceCommand internal-sftp\n" >> /etc/ssh/sshd_config
 
 semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
-
-# turn on the configure-strongswan service
-chkconfig --level 34 configure-strongswan on
 
 # This is rather unfortunate, but the remediation content 
 # starts services, which need to be killed/shutdown if
