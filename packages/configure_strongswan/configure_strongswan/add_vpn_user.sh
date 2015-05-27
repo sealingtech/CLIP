@@ -56,7 +56,8 @@ XAUTH_PASSWD=""
 if [ $1"x" == "1x" ]
 then
 	CONN="conn $CONN_NAME\n\
-        ike=aes256-sha1-modp1024\n\
+        ike=aes256-sha1-modp1024!\n\
+        esp=aes256-sha1!\n\
         keyexchange=ikev1\n\
         rightcert=$CONN_NAME.pem\n\
         rightauth2=xauth\n"
@@ -68,6 +69,7 @@ then
 else
 	CONN="conn $CONN_NAME\n\
         ike=aes256-sha256-ecp384!\n\
+        esp=aes256-aes128-sha384-sha256-ecp384-ecp256!\n\
         keyexchange=ikev2\n\
         rightcert=$CONN_NAME.pem\n"
 fi
