@@ -152,26 +152,6 @@ ifdef(`distro_ubuntu',`
 	')
 ')
 
-# SRS: removed for CLIP but...
-# what impact will this have on single user mode?
-# Well, just use rescue mode then.
-#tunable_policy(`console_login',`
-	# Able to relabel /dev/console to user tty types.
-#	term_relabel_console(local_login_t)
-#')
-
-# SRS: removed for CLIP
-#tunable_policy(`use_nfs_home_dirs',`
-#	fs_read_nfs_files(local_login_t)
-#	fs_read_nfs_symlinks(local_login_t)
-#')
-
-# SRS: removed for CLIP
-#tunable_policy(`use_samba_home_dirs',`
-#	fs_read_cifs_files(local_login_t)
-#	fs_read_cifs_symlinks(local_login_t)
-#')
-
 optional_policy(`
 	alsa_domtrans(local_login_t)
 ')

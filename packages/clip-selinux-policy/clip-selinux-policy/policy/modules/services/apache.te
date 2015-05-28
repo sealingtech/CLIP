@@ -430,33 +430,6 @@ tunable_policy(`allow_httpd_mod_auth_pam',`
 ')
 ')
 
-# SRS: removed for CLIP
-#tunable_policy(`httpd_can_network_connect',`
-#	corenet_tcp_connect_all_ports(httpd_t)
-#')
-
-# SRS: removed for CLIP
-#tunable_policy(`httpd_can_network_relay',`
-	# allow httpd to work as a relay
-#	corenet_tcp_connect_gopher_port(httpd_t)
-#	corenet_tcp_connect_ftp_port(httpd_t)
-#	corenet_tcp_connect_http_port(httpd_t)
-#	corenet_tcp_connect_http_cache_port(httpd_t)
-#	corenet_tcp_connect_memcache_port(httpd_t)
-#	corenet_sendrecv_gopher_client_packets(httpd_t)
-#	corenet_sendrecv_ftp_client_packets(httpd_t)
-#	corenet_sendrecv_http_client_packets(httpd_t)
-#	corenet_sendrecv_http_cache_client_packets(httpd_t)
-#')
-
-# SRS: removed for CLIP
-#tunable_policy(`httpd_enable_cgi && httpd_use_nfs',`
-#	fs_nfs_domtrans(httpd_t, httpd_sys_script_t)
-#')
-
-#tunable_policy(`httpd_enable_cgi && httpd_use_cifs',`
-#	fs_cifs_domtrans(httpd_t, httpd_sys_script_t)
-#')
 
 tunable_policy(`httpd_enable_cgi && httpd_unified && httpd_builtin_scripting',`
 	domtrans_pattern(httpd_t, httpdcontent, httpd_sys_script_t)
@@ -466,32 +439,6 @@ tunable_policy(`httpd_enable_cgi && httpd_unified && httpd_builtin_scripting',`
 	manage_lnk_files_pattern(httpd_t, httpdcontent, httpdcontent)
 ')
 
-#tunable_policy(`httpd_enable_ftp_server',`
-#	corenet_tcp_bind_ftp_port(httpd_t)
-#')
-
-#tunable_policy(`httpd_enable_homedirs',`
-#	userdom_read_user_home_content_files(httpd_t)
-#')
-
-#tunable_policy(`httpd_enable_homedirs && use_nfs_home_dirs',`
-##	fs_read_nfs_files(httpd_t)
-#	fs_read_nfs_symlinks(httpd_t)
-#')
-
-##tunable_policy(`httpd_enable_homedirs && use_samba_home_dirs',`
-#	fs_read_cifs_files(httpd_t)
-#	fs_read_cifs_symlinks(httpd_t)
-#')
-
-#optional_policy(`
-#	tunable_policy(`httpd_can_sendmail',`
-		# allow httpd to connect to mail servers
-#		corenet_tcp_connect_smtp_port(httpd_t)
-#		corenet_sendrecv_smtp_client_packets(httpd_t)
-#		mta_send_mail(httpd_t)
-#	')
-#')
 
 tunable_policy(`httpd_ssi_exec',`
 	corecmd_shell_domtrans(httpd_t, httpd_sys_script_t)
@@ -726,39 +673,11 @@ logging_send_syslog_msg(httpd_suexec_t)
 miscfiles_read_localization(httpd_suexec_t)
 miscfiles_read_public_files(httpd_suexec_t)
 
-#tunable_policy(`httpd_can_network_connect',`
-#	allow httpd_suexec_t self:tcp_socket create_stream_socket_perms;
-#	allow httpd_suexec_t self:udp_socket create_socket_perms;
-#
-#	corenet_all_recvfrom_unlabeled(httpd_suexec_t)
-#	corenet_all_recvfrom_netlabel(httpd_suexec_t)
-#	corenet_tcp_sendrecv_generic_if(httpd_suexec_t)
-#	corenet_udp_sendrecv_generic_if(httpd_suexec_t)
-#	corenet_tcp_sendrecv_generic_node(httpd_suexec_t)
-#	corenet_udp_sendrecv_generic_node(httpd_suexec_t)
-#	corenet_tcp_sendrecv_all_ports(httpd_suexec_t)
-#	corenet_udp_sendrecv_all_ports(httpd_suexec_t)
-#	corenet_tcp_connect_all_ports(httpd_suexec_t)
-#	corenet_sendrecv_all_client_packets(httpd_suexec_t)
-#')
-
 tunable_policy(`httpd_enable_cgi && httpd_unified',`
 	allow httpd_sys_script_t httpdcontent:file entrypoint;
 	domtrans_pattern(httpd_suexec_t, httpdcontent, httpd_sys_script_t)
 
 ')
-
-#tunable_policy(`httpd_enable_homedirs && use_nfs_home_dirs',`
-#	fs_read_nfs_files(httpd_suexec_t)
-#	fs_read_nfs_symlinks(httpd_suexec_t)
-#	fs_exec_nfs_files(httpd_suexec_t)
-#')
-
-#tunable_policy(`httpd_enable_homedirs && use_samba_home_dirs',`
-#	fs_read_cifs_files(httpd_suexec_t)
-#	fs_read_cifs_symlinks(httpd_suexec_t)
-#	fs_exec_cifs_files(httpd_suexec_t)
-#')
 
 optional_policy(`
 	mailman_domtrans_cgi(httpd_suexec_t)
@@ -806,38 +725,6 @@ optional_policy(`
 		mta_send_mail(httpd_sys_script_t)
 	')
 ')
-
-#tunable_policy(`httpd_enable_cgi && httpd_can_network_connect',`
-#	allow httpd_sys_script_t self:tcp_socket create_stream_socket_perms;
-#	allow httpd_sys_script_t self:udp_socket create_socket_perms;
-#
-#	corenet_tcp_bind_all_nodes(httpd_sys_script_t)
-#	corenet_udp_bind_all_nodes(httpd_sys_script_t)
-#	corenet_all_recvfrom_unlabeled(httpd_sys_script_t)
-#	corenet_all_recvfrom_netlabel(httpd_sys_script_t)
-#	corenet_tcp_sendrecv_all_if(httpd_sys_script_t)
-#	corenet_udp_sendrecv_all_if(httpd_sys_script_t)
-#	corenet_tcp_sendrecv_all_nodes(httpd_sys_script_t)
-#	corenet_udp_sendrecv_all_nodes(httpd_sys_script_t)
-#	corenet_tcp_sendrecv_all_ports(httpd_sys_script_t)
-#	corenet_udp_sendrecv_all_ports(httpd_sys_script_t)
-#	corenet_tcp_connect_all_ports(httpd_sys_script_t)
-#	corenet_sendrecv_all_client_packets(httpd_sys_script_t)
-#')
-
-#tunable_policy(`httpd_enable_homedirs',`
-#	userdom_read_user_home_content_files(httpd_sys_script_t)
-#')
-
-#tunable_policy(`httpd_enable_homedirs && use_nfs_home_dirs',`
-#	fs_read_nfs_files(httpd_sys_script_t)
-#	fs_read_nfs_symlinks(httpd_sys_script_t)
-#')
-
-#tunable_policy(`httpd_enable_homedirs && use_samba_home_dirs',`
-#	fs_read_cifs_files(httpd_sys_script_t)
-#	fs_read_cifs_symlinks(httpd_sys_script_t)
-#')
 
 optional_policy(`
 	clamav_domtrans_clamscan(httpd_sys_script_t)
@@ -897,9 +784,3 @@ tunable_policy(`httpd_enable_cgi && httpd_unified',`
 	allow httpd_user_script_t httpdcontent:file entrypoint;
 ')
 
-# allow accessing files/dirs below the users home dir
-#tunable_policy(`httpd_enable_homedirs',`
-#	userdom_search_user_home_dirs(httpd_t)
-#	userdom_search_user_home_dirs(httpd_suexec_t)
-#	userdom_search_user_home_dirs(httpd_user_script_t)
-#')

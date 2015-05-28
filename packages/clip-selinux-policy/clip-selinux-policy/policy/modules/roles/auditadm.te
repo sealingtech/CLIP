@@ -31,6 +31,7 @@ logging_manage_all_logs(auditadm_t)
 logging_run_auditctl(auditadm_t, auditadm_r)
 logging_run_auditd(auditadm_t, auditadm_r)
 
+
 # SRS: removed for CLIP
 #seutil_run_runinit(auditadm_t, auditadm_r)
 #seutil_read_bin_policy(auditadm_t)
@@ -47,11 +48,6 @@ optional_policy(`
 	screen_role_template(auditadm, auditadm_r, auditadm_t)
 ')
 
-# SRS: removed for CLIP
-#optional_policy(`
-#	secadm_role_change(auditadm_r)
-#')
-
 optional_policy(`
 	su_role_template(auditadm, auditadm_r, auditadm_t)
 ')
@@ -59,11 +55,6 @@ optional_policy(`
 optional_policy(`
 	sudo_role_template(auditadm, auditadm_r, auditadm_t)
 ')
-
-# SRS: removed for CLIP
-#optional_policy(`
-#	sysadm_role_change(auditadm_r)
-#')
 
 optional_policy(`
 	vlock_run(auditadm_t, auditadm_r)

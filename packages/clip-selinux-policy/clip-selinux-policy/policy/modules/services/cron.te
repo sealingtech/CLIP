@@ -610,10 +610,6 @@ tunable_policy(`fcron_crond', `
 	allow crond_t user_cron_spool_t:file manage_file_perms;
 ')
 
-# need a per-role version of this:
-#optional_policy(`
-#	mono_domtrans(cronjob_t)
-#')
 
 optional_policy(`
 	nis_use_ypbind(cronjob_t)

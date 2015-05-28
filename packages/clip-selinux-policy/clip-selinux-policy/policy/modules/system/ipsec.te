@@ -5,12 +5,13 @@ policy_module(ipsec, 1.12.0)
 # Declarations
 #
 
-## <desc>
-## <p>
-## Allow racoon to read shadow
-## </p>
-## </desc>
-gen_tunable(racoon_read_shadow, false)
+# SRS: removed for CLIP
+# <desc>
+# <p>
+# Allow racoon to read shadow
+# </p>
+# </desc>
+#gen_tunable(racoon_read_shadow, false)
 
 type ipsec_t;
 type ipsec_exec_t;
@@ -418,11 +419,6 @@ miscfiles_read_localization(racoon_t)
 
 sysnet_exec_ifconfig(racoon_t)
 
-auth_can_read_shadow_passwords(racoon_t)
-tunable_policy(`racoon_read_shadow',`
-	auth_tunable_read_shadow(racoon_t)
-')
-
 ########################################
 #
 # Setkey local policy
@@ -438,7 +434,6 @@ read_lnk_files_pattern(setkey_t, ipsec_conf_file_t, ipsec_conf_file_t)
 
 kernel_request_load_module(setkey_t)
 
-# allow setkey utility to set contexts on SA's and policy
 domain_ipsec_setcontext_all_domains(setkey_t)
 
 files_read_etc_files(setkey_t)

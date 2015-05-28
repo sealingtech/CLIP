@@ -91,18 +91,6 @@ userdom_spec_domtrans_unpriv_users(remote_login_t)
 # Search for mail spool file.
 mta_getattr_spool(remote_login_t)
 
-# SRS: removed for CLIP
-#tunable_policy(`use_nfs_home_dirs',`
-#	fs_read_nfs_files(remote_login_t)
-#	fs_read_nfs_symlinks(remote_login_t)
-#')
-
-# SRS: removed for CLIP
-#tunable_policy(`use_samba_home_dirs',`
-#	fs_read_cifs_files(remote_login_t)
-#	fs_read_cifs_symlinks(remote_login_t)
-#')
-
 optional_policy(`
 	alsa_domtrans(remote_login_t)
 ')

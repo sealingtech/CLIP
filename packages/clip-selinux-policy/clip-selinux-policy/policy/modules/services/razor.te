@@ -105,20 +105,6 @@ logging_send_syslog_msg(razor_t)
 userdom_search_user_home_dirs(razor_t)
 userdom_use_user_terminals(razor_t)
 
-# SRS: removed for CLIP
-#tunable_policy(`use_nfs_home_dirs',`
-#	fs_manage_nfs_dirs(razor_t)
-#	fs_manage_nfs_files(razor_t)
-#	fs_manage_nfs_symlinks(razor_t)
-#')
-
-# SRS: removed for CLIP
-#tunable_policy(`use_samba_home_dirs',`
-#	fs_manage_cifs_dirs(razor_t)
-#	fs_manage_cifs_files(razor_t)
-#	fs_manage_cifs_symlinks(razor_t)
-#')
-
 optional_policy(`
 	nscd_socket_use(razor_t)
 ')

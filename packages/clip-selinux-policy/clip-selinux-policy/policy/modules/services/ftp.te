@@ -124,9 +124,6 @@ files_read_etc_files(anon_sftpd_t)
 
 miscfiles_read_public_files(anon_sftpd_t)
 
-#tunable_policy(`sftpd_anon_write',`
-#	miscfiles_manage_public_files(anon_sftpd_t)
-#')
 
 ########################################
 #
@@ -250,60 +247,6 @@ tunable_policy(`allow_ftpd_use_cifs && allow_ftpd_anon_write',`
 	fs_manage_cifs_files(ftpd_t)
 ')
 
-# SRS: removed for CLIP
-#tunable_policy(`allow_ftpd_use_nfs',`
-#	fs_read_nfs_files(ftpd_t)
-#	fs_read_nfs_symlinks(ftpd_t)
-#')
-
-#tunable_policy(`allow_ftpd_use_nfs && allow_ftpd_anon_write',`
-#	fs_manage_nfs_files(ftpd_t)
-#')
-
-#tunable_policy(`allow_ftpd_full_access',`
-#	allow ftpd_t self:capability { dac_override dac_read_search };
-#	auth_manage_all_files_except_auth_files(ftpd_t)
-#')
-
-#tunable_policy(`ftp_home_dir',`
-#	allow ftpd_t self:capability { dac_override dac_read_search };
-#
-	# allow access to /home
-#	files_list_home(ftpd_t)
-#	userdom_read_user_home_content_files(ftpd_t)
-#	userdom_manage_user_home_content_dirs(ftpd_t)
-#	userdom_manage_user_home_content_files(ftpd_t)
-#	userdom_manage_user_home_content_symlinks(ftpd_t)
-#	userdom_user_home_dir_filetrans_user_home_content(ftpd_t, { dir file lnk_file })
-#')
-
-#tunable_policy(`ftp_home_dir && use_nfs_home_dirs',`
-#	fs_manage_nfs_files(ftpd_t)
-#	fs_read_nfs_symlinks(ftpd_t)
-#')
-
-#tunable_policy(`ftp_home_dir && use_samba_home_dirs',`
-#	fs_manage_cifs_files(ftpd_t)
-#	fs_read_cifs_symlinks(ftpd_t)
-#')
-
-#optional_policy(`
-#	tunable_policy(`ftp_home_dir',`
-#		apache_search_sys_content(ftpd_t)
-#	')
-#')
-
-#optional_policy(`
-#	corecmd_exec_shell(ftpd_t)
-
-#	files_read_usr_files(ftpd_t)
-
-#	cron_system_entry(ftpd_t, ftpd_exec_t)
-
-#	optional_policy(`
-#		logrotate_exec(ftpd_t)
-#	')
-#')
 
 optional_policy(`
 	daemontools_service_domain(ftpd_t, ftpd_exec_t)
@@ -380,34 +323,3 @@ tunable_policy(`sftpd_enable_homedirs',`
 	userdom_user_home_dir_filetrans_user_home_content(sftpd_t, { dir file })
 ')
 
-#tunable_policy(`sftpd_enable_homedirs && use_nfs_home_dirs',`
-#	fs_manage_nfs_dirs(sftpd_t)
-#	fs_manage_nfs_files(sftpd_t)
-#	fs_manage_nfs_symlinks(sftpd_t)
-#')
-
-#tunable_policy(`sftpd_enable_homedirs && use_samba_home_dirs',`
-#	fs_manage_cifs_dirs(sftpd_t)
-#	fs_manage_cifs_files(sftpd_t)
-#	fs_manage_cifs_symlinks(sftpd_t)
-#')
-
-#tunable_policy(`sftpd_full_access',`
-#	allow sftpd_t self:capability { dac_override dac_read_search };
-#	fs_read_noxattr_fs_files(sftpd_t)
-#	auth_manage_all_files_except_auth_files(sftpd_t)
-#')
-
-#tunable_policy(`use_samba_home_dirs',`
-#	# allow read access to /home by default
-#	fs_list_cifs(sftpd_t)
-#	fs_read_cifs_files(sftpd_t)
-#	fs_read_cifs_symlinks(sftpd_t)
-#')
-
-#tunable_policy(`use_nfs_home_dirs',`
-#	# allow read access to /home by default
-#	fs_list_nfs(sftpd_t)
-#	fs_read_nfs_files(sftpd_t)
-#	fs_read_nfs_symlinks(ftpd_t)
-#')

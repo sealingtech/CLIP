@@ -166,30 +166,6 @@ interface(`userdom_ro_home_role',`
 	read_fifo_files_pattern($2, { user_home_t user_home_dir_t }, user_home_t)
 	read_sock_files_pattern($2, { user_home_t user_home_dir_t }, user_home_t)
 	files_list_home($2)
-
-# SRS: removed for CLIP
-#	tunable_policy(`use_nfs_home_dirs',`
-#		fs_list_nfs($2)
-#		fs_read_nfs_files($2)
-#		fs_read_nfs_symlinks($2)
-#		fs_read_nfs_named_sockets($2)
-#		fs_read_nfs_named_pipes($2)
-#	',`
-#		fs_dontaudit_list_nfs($2)
-#		fs_dontaudit_read_nfs_files($2)
-#	')
-
-# SRS: removed for CLIP
-#	tunable_policy(`use_samba_home_dirs',`
-#		fs_list_cifs($2)
-#		fs_read_cifs_files($2)
-#		fs_read_cifs_symlinks($2)
-#		fs_read_cifs_named_sockets($2)
-#		fs_read_cifs_named_pipes($2)
-#	',`
-#		fs_dontaudit_list_cifs($2)
-#		fs_dontaudit_read_cifs_files($2)
-#	')
 ')
 
 #######################################
@@ -247,29 +223,6 @@ interface(`userdom_manage_home_role',`
 
 	# cjp: this should probably be removed:
 	allow $2 user_home_dir_t:dir { manage_dir_perms relabel_dir_perms };
-
-# SRS: removed for CLIP
-#	tunable_policy(`use_nfs_home_dirs',`
-#		fs_manage_nfs_dirs($2)
-#		fs_manage_nfs_files($2)
-#		fs_manage_nfs_symlinks($2)
-#		fs_manage_nfs_named_sockets($2)
-#		fs_manage_nfs_named_pipes($2)
-#	',`
-#		fs_dontaudit_manage_nfs_dirs($2)
-#		fs_dontaudit_manage_nfs_files($2)
-#	')
-
-#	tunable_policy(`use_samba_home_dirs',`
-#		fs_manage_cifs_dirs($2)
-#		fs_manage_cifs_files($2)
-#		fs_manage_cifs_symlinks($2)
-#		fs_manage_cifs_named_sockets($2)
-#		fs_manage_cifs_named_pipes($2)
-#	',`
-#		fs_dontaudit_manage_cifs_dirs($2)
-#		fs_dontaudit_manage_cifs_files($2)
-#	')
 ')
 
 #######################################
@@ -1004,10 +957,6 @@ template(`userdom_unpriv_user_template', `
 	# Allow users to run TCP servers (bind to ports and accept connection from
 	# the same domain and outside users) disabling this forces FTP passive mode
 	# and may change other protocols
-#	tunable_policy(`user_tcp_server',`
-#		corenet_tcp_bind_generic_node($1_t)
-#		corenet_tcp_bind_generic_port($1_t)
-#	')
 
 	optional_policy(`
 		netutils_run_ping_cond($1_t, $1_r)
@@ -1187,23 +1136,6 @@ template(`userdom_admin_user_template',`
 	userdom_manage_user_home_content_pipes($1_t)
 	userdom_manage_user_home_content_sockets($1_t)
 	userdom_user_home_dir_filetrans_user_home_content($1_t, { dir file lnk_file fifo_file sock_file })
-
-	# SRS: removed for CLIP
-#	tunable_policy(`user_rw_noexattrfile',`
-#		fs_manage_noxattr_fs_files($1_t)
-#		fs_manage_noxattr_fs_dirs($1_t)
-#	',`
-#		fs_read_noxattr_fs_files($1_t)
-#	')
-
-	# SRS: removed for CLIP
-#	optional_policy(`
-#		postgresql_unconfined($1_t)
-#	')
-
-#	optional_policy(`
-#		userhelper_exec($1_t)
-#	')
 ')
 
 ########################################
@@ -1251,33 +1183,12 @@ template(`userdom_security_admin_template',`
 	mls_file_read_all_levels($1)
 	mls_file_upgrade($1)
 	mls_file_downgrade($1)
-
-	selinux_set_enforce_mode($1)
-	selinux_set_all_booleans($1)
-	selinux_set_parameters($1)
-
-	# SRS: removed for CLIP
-	#auth_relabel_all_files_except_auth_files($1)
-	#auth_relabel_shadow($1)
-
+	
 	init_exec($1)
 
 	logging_send_syslog_msg($1)
-	# SRS: removed for CLIP since only audadm should be able to read logs
-	#logging_read_audit_log($1)
-	#logging_read_audit_config($1)
-	#logging_read_generic_logs($1)
 
-	seutil_manage_bin_policy($1)
-	seutil_run_checkpolicy($1, $2)
-	seutil_run_loadpolicy($1, $2)
-	seutil_run_semanage($1, $2)
-	seutil_run_setfiles($1, $2)
-
-	# Removed for CLIP.
-	#optional_policy(`
-	#	aide_run($1, $2)
-	#')
+	logging_dontaudit_send_audit_msgs($1)
 
 	optional_policy(`
 		consoletype_exec($1)
@@ -1285,18 +1196,6 @@ template(`userdom_security_admin_template',`
 
 	optional_policy(`
 		dmesg_exec($1)
-	')
-
-	optional_policy(`
-		ipsec_run_setkey($1, $2)
-	')
-
-	optional_policy(`
-		netlabel_run_mgmt($1, $2)
-	')
-
-	optional_policy(`
-		samhain_run($1, $2)
 	')
 ')
 
@@ -1906,14 +1805,6 @@ interface(`userdom_exec_user_home_content_files',`
 	files_search_home($1)
 	exec_files_pattern($1, { user_home_dir_t user_home_t }, user_home_t)
 
-# SRS: removed for CLIP
-#	tunable_policy(`use_nfs_home_dirs',`
-#		fs_exec_nfs_files($1)
-#	')
-
-#	tunable_policy(`use_samba_home_dirs',`
-#		fs_exec_cifs_files($1)
-#	')
 ')
 
 ########################################

@@ -82,27 +82,11 @@ ifdef(`distro_ubuntu',`
 	')
 ')
 
-# SRS: removed for CLIP
-#tunable_policy(`use_nfs_home_dirs',`
-#	fs_read_nfs_files(depmod_t)
-#')
-
-# SRS: removed for CLIP
-#tunable_policy(`use_samba_home_dirs',`
-#	fs_read_cifs_files(depmod_t)
-#')
-
 optional_policy(`
 	rpm_rw_pipes(depmod_t)
 	rpm_manage_script_tmp_files(depmod_t)
 ')
 
-# SRS: um, wtf. This is like using a sledge hammer instead of
-# of tack hammer.  Removed for CLIP.
-#optional_policy(`
-	# Read System.map from home directories.
-#	unconfined_domain(depmod_t)
-#')
 
 ########################################
 #

@@ -149,16 +149,4 @@ template(`screen_role_template',`
 	userdom_setattr_user_ptys($1_screen_t)
 	userdom_setattr_user_ttys($1_screen_t)
 
-# SRS: removed for CLIP
-#	tunable_policy(`use_samba_home_dirs',`
-#		fs_cifs_domtrans($1_screen_t, $3)
-#		fs_read_cifs_symlinks($1_screen_t)
-#		fs_list_cifs($1_screen_t)
-#	')
-
-#	tunable_policy(`use_nfs_home_dirs',`
-#		fs_nfs_domtrans($1_screen_t, $3)
-#		fs_list_nfs($1_screen_t)
-#		fs_read_nfs_symlinks($1_screen_t)
-#	')
 ')

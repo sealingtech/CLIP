@@ -61,30 +61,6 @@ tunable_policy(`aide_enable_write_db',`
 ')
 ')
 
-# SRS: removed for CLIP
-#ifndef(`enable_mls',`
-#	logging_manage_audit_log(toor_t)
-#	logging_manage_audit_config(toor_t)
-#	logging_run_auditctl(toor_t, toor_r)
-#')
-
-# SRS: removed for CLIP
-#tunable_policy(`allow_ptrace',`
-#	domain_ptrace_all_domains(toor_t)
-#')
-
-# SRS: removed for CLIP
-#optional_policy(`
-#	amanda_run_recover(toor_t, toor_r)
-#')
-
-# SRS: removed for CLIP
-#optional_policy(`
-#	apache_run_helper(toor_t, toor_r)
-#	#apache_run_all_scripts(toor_t, toor_r)
-#	#apache_domtrans_sys_script(toor_t)
-#	apache_role(toor_r, toor_t)
-#')
 
 optional_policy(`
 	# cjp: why is this not apm_run_client

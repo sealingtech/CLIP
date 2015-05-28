@@ -227,24 +227,6 @@ tunable_policy(`allow_ssh_keysign',`
 	allow ssh_keysign_t ssh_t:fifo_file rw_file_perms;
 ')
 
-#tunable_policy(`use_nfs_home_dirs',`
-#	fs_manage_nfs_dirs(ssh_t)
-#	fs_manage_nfs_files(ssh_t)
-#')
-
-# SRS: removed for CLIP
-#tunable_policy(`use_samba_home_dirs',`
-#	fs_manage_cifs_dirs(ssh_t)
-#	fs_manage_cifs_files(ssh_t)
-#')
-
-# SRS: removed for CLIP
-# for port forwarding
-#tunable_policy(`user_tcp_server',`
-#	corenet_tcp_bind_ssh_port(ssh_t)
-#	corenet_tcp_bind_generic_node(ssh_t)
-#')
-
 optional_policy(`
 	xserver_user_x_domain_template(ssh, ssh_t, ssh_tmpfs_t)
 	xserver_domtrans_xauth(ssh_t)
@@ -462,12 +444,6 @@ logging_send_syslog_msg(chroot_user_t)
 
 locallogin_signull(sshd_t)
 
-#tunable_policy(`ssh_chroot_full_access',`
-#    allow chroot_user_t self:capability { dac_override dac_read_search };
-#    auth_manage_all_files_except_shadow(chroot_user_t)
-#')
-
-
 tunable_policy(`ssh_chroot_rw_homedirs',`
         files_list_home(chroot_user_t)
         userdom_read_user_home_content_files(chroot_user_t)
@@ -478,35 +454,6 @@ tunable_policy(`ssh_chroot_rw_homedirs',`
 
         userdom_user_home_dir_filetrans_pattern(chroot_user_t, { dir file lnk_file })
 ')
-
-#optional_policy(`
-#	tunable_policy(`ssh_chroot_manage_apache_content',`
-#		apache_manage_sys_content(chroot_user_t)
-#		apache_manage_sys_content_rw(chroot_user_t)
-#	')
-#')
-
-#tunable_policy(`ssh_chroot_rw_homedirs && use_nfs_home_dirs',`
-#    fs_manage_nfs_dirs(chroot_user_t)
-#    fs_manage_nfs_files(chroot_user_t)
-#    fs_manage_nfs_symlinks(chroot_user_t)
-#')
-
-#tunable_policy(`ssh_chroot_rw_homedirs && use_samba_home_dirs',`
-#    fs_manage_cifs_dirs(chroot_user_t)
-#    fs_manage_cifs_files(chroot_user_t)
-#    fs_manage_cifs_symlinks(chroot_user_t)
-#')
-
-#tunable_policy(`use_samba_home_dirs',`
-#    fs_read_cifs_files(chroot_user_t)
-#    fs_read_cifs_symlinks(chroot_user_t)
-#')
-
-#tunable_policy(`use_nfs_home_dirs',`
-#    fs_read_nfs_files(chroot_user_t)
-#    fs_read_nfs_symlinks(chroot_user_t)
-#')
 
 ssh_rw_stream_sockets(chroot_user_t)
 ssh_rw_tcp_sockets(chroot_user_t)

@@ -35,7 +35,7 @@ auth_role(secadm_r, secadm_t)
 #auth_relabel_all_files_except_auth_files(secadm_t)
 auth_relabel_shadow(secadm_t)
 
-init_exec(secadm_t)
+#init_exec(secadm_t)
 
 # SRS: removed for CLIP
 #logging_read_audit_log(secadm_t)
@@ -46,13 +46,26 @@ optional_policy(`
 	aide_run(secadm_t, secadm_r)
 ')
 
-#optional_policy(`
-#	auditadm_role_change(secadm_r)
-#')
-
 optional_policy(`
 	dmesg_exec(secadm_t)
 ')
+
+optional_policy(`
+	aide_run(secadm_t, secadm_r)
+')
+
+optional_policy(`
+	tripwire_run_siggen(secadm_t, secadm_r)
+	tripwire_run_tripwire(secadm_t, secadm_r)
+	tripwire_run_twadmin(secadm_t, secadm_r)
+	tripwire_run_twprint(secadm_t, secadm_r)
+')
+
+
+optional_policy(`
+	samhain_run(secadm_t, secadm_r)
+')
+
 
 optional_policy(`
 	netlabel_run_mgmt(secadm_t, secadm_r)
@@ -69,11 +82,6 @@ optional_policy(`
 optional_policy(`
 	sudo_role_template(secadm, secadm_r, secadm_t)
 ')
-
-# SRS: removed for CLIP
-#optional_policy(`
-#	sysadm_role_change(secadm_r)
-#')
 
 optional_policy(`
 	vlock_run(secadm_t, secadm_r)

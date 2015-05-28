@@ -100,15 +100,6 @@ ifdef(`distro_redhat',`
 	files_getattr_all_file_type_fs(logwatch_t)
 ')
 
-# SRS: removed for CLIP
-#tunable_policy(`use_nfs_home_dirs',`
-#	fs_list_nfs(logwatch_t)
-#')
-
-#tunable_policy(`use_samba_home_dirs',`
-#	fs_list_cifs(logwatch_t)
-#')
-
 optional_policy(`
 	apache_read_log(logwatch_t)
 ')
@@ -138,12 +129,3 @@ optional_policy(`
 	ntp_domtrans(logwatch_t)
 ')
 
-# SRS: removed for CLIP
-#optional_policy(`
-#	rpc_search_nfs_state_data(logwatch_t)
-#')
-#
-#optional_policy(`
-#	samba_read_log(logwatch_t)
-#	samba_read_share_files(logwatch_t)
-#')

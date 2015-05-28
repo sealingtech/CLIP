@@ -136,11 +136,6 @@ sysnet_read_config(apt_t)
 
 userdom_use_user_terminals(apt_t)
 
-# with boolean, for cron-apt and such?
-#optional_policy(`
-#	cron_system_entry(apt_t,apt_exec_t)
-#')
-
 optional_policy(`
 	# dpkg interaction
 	dpkg_read_db(apt_t)

@@ -158,19 +158,6 @@ tunable_policy(`spamd_enable_home_dirs',`
 	userdom_manage_user_home_content_symlinks(spamd_t)
 ')
 
-# SRS: removed for CLIP
-#tunable_policy(`use_nfs_home_dirs',`
-#	fs_manage_nfs_dirs(spamassassin_t)
-#	fs_manage_nfs_files(spamassassin_t)
-#	fs_manage_nfs_symlinks(spamassassin_t)
-#')
-
-# SRS: removed for CLIP
-#tunable_policy(`use_samba_home_dirs',`
-#	fs_manage_cifs_dirs(spamassassin_t)
-#	fs_manage_cifs_files(spamassassin_t)
-#	fs_manage_cifs_symlinks(spamassassin_t)
-#')
 
 optional_policy(`
 	# Write pid file and socket in ~/.evolution/cache/tmp
@@ -379,15 +366,6 @@ sysnet_dns_name_resolve(spamd_t)
 
 userdom_use_unpriv_users_fds(spamd_t)
 userdom_search_user_home_dirs(spamd_t)
-
-# SRS: removed for CLIP
-#tunable_policy(`use_nfs_home_dirs',`
-#	fs_manage_nfs_files(spamd_t)
-#')
-
-#tunable_policy(`use_samba_home_dirs',`
-#	fs_manage_cifs_files(spamd_t)
-#')
 
 optional_policy(`
 	amavis_manage_lib_files(spamd_t)

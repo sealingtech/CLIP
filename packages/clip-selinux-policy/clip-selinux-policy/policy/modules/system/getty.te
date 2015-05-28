@@ -113,14 +113,6 @@ ifdef(`distro_ubuntu',`
 	')
 ')
 
-# SRS: removed for CLIP
-#tunable_policy(`console_login',`
-	# Support logging in from /dev/console
-#	term_use_console(getty_t)
-#',`
-#	term_dontaudit_use_console(getty_t)
-#')
-
 optional_policy(`
 	mta_send_mail(getty_t)
 ')

@@ -59,32 +59,14 @@ miscfiles_read_localization(cdrecord_t)
 userdom_use_user_terminals(cdrecord_t)
 userdom_read_user_home_content_files(cdrecord_t)
 
-# Handle nfs home dirs
-# SRS: removed for CLIP
-#tunable_policy(`cdrecord_read_content && use_nfs_home_dirs',`
-#	fs_list_auto_mountpoints(cdrecord_t)
-#	files_list_home(cdrecord_t)
-#	fs_read_nfs_files(cdrecord_t)
-#	fs_read_nfs_symlinks(cdrecord_t)
-#
-#',`
-	files_dontaudit_list_home(cdrecord_t)
-	fs_dontaudit_list_auto_mountpoints(cdrecord_t)
-	fs_dontaudit_read_nfs_files(cdrecord_t)
-	fs_dontaudit_list_nfs(cdrecord_t)
-#')
-# Handle samba home dirs
-#tunable_policy(`cdrecord_read_content && use_samba_home_dirs',`
-#	fs_list_auto_mountpoints(cdrecord_t)
-#	files_list_home(cdrecord_t)
-#	fs_read_cifs_files(cdrecord_t)
-#	fs_read_cifs_symlinks(cdrecord_t)
-#',`
-	files_dontaudit_list_home(cdrecord_t)
-	fs_dontaudit_list_auto_mountpoints(cdrecord_t)
-	fs_dontaudit_read_cifs_files(cdrecord_t)
-	fs_dontaudit_list_cifs(cdrecord_t)
-#')
+files_dontaudit_list_home(cdrecord_t)
+fs_dontaudit_list_auto_mountpoints(cdrecord_t)
+fs_dontaudit_read_nfs_files(cdrecord_t)
+fs_dontaudit_list_nfs(cdrecord_t)
+files_dontaudit_list_home(cdrecord_t)
+fs_dontaudit_list_auto_mountpoints(cdrecord_t)
+fs_dontaudit_read_cifs_files(cdrecord_t)
+fs_dontaudit_list_cifs(cdrecord_t)
 
 # Handle removable media, /tmp, and /home
 tunable_policy(`cdrecord_read_content',`
@@ -110,13 +92,3 @@ tunable_policy(`cdrecord_read_content',`
 	userdom_dontaudit_read_user_home_content_files(cdrecord_t)
 ')
 
-# SRS: removed for CLIP
-#tunable_policy(`use_nfs_home_dirs',`
-#	files_search_mnt(cdrecord_t)
-#	fs_read_nfs_files(cdrecord_t)
-#	fs_read_nfs_symlinks(cdrecord_t)
-#')
-
-#optional_policy(`
-#	resmgr_stream_connect(cdrecord_t)
-##')
