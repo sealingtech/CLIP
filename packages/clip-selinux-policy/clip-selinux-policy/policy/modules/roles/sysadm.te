@@ -24,6 +24,8 @@ userdom_admin_user_template(sysadm)
 selinux_set_all_booleans(sysadm_t)
 selinux_set_parameters(sysadm_t)
 
+seutil_domtrans_setfiles(sysadm_t)
+
 # SRS: note: this is pretty damn powerful.
 # Most significantly, you can add permissive domains.
 seutil_run_semanage(sysadm_t, sysadm_r)
