@@ -505,7 +505,7 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 :FORWARD ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
--A FORWARD -o eth0 -p tcp -m tcp --tcp-flags SYN,RST SYN -m tcpmss --mss 1361:1536 -j TCPMSS --set-mss 1360
+-A FORWARD -o eth0 -p tcp -m tcp --tcp-flags SYN,RST SYN -m tcpmss --mss 1301:1536 -j TCPMSS --set-mss 1300
 COMMIT
 *nat
 :PREROUTING ACCEPT [0:0]
