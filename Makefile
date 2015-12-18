@@ -496,7 +496,7 @@ clean-mock: $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.bl
 PHONIES += bare-repos
 bare-repos: clean-mock
 	$(VERBOSE)$(RM) $(YUM_CONF_ALL_FILE)
-	$(VERBOSE)$(RM) -r $(CLIP_REPO_DIRS) $(CLIP_REPO_DIR)
+	$(VERBOSE)$(RM) -rf repos/*
 
 PHONIES += clean
 clean:
