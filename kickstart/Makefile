@@ -114,8 +114,9 @@ aws: $(ADDTL_DEPS) setup-aws-ks
 	JAVA_HOME=$(JAVA_HOME) EC2_HOME=$(EC2_HOME) $(EC2_REGISTER) $(EC2_REGISTER_ARGS)
 
 setup-inst-ks: $(SETUP_DEPS)
+	@sudo rm -rf $(BUILD_DIR)/$(ISO_VERSION)/$(TARGET_ARCH)
 	$(VERBOSE)test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)
-	$(VERBOSE)test -d $(PUNGI_OS_DIR) || mkdir -p $(PUNGI_OS_DIR)
+	$(VERBOSE)mkdir -p $(PUNGI_OS_DIR)
 	$(VERBOSE)cp --force $(KS) $(INST_KS)
 	@echo "Modifying kickstart with build variables..."
 	$(VERBOSE)sed -i -e 's;#REPO-REPLACEMENT-PLACEHOLDER;$(REPO_LINES);' $(INST_KS)
