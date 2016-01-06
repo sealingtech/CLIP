@@ -1,5 +1,20 @@
 This is the basic apache (httpd) kickstart file for any webserver.
 
+We do not enable SSL by default as we don't want to generate 
+self-signed certificates as that might be undesirable.
+
+In a future version of CLIP we plan to add support for Let's Encrypt
+which will automate the process of getting CA-signed certs for free!
+If you want to try it now visit this link:
+https://letsencrypt.org/howitworks/
+
+Follow the instructions hwere to generate a self-signed certificate:
+https://wiki.centos.org/HowTos/Https
+
+NOTE: anytime those steps tell you to restart a service, pre-pend "run_init"
+to the beginning of the command. CLIP's strict policy won't allow you to 
+directly restart services.
+
 Please enable HTTPS and disable unencrypted HTTP after you generate or
 purchase certificates:
 http://httpd.apache.org/docs/2.4/ssl/ssl_howto.html

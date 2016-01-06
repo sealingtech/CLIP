@@ -1,5 +1,24 @@
-Once the VPN system has booted, sftp in as "client" using the
-password you specified in the kickstart ("neutronbass" by
-default).  Then, download the key material from android_certs
-and remove them. Use these certificates to connect to the VPN
-endpoint.
+1. Using AWS: If you generate a VPN variant for use in AWS, a SSH public key
+will be added to the users on the VPN automatically. This is the 
+from the key pair you generated in the AWS web interface when
+instantiating a VM from the AMI.
+
+2. Not using AWS: if you are not using AWS you must add public keys to the
+the system manually. Login to the console as toor and add keys to
+/home/vpn/.ssh/authorized_keys and /home/sftp/.ssh/authorized_keys
+Then run:
+restorecon -RF /home 
+
+3 Both AWS and non-AWS: once the system has booted ssh into the system as
+the 'vpn' user. Enter a "1" to generate IKE v1 certificatess or "2" to
+generate IKE v2 certificates. Press ctrl-c.
+
+4. SFTP into the system as the 'sftp' user. Download the generated
+certificates.
+
+NOTE: this assumes you haven't changed any of the user names in the 
+kickstart.
+
+5. Configure your client to use the downloaded certificates and 
+setup the client to connect to the VPN server. Connect and enjoy!
+
