@@ -2,6 +2,29 @@ Our journey towards perfection is still a WiP so here are the CLIP known
 issues:
 
 =============================================================================
+CLIP for RHEL 6.7 Final Release - January 2015:
+
+- Build-system specific (probably) - kernel 2.6.32-504.12.2.el6.x86_64 causes
+  panics when building CLIP. Use either an older kernel or newer kernel
+  than 504. 
+
+- There is an issue with version  nss-softokn-3.14.3-22.el6_6.x86_64 and
+  anaconda-13.21.229-1.el6.centos.x86_64.  anaconda contains a static list
+  of files to include in the initrd.  nss-softokn, in the version above,
+  introduces a new library that should have been included via an update to
+  anaconda.  This causes RPM signature validation to fail and no packages are
+  actually installed.  Of course the anaconda UI doesn't tell you this... and
+  it fails when it tries to set the root password as /etc/passwd isn;t
+  present. And of course the traceback isn't helpful.  It tells you there was
+  a problem in setUserPasswd() and leaves you to track it down by trawling
+  through /tmp/log and /mnt/sysimg/root/install.log.  But I digress and there
+  will likely be an updated anaconda as no one can roll an installable ISO
+  without patching anaconda.  Our work-around is to use anaconda's update
+  feature that allows you to hot-patch anaconda's initrd before anaconda
+  itself is started. So we check for the the culprit package and include an
+  update image in the rolled ISO.  That was a mouthful.
+
+=============================================================================
 CLIP for RHEL 6.6 Final Release - Aprilish 2015:
 
 - Build-system specific (probably) - kernel 2.6.32-504.12.2.el6.x86_64 causes
@@ -18,6 +41,9 @@ CLIP for RHEL 6.6 Final Release - Aprilish 2015:
   kickstart.  That will continually fail as no kernel module is available for
   the CDROM device.  The current work-around is to run "make bare" and then
   rebuild the desired ISO like usual.
+
+  I believe this is related to using a commitish in this path:
+	./tmp/clip-sftp-dropbox/7e2d5ae/x86_64/os/Packages
 
 - There is an issue with version  nss-softokn-3.14.3-22.el6_6.x86_64 and
   anaconda-13.21.229-1.el6.centos.x86_64.  anaconda contains a static list
