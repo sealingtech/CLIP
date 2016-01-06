@@ -129,6 +129,7 @@ rsyslog
 ruby
 screen
 -selinux-policy-targeted
+screen
 setup
 setools-console
 shadow-utils
@@ -368,6 +369,28 @@ if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
 		grubby --update-kernel=ALL --args=enforcing=0
 	fi	
 fi
+
+# This remediation doesn't appear to be added to the script, it might have been added after the SSG release
+# platform = Red Hat Enterprise Linux 6
+# If system does not contain control-alt-delete.override,
+if [ ! -f /etc/init/control-alt-delete.override ]; then
+
+        # but does have control-alt-delete.conf file,
+        if [ -f /etc/init/control-alt-delete.conf ]; then
+
+                # then copy .conf to .override to maintain persistency
+                cp /etc/init/control-alt-delete.conf /etc/init/control-alt-delete.override
+        fi
+fi
+
+sed -i 's,^exec.*$,exec /usr/bin/logger -p authpriv.notice -t init "Ctrl-Alt-Del was pressed and ignored",' /etc/init/control-alt-delete.override
+
+# also these PAM fixes aren't being remediated automatically
+sed -i -e 's/^auth.*pam_unix.*/auth required pam_faillock.so preauth silent deny=3 unlock_time=604800 fail_interval=900\n&/' /etc/pam.d/system-auth
+sed -i -e 's/^auth.*pam_unix.*/&\nauth [default=die] pam_faillock.so authfail deny=3 unlock_time=604800 fail_interval=900/' /etc/pam.d/system-auth
+# this already appears to be the default... false positive probably
+#sed -i -e 's/^account.*pam_unix.*/account required pam_faillock.so \n&/' /etc/pam.d/system-auth
+sed -i -e 's/^password.*cracklib.*/password required pam_cracklib.so maxrepeat=3/' /etc/pam.d/system-auth
 
 # We don't want the final remediation script to set the system to targeted
 sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
