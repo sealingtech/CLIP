@@ -30,6 +30,10 @@ seutil_domtrans_setfiles(sysadm_t)
 # Most significantly, you can add permissive domains.
 seutil_run_semanage(sysadm_t, sysadm_r)
 
+shutdown_run(sysadm_t,sysadm_r)
+
+seutil_run_runinit(sysadm_t,sysadm_r)
+
 ifndef(`enable_mls',`
 	userdom_security_admin_template(sysadm_t, sysadm_r)
 ')
@@ -43,8 +47,8 @@ mls_process_read_up(sysadm_t)
 ubac_file_exempt(sysadm_t)
 #ubac_fd_exempt(sysadm_t)
 
-#init_exec(sysadm_t)
-#init_stream_connect(sysadm_t)
+init_exec(sysadm_t)
+init_stream_connect(sysadm_t)
 
 # Add/remove user home directories
 userdom_manage_user_home_dirs(sysadm_t)
@@ -67,6 +71,11 @@ ifdef(`direct_sysadm_daemon',`
 ')
 
 logging_read_generic_logs(sysadm_t)
+logging_read_audit_log(sysadm_t)
+
+# for chkconfig
+files_manage_etc_symlinks(sysadm_t)
+init_read_all_script_files(sysadm_t)
 
 optional_policy(`
 	# cjp: why is this not apm_run_client
