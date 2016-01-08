@@ -50,7 +50,7 @@ auth --useshadow --passalgo=sha512
 
 selinux --enforcing
 firewall --enabled
-reboot
+reboot --eject
 
 # DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
 #REPO-REPLACEMENT-PLACEHOLDER
@@ -99,6 +99,8 @@ bind-utils
 chkconfig
 coreutils
 cpio
+cronie
+crontabs
 device-mapper
 e2fsprogs
 filesystem
@@ -111,6 +113,8 @@ iputils
 kbd
 kernel
 ncurses
+ntp
+ntpdate
 openscap
 openscap-content
 openscap-utils
@@ -390,11 +394,19 @@ fi
 sed -i 's,^exec.*$,exec /usr/bin/logger -p authpriv.notice -t init "Ctrl-Alt-Del was pressed and ignored",' /etc/init/control-alt-delete.override
 
 # also these PAM fixes aren't being remediated automatically
-sed -i -e 's/^auth.*pam_unix.*/auth required pam_faillock.so preauth silent deny=3 unlock_time=604800 fail_interval=900\n&/' /etc/pam.d/system-auth
-sed -i -e 's/^auth.*pam_unix.*/&\nauth [default=die] pam_faillock.so authfail deny=3 unlock_time=604800 fail_interval=900/' /etc/pam.d/system-auth
-# this already appears to be the default... false positive probably
-#sed -i -e 's/^account.*pam_unix.*/account required pam_faillock.so \n&/' /etc/pam.d/system-auth
-sed -i -e 's/^password.*cracklib.*/password required pam_cracklib.so maxrepeat=3/' /etc/pam.d/system-auth
+for file in /etc/pam.d/system-auth /etc/pam.d/password-auth-ac; do
+        sed -i -e 's/^auth\s\+required\s\+pam_faillock.*/auth required pam_faillock.so preauth silent deny=3 unlock_time=604800 fail_interval=900/' $file
+        sed -i -e 's/^auth\s\+\[default.*pam_faillock.*/auth [default=die] pam_faillock.so authfail deny=3 unlock_time=604800 fail_interval=900/'  $file
+        # this already appears to be the default... false positive probably
+        #sed -i -e 's/^account.*pam_unix.*/account required pam_faillock.so \n&/' $file
+
+done
+
+if grep -q "maxrepeat" /etc/pam.d/system-auth; then
+        sed -i --follow-symlink "s/\(maxrepeat *= *\).*/\13/" /etc/pam.d/system-auth
+else
+        sed -i --follow-symlink "s/\(.*pam_cracklib\.so.*\)/\1 maxrepeat=3/" /etc/pam.d/system-auth
+fi
 
 # We don't want the final remediation script to set the system to targeted
 sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
