@@ -563,6 +563,9 @@ if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
 	rm -f /.autorelabel
 fi
 
+# Mitigate CVE-2016-0777
+echo "UseRoaming no" >> /etc/ssh/ssh_config
+
 # this one isn't actually due to remediation, but needs to be done too
 kill $(jobs -p) 2>/dev/null 1>/dev/null
 kill $TAILPID 2>/dev/null 1>/dev/null

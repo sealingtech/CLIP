@@ -604,6 +604,9 @@ if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
 	rm /.autorelabel
 fi
 
+# Mitigate CVE-2016-0777
+echo "UseRoaming no" >> /etc/ssh/ssh_config
+
 kill $TAILPID 2>/dev/null 1>/dev/null
 kill $(jobs -p) 2>/dev/null 1>/dev/null
 
