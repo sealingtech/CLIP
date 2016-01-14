@@ -234,13 +234,13 @@ dhclient
 #CONFIG-BUILD-PLACEHOLDER
 export PATH="/sbin:/usr/sbin:/usr/bin:/bin:/usr/local/bin"
 exec >/root/clip_post_install.log 2>&1
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
-	|| [ x"$CONFIG_BUILD_AWS" == "xy" ];
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "xy" ] \
+        && [ x"$CONFIG_BUILD_AWS" != "xy" ];
 then
-	# Print the log to tty7 so that the user know what's going on
-	tail -f /root/clip_post_install.log >/dev/tty7 &
-	TAILPID=$!
-	chvt 7
+        # Print the log to tty7 so that the user know what's going on
+        tail -f /root/clip_post_install.log >/dev/tty7 &
+        TAILPID=$!
+        chvt 7
 fi
 
 
