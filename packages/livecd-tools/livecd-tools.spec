@@ -4,8 +4,8 @@
 
 Summary: Tools for building live CDs
 Name: livecd-tools
-Version: 13.4.4
-Release: 101%{?dist}
+Version: 13.4.7
+Release: 1%{?dist}
 Epoch: 1
 License: GPLv2
 Group: System Environment/Base
@@ -19,9 +19,8 @@ Source0: http://fedorahosted.org/releases/l/i/livecd/%{name}-%{version}.tar.bz2
 Patch0: lokkit-fw-no-reset.patch
 Patch1: dracut-live-fix.patch
 Patch2: kargs-and-boot-menu.patch
-Patch3: setfiles-force-all-bits.patch
+Patch3: setfiles-fixes.patch
 Patch4: add-live-sata-mods.patch
-Patch5: setfiles-use-correct-fc.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Requires: python-imgcreate = %{epoch}:%{version}-%{release}
 Requires: mkisofs
@@ -31,7 +30,7 @@ Requires: pyparted
 Requires: util-linux
 %ifarch %{ix86} x86_64
 Requires: syslinux
-Requires: /sbin/extlinux
+Requires: syslinux-extlinux
 %endif
 %ifarch ppc
 Requires: yaboot
@@ -59,7 +58,6 @@ Requires: system-config-keyboard >= 1.3.0
 Requires: python-urlgrabber
 Requires: libselinux-python
 Requires: dbus-python
-Requires: dracut
 
 %description -n python-imgcreate
 Python modules that can be used for building images for things
@@ -73,7 +71,6 @@ like live image or appliances.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
-%patch5 -p1
 
 %build
 make
@@ -107,6 +104,20 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/imgcreate/*.pyc
 
 %changelog
+* Fri Feb 27 2015 Brian C. Lane <bcl@redhat.com> 13.4.7-1
+- Version 13.4.6 (bcl)
+- lokkit patch moved upstream
+
+* Fri May 02 2014 Brian C. Lane <bcl@redhat.com> 13.4.6-1
+- Version 13.4.6 (bcl)
+- edit-livecd: Remove rebuild_iso_symlinks (#928620) (bcl)
+- correctly check for selinux state (#896610) (bcl)
+- Change vfat limit from 2047 to 4095 (bcl)
+
+* Fri Jan 31 2014 Brian C. Lane <bcl@redhat.com> 13.4.5-1
+- Version 13.4.5 (bcl)
+- Add dmsquash-live module to dracut (#957892) (bcl)
+
 * Thu May 23 2013 Brian C. Lane <bcl@redhat.com> 13.4.4-2
 - Version 13.4.4 (bcl)
 - Avoid setting empty root password (#962493) (thoger)

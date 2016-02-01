@@ -1,22 +1,24 @@
-diff -urN a/imgcreate/live.py b/imgcreate/live.py
---- a/imgcreate/live.py        2015-02-26 12:30:09.649899255 -0500
-+++ b/imgcreate/live.py        2015-02-26 12:33:08.712899177 -0500
-@@ -187,7 +187,8 @@
+diff -purN a/imgcreate/live.py b/imgcreate/live.py
+--- a/imgcreate/live.py    2016-02-01 13:40:26.216092704 -0500
++++ b/imgcreate/live.py    2016-02-01 13:53:48.384091265 -0500
+@@ -187,7 +187,8 @@ class LiveImageCreatorBase(LoopImageCrea
      def _mount_instroot(self, base_on = None):
          LoopImageCreator._mount_instroot(self, base_on)
          self.__write_initrd_conf(self._instroot + "/etc/sysconfig/mkinitrd")
 -        self.__write_dracut_conf(self._instroot + "/etc/dracut.conf")
-+        # SRS: fix for https://bugzilla.redhat.com/show_bug.cgi?id=766955
++        # SRS: write it out out to a diff location tol avoid .rpmnew
 +        self.__write_dracut_conf(self._instroot + "/etc/dracut.conf.d/02livecd.conf")
  
      def _unmount_instroot(self):
          self.__restore_file(self._instroot + "/etc/sysconfig/mkinitrd")
-@@ -267,6 +268,9 @@
+@@ -267,7 +268,10 @@ class LiveImageCreatorBase(LoopImageCrea
          f = open(path, "a")
          f.write('filesystems+="' + self.__extra_filesystems() + ' "\n')
          f.write('drivers+="' + self.__extra_drivers() + ' "\n')
-+        # SRS: fix for https://bugzilla.redhat.com/show_bug.cgi?id=766955
+-        f.write('add_dracutmodules+=" dmsquash-live "')
++        # SRS: CLIP's dracut module
 +        f.write('add_dracutmodules+=" dmsquash-live clip "\n')
++        # SRS: for AWS support
 +        f.write('add_drivers+=" xen-blkfront "\n')
          f.close()
  

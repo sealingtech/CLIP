@@ -1,7 +1,7 @@
-index 345c638..09f5ed3 100644
---- a/imgcreate/kickstart.py
-+++ b/imgcreate/kickstart.py
-@@ -425,7 +425,7 @@ class SelinuxConfig(KickstartConfig):
+diff -purN a/imgcreate/kickstart.py b/imgcreate/kickstart.py
+--- a/imgcreate/kickstart.py	2016-02-01 13:40:26.216092704 -0500
++++ b/imgcreate/kickstart.py	2016-02-01 13:40:30.020095465 -0500
+@@ -426,7 +426,7 @@ class SelinuxConfig(KickstartConfig):
  
      def apply(self, ksselinux):
          if os.path.exists(self.path("/usr/sbin/lokkit")):

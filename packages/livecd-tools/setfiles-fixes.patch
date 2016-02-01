@@ -1,6 +1,6 @@
 diff -purN a/imgcreate/kickstart.py b/imgcreate/kickstart.py
---- a/imgcreate/kickstart.py	2015-02-12 14:49:05.397926152 -0500
-+++ b/imgcreate/kickstart.py	2015-02-12 14:51:56.212926186 -0500
+--- a/imgcreate/kickstart.py	2016-02-01 14:32:12.151090255 -0500
++++ b/imgcreate/kickstart.py	2016-02-01 14:33:11.970078001 -0500
 @@ -38,6 +38,7 @@ import pykickstart.version as ksversion
  
  import imgcreate.errors as errors
@@ -9,22 +9,33 @@ diff -purN a/imgcreate/kickstart.py b/imgcreate/kickstart.py
  
  def read_kickstart(path):
      """Parse a kickstart file and return a KickstartParser instance.
+@@ -422,7 +423,9 @@ class SelinuxConfig(KickstartConfig):
+         if not os.path.exists(self.path("/sbin/setfiles")):
+             return
+ 
+-        self.call(["/sbin/setfiles", selinux.selinux_file_context_path(), "/"])
++        selinuxtype = sysutils.find(self.path("/etc/selinux/config"), "SELINUXTYPE=(.*)")
++        fc_path = sysutils.joinpaths("/etc/selinux", selinuxtype[0], "contexts/files/file_contexts")
++        self.call(["/sbin/setfiles", "-F", fc_path, "/"])
+ 
+     def apply(self, ksselinux):
+         if os.path.exists(self.path("/usr/sbin/lokkit")):
 diff -purN a/imgcreate/sysutils.py b/imgcreate/sysutils.py
---- a/imgcreate/sysutils.py     2015-02-12 14:31:19.548926144 -0500
-+++ b/imgcreate/sysutils.py     2015-02-12 14:32:37.237926193 -0500
+--- a/imgcreate/sysutils.py	2016-02-01 14:32:12.152090249 -0500
++++ b/imgcreate/sysutils.py	2016-02-01 14:33:11.969077806 -0500
 @@ -19,7 +19,7 @@
  # Red Hat Author(s):  Martin Gracik <mgracik@redhat.com>
  #
-
+ 
 -__all__ = ["joinpaths", "touch", "replace", "chown_", "chmod_", "remove",
 +__all__ = ["joinpaths", "touch", "find", "replace", "chown_", "chmod_", "remove",
             "linktree"]
-
+ 
  import sys
 @@ -46,6 +46,18 @@ def touch(fname):
      with open(fname, "w") as _:
          pass
-
+ 
 +def find(fname, find):
 +    fin = open(fname)
 +    pattern = re.compile(find)
@@ -37,20 +48,6 @@ diff -purN a/imgcreate/sysutils.py b/imgcreate/sysutils.py
 +
 +    fin.close()
 +    return ret
-
+ 
  def replace(fname, find, replace):
      fin = fileinput.input(fname, inplace=1)
-
---- a/imgcreate/kickstart.py    2015-02-12 15:26:46.313925946 -0500
-+++ b/imgcreate/kickstart.py    2015-02-12 15:28:16.958925934 -0500
-@@ -423,7 +423,9 @@ class SelinuxConfig(KickstartConfig):
-         if not os.path.exists(self.path("/sbin/setfiles")):
-             return
-
--        self.call(["/sbin/setfiles", "-F", "/etc/selinux/clip/contexts/files/file_contexts", "/"])
-+        selinuxtype = sysutils.find(self.path("/etc/selinux/config"), "SELINUXTYPE=(.*)")
-+        fc_path = sysutils.joinpaths("/etc/selinux", selinuxtype[0], "contexts/files/file_contexts")
-+        self.call(["/sbin/setfiles", "-F", fc_path, "/"])
-
-     def apply(self, ksselinux):
-         if os.path.exists(self.path("/usr/sbin/lokkit")):

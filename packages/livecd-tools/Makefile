@@ -11,11 +11,11 @@ PKGNAME := livecd-tools
 
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
-VERSION := 13.4.4
+VERSION := 13.4.7
 
 # Bump this if creating multiple releases from the same
 # version.
-RELEASE := 101.el6
+RELEASE := 1.el6
 
 # The name of the Vendor
 VENDOR := null
