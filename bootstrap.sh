@@ -41,7 +41,7 @@ if [ x"$tmpfile" != "x" ]; then
 fi
 
 # install packages that we need but aren't commonly present on default RHEL installs.
-for i in createrepo rpm-build make; do
+for i in createrepo rpm-build make anaconda policycoreutils-python; do
 	/bin/rpm -q "$i" >/dev/null || sudo /usr/bin/yum install -y $i
 done;
 
@@ -53,7 +53,7 @@ if [ "$distro" == "r" ]; then
 This might not work if you don't have credentials or you're out of entitlements.
 We *NEED* packages from Opt to be installed on the build host *and* need to pull
 packages from there to put on the generated installable media.  If you're using
-RHEL want to work-around this issue (hack): 
+RHEL and want to work-around this issue (hack): 
 1. Grab a CentOS ISO.
 2. Mount it.
 3. Add it as a yum repo:
@@ -98,6 +98,9 @@ popd > /dev/null
 read foo
 /usr/bin/sudo /usr/sbin/setenforce 0
 /usr/bin/sudo /bin/sed -i -e 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
+
+# We use PYTHONPATH to run livecd creator and pungi in-tree via sudo
+echo 'Defaults    env_keep += "PYTHONPATH"' >> /etc/sudoers
 
 /bin/echo -e "Basic bootstrapping of build host is complete.\nPress 'enter' to run 'make clip-minimal-inst-iso' or ctrl-c to quit."
 read

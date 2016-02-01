@@ -3,11 +3,14 @@ Here is a quick list of the things you need to do to get started.
 Big Hint/Suggestion: if you use Quark Security's build VM
 you can skip steps 1-4.  Why not make your life easier by
 downloading it:
-[Quark Security's CLIP build VM](https://quarksecurity.com/files/CLIP/)
+[Quark Security's CLIP build VM](http://test.quarksecurity.com/opensource.shtml)
 
 
 1. Add your user to /etc/sudoers (required since mock and livecd creator use
-chroots)
+chroots). While you're in there, add this line too:
+Defaults    env_keep += "PYTHONPATH"
+
+Note that this line is required to generate media.
 
 2. CHANGE THE DEFAULT PASSWORD IN YOUR KICKSTART (kickstarts/clip-minimal/clip-minimal.ks)!
 CLIP intentionally ships with an unencrypted default password!  It is "neutronbass".  

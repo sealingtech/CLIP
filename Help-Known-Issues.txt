@@ -4,9 +4,23 @@ issues:
 =============================================================================
 CLIP for RHEL 6.7 Final Release - January 2015:
 
-- Build-system specific (probably) - kernel 2.6.32-504.12.2.el6.x86_64 causes
-  panics when building CLIP. Use either an older kernel or newer kernel
-  than 504. 
+- Kernel versions >= 2.6.32-504.12.2.el6.x86_64 can cause problems when building 
+  RPMs. The problems appears to be related to Red Hat back porting
+  container features into the kernel. Mock was using these features before
+  they were complete or fully implemented. When Mock sets up the chroot, and starts
+  pperforming operationgs, this go to a very bad place. In the 504 kernel,
+  it leads to a kernel panic. In the 573 kernel, it leads ot memory allocation
+  errors when my forks processes in the chroot. 
+
+  What we do to solve this issue is stick with kernel version 358. You do this
+  by modifying /etc/grub.conf and setting the "default" field to the 358
+  kernel. The default field is zero based, so to pick the first kernel it is
+  "0", the second is "1", the third is "2", and so on.
+
+  NOTE: these issues appear inconsistently across build hosts, so you might
+  not have a problem. However, it is known to occur on some systems, and
+  selecting the 348 kernel fixes it on all systems on which have encountered
+  issues.
 
 - There is an issue with version  nss-softokn-3.14.3-22.el6_6.x86_64 and
   anaconda-13.21.229-1.el6.centos.x86_64.  anaconda contains a static list
