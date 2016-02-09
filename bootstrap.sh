@@ -79,16 +79,8 @@ fi
 
 # install packages from epel that we carry in CLIP
 pushd . >/dev/null
-cd host_packages 
-rpm -q pigz > /dev/null || /usr/bin/sudo /usr/bin/yum localinstall -y epel/pigz*
-for i in `find ./ -iname *.noarch.rpm`; do
-	NAME=`/bin/rpm -qp --queryformat '%{NAME}' $i 2>/dev/null`
-	/bin/rpm -q "$NAME" > /dev/null || /usr/bin/sudo /usr/bin/yum localinstall -y $i
-done
-for i in `find ./ -iname *.$arch.rpm`; do
-	NAME=`/bin/rpm -qp --queryformat '%{NAME}' $i 2>/dev/null`
-	/bin/rpm -q "$NAME" > /dev/null || /usr/bin/sudo /usr/bin/yum localinstall -y $i
-done
+cd host_packages/epel
+yum localinstall *.rpm
 popd > /dev/null
 /usr/bin/sudo /usr/sbin/usermod -aG mock `id -un`
 
