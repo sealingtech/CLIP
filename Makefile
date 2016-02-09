@@ -27,7 +27,7 @@ endif
 
 # NOTE: DO NOT REMOVE THIS CHECK. RUNNING MOCK AS ROOT *WILL* BREAK THINGS.
 ifeq ($(shell id -u),0)
-$(error Never CLIP as root! It will break things!  Try again as an unprivileged user with sudo access.)
+$(error Never build CLIP as root! The tools used by CLIP (mock) will break things! Try again as an unprivileged user with sudo access.)
 endif
 
 HOST_RPM_DEPS := rpm-build createrepo mock repoview
