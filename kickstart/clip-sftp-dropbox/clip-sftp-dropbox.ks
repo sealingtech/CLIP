@@ -543,6 +543,7 @@ if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
         || [ x"$CONFIG_BUILD_AWS" == "xy" ];
 then
 	rm -f /.autorelabel
+	service ntpd stop
 fi
 
 # Mitigate CVE-2016-0777

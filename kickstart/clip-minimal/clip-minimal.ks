@@ -517,6 +517,7 @@ sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_co
 if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
         || [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	rm /.autorelabel
+	service ntpd stop
 fi
 
 # Mitigate CVE-2016-0777
@@ -526,6 +527,8 @@ kill $(jobs -p) 2>/dev/null 1>/dev/null
 kill $TAILPID 2>/dev/null 1>/dev/null
 
 echo "Done with post install scripts..."
+
+sleep 5
 
 %end
 
