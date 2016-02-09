@@ -2,14 +2,14 @@ Our journey towards perfection is still a WiP so here are the CLIP known
 issues:
 
 =============================================================================
-CLIP for RHEL 6.7 Final Release - January 2015:
+CLIP for RHEL 6.7 Final Release - February 2016:
 
 - Kernel versions >= 2.6.32-504.12.2.el6.x86_64 can cause problems when building 
-  RPMs. The problems appears to be related to Red Hat back porting
+  RPMs. The problems appear to be related to Red Hat back porting
   container features into the kernel. Mock was using these features before
   they were complete or fully implemented. When Mock sets up the chroot, and starts
-  pperforming operationgs, this go to a very bad place. In the 504 kernel,
-  it leads to a kernel panic. In the 573 kernel, it leads ot memory allocation
+  pperforming operations, this go to a very bad place. In the 504 kernel,
+  it leads to a kernel panic. In the 573 kernel, it leads to memory allocation
   errors when my forks processes in the chroot. 
 
   What we do to solve this issue is stick with kernel version 358. You do this
@@ -19,7 +19,7 @@ CLIP for RHEL 6.7 Final Release - January 2015:
 
   NOTE: these issues appear inconsistently across build hosts, so you might
   not have a problem. However, it is known to occur on some systems, and
-  selecting the 348 kernel fixes it on all systems on which have encountered
+  selecting the 348 kernel fixes it on all systems on which we have encountered
   issues.
 
 - There is an issue with version  nss-softokn-3.14.3-22.el6_6.x86_64 and
