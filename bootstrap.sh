@@ -21,11 +21,11 @@ repositories like this available CLIP will not work!  Please see Help-FAQ.txt!\n
 tmpfile=''
 while :; do
 	/bin/echo -e "
-Enter a name for this yum repo.  Just leave empty if you are done adding, or don't wish to change, the repositories.\n"
+Enter a name for this yum repo.  Just leave empty if you are done adding, or don't wish to change the repositories.\n"
 	read name
 	[ x"$name" == "x" ] && break
 	/bin/echo -e "
-Enter a fully qualified path for this yum repo.  Just leave empty if you are done adding, or don't wish to change, the repositories.\n"
+Enter a fully qualified path for this yum repo.  Just leave empty if you are done adding, or don't wish to change the repositories.\n"
 	read path
 	[ x"$path" == "x" ] && break
 
@@ -62,7 +62,7 @@ RHEL and want to work-around this issue (hack):
 5. Refer to the same path in the CONFIG_REPOS file.
 Press enter to continue.
 "
-	read foo
+	read
 	/usr/bin/sudo rhn-channel --add --channel=rhel-$arch-server-optional-`/bin/awk '{ print $7; }' /etc/redhat-release`.z
 fi
 /bin/rpm -q "python-kid" >/dev/null || /usr/bin/sudo /usr/bin/yum install -y python-kid || if [ "$?" != "0" ]; then
@@ -80,19 +80,23 @@ fi
 # install packages from epel that we carry in CLIP
 pushd . >/dev/null
 cd host_packages/epel
-yum localinstall *.rpm
+/usr/bin/sudo /usr/bin/yum -y localinstall *.rpm
 popd > /dev/null
 /usr/bin/sudo /usr/sbin/usermod -aG mock `id -un`
 
 /bin/echo -e "This is embarassing but due to a bug (bz #861281) you must do builds in permissive.\nhttps://bugzilla.redhat.com/show_bug.cgi?id=861281"
 /bin/echo "So this is a heads-up we're going to configure your system to run in permissive mode.  Sorry!"
-/bin/echo "You can bail by pressing ctrl-c or hit enter to continue."
-read foo
+/bin/echo "Press enter to continue."
+read 
 /usr/bin/sudo /usr/sbin/setenforce 0
 /usr/bin/sudo /bin/sed -i -e 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 
-# We use PYTHONPATH to run livecd creator and pungi in-tree via sudo
-echo 'Defaults    env_keep += "PYTHONPATH"' >> /etc/sudoers
+/bin/echo "We need to allow the PYTHONPATH environment variable to pass through sudo commands."
+/bin/echo "This is because we run livecd-creator and pungi in-tree."
+/bin/echo "This is just a heads-up so you aren't surprised when you notice."
+/bin/echo "Press enter to continue."
+read
+/usr/bin/sudo sh -c '/bin/echo "Defaults    env_keep += \"PYTHONPATH\"" >> /etc/sudoers'
 
 /bin/echo -e "Basic bootstrapping of build host is complete.\nPress 'enter' to run 'make clip-minimal-inst-iso' or ctrl-c to quit."
 read
