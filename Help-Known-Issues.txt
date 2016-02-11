@@ -4,23 +4,13 @@ issues:
 =============================================================================
 CLIP for RHEL 6.7 Final Release - February 2016:
 
-- Kernel versions >= 2.6.32-504.12.2.el6.x86_64 can cause problems when building 
-  RPMs. The problems appear to be related to Red Hat back porting
-  container features into the kernel. Mock was using these features before
-  they were complete or fully implemented. When Mock sets up the chroot, and starts
-  pperforming operations, this go to a very bad place. In the 504 kernel,
-  it leads to a kernel panic. In the 573 kernel, it leads to memory allocation
-  errors when my forks processes in the chroot. 
+- OpenSCAP has a double free when using a certain version of glibc on RHEL 6.7.
+  It doesn't occur on all systems, but we have experienced it creating live 
+  images with glibc-2.12-1.166.el6.x86_64.rpm. The way we fixed it is by
+  updating to the latest packages by running "yum update".
 
-  What we do to solve this issue is stick with kernel version 358. You do this
-  by modifying /etc/grub.conf and setting the "default" field to the 358
-  kernel. The default field is zero based, so to pick the first kernel it is
-  "0", the second is "1", the third is "2", and so on.
-
-  NOTE: these issues appear inconsistently across build hosts, so you might
-  not have a problem. However, it is known to occur on some systems, and
-  selecting the 348 kernel fixes it on all systems on which we have encountered
-  issues.
+  We believe the issue is related to this bug:
+  https://fedorahosted.org/openscap/ticket/442
 
 - There is an issue with version  nss-softokn-3.14.3-22.el6_6.x86_64 and
   anaconda-13.21.229-1.el6.centos.x86_64.  anaconda contains a static list
