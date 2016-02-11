@@ -298,7 +298,15 @@ $(REPO_DIR)/$(REPO_ID)-repo/last-updated: $(CONF_DIR)/pkglist.$(REPO_ID) $(CONFI
 	@echo "Populating $(REPO_ID) yum repo, this could take a few minutes..."
 	@if [ ! -d $(REPO_PATH) ]; then echo -e "\nError yum repo path doesn't exist: $(REPO_PATH)\n"; exit 1; fi
 	$(call MKDIR,$(REPO_DIR)/$(REPO_ID)-repo)
-	$(VERBOSE)while read fil; do $(REPO_LINK) $(REPO_PATH)/$$$$fil $(REPO_DIR)/$(REPO_ID)-repo/$$$$fil; done < $(CONF_DIR)/pkglist.$(REPO_ID)
+	$(VERBOSE)while read fil; do \
+		if [ -f "$(REPO_PATH)/$$$$fil" ]; then \
+			 $(REPO_LINK) "$(REPO_PATH)/$$$$fil" $(REPO_DIR)/$(REPO_ID)-repo/$$$$fil; \
+		elif [ -f "$(REPO_PATH)/Packages/$$$$fil" ]; then \
+			$(REPO_LINK) "$(REPO_PATH)/Packages/$$$$fil" $(REPO_DIR)/$(REPO_ID)-repo/$$$$fil; \
+		else \
+			echo "Can't find $$$$file in repo $(REPO_PATH)!"; exit 1; \
+		fi; \
+	done < $(CONF_DIR)/pkglist.$(REPO_ID)
 	@echo "Generating $(REPO_ID) yum repo metadata, this could take a few minutes..."
 	$(VERBOSE)cd $(REPO_DIR)/$(REPO_ID)-repo && $(REPO_CREATE) -g $(COMPS_FILE)  .
 	test -f $(YUM_CONF_ALL_FILE) || ( cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE);\
