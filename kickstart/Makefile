@@ -26,14 +26,17 @@ AWS_KS  := $(BUILD_DIR)/$(NAME)-aws.ks
 PUNGI_OS_DIR := $(BUILD_DIR)/$(ISO_VERSION)/$(TARGET_ARCH)/os/
 PUNGI_ISO_DIR := $(BUILD_DIR)/$(ISO_VERSION)/$(TARGET_ARCH)/iso/
 
+RUN_PUNGI ?= $(SUPPORT_DIR)/runpungi.sh
 PUNGI ?= $(TOOLS_DIR)/usr/bin/pungi
 PUNGI_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.6/site-packages/
 PUNGI_ARGS := --destdir="$(BUILD_DIR)" --ver="$(ISO_VERSION)" --name="$(NAME)" --nosource --force
 
 CHECK_VOL_ID ?= $(SUPPORT_DIR)/checkVolID.py
 
+RUN_LIVECD ?= $(SUPPORT_DIR)/runlivecd.sh
 LIVECD_CREATOR ?= $(TOOLS_DIR)/usr/bin/livecd-creator
 LIVECD_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.6/site-packages/
+RUN_IMAGECREATE ?= $(SUPPORT_DIR)/runimagecreate.sh
 IMAGE_CREATOR ?= $(TOOLS_DIR)/usr/bin/image-creator
 
 UPDATES_IMG := $(TMP_DIR)/updates.img
@@ -84,7 +87,7 @@ $(UPDATES_IMG): $(YUM_CONF_ALL_FILE)
 iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) $(UPDATES_IMG) setup-inst-ks check-volume-id
 	@echo "Gathering things with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
-	$(VERBOSE)cd $(BUILD_DIR); sudo PYTHONPATH=$(PUNGI_PYTHONPATH) $(PUNGI) $(PUNGI_ARGS) -GCB -c "$(INST_KS)"
+	$(VERBOSE)cd $(BUILD_DIR); sudo $(RUN_PUNGI) "$(PUNGI_PYTHONPATH)" $(PUNGI_ARGS) -GCB -c "$(INST_KS)"
 	@echo "Fixing the boot menu..."
 	$(VERBOSE)sudo sed -i -e "s/^label linux$$/label $(NAME)/" \
 	       -e "s/append initrd=initrd.img$$/append initrd=initrd.img ks=cdrom:$(notdir $(INST_KS))/" \
@@ -94,17 +97,17 @@ iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) $(UPDATES_IMG) setup-inst-ks check-volume-id
 	$(VERBOSE) sudo cp $(UPDATES_IMG) $(PUNGI_OS_DIR)/images/
 	@echo "Building ISO with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
-	$(VERBOSE)cd $(BUILD_DIR);sudo PYTHONPATH=$(PUNGI_PYTHONPATH) $(PUNGI) $(PUNGI_ARGS) -I -c $(INST_KS)
+	$(VERBOSE)cd $(BUILD_DIR);sudo $(RUN_PUNGI) "$(PUNGI_PYTHONPATH)" $(PUNGI_ARGS) -I -c $(INST_KS)
 	$(VERBOSE)sudo mv --force $(PUNGI_ISO_DIR)/$(NAME)-$(ISO_VERSION)-*.iso $(OUTPUT_DIR)/
 
 live-iso: $(DEPS) $(ADDTL_DEPS) setup-live-ks
 	@echo "Live CD Creator needs root permissions - please enter your sudo password if prompted."
-	$(VERBOSE)cd $(BUILD_DIR);sudo PYTHONPATH=$(LIVECD_PYTHONPATH) $(LIVECD_CREATOR)  $(LIVECD_ARGS) --config="$(LIVE_KS)"
+	$(VERBOSE)cd $(BUILD_DIR);sudo $(RUN_LIVECD) $(LIVECD_PYTHONPATH) $(LIVECD_ARGS) --config="$(LIVE_KS)"
 	$(VERBOSE)mv --force $(BUILD_DIR)/livecd-*.iso $(OUTPUT_DIR)/$(NAME)-$(ISO_VERSION)-live.iso
 
 aws: $(ADDTL_DEPS) setup-aws-ks
 	@echo "Image Creator needs root permissions - please enter your sudo password if prompted."
-	$(VERBOSE)cd $(BUILD_DIR);sudo PYTHONPATH=$(LIVECD_PYTHONPATH) $(IMAGE_CREATOR)  $(LIVECD_ARGS) --name=$(NAME)-$(ISO_VERSION) $(AWS_KS)
+	$(VERBOSE)cd $(BUILD_DIR);sudo $(RUN_IMAGECREATE) "$(LIVECD_PYTHONPATH)" $(LIVECD_ARGS) --name=$(NAME)-$(ISO_VERSION) $(AWS_KS)
 	@echo "Creating AWS bundle from image"
 	mkdir -p $(AWS_BUNDLE_DIR)
 	$(EC2_BUNDLE_IMAGE) $(EC2_BUNDLE_IMAGE_ARGS)

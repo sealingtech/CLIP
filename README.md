@@ -7,8 +7,7 @@ downloading it:
 
 
 1. Add your user to /etc/sudoers (required since mock and livecd creator use
-chroots). While you're in there, add this line too:
-Defaults    env_keep += "PYTHONPATH"
+chroots).
 
 Note that this line is required to generate media.
 

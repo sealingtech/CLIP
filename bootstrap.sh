@@ -91,13 +91,6 @@ read
 /usr/bin/sudo /usr/sbin/setenforce 0
 /usr/bin/sudo /bin/sed -i -e 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 
-/bin/echo "We need to allow the PYTHONPATH environment variable to pass through sudo commands."
-/bin/echo "This is because we run livecd-creator and pungi in-tree."
-/bin/echo "This is just a heads-up so you aren't surprised when you notice."
-/bin/echo "Press enter to continue."
-read
-/usr/bin/sudo sh -c '/bin/echo "Defaults    env_keep += \"PYTHONPATH\"" >> /etc/sudoers'
-
 /bin/echo -e "Basic bootstrapping of build host is complete.\nPress 'enter' to run 'make clip-minimal-inst-iso' or ctrl-c to quit."
 read
 /usr/bin/make clip-minimal-inst-iso
