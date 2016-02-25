@@ -543,7 +543,11 @@ if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
         || [ x"$CONFIG_BUILD_AWS" == "xy" ];
 then
 	rm -f /.autorelabel
-	service ntpd stop
+	# this unfortunate hack is b/c stopping the daemon only
+	# kills the first process and the child hangs around 
+	# and has open FDs and the img file can't be cleanly 
+	# unmounted
+	kill -TERM -`cat /var/run/ntpd.pid`
 fi
 
 # Mitigate CVE-2016-0777

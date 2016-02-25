@@ -517,7 +517,11 @@ sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_co
 if [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ] \
         || [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
 	rm /.autorelabel
-	service ntpd stop
+	# this unfortunate hack is b/c stopping the daemon only
+	# kills the first process and the child hangs around 
+	# and has open FDs and the img file can't be cleanly 
+	# unmounted
+	kill -TERM -`cat /var/run/ntpd.pid`
 fi
 
 # Mitigate CVE-2016-0777
@@ -528,7 +532,6 @@ kill $TAILPID 2>/dev/null 1>/dev/null
 
 echo "Done with post install scripts..."
 
-sleep 5
 
 %end
 
