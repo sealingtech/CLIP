@@ -5,7 +5,7 @@ initdir=$(prefix)/etc/init\.d/
 all: add_ss_user 
 
 INIT_SCRIPTS=configure-strongswan
-HELPER_PROGS=add_vpn_user.sh gen_word.sh strongswan_login.py vpn_funcs.sh
+HELPER_PROGS=add_vpn_user.sh strongswan_login.py vpn_funcs.sh gen_word.py
 
 #TODO more hardened flags?
 CFLAGS := -Werror -Wextra -Wall

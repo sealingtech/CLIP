@@ -1,6 +1,6 @@
 #! /bin/bash -e
 
-WORD_PROG=/usr/bin/gen_word.sh
+WORD_PROG=/usr/bin/gen_word.py
 WORDS=`$WORD_PROG 50`
 NEXT_WORD="\${WORD_ARRAY[WORD_INDEX]}; WORD_INDEX=\$[WORD_INDEX + 1]"
 

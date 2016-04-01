@@ -34,7 +34,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(755,root,root,-)
 /etc/init.d/configure-strongswan
 /usr/bin/add_vpn_user.sh
-/usr/bin/gen_word.sh
+/usr/bin/gen_word.py
 /usr/bin/strongswan_login.py
 /usr/bin/vpn_funcs.sh
 
