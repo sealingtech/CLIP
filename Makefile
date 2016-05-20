@@ -1,7 +1,7 @@
 # Copyright (C) 2011-2012 Tresys Technology, LLC
-# Copyright (C) 2011-2015 Quark Security, Inc
+# Copyright (C) 2011-2016 Quark Security, Inc
 # Copyright (C) 2013 Cubic Corporation
-# 
+#
 # Authors: Spencer Shimko <sshimko@tresys.com>
 #          Spencer Shimko <spencer@quarksecurity.com>
 #	   John Feehley <jfeehley@quarksecurity.com>
@@ -17,7 +17,7 @@ include CONFIG_BUILD
 -include CONFIG_AWS
 
 # This is the RHEL version supported by this release of CLIP.  Do not alter.
-export RHEL_VER := 6
+export RHEL_VER := 7
 
 ######################################################
 # BEGIN MAGIC
