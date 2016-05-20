@@ -1,5 +1,5 @@
 # Copyright (C) 2011-2012 Tresys Technology, LLC
-# Copyright (C) 2014-215 Quark Security, Inc
+# Copyright (C) 2014-2016 Quark Security, Inc
 #
 # Authors: Francisco Slavin <fslavin@tresys.com>
 #          Spencer Shimko <sshimko@tresys.com>
@@ -39,10 +39,6 @@ LIVECD_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.6/site-packages/
 RUN_IMAGECREATE ?= $(SUPPORT_DIR)/runimagecreate.sh
 IMAGE_CREATOR ?= $(TOOLS_DIR)/usr/bin/image-creator
 
-UPDATES_IMG := $(TMP_DIR)/updates.img
-MK_UPDATES_IMG := $(SUPPORT_DIR)/mk-anaconda-update-img.sh
-UPDATES_DIR := $(TMP_DIR)/updates
-
 #TODO download a specific version of these tools
 #this will avoid this ugly wildcarding stuff which might break,
 #and this way we'll always be using a known good version of the tools
@@ -81,10 +77,7 @@ SETUP_DEPS := $(CURDIR)/../Makefile $(KS)
 all: iso live-iso setup-ks
 
 
-$(UPDATES_IMG): $(YUM_CONF_ALL_FILE)
-	$(MK_UPDATES_IMG) $@ $(UPDATES_DIR) $(YUM_CONF_ALL_FILE)
-
-iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) $(UPDATES_IMG) setup-inst-ks check-volume-id
+iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) setup-inst-ks check-volume-id
 	@echo "Gathering things with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
 	$(VERBOSE)cd $(BUILD_DIR); sudo $(RUN_PUNGI) "$(PUNGI_PYTHONPATH)" $(PUNGI_ARGS) -GCB -c "$(INST_KS)"
@@ -94,7 +87,6 @@ iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) $(UPDATES_IMG) setup-inst-ks check-volume-id
 	       -e "s/or upgrade an existing system/$(NAME)/" \
 	$(PUNGI_OS_DIR)/isolinux/isolinux.cfg
 	@echo "Adding updates.img so this sucker boots"
-	$(VERBOSE) sudo cp $(UPDATES_IMG) $(PUNGI_OS_DIR)/images/
 	@echo "Building ISO with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
 	$(VERBOSE)cd $(BUILD_DIR);sudo $(RUN_PUNGI) "$(PUNGI_PYTHONPATH)" $(PUNGI_ARGS) -I -c $(INST_KS)
