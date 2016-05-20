@@ -13,6 +13,7 @@ of this to work.
 If you are using RHEL enter 'r'.
 If you are using CentOS 'c'."
 read distro
+
 /bin/echo -e "CLIP uses yum repositories for building packages and generting ISOs.
 These must be directories of packages, not RHN channels.  E.g. a directory with
 a bunch of packages and a repodata/ sub-directory.  If you do not have yum 
@@ -41,7 +42,7 @@ if [ x"$tmpfile" != "x" ]; then
 fi
 
 # install packages that we need but aren't commonly present on default RHEL installs.
-for i in createrepo rpm-build make anaconda policycoreutils-python; do
+for i in createrepo rpm-build make anaconda policycoreutils-python lorax python-lockfile hfsplus-tools; do
 	/bin/rpm -q "$i" >/dev/null || sudo /usr/bin/yum install -y $i
 done;
 
@@ -64,17 +65,6 @@ Press enter to continue.
 "
 	read
 	/usr/bin/sudo rhn-channel --add --channel=rhel-$arch-server-optional-`/bin/awk '{ print $7; }' /etc/redhat-release`.z
-fi
-/bin/rpm -q "python-kid" >/dev/null || /usr/bin/sudo /usr/bin/yum install -y python-kid || if [ "$?" != "0" ]; then
-	/bin/echo "WARNING: we couldn't find a package we need to install on the build 
-host.  This is usually the result of using RHEL without a subscription to RHN. Try this:
-1. Grab a CentOS ISO.
-2. Mount it.
-3. Add it as a yum repo:
-        http://docs.oracle.com/cd/E37670_01/E37355/html/ol_create_repo.html
-4. Re-run this script and pick CentOS.
-5. Refer to the same path in the CONFIG_REPOS file.
-"
 fi
 
 # install packages from epel that we carry in CLIP
