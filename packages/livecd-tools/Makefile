@@ -15,7 +15,7 @@ VERSION := 13.4.7
 
 # Bump this if creating multiple releases from the same
 # version.
-RELEASE := 1.el6
+RELEASE := 1$(shell rpm --eval "%{dist}")
 
 # The name of the Vendor
 VENDOR := null
