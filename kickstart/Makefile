@@ -28,14 +28,14 @@ PUNGI_ISO_DIR := $(BUILD_DIR)/$(ISO_VERSION)/$(TARGET_ARCH)/iso/
 
 RUN_PUNGI ?= $(SUPPORT_DIR)/runpungi.sh
 PUNGI ?= $(TOOLS_DIR)/usr/bin/pungi
-PUNGI_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.6/site-packages/
+PUNGI_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.7/site-packages/
 PUNGI_ARGS := --destdir="$(BUILD_DIR)" --ver="$(ISO_VERSION)" --name="$(NAME)" --nosource --force
 
 CHECK_VOL_ID ?= $(SUPPORT_DIR)/checkVolID.py
 
 RUN_LIVECD ?= $(SUPPORT_DIR)/runlivecd.sh
 LIVECD_CREATOR ?= $(TOOLS_DIR)/usr/bin/livecd-creator
-LIVECD_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.6/site-packages/
+LIVECD_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.7/site-packages/
 RUN_IMAGECREATE ?= $(SUPPORT_DIR)/runimagecreate.sh
 IMAGE_CREATOR ?= $(TOOLS_DIR)/usr/bin/image-creator
 
