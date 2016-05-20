@@ -76,13 +76,13 @@ logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=ext4 --size 500  --max
 
 %packages --excludedocs
 #CONFIG-BUILD-ADDTL-PACKAGES
-clip-selinux-policy
-clip-selinux-policy-mcs
-clip-selinux-policy-mcs-apache
-clip-selinux-policy-mcs-mysql
-clip-selinux-policy-mcs-ssh
-clip-selinux-policy-mcs-postfix
-clip-selinux-policy-mcs-ec2ssh
+selinux-policy
+selinux-policy-mcs
+selinux-policy-mcs-apache
+selinux-policy-mcs-mysql
+selinux-policy-mcs-ssh
+selinux-policy-mcs-postfix
+selinux-policy-mcs-ec2ssh
 clip-miscfiles
 m4
 scap-security-guide
@@ -506,7 +506,7 @@ EOF
 elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
 	chage -E -1 $USERNAME
 else
-        rpm -e clip-selinux-policy-mcs-ec2ssh
+        rpm -e selinux-policy-mcs-ec2ssh
         chage -d 0 "$USERNAME"
 	/sbin/chkconfig sshd off
 fi

@@ -63,7 +63,7 @@ part pv.os --size=1   --grow        --asprimary
 volgroup vg00 --pesize=65536 pv.os
 logvol /              --vgname=vg00 --name=root  --fstype=ext4 --size 5500 --maxsize 21000 --grow
 logvol /var           --vgname=vg00 --name=var   --fstype=ext4 --size 4000 --fsoptions=defaults,nosuid --grow
-logvol /home          --vgname=vg00 --name=home  --fstype=ext4 --size=1    --fsoptions=defaults,nosuid,nodev --percent=10 --grow
+logvol /home          --vgname=vg00 --name=home  --fstype=ext4 --size=1000    --fsoptions=defaults,nosuid,nodev --grow
 logvol swap           --vgname=vg00 --name=swap  --fstype=swap --recommended
 
 logvol /var/log       --vgname=vg00 --name=log   --fstype=ext4 --size 1500 --fsoptions=defaults,nosuid,noexec,nodev --maxsize 25000 --grow
@@ -75,12 +75,12 @@ logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=ext4 --size 500  --max
 
 %packages --excludedocs
 #CONFIG-BUILD-ADDTL-PACKAGES
-clip-selinux-policy
-clip-selinux-policy-mcs
-clip-selinux-policy-mcs-ssh
-clip-selinux-policy-mcs-unprivuser
-clip-selinux-policy-mcs-aide
-clip-selinux-policy-mcs-ec2ssh
+selinux-policy
+selinux-policy-mcs
+selinux-policy-mcs-ssh
+selinux-policy-mcs-unprivuser
+selinux-policy-mcs-aide
+selinux-policy-mcs-ec2ssh
 clip-miscfiles
 m4
 scap-security-guide
@@ -483,7 +483,7 @@ EOF
 elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
         chage -E -1 $USERNAME
 else
-	rpm -e clip-selinux-policy-mcs-ec2ssh
+	rpm -e selinux-policy-mcs-ec2ssh
 	chage -d 0 "$USERNAME"
 fi
 

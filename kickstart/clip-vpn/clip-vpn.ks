@@ -72,15 +72,15 @@ logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=ext4 --size 500  --max
 
 %packages --excludedocs
 @Base
-clip-selinux-policy
-# by default use MCS policy (clip-selinux-policy-clip)
--clip-selinux-policy-mls
-clip-selinux-policy-mcs
-clip-selinux-policy-mcs-ssh
-clip-selinux-policy-mcs-unprivuser
-clip-selinux-policy-mcs-ec2ssh
-clip-selinux-policy-mcs-config-strongswan
-clip-selinux-policy-mcs-vpnadm
+selinux-policy
+# by default use MCS policy (selinux-policy-clip)
+-selinux-policy-mls
+selinux-policy-mcs
+selinux-policy-mcs-ssh
+selinux-policy-mcs-unprivuser
+selinux-policy-mcs-ec2ssh
+selinux-policy-mcs-config-strongswan
+selinux-policy-mcs-vpnadm
 clip-miscfiles
 m4
 scap-security-guide
@@ -572,7 +572,7 @@ elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
         chage -E -1 $USERNAME
 
 else
-	rpm -e clip-selinux-policy-mcs-ec2ssh
+	rpm -e selinux-policy-mcs-ec2ssh
 fi
 
 sed -i -e 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config

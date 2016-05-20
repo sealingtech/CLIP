@@ -1,0 +1,18 @@
+set breakpoint pending on
+set unwindonsignal on
+
+tbreak conditional.c:584 if (buf[1] != 0 && buf[1] != 1)
+commands
+silent
+# get the length
+set $x = buf[2]
+# alloc the buf
+call malloc($x)
+set $buf = $
+call next_entry($buf, fp, $x)
+printf "bad bool is: %s\n", ((char *) $buf)
+continue
+end
+
+run
+quit
