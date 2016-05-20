@@ -1,2 +1,0 @@
-/etc/rc\.d/init\.d/ec2-get-ssh		--	gen_context(system_u:object_r:ec2ssh_initrc_exec_t,s0)
-
