@@ -398,7 +398,7 @@ $(CLIP_REPO_DIR)/exists $(YUM_CONF_ALL_FILE):
 	$(call CHECK_DEPS)
 	test -f $(YUM_CONF_ALL_FILE) || ( cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE);\
 		echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_ALL_FILE))
-	$(call MKDIR,$(basename @))
+	$(call MKDIR,$(basename $@))
 	echo "Generating clip-repo metadata."; \
 	$(VERBOSE)cd $(CLIP_REPO_DIR) && $(REPO_CREATE) -g $(COMPS_FILE) .
 
