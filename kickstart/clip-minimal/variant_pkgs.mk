@@ -1,4 +1,5 @@
 PACKAGES += \
+anaconda-dracut \
 cacti \
 clip-dracut-module \
 clip-miscfiles \

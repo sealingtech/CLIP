@@ -89,6 +89,7 @@ clip-dracut-module
 
 acl
 aide
+anaconda-dracut
 attr
 audit
 authconfig
