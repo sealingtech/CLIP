@@ -1,0 +1,28 @@
+diff -purN a/src/pylorax/imgutils.py b/src/pylorax/imgutils.py
+--- a/src/pylorax/imgutils.py	2016-06-03 15:42:06.803659497 -0400
++++ b/src/pylorax/imgutils.py	2016-06-03 15:44:46.733466978 -0400
+@@ -99,12 +99,18 @@ def mkrootfsimg(rootdir, outfile, label,
+ 
+     mkext4img(rootdir, outfile, label=label, size=fssize)
+     # Reset selinux context on new rootfs
+-    with LoopDev(outfile) as loopdev:
+-        with Mount(loopdev) as mnt:
+-            cmd = [ "setfiles", "-e", "/proc", "-e", "/sys", "-e", "/dev", "-e", "/install",
+-                    "/etc/selinux/targeted/contexts/files/file_contexts", "/"]
+-            root = join(mnt, sysroot.lstrip("/"))
+-            runcmd(cmd, root=root)
++    # SRS: this is all sorts of messed up.
++    # It assumes a targeted policy is
++    # present in the image being generated.
++    # Then later, in a .tmpl file, it removes
++    # the policy, making this problematic 
++    # relabeling moot.
++#    with LoopDev(outfile) as loopdev:
++#        with Mount(loopdev) as mnt:
++#            cmd = [ "setfiles", "-e", "/proc", "-e", "/sys", "-e", "/dev", "-e", "/install",
++#                    "/etc/selinux/targeted/contexts/files/file_contexts", "/"]
++#            root = join(mnt, sysroot.lstrip("/"))
++#            runcmd(cmd, root=root)
+ 
+ ######## Utility functions ###############################################
+ 
