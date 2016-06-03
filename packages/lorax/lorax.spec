@@ -1,7 +1,7 @@
 %define debug_package %{nil}
 
 Name:           lorax
-Version:        19.6.28
+Version:        19.6.66
 Release:        1%{?dist}
 Summary:        Tool for creating the anaconda install images
 
@@ -9,6 +9,8 @@ Group:          Applications/System
 License:        GPLv2+
 URL:            http://git.fedorahosted.org/git/?p=lorax.git
 Source0:        https://fedorahosted.org/releases/l/o/%{name}/%{name}-%{version}.tar.gz
+Patch0: setfiles-fixes.patch
+Patch1: disable-macboot.patch
 
 BuildRequires:  python2-devel
 
@@ -35,6 +37,7 @@ Requires:       xz
 Requires:       yum
 Requires:       pykickstart
 Requires:       dracut >= 030
+Requires:       anaconda-dracut
 
 %if 0%{?fedora}
 # Fedora specific deps
@@ -52,13 +55,19 @@ Requires:       redhat-upgrade-dracut-plymouth
 Requires:       syslinux >= 4.02-5
 %endif
 
-%ifarch ppc ppc64
+%ifarch ppc ppc64 ppc64le
 Requires:       kernel-bootwrapper
+Requires:       grub2
+Requires:       grub2-tools
 %endif
 
 %ifarch s390 s390x
 Requires:       openssh
 %endif
+
+# Moved image-minimizer tool to lorax
+Provides:       appliance-tools-minimizer
+Obsoletes:      appliance-tools-minimizer < 007.7-3
 
 %description
 Lorax is a tool for creating the anaconda install images.
@@ -69,6 +78,8 @@ Anaconda's image install feature.
 
 %prep
 %setup -q
+%patch0 -p1
+%patch1 -p1
 
 %build
 
@@ -78,13 +89,14 @@ make DESTDIR=$RPM_BUILD_ROOT mandir=%{_mandir} install
 
 %files
 %defattr(-,root,root,-)
-%doc COPYING AUTHORS README.livemedia-creator
+%doc COPYING AUTHORS README.livemedia-creator README.product
 %doc docs/*ks
 %{python_sitelib}/pylorax
 %{python_sitelib}/*.egg-info
 %{_sbindir}/lorax
 %{_sbindir}/mkefiboot
 %{_sbindir}/livemedia-creator
+%{_bindir}/image-minimizer
 %dir %{_sysconfdir}/lorax
 %config(noreplace) %{_sysconfdir}/lorax/lorax.conf
 %dir %{_datadir}/lorax
@@ -92,13 +104,229 @@ make DESTDIR=$RPM_BUILD_ROOT mandir=%{_mandir} install
 %{_mandir}/man1/*.1*
 
 %changelog
+* Wed Sep 02 2015 Brian C. Lane <bcl@redhat.com> 19.6.66-1
+- livemedia-creator: Remove random-seed from images (bcl)
+  Resolves: rhbz#1258986
+
+* Tue Sep 01 2015 Brian C. Lane <bcl@redhat.com> 19.6.65-1
+- Don't include early microcode in initramfs (bcl)
+- Resolves: rhbz#1258498
+
+* Mon Aug 31 2015 Brian C. Lane <bcl@redhat.com> 19.6.64-1
+- Fix metacity theme path (bcl)
+  Related: rhbz#1231856
+- Run spice-vdagentd without systemd-logind integration (dshea)
+  Related: rhbz#1169991
+
+* Thu Aug 27 2015 Brian C. Lane <bcl@redhat.com> 19.6.63-1
+- Replace the metacity theme file. (dshea)
+  Related: rhbz#1231856
+
+* Sun Aug 16 2015 Brian C. Lane <bcl@redhat.com> 19.6.62-1
+- Change default releasever to 7 (bcl)
+- Resolves: rhbz#1253242
+
+* Wed Aug 12 2015 Brian C. Lane <bcl@redhat.com> 19.6.61-1
+- Add lldptool (rvykydal)
+  Related: rhbz#1085325
+
+* Wed Aug 05 2015 Brian C. Lane <bcl@redhat.com> 19.6.60-1
+- Fix tito tagger to bump version, not release (bcl)
+  Related: rhbz#1085013
+
+* Wed Aug 05 2015 Brian C. Lane <bcl@redhat.com> 19.6.59-2
+- Fix chronyd not working in the installation (jkonecny)
+  Related: rhbz#1085013
+
+* Tue Jul 14 2015 Brian C. Lane <bcl@redhat.com> 19.6.59-1
+- Add installimg command for use in the templates (bcl@redhat.com)
+  Related: rhbz#1202278
+
+* Tue Jun 30 2015 Brian C. Lane <bcl@redhat.com> 19.6.58-1
+- Keep hyperv_fb driver in the image (bcl@redhat.com)
+  Resolves: rhbz#834791
+
+* Fri Jun 26 2015 Brian C. Lane <bcl@redhat.com> 19.6.57-1
+- livemedia-creator: fix base repo log monitor (#1196721) (bcl@redhat.com)
+  Related: rhbz#1196721
+- network: turn slaves autoconnection on (rvykydal@redhat.com)
+  Resolves: rhbz#1172751
+  Resolves: rhbz#1134090
+
+* Thu Jun 25 2015 Brian C. Lane <bcl@redhat.com> 19.6.56-1
+- Add ability for external templates to graft content into boot.iso (walters@verbum.org)
+  Resolves: rhbz#1202278
+- Update templates to use installimg for product and updates (bcl@redhat.com)
+  Related: rhbz#1202278
+
+* Mon Jun 22 2015 Brian C. Lane <bcl@redhat.com> 19.6.55-1
+- Add ntp configuration file to installation (jkonecny@redhat.com)
+  Related: rhbz#1085013
+- livemedia-creator: Add option to create qcow2 disk images (bcl@redhat.com)
+  Resolves: rhbz#1210413
+- Add support for creating qcow2 images (bcl@redhat.com)
+  Related: rhbz#1210413
+- Install the oscap-anaconda-addon (vpodzime@redhat.com)
+  Resolves: rhbz#1190685
+
+* Mon Jun 15 2015 Brian C. Lane <bcl@redhat.com> 19.6.54-1
+- Add removekmod template command (bcl@redhat.com)
+  Resolves: rhbz#1230356
+- Disable systemd-tmpfiles-clean (bcl@redhat.com)
+  Resolves: rhbz#1202545
+- Add bridge-utils (bcl@redhat.com)
+  Resolves: rhbz#1188812
+
+* Fri Jun 05 2015 Brian C. Lane <bcl@redhat.com> 19.6.53-1
+- Keep the zram kernel module (bcl@redhat.com)
+- Keep seq and getconf utilities in the image (vpodzime@redhat.com)
+- Don't remove usr/lib/rpm/platform/ (#1116450) (bcl@redhat.com)
+- Include /sbin/ldconfig from glibc. (dlehman@redhat.com)
+
+* Fri Apr 17 2015 Brian C. Lane <bcl@redhat.com> 19.6.52-1
+- Backport --make-ostree-live (rvykydal)
+  Resolves: rhbz#1184021
+
+* Fri Jan 16 2015 Brian C. Lane <bcl@redhat.com> 19.6.51-1
+- Remove imggraft from aarch64.tmpl (bcl@redhat.com)
+  Related: rhbz#1174475
+
+* Wed Jan 14 2015 Brian C. Lane <bcl@redhat.com> 19.6.50-1
+- Use gcdaa64.efi and make boot.iso on aarch64 (pjones@redhat.com)
+  Resolves: rhbz#1174475
+
+* Wed Jan 07 2015 Brian C. Lane <bcl@redhat.com> 19.6.49-1
+- runtime-cleanup.tmpl: keep virtio-rng (#1179000) (lersek@redhat.com)
+  Resolves: rhbz#1179000
+
+* Fri Dec 19 2014 Brian C. Lane <bcl@redhat.com> 19.6.48-1
+- aarch64 no longer needs explicit console setting (#1170413) (bcl@redhat.com)
+  Resolves: rhbz#1170413
+
+* Tue Dec 02 2014 Brian C. Lane <bcl@redhat.com> 19.6.47-1
+- Drop 32 bit for loop from ppc64 grub2 config (#1169878) (bcl@redhat.com)
+  Resolves: rhbz#1169878
+
+* Thu Nov 20 2014 Brian C. Lane <bcl@redhat.com> 19.6.46-1
+- Add --add-template{,-var} (walters@verbum.org)
+  Resolves: rhbz#1157777
+
+* Fri Oct 31 2014 Brian C. Lane <bcl@redhat.com> 19.6.45-1
+- Don't include the stock lvm.conf. (dlehman@redhat.com)
+
+* Wed Oct 22 2014 Brian C. Lane <bcl@redhat.com> 19.6.44-1
+- move image-minimizer to lorax (bcl@redhat.com)
+  Resolves: rhbz#1082642
+
+* Thu Oct 16 2014 Brian C. Lane <bcl@redhat.com> 19.6.43-1
+- Use all upper case for shim in live/efi.tmpl (bcl@redhat.com)
+  Related: rhbz#1100048
+
+* Tue Oct 07 2014 Brian C. Lane <bcl@redhat.com> 19.6.42-1
+- Revert "Don't remove /usr/share/doc/anaconda." (mkolman@redhat.com)
+  Related: rhbz#1072033
+- Look for "BOOT${efiarch}.EFI" in mkefiboot as well. (pjones@redhat.com)
+  Related: rhbz#1100048
+- Libgailutil is required yelp, don't remove it (mkolman@redhat.com)
+  Related: rhbz#1072033
+
+* Fri Oct 03 2014 Brian C. Lane <bcl@redhat.com> 19.6.41-1
+- Make sure shim is actually in the package list on aarch64 as well.  (pjones@redhat.com)
+  Related: rhbz#1100048
+
+* Thu Oct 02 2014 Brian C. Lane <bcl@redhat.com> 19.6.40-1
+- Use shim on aarch64. (pjones@redhat.com)
+  Related: rhbz#1100048
+- Keep the /etc/lvm/profiles directory in the image (vpodzime@redhat.com)
+  Related: rhbz#869456
+
+* Tue Sep 30 2014 Brian C. Lane <bcl@redhat.com> 19.6.39-1
+- Don't remove /usr/share/doc/anaconda. (clumens@redhat.com)
+  Resolves: rhbz#1147518
+- Stop removing libXt from the installation media. (clumens@redhat.com)
+  Related: rhbz#1147518
+- network: add support for bridge (#1075195) (rvykydal@redhat.com)
+  Related: rhbz#1075195
+
+* Tue Sep 23 2014 Brian C. Lane <bcl@redhat.com> 19.6.38-1
+- livemedia-creator: Make sure ROOT_PATH exists (bcl@redhat.com)
+  Related: rhbz#1144140
+- livemedia-creator: Use RHEL7 version of kickstart (bcl@redhat.com)
+  Related: rhbz#1144140
+- RHEL7 doesn't include pigz or pbzip2 (bcl@redhat.com)
+  Related: rhbz#1144140
+- livemedia-creator: Add --no-recursion to mktar (bcl@redhat.com)
+  Related: rhbz#1144140
+- livemedia-creator: Add support for making tarfiles (bcl@redhat.com)
+  Resolves: rhbz#1144140
+- livemedia-creator: Check fsimage kickstart for single partition (bcl@redhat.com)
+  Related: rhbz#1144140
+- livemedia-creator: Copy fsimage if hardlink fails (bcl@redhat.com)
+  Related: rhbz#1144140
+- livemedia-creator: Make --make-fsimage work with virt-install (bcl@redhat.com)
+  Related: rhbz#1144140
+
+* Mon Sep 15 2014 Brian C. Lane <bcl@redhat.com> 19.6.37-1
+- Let the plymouth dracut module back into the ppc64 upgrade.img (dshea@redhat.com)
+  Resolves: rhbz#1069671
+
+* Tue Sep 09 2014 Brian C. Lane <bcl@redhat.com> 19.6.36-1
+- Add more tools for rescue mode (bcl@redhat.com)
+  Resolves: rhbz#1109785
+- Add kexec anaconda addon (bcl@redhat.com)
+  Resolves: rhbz#1116335
+
+* Wed Sep 03 2014 Brian C. Lane <bcl@redhat.com> 19.6.35-1
+- Add ppc64le arch (bcl@redhat.com)
+  Resolves: rhbz#1136490
+
+* Fri Aug 29 2014 Brian C. Lane <bcl@redhat.com> 19.6.34-1
+- allow setting additional dracut parameters for DVD s390x installs (dan@danny.cz)
+  Resolves: rhbz#1132050
+
+* Thu Aug 28 2014 Brian C. Lane <bcl@redhat.com> 19.6.33-1
+- livemedia-creator: Update ppc64 live to use grub2 (bcl@redhat.com)
+  Related: rhbz#1102318
+  Related: rhbz#1131199
+
+* Tue Aug 19 2014 Brian C. Lane <bcl@redhat.com> 19.6.32-1
+- Yaboot to grub2 conversion cleanup. (dwa@redhat.com)
+  Related: rhbz#1131199
+- GRUB2 as the ISO boot loader for POWER arch (#1131199) (pfsmorigo@br.ibm.com)
+  Resolves: rhbz#1131199
+- Revert "Require 32bit glibc on ppc64" (bcl@redhat.com)
+  Related: rhbz#1131199
+
+* Fri Aug 15 2014 Brian C. Lane <bcl@redhat.com> 19.6.31-1
+- Add efibootmgr to installpkg list for aarch64. (dmarlin@redhat.com)
+  Resolves: rhbz#1130366
+
+* Tue Aug 12 2014 Brian C. Lane <bcl@redhat.com> 19.6.30-1
+- livemedia-creator: Cleanup temp yum files (bcl@redhat.com)
+  Resolves: rhbz#1073502
+- Require 32bit glibc on ppc64 (bcl@redhat.com)
+  Resolves: rhbz#1105054
+- Add xfsdump and remove extra files from xfsprogs (bcl@redhat.com)
+  Resolves: rhbz#1118654
+- Add ipmitool and drivers (bcl@redhat.com)
+  Resolves: rhbz#1126009
+- Update grub2-efi.cfg for aarch64 to more closely match x86 (dmarlin@redhat.com)
+  Resolves: rhbz#1089418
+
+* Fri Aug 08 2014 Brian C. Lane <bcl@redhat.com> 19.6.29-1
+- utf-8 encode yum actions before displaying them (#1072362) (bcl@redhat.com)
+- Use BOOTAA64.efi for AARCH64 bootloader filename (#1080113) (bcl@redhat.com)
+- Drop devicetree from aarch64 grub2-efi.cfg (#1089418) (bcl@redhat.com)
+- livemedia-creator: Add ppc64 live creation support (#1102318)
+  (bcl@redhat.com)
+- runtime-install: Add rpm-ostree (walters@verbum.org)
+
 * Wed Apr 23 2014 Brian C. Lane <bcl@redhat.com> 19.6.28-1
 - Install rdma so that dracut will use it along with libmlx4 (bcl)
   Resolves: rhbz#1089564
 
 * Thu Apr 03 2014 Brian C. Lane <bcl@redhat.com> 19.6.27-1
-- Stop removing curl after adding it (bcl@redhat.com)
-  Resolves: rhbz#1083205
+- Stop removing curl after adding it (#1083205) (bcl@redhat.com)
 
 * Fri Feb 28 2014 Brian C. Lane <bcl@redhat.com> 19.6.26-1
 - Use string for releasever not int (bcl@redhat.com)
@@ -143,6 +371,7 @@ make DESTDIR=$RPM_BUILD_ROOT mandir=%{_mandir} install
 - Don't activate default auto connections after switchroot (#1012511)
   (rvykydal@redhat.com)
   Related: rhbz#1012511
+
 * Fri Jan 24 2014 Brian C. Lane <bcl@redhat.com> 19.6.16-1
 - Activate anaconda-shell@.service on switch to empty VT (#980062)
   (wwoods@redhat.com)
