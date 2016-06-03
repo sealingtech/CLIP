@@ -263,7 +263,7 @@ chmod +x %{buildroot}%{_usr}/share/selinux/devel/policyhelp
 %{__rm} -fR %{buildroot}
 
 %post
-if [ ! -s /etc/selinux/config -o x$(grep "SELINUX=disabled" /etc/selinux/config) != "x" ]; then
+if [ ! -e /etc/selinux/config ]; then
 #
 #     New install so we will default to selinux-policy policy
 #
@@ -282,17 +282,11 @@ SELINUXTYPE=mcs
 " > /etc/selinux/config
 fi
 
-if grep -q 'SELINUXTYPE=targeted' /etc/selinux/config; then
-	sed -e 's/SELINUXTYPE=targeted/SELINUXTYPE=mcs/' -i /etc/selinux/config
-fi
+sed -e 's/^SELINUXTYPE=.*/SELINUXTYPE=mcs/' -i /etc/selinux/config
 
 ln -sf /etc/selinux/config /etc/sysconfig/selinux 
 restorecon /etc/selinux/config 2> /dev/null || :
 
-. /etc/selinux/config
-# if first time update booleans.local needs to be copied to sandbox
-[ -f /etc/selinux/${SELINUXTYPE}/booleans.local ] && mv /etc/selinux/${SELINUXTYPE}/booleans.local /etc/selinux/selinux-policy/modules/active/
-[ -f /etc/selinux/${SELINUXTYPE}/seusers ] && cp -f /etc/selinux/${SELINUXTYPE}/seusers /etc/selinux/${SELINUXTYPE}/modules/active/seusers
 exit 0
 
 %postun
@@ -325,6 +319,11 @@ MCS policy
 %saveFileContext mcs
 
 %post mcs
+sed -e 's/^SELINUXTYPE=.*/SELINUXTYPE=mcs/' -i /etc/selinux/config
+# if first time update booleans.local needs to be copied to sandbox
+[ -f /etc/selinux/mcs/booleans.local ] && mv /etc/selinux/mcs/booleans.local /etc/selinux/mcs/modules/active/
+[ -f /etc/selinux/mcs/seusers ] && cp -f /etc/selinux/mcs/seusers /etc/selinux/mcs/modules/active/seusers
+
 packages=`cat /usr/share/selinux/mcs/modules.lst`
 if [ $1 -eq 1 ]; then
    #%loadpolicy mcs $packages
@@ -365,6 +364,10 @@ Stabdard MLS policy
 %saveFileContext mls
 
 %post mls 
+sed -e 's/^SELINUXTYPE=.*/SELINUXTYPE=mls/' -i /etc/selinux/config
+# if first time update booleans.local needs to be copied to sandbox
+[ -f /etc/selinux/mls/booleans.local ] && mv /etc/selinux/mls/booleans.local /etc/selinux/mls/modules/active/
+[ -f /etc/selinux/mls/seusers ] && cp -f /etc/selinux/mls/seusers /etc/selinux/mls/modules/active/seusers
 #semodule -n -s mls 2>/dev/null
 #packages=`cat /usr/share/selinux/mls/modules.lst`
 #%loadpolicy mls $packages
