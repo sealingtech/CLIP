@@ -1,0 +1,11 @@
+diff -purN a/src/pylorax/__init__.py b/src/pylorax/__init__.py
+--- a/src/pylorax/__init__.py	2016-06-03 15:46:34.534110165 -0400
++++ b/src/pylorax/__init__.py	2016-06-03 15:48:19.212289183 -0400
+@@ -160,6 +160,7 @@ class Lorax(BaseLoraxClass):
+         else:
+             vernum = pylorax.version.num
+ 
++	domacboot = False
+         if domacboot:
+             try:
+                 runcmd(["rpm", "-q", "hfsplus-tools"])

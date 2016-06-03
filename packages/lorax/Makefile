@@ -10,7 +10,7 @@ PKGNAME := lorax
 
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
-VERSION := 19.6.28
+VERSION := 19.6.66
 
 # Bump this if creating multiple releases from the same
 # version.
@@ -26,7 +26,7 @@ PACKAGER ?= null
 # Hard code an arch if cross-compiling or going noarch.
 ARCH := noarch
 
-SOURCES := $(PKGNAME)-$(VERSION).tar.gz
+SOURCES := $(PKGNAME)-$(VERSION).tar.gz *.patch
 
 # Spec file name
 RPM_SPEC := $(PKGNAME).spec
