@@ -83,7 +83,7 @@ iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) setup-inst-ks check-volume-id
 	$(VERBOSE)cd $(BUILD_DIR); sudo $(RUN_PUNGI) "$(PUNGI_PYTHONPATH)" $(PUNGI_ARGS) -GCB -c "$(INST_KS)"
 	@echo "Fixing the boot menu..."
 	$(VERBOSE)sudo sed -i -e "s/^label linux$$/label $(NAME)/" \
-	       -e "s/append initrd=initrd.img$$/append initrd=initrd.img ks=cdrom:$(notdir $(INST_KS))/" \
+	       -e "s/append initrd=initrd.img\(.*\)$$/append initrd=initrd.img \1 ks=cdrom:$(notdir $(INST_KS))/" \
 	       -e "s/or upgrade an existing system/$(NAME)/" \
 	$(PUNGI_OS_DIR)/isolinux/isolinux.cfg
 	@echo "Adding updates.img so this sucker boots"
