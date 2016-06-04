@@ -132,6 +132,7 @@ setup
 setools-console
 shadow-utils
 sudo
+systemd
 util-linux-ng
 vim-minimal
 vlock
