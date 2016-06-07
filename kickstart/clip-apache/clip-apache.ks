@@ -78,11 +78,11 @@ logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=xfs --size 500  --maxs
 #CONFIG-BUILD-ADDTL-PACKAGES
 selinux-policy
 selinux-policy-mcs
-selinux-policy-mcs-apache
-selinux-policy-mcs-mysql
-selinux-policy-mcs-ssh
-selinux-policy-mcs-postfix
-selinux-policy-mcs-ec2ssh
+#selinux-policy-mcs-apache
+#selinux-policy-mcs-mysql
+#selinux-policy-mcs-ssh
+#selinux-policy-mcs-postfix
+#selinux-policy-mcs-ec2ssh
 clip-miscfiles
 m4
 scap-security-guide

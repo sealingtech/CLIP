@@ -76,8 +76,8 @@ selinux-policy
 # by default use MCS policy (selinux-policy-clip)
 -selinux-policy-mls
 selinux-policy-mcs
-selinux-policy-mcs-ssh
-selinux-policy-mcs-ec2ssh
+#selinux-policy-mcs-ssh
+#selinux-policy-mcs-ec2ssh
 clip-miscfiles
 m4
 scap-security-guide
