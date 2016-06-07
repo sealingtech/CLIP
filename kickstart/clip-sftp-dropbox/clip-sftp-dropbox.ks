@@ -54,21 +54,21 @@ reboot --eject
 
 zerombr
 clearpart --all --initlabel
-part /boot --size=200 --fstype ext4 --asprimary
+part /boot --size=200 --fstype xfs --asprimary
 part pv.os --size=1   --grow        --asprimary
 
 volgroup vg00 --pesize=65536 pv.os
-logvol /              --vgname=vg00 --name=root  --fstype=ext4 --size 5500 --maxsize 21000 --grow
-logvol /var           --vgname=vg00 --name=var   --fstype=ext4 --size 4000 --fsoptions=defaults,nosuid --grow
-logvol /home          --vgname=vg00 --name=home  --fstype=ext4 --size=1    --fsoptions=defaults,nosuid,nodev --percent=80 --grow
+logvol /              --vgname=vg00 --name=root  --fstype=xfs --size 5500 --maxsize 21000 --grow
+logvol /var           --vgname=vg00 --name=var   --fstype=xfs --size 4000 --fsoptions=defaults,nosuid --grow
+logvol /home          --vgname=vg00 --name=home  --fstype=xfs --size=1    --fsoptions=defaults,nosuid,nodev --percent=80 --grow
 logvol swap           --vgname=vg00 --name=swap  --fstype=swap --recommended
 
-logvol /var/log       --vgname=vg00 --name=log   --fstype=ext4 --size 1500 --fsoptions=defaults,nosuid,noexec,nodev --maxsize 25000 --grow
-logvol /var/log/audit --vgname=vg00 --name=audit --fstype=ext4 --size 1500 --fsoptions=defaults,nosuid,noexec,nodev --maxsize 25000 --grow
-#logvol /tmp           --vgname=vg00 --name=tmp   --fstype=ext4 --size 100  --fsoptions=defaults,bind,nosuid,noexec,nodev --maxsize 6000  --grow
-#logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=ext4 --size 100  --fsoptions=defaults,nosuid,noexec,nodev --maxsize 5000  --grow
-logvol /tmp           --vgname=vg00 --name=tmp   --fstype=ext4 --size 500  --maxsize 6000  --grow
-logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=ext4 --size 500  --maxsize 5000  --grow
+logvol /var/log       --vgname=vg00 --name=log   --fstype=xfs --size 1500 --fsoptions=defaults,nosuid,noexec,nodev --maxsize 25000 --grow
+logvol /var/log/audit --vgname=vg00 --name=audit --fstype=xfs --size 1500 --fsoptions=defaults,nosuid,noexec,nodev --maxsize 25000 --grow
+#logvol /tmp           --vgname=vg00 --name=tmp   --fstype=xfs --size 100  --fsoptions=defaults,bind,nosuid,noexec,nodev --maxsize 6000  --grow
+#logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=xfs --size 100  --fsoptions=defaults,nosuid,noexec,nodev --maxsize 5000  --grow
+logvol /tmp           --vgname=vg00 --name=tmp   --fstype=xfs --size 500  --maxsize 6000  --grow
+logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=xfs --size 500  --maxsize 5000  --grow
 
 %packages --excludedocs
 @Base
