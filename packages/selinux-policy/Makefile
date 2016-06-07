@@ -18,10 +18,10 @@ VERSION := 3.13.1
 
 # bump this if creating multiple releases from the same
 # version (think about this... why are you doing this?)
-RELEASE := 23.el7_1.99
+RELEASE := 999.el7_2
 
 # The name of the Vendor
-VENDOR := Quark Security, Inc 
+VENDOR := Quark Security, Inc
 
 # The name of the Packager
 PACKAGER ?= Quark Security, Inc
