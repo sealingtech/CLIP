@@ -9,8 +9,8 @@
 PKGNAME := selinux-policy
 
 # These two are typically set by the top-level CONFIG_BUILD file.
-BUILD_CONFIG_ENFORCING_MODE ?= y
-BUILD_CONFIG_TOOR ?= n
+CONFIG_BUILD_ENFORCING_MODE ?= y
+CONFIG_BUILD_TOOR ?= n
 
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
