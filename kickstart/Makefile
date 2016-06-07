@@ -8,6 +8,7 @@
 
 NAME := $(shell basename $(CURDIR))
 KS := $(CURDIR)/$(NAME).ks
+INC := $(CURDIR)/../includes
 
 TARGET_ARCH ?= $(shell uname -i)
 
@@ -118,6 +119,7 @@ setup-inst-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(CONFIG_BUILD_BASH_VARS);' $(INST_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(CONFIG_BUILD_ADDTL_PACKAGES);' $(INST_KS)
 	$(VERBOSE)sed -e 's/^repo/#repo/' $(INST_KS) > $(PUNGI_OS_DIR)/$(notdir $(INST_KS))
+	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
 
 check-volume-id:
 	@echo "Validating Volume ID"
@@ -130,6 +132,7 @@ setup-live-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -i -e 's;#REPO-REPLACEMENT-PLACEHOLDER;$(REPO_LINES);' $(LIVE_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(LIVE_CONFIG_BUILD_BASH_VARS);' $(LIVE_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(LIVE_CONFIG_BUILD_ADDTL_PACKAGES);' $(LIVE_KS)
+	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
 
 setup-aws-ks: $(SETUP_DEPS)
 	$(VERBOSE)test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)
@@ -138,6 +141,7 @@ setup-aws-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -i -e 's;#REPO-REPLACEMENT-PLACEHOLDER;$(REPO_LINES);' $(AWS_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(AWS_CONFIG_BUILD_BASH_VARS);' $(AWS_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(AWS_CONFIG_BUILD_ADDTL_PACKAGES);' $(AWS_KS)
+	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
 
 clean:
 	$(VERBOSE)sudo rm -rf $(BUILD_DIR)
