@@ -52,25 +52,10 @@ reboot --eject
 # DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
 #REPO-REPLACEMENT-PLACEHOLDER
 
-zerombr
-clearpart --all --initlabel
-part /boot --size=200 --fstype xfs --asprimary
-part pv.os --size=1   --grow        --asprimary
-
-volgroup vg00 --pesize=65536 pv.os
-logvol /              --vgname=vg00 --name=root  --fstype=xfs --size 5500 --maxsize 21000 --grow
-logvol /var           --vgname=vg00 --name=var   --fstype=xfs --size 4000 --fsoptions=defaults,nosuid --grow
-logvol /home          --vgname=vg00 --name=home  --fstype=xfs --size=1    --fsoptions=defaults,nosuid,nodev --percent=80 --grow
-logvol swap           --vgname=vg00 --name=swap  --fstype=swap --recommended
-
-logvol /var/log       --vgname=vg00 --name=log   --fstype=xfs --size 1500 --fsoptions=defaults,nosuid,noexec,nodev --maxsize 25000 --grow
-logvol /var/log/audit --vgname=vg00 --name=audit --fstype=xfs --size 1500 --fsoptions=defaults,nosuid,noexec,nodev --maxsize 25000 --grow
-#logvol /tmp           --vgname=vg00 --name=tmp   --fstype=xfs --size 100  --fsoptions=defaults,bind,nosuid,noexec,nodev --maxsize 6000  --grow
-#logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=xfs --size 100  --fsoptions=defaults,nosuid,noexec,nodev --maxsize 5000  --grow
-logvol /tmp           --vgname=vg00 --name=tmp   --fstype=xfs --size 500  --maxsize 6000  --grow
-logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=xfs --size 500  --maxsize 5000  --grow
+%include includes/standard-storage
 
 %packages --excludedocs
+%include includes/standard-packages
 @Base
 selinux-policy
 # by default use MCS policy (selinux-policy-clip)
@@ -82,151 +67,6 @@ selinux-policy-mcs
 #selinux-policy-mcs-config-strongswan
 #selinux-policy-mcs-vpnadm
 clip-miscfiles
-m4
-scap-security-guide
-dracut
-clip-dracut-module
-
-acl
-aide
-attr
-audit
-authconfig
-basesystem
-bash
-bind-libs
-bind-utils
-chkconfig
-configure_strongswan
-coreutils
-cpio
-cronie
-crontabs
-device-mapper
-e2fsprogs
-filesystem
-glibc
-initscripts
-iproute
-iptables
-iptables-ipv6
-iputils
-kbd
-kernel
-ncurses
-ntp
-ntpdate
-openscap
-openscap-content
-openscap-utils
-openssh
-openssh-server
-passwd
-perl
-policycoreutils
-policycoreutils-newrole
-policycoreutils-python
-procps
-rootfiles
-rpm
-rsyslog
-ruby
-screen
--selinux-policy-targeted
-screen
-setup
-setools-console
-shadow-utils
-strongswan
-sudo
-systemd
-util-linux-ng
-vim-minimal
-vlock
-yum
--Red_Hat_Enterprise_Linux-Release_Notes-6-en-US
--abrt-addon-ccpp
--abrt-addon-kerneloops
--abrt-addon-python
--abrt-cli
--acpid
--alsa-utils
--authconfig
--b43-fwcutter
--b43-openfwwf
--blktrace
--bridge-utils
--cryptsetup-luks
--dbus
-dhclient
--dmraid
--dosfstools
--fprintd
--fprintd-pam
--hicolor-icon-theme
--kexec-tools
--man
--man-pages
--man-pages-overrides
--mdadm
--mlocate
--mtr
--nano
--ntsysv
--pinfo
--postfix
--prelink
--psacct
--pm-utils
--redhat-indexhtml
--rdate
--readahead
--rhnsd
--setserial
--setuptool
--strace
--subscription-manager
--sysstat
--systemtap-runtime
--system-config-firewall-tui
--system-config-network-tui
--tcpdump
--traceroute
--vconfig
--virt-what
--wget
--yum-rhn-plugin
-
--libreport
-
--aic94xx-firmware
--at
--atmel-firmware
--bfa-firmware
--ipw2100-firmware
--ipw2200-firmware
--ivtv-firmware
--iwl100-firmware
--iwl1000-firmware
--iwl3945-firmware
--iwl4965-firmware
--iwl5000-firmware
--iwl5150-firmware
--iwl6000-firmware
--iwl6000g2a-firmware
--iwl6000g2b-firmware
--iwl6050-firmware
--kernel-firmware
--libertas-usb8388-firmware
--ql2100-firmware
--ql2200-firmware
--ql23xx-firmware
--ql2400-firmware
--ql2500-firmware
--rt61pci-firmware
--rt73usb-firmware
--xorg-x11-drv-ati-firmware
--zd1211-firmware
 
 %end
 
