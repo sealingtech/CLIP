@@ -83,11 +83,13 @@ iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) setup-inst-ks check-volume-id
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
 	$(VERBOSE)cd $(BUILD_DIR); sudo $(RUN_PUNGI) "$(PUNGI_PYTHONPATH)" $(PUNGI_ARGS) -GCB -c "$(INST_KS)"
 	@echo "Fixing the boot menu..."
+	@# THis "hack" is b/c pungi does absolutely nothing to %includes to get the files into the ISO
+	$(VERBOSE)sed -i 's;%include\s\+\(.*\);%include /mnt/install/repo/\1;' $(PUNGI_OS_DIR)$(notdir $(INST_KS))
+	$(VERBOSE)cp -a $(INC) $(PUNGI_OS_DIR)
 	$(VERBOSE)sudo sed -i -e "s/^label linux$$/label $(NAME)/" \
 	       -e "s/append initrd=initrd.img\(.*\)$$/append initrd=initrd.img \1 ks=cdrom:$(notdir $(INST_KS)) text/" \
 	       -e "s/or upgrade an existing system/$(NAME)/" \
 	$(PUNGI_OS_DIR)/isolinux/isolinux.cfg
-	@echo "Adding updates.img so this sucker boots"
 	@echo "Building ISO with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
 	$(VERBOSE)cd $(BUILD_DIR);sudo $(RUN_PUNGI) "$(PUNGI_PYTHONPATH)" $(PUNGI_ARGS) -I -c $(INST_KS)
@@ -110,7 +112,9 @@ aws: $(ADDTL_DEPS) setup-aws-ks
 	JAVA_HOME=$(JAVA_HOME) EC2_HOME=$(EC2_HOME) $(EC2_REGISTER) $(EC2_REGISTER_ARGS)
 
 setup-inst-ks: $(SETUP_DEPS)
-	@sudo rm -rf $(BUILD_DIR)/$(ISO_VERSION)/$(TARGET_ARCH)
+	@echo "Cleaning up after any previous builds to avoid conflicts..."
+	# OK, this is dangerous. Need to find a better way to address the cruft problem.
+	$(VERBOSE)sudo rm -rf $(BUILD_DIR)
 	$(VERBOSE)test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)
 	$(VERBOSE)mkdir -p $(PUNGI_OS_DIR)
 	$(VERBOSE)cp --force $(KS) $(INST_KS)
