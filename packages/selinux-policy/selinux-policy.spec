@@ -334,7 +334,7 @@ else
    #%loadpolicy mcs $packages
    %relabel mcs
 fi
-touch /.autorelabel
+echo "-F" > /.autorelabel
 rm -f /usr/share/selinux/devel/include
 ln -s /usr/share/selinux/mcs/include /usr/share/selinux/devel
 exit 0
