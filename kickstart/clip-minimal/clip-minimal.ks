@@ -69,6 +69,7 @@ selinux-policy-mcs
 clip-miscfiles
 clip-dracut-module
 
+
 %end
 
 %post --interpreter=/bin/bash
@@ -90,24 +91,20 @@ echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 
 export POLNAME=$(awk -F= '/^SELINUXTYPE/ { print $2; }' /etc/selinux/config)
 
-#NOTE: while the following lines allow the SCAP content to be interprested on
-# CentOS, the results might be wrong in a few places, like FIPS compliance and
-# gpgp keys etc.
 if [ -f /etc/centos-release ]; then
-        awk '/o:redhat:enterprise_linux:6/{print "<platform idref=\"cpe:/o:centos:centos:6\"/>"}1' < /usr/share/xml/scap/ssg/content/ssg-rhel6-xccdf.xml > /usr/share/xml/scap/ssg/content/ssg-centos6-xccdf.xml
-        xccdf='centos6'
+        xccdf='centos7'
 else   
-        xccdf='rhel6'
+        xccdf='rhel7'
 fi
 
 mkdir -p /root/scap/{pre,post}/html
-oscap xccdf eval --profile stig-rhel6-server-upstream \
+oscap xccdf eval --profile stig-rhel7-server-upstream \
 --report /root/scap/pre/html/report.html \
 --results /root/scap/pre/html/results.xml \
 /usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
 
 oscap xccdf generate fix \
---result-id xccdf_org.open-scap_testresult_stig-rhel6-server-upstream \
+--result-id xccdf_org.open-scap_testresult_stig-rhel7-server-upstream \
 /root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
 
 chmod +x /root/scap/pre/remediation-script.sh
@@ -115,18 +112,10 @@ if [ x"$CONFIG_BUILD_REMEDIATE" == "xy" ]; then
         /root/scap/pre/remediation-script.sh
         # Un-remediate things SSG broke...
         sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
-
-        cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
-        | fold -sw 80 > /etc/issue.net
-        cp /etc/issue.net /etc/issue
 fi
 
 # Un-remeidate things SSG broke...
 sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
-
-cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
-| fold -sw 80 > /etc/issue.net
-cp /etc/issue.net /etc/issue
 
 # FIXME: Change the username and password.
 #        If a hashed password is specified it will be used
@@ -255,13 +244,13 @@ fi
 # We don't want the final remediation script to set the system to targeted
 sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
 
-oscap xccdf eval --profile stig-rhel6-server-upstream \
+oscap xccdf eval --profile stig-rhel7-server-upstream \
 --report /root/scap/post/html/report.html \
 --results /root/scap/post/html/results.xml \
 /usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
 
 oscap xccdf generate fix \
---result-id xccdf_org.open-scap_testresult_stig-rhel6-server-upstream \
+--result-id xccdf_org.open-scap_testresult_stig-rhel7-server-upstream \
 /root/scap/post/html/results.xml > /root/scap/post/remediation-script.sh
 chmod +x /root/scap/post/remediation-script.sh
 
