@@ -14,6 +14,18 @@ TARGET_ARCH ?= $(shell uname -i)
 
 ISO_VERSION ?= 1
 
+ifeq ($(CONFIG_BUILD_UNCONFINED_TOOR),y)
+devel_mode := y
+endif
+
+ifeq ($(CONFIG_BUILD_ENFORCING_MODE),n)
+devel_mode := y
+endif
+
+ifdef devel_mode
+CONFIG_BUILD_ADDTL_PACKAGES += policycoreutils-devel net-tools
+endif
+
 ROOT_DIR ?= $(CURDIR)
 TMP_DIR ?= $(ROOT_DIR)/tmp
 BUILD_DIR ?= $(TMP_DIR)/$(NAME)
@@ -121,7 +133,7 @@ setup-inst-ks: $(SETUP_DEPS)
 	@echo "Modifying kickstart with build variables..."
 	$(VERBOSE)sed -i -e 's;#REPO-REPLACEMENT-PLACEHOLDER;$(REPO_LINES);' $(INST_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(CONFIG_BUILD_BASH_VARS);' $(INST_KS)
-	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(CONFIG_BUILD_ADDTL_PACKAGES);' $(INST_KS)
+	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/');' $(INST_KS)
 	$(VERBOSE)sed -e 's/^repo/#repo/' $(INST_KS) > $(PUNGI_OS_DIR)/$(notdir $(INST_KS))
 	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
 
@@ -135,7 +147,7 @@ setup-live-ks: $(SETUP_DEPS)
 	@echo "Modifying kickstart with build variables..."
 	$(VERBOSE)sed -i -e 's;#REPO-REPLACEMENT-PLACEHOLDER;$(REPO_LINES);' $(LIVE_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(LIVE_CONFIG_BUILD_BASH_VARS);' $(LIVE_KS)
-	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(LIVE_CONFIG_BUILD_ADDTL_PACKAGES);' $(LIVE_KS)
+	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/');' $(INST_KS)
 	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
 
 setup-aws-ks: $(SETUP_DEPS)
@@ -144,7 +156,7 @@ setup-aws-ks: $(SETUP_DEPS)
 	@echo "Modifying kickstart with build variables..."
 	$(VERBOSE)sed -i -e 's;#REPO-REPLACEMENT-PLACEHOLDER;$(REPO_LINES);' $(AWS_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(AWS_CONFIG_BUILD_BASH_VARS);' $(AWS_KS)
-	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(AWS_CONFIG_BUILD_ADDTL_PACKAGES);' $(AWS_KS)
+	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/');' $(INST_KS)
 	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
 
 clean:
