@@ -14,6 +14,7 @@ Source: %{pkgname}-%{version}.tar.gz
 Url: http://oss.tresys.com/repos/refpolicy/
 BuildArch: noarch
 Requires: coreutils
+Provides: selinux-policy-devel
 
 %description 
 This package contains the base components common across policy types.  In
