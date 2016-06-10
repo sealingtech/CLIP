@@ -9,12 +9,12 @@ gen_require(`
 # Declarations
 #
 
-## <desc>
-## <p>
-## Allow all daemons to use tcp wrappers.
-## </p>
-## </desc>
-gen_tunable(daemons_use_tcp_wrapper, false)
+### <desc>
+### <p>
+### Allow all daemons to use tcp wrappers.
+### </p>
+### </desc>
+#gen_tunable(daemons_use_tcp_wrapper, false)
 
 ## <desc>
 ## <p>
@@ -23,19 +23,19 @@ gen_tunable(daemons_use_tcp_wrapper, false)
 ## </desc>
 gen_tunable(daemons_use_tty, false)
 
-## <desc>
-## <p>
-## Allow all daemons to write corefiles to /
-## </p>
-## </desc>
-gen_tunable(daemons_dump_core, false)
+### <desc>
+### <p>
+### Allow all daemons to write corefiles to /
+### </p>
+### </desc>
+#gen_tunable(daemons_dump_core, false)
 
-## <desc>
-## <p>
-## Enable cluster mode for daemons.
-## </p>
-## </desc>
-gen_tunable(daemons_enable_cluster_mode, false)
+### <desc>
+### <p>
+### Enable cluster mode for daemons.
+### </p>
+### </desc>
+#gen_tunable(daemons_enable_cluster_mode, false)
 
 # used for direct running of init scripts
 # by admin domains
@@ -146,6 +146,7 @@ ifdef(`enable_mls',`
 
 # Use capabilities. old rule:
 allow init_t self:capability ~{ audit_control audit_write sys_module };
+dontaudit init_t self:capability sys_module;
 allow init_t self:capability2 ~{ mac_admin mac_override };
 allow init_t self:tcp_socket { listen accept };
 allow init_t self:key manage_key_perms;
@@ -209,9 +210,9 @@ kernel_stream_connect(init_t)
 corecmd_exec_chroot(init_t)
 corecmd_exec_bin(init_t)
 
-corenet_all_recvfrom_netlabel(init_t)
-corenet_tcp_bind_all_ports(init_t)
-corenet_udp_bind_all_ports(init_t)
+#corenet_all_recvfrom_netlabel(init_t)
+#corenet_tcp_bind_all_ports(init_t)
+#corenet_udp_bind_all_ports(init_t)
 
 dev_create_all_chr_files(init_t)
 dev_rw_sysfs(init_t)
@@ -253,8 +254,6 @@ fs_list_inotifyfs(init_t)
 # cjp: this may be related to /dev/log
 fs_write_ramfs_sockets(init_t)
 
-mcs_process_set_categories(init_t)
-
 mls_file_read_all_levels(init_t)
 mls_file_write_all_levels(init_t)
 mls_file_downgrade(init_t)
@@ -270,6 +269,7 @@ mls_rangetrans_source(init_t)
 selinux_set_all_booleans(init_t)
 selinux_load_policy(init_t)
 selinux_mounton_fs(init_t)
+seutil_read_default_contexts(init_t)
 allow init_t security_t:security load_policy;
 
 term_create_pty_dir(init_t)
@@ -286,19 +286,28 @@ libs_rw_ld_so_cache(init_t)
 logging_create_devlog_dev(init_t)
 logging_send_syslog_msg(init_t)
 logging_send_audit_msgs(init_t)
+# for dumping dmesg output to /var/log/dmesg
+# maybe a  unqie domain for /usr/lib/systemd/rhel-dmesg would be better
 logging_rw_generic_logs(init_t)
 logging_relabel_devlog_dev(init_t)
-logging_manage_audit_config(init_t)
+#logging_manage_audit_config(init_t)
+# Init is rotating the dmesg files on boot
+logging_rotate_generic_logs(init_t)
 
 seutil_read_config(init_t)
 seutil_read_module_store(init_t)
 
 miscfiles_manage_localization(init_t)
 miscfiles_filetrans_named_content(init_t)
+files_relabelfrom_etc_dirs(init_t)
+files_relabelfrom_var_lib_dirs(init_t)
+files_relabelfrom_var_dirs(init_t)
 
-userdom_use_user_ttys(init_t)
-userdom_manage_tmp_dirs(init_t)
-userdom_manage_tmp_sockets(init_t)
+optional_policy(`
+	userdom_use_user_ttys(init_t)
+	userdom_manage_tmp_dirs(init_t)
+	userdom_manage_tmp_sockets(init_t)
+')
 
 allow init_t self:process setsched;
 
@@ -324,7 +333,7 @@ ifdef(`distro_redhat',`
 
 corecmd_shell_domtrans(init_t, initrc_t)
 
-storage_raw_rw_fixed_disk(init_t)
+#storage_raw_rw_fixed_disk(init_t)
 
 sysnet_read_dhcpc_state(init_t)
 
@@ -471,16 +480,24 @@ systemd_config_all_services(init_t)
 systemd_relabelto_fifo_file_passwd_run(init_t)
 systemd_relabel_unit_dirs(init_t)
 systemd_relabel_unit_files(init_t)
-systemd_manage_unit_dirs(initrc_t)
-systemd_manage_unit_symlinks(initrc_t)
-systemd_config_all_services(initrc_t)
-systemd_read_unit_files(initrc_t)
+systemd_notify_relabel_socket(init_t)
+systemd_login_create_pid_files(init_t)
+systemd_login_rw_pid_files(init_t)
+#systemd_manage_unit_dirs(initrc_t)
+#systemd_manage_unit_symlinks(initrc_t)
+#systemd_config_all_services(initrc_t)
+#systemd_read_unit_files(initrc_t)
 
 create_sock_files_pattern(init_t, init_sock_file_type, init_sock_file_type)
 
-auth_use_nsswitch(init_t)
+#auth_use_nsswitch(init_t)
 auth_rw_login_records(init_t)
 auth_domtrans_chk_passwd(init_t)
+
+# Needed to delete /.autorelabel
+files_delete_boot_flag(init_t)
+
+iptables_read_config(init_t)
 
 ifdef(`distro_redhat',`
     # it comes from setupr scripts used in systemd unit files
@@ -572,11 +589,11 @@ optional_policy(`
 	xserver_read_xdm_lib_files(init_t)
 ')
 
-optional_policy(`
-	unconfined_domain(init_t)
-	domain_named_filetrans(init_t)
-	unconfined_server_domtrans(init_t)
-')
+#optional_policy(`
+#	unconfined_domain(init_t)
+#	domain_named_filetrans(init_t)
+#	unconfined_server_domtrans(init_t)
+#')
 
 ########################################
 #
@@ -657,7 +674,7 @@ files_pid_filetrans_lock_dir(initrc_t, "lock")
 files_read_kernel_symbol_table(initrc_t)
 files_exec_etc_files(initrc_t)
 files_manage_etc_symlinks(initrc_t)
-files_manage_system_conf_files(initrc_t)
+files_read_system_conf_files(initrc_t)
 
 fs_manage_tmpfs_dirs(initrc_t)
 fs_manage_tmpfs_symlinks(initrc_t)
@@ -665,17 +682,7 @@ fs_delete_tmpfs_files(initrc_t)
 fs_tmpfs_filetrans(initrc_t, initrc_state_t, file)
 fs_read_nfsd_files(initrc_t)
 
-corecmd_exec_all_executables(initrc_t)
-
-corenet_all_recvfrom_netlabel(initrc_t)
-corenet_tcp_sendrecv_generic_if(initrc_t)
-corenet_udp_sendrecv_generic_if(initrc_t)
-corenet_tcp_sendrecv_generic_node(initrc_t)
-corenet_udp_sendrecv_generic_node(initrc_t)
-corenet_tcp_sendrecv_all_ports(initrc_t)
-corenet_udp_sendrecv_all_ports(initrc_t)
-corenet_tcp_connect_all_ports(initrc_t)
-corenet_sendrecv_all_client_packets(initrc_t)
+#corecmd_exec_all_executables(initrc_t)
 
 dev_read_rand(initrc_t)
 dev_read_urand(initrc_t)
@@ -740,28 +747,28 @@ files_manage_urandom_seed(initrc_t)
 files_manage_generic_spool(initrc_t)
 # Mount and unmount file systems.
 # cjp: not sure why these are here; should use mount policy
-files_list_isid_type_dirs(initrc_t)
-files_mounton_isid_type_dirs(initrc_t)
-files_list_default(initrc_t)
-files_mounton_default(initrc_t)
-files_manage_mnt_dirs(initrc_t)
-files_manage_mnt_files(initrc_t)
+#files_list_isid_type_dirs(initrc_t)
+#files_mounton_isid_type_dirs(initrc_t)
+#files_list_default(initrc_t)
+#files_mounton_default(initrc_t)
+#files_manage_mnt_dirs(initrc_t)
+#files_manage_mnt_files(initrc_t)
 
 fs_delete_cgroup_dirs(initrc_t)
 fs_list_cgroup_dirs(initrc_t)
 fs_rw_cgroup_files(initrc_t)
 fs_list_inotifyfs(initrc_t)
-fs_register_binary_executable_type(initrc_t)
+#fs_register_binary_executable_type(initrc_t)
 # rhgb-console writes to ramfs
 fs_write_ramfs_pipes(initrc_t)
 # cjp: not sure why these are here; should use mount policy
-fs_mount_all_fs(initrc_t)
-fs_unmount_all_fs(initrc_t)
-fs_remount_all_fs(initrc_t)
-fs_getattr_all_fs(initrc_t)
-fs_search_all(initrc_t)
-fs_getattr_nfsd_files(initrc_t)
-fs_dontaudit_create_tmpfs_chr_dev(initrc_t)
+#fs_mount_all_fs(initrc_t)
+#fs_unmount_all_fs(initrc_t)
+#fs_remount_all_fs(initrc_t)
+#fs_getattr_all_fs(initrc_t)
+#fs_search_all(initrc_t)
+#fs_getattr_nfsd_files(initrc_t)
+#fs_dontaudit_create_tmpfs_chr_dev(initrc_t)
 
 # initrc_t needs to do a pidof which requires ptrace
 mcs_process_set_categories(initrc_t)
@@ -774,18 +781,18 @@ mls_rangetrans_source(initrc_t)
 mls_fd_share_all_levels(initrc_t)
 mls_socket_write_to_clearance(initrc_t)
 
-selinux_get_enforce_mode(initrc_t)
-selinux_setcheckreqprot(initrc_t)
+#selinux_get_enforce_mode(initrc_t)
+#selinux_setcheckreqprot(initrc_t)
 
 storage_getattr_fixed_disk_dev(initrc_t)
 storage_setattr_fixed_disk_dev(initrc_t)
-storage_setattr_removable_dev(initrc_t)
+#storage_setattr_removable_dev(initrc_t)
 
 term_use_all_terms(initrc_t)
 term_reset_tty_labels(initrc_t)
 
-auth_rw_login_records(initrc_t)
-auth_manage_faillog(initrc_t)
+#auth_rw_login_records(initrc_t)
+#auth_manage_faillog(initrc_t)
 auth_setattr_login_records(initrc_t)
 auth_rw_lastlog(initrc_t)
 auth_read_pam_pid(initrc_t)
@@ -799,23 +806,25 @@ libs_exec_ld_so(initrc_t)
 
 logging_send_audit_msgs(initrc_t)
 logging_send_syslog_msg(initrc_t)
-logging_manage_generic_logs(initrc_t)
-logging_read_all_logs(initrc_t)
-logging_append_all_logs(initrc_t)
-logging_read_audit_config(initrc_t)
+#logging_manage_generic_logs(initrc_t)
+#logging_read_all_logs(initrc_t)
+#logging_append_all_logs(initrc_t)
+#logging_read_audit_config(initrc_t)
 
 # slapd needs to read cert files from its initscript
-miscfiles_manage_generic_cert_files(initrc_t)
+#miscfiles_manage_generic_cert_files(initrc_t)
 
 
 seutil_read_config(initrc_t)
 
-userdom_read_admin_home_files(initrc_t)
-userdom_read_user_home_content_files(initrc_t)
-# Allow access to the sysadm TTYs. Note that this will give access to the
-# TTYs to any process in the initrc_t domain. Therefore, daemons and such
-# started from init should be placed in their own domain.
-userdom_use_inherited_user_terminals(initrc_t)
+optional_policy(`
+	userdom_read_admin_home_files(initrc_t)
+	userdom_read_user_home_content_files(initrc_t)
+	# Allow access to the sysadm TTYs. Note that this will give access to the
+	# TTYs to any process in the initrc_t domain. Therefore, daemons and such
+	# started from init should be placed in their own domain.
+	#userdom_use_inherited_user_terminals(initrc_t)
+')
 
 ifdef(`distro_debian',`
 	dev_setattr_generic_dirs(initrc_t)
@@ -902,10 +911,10 @@ ifdef(`distro_redhat',`
 	# during device initialization:
 	dev_create_generic_dirs(initrc_t)
 	dev_rwx_zero(initrc_t)
-	dev_rx_raw_memory(initrc_t)
-	dev_wx_raw_memory(initrc_t)
-	storage_raw_read_fixed_disk(initrc_t)
-	storage_raw_write_fixed_disk(initrc_t)
+	#dev_rx_raw_memory(initrc_t)
+	#dev_wx_raw_memory(initrc_t)
+	#storage_raw_read_fixed_disk(initrc_t)
+	#storage_raw_write_fixed_disk(initrc_t)
 
 	files_create_boot_dirs(initrc_t)
 	files_create_boot_flag(initrc_t)
@@ -998,6 +1007,14 @@ ifdef(`distro_redhat',`
 		sysnet_relabelfrom_net_conf(initrc_t)
 		sysnet_relabelto_net_conf(initrc_t)
 		sysnet_filetrans_named_content(initrc_t)
+
+		sysnet_rw_dhcp_config(init_t)
+		sysnet_manage_config(init_t)
+		sysnet_manage_dhcpc_state(init_t)
+		sysnet_relabelfrom_dhcpc_state(init_t)
+		sysnet_relabelfrom_net_conf(init_t)
+		sysnet_relabelto_net_conf(init_t)
+		sysnet_filetrans_named_content(init_t)
 	')
 
 	optional_policy(`
@@ -1023,29 +1040,31 @@ ifdef(`distro_suse',`
 
 domain_dontaudit_use_interactive_fds(daemon)
 
-userdom_dontaudit_list_admin_dir(daemon)
-userdom_dontaudit_search_user_tmp(daemon)
-
-tunable_policy(`daemons_use_tcp_wrapper',`
-    corenet_tcp_connect_auth_port(daemon)
+optional_policy(`
+	userdom_dontaudit_list_admin_dir(daemon)
+	userdom_dontaudit_search_user_tmp(daemon)
 ')
 
-tunable_policy(`daemons_use_tty',`
-	term_use_unallocated_ttys(daemon)
-	term_use_generic_ptys(daemon)
-	term_use_all_ttys(daemon)
-	term_use_all_ptys(daemon)
-',`
-	term_dontaudit_use_unallocated_ttys(daemon)
-	term_dontaudit_use_generic_ptys(daemon)
-	term_dontaudit_use_all_ttys(daemon)
-	term_dontaudit_use_all_ptys(daemon)
- ')
+#tunable_policy(`daemons_use_tcp_wrapper',`
+#    corenet_tcp_connect_auth_port(daemon)
+#')
+
+#tunable_policy(`daemons_use_tty',`
+#	term_use_unallocated_ttys(daemon)
+#	term_use_generic_ptys(daemon)
+#	term_use_all_ttys(daemon)
+#	term_use_all_ptys(daemon)
+#',`
+#	term_dontaudit_use_unallocated_ttys(daemon)
+#	term_dontaudit_use_generic_ptys(daemon)
+#	term_dontaudit_use_all_ttys(daemon)
+#	term_dontaudit_use_all_ptys(daemon)
+# ')
  
 # system-config-services causes avc messages that should be dontaudited
-tunable_policy(`daemons_dump_core',`
-	files_manage_root_files(daemon)
-')
+#tunable_policy(`daemons_dump_core',`
+#	files_manage_root_files(daemon)
+#')
 
 optional_policy(`
 	unconfined_dontaudit_rw_pipes(daemon)
@@ -1063,12 +1082,12 @@ optional_policy(`
 	dev_rw_apm_bios(initrc_t)
 ')
 
-optional_policy(`
-	apache_read_config(initrc_t)
-	apache_list_modules(initrc_t)
+#optional_policy(`
+#	apache_read_config(initrc_t)
+#	apache_list_modules(initrc_t)
 	# webmin seems to cause this.
-	apache_search_sys_content(daemon)
-')
+#	apache_search_sys_content(daemon)
+#')
 
 optional_policy(`
 	asterisk_setattr_logs(initrc_t)
@@ -1183,6 +1202,8 @@ optional_policy(`
 optional_policy(`
 	modutils_read_module_config(initrc_t)
 	modutils_domtrans_insmod(initrc_t)
+	modutils_read_module_config(init_t)
+	modutils_domtrans_insmod(init_t)
 ')
 
 optional_policy(`
@@ -1212,10 +1233,10 @@ optional_policy(`
 	loadkeys_exec(initrc_t)
 ')
 
-optional_policy(`
-	# in emergency/recovery situations use sulogin
-	locallogin_domtrans_sulogin(initrc_t)
-')
+#optional_policy(`
+#	# in emergency/recovery situations use sulogin
+#	locallogin_domtrans_sulogin(initrc_t)
+#')
 
 optional_policy(`
 	# This is needed to permit chown to read /var/spool/lpd/lp.
@@ -1333,11 +1354,6 @@ optional_policy(`
 	# bash tries ioctl for some reason
 	files_dontaudit_ioctl_all_pids(initrc_t)
 
-')
-
-optional_policy(`
-	samba_rw_config(initrc_t)
-	samba_read_winbind_pid(initrc_t)
 ')
 
 optional_policy(`
@@ -1470,26 +1486,28 @@ optional_policy(`
 	zebra_read_config(initrc_t)
 ')
 
-userdom_inherit_append_user_home_content_files(daemon)
-userdom_inherit_append_user_tmp_files(daemon)
-userdom_dontaudit_rw_stream(daemon)
-
-logging_inherit_append_all_logs(daemon)
-
 optional_policy(`
-	# sudo service restart causes this 
-	unconfined_signull(daemon)
+	#userdom_inherit_append_user_home_content_files(daemon)
+	#userdom_inherit_append_user_tmp_files(daemon)
+	userdom_dontaudit_rw_stream(daemon)
 ')
+
+#logging_inherit_append_all_logs(daemon)
+
+#optional_policy(`
+	# sudo service restart causes this 
+#	unconfined_signull(daemon)
+#')
 
 
 optional_policy(`
 	xserver_dontaudit_append_xdm_home_files(daemon)
-	tunable_policy(`use_nfs_home_dirs',`
-		fs_dontaudit_rw_nfs_files(daemon)
-	')
-	tunable_policy(`use_samba_home_dirs',`
-		fs_dontaudit_rw_cifs_files(daemon)
-	')
+#	tunable_policy(`use_nfs_home_dirs',`
+#		fs_dontaudit_rw_nfs_files(daemon)
+#	')
+#	tunable_policy(`use_samba_home_dirs',`
+#		fs_dontaudit_rw_cifs_files(daemon)
+#	')
 ')
 
 init_rw_script_stream_sockets(daemon)
@@ -1570,7 +1588,7 @@ allow daemon init_t:unix_stream_socket ioctl;
 allow daemon init_t:unix_dgram_socket sendto;
 # need write to /var/run/systemd/notify
 init_write_pid_socket(daemon)
-init_rw_inherited_script_tmp_files(daemon)
+#init_rw_inherited_script_tmp_files(daemon)
 
 # Handle upstart/systemd direct transition to a executable
 allow init_t systemprocess:process { dyntransition siginh };
@@ -1581,24 +1599,26 @@ allow systemprocess init_t:unix_stream_socket { append write read getattr ioctl 
 
 files_dontaudit_rw_inherited_locks(systemprocess)
 files_dontaudit_tmp_file_leaks(systemprocess)
-init_rw_inherited_script_tmp_files(systemprocess)
+#init_rw_inherited_script_tmp_files(systemprocess)
 
 logging_dontaudit_rw_inherited_generic_logs(systemprocess)
 
-userdom_dontaudit_search_user_home_dirs(systemprocess)
-userdom_dontaudit_rw_stream(systemprocess)
-userdom_dontaudit_write_user_tmp_files(systemprocess)
-
-tunable_policy(`daemons_use_tty',`
-   term_use_all_ttys(systemprocess)
-   term_use_all_ptys(systemprocess)
-',`
-   term_dontaudit_use_all_ttys(systemprocess)
-   term_dontaudit_use_all_ptys(systemprocess)
+optional_policy(`
+	userdom_dontaudit_search_user_home_dirs(systemprocess)
+	userdom_dontaudit_rw_stream(systemprocess)
+	userdom_dontaudit_write_user_tmp_files(systemprocess)
 ')
 
+#tunable_policy(`daemons_use_tty',`
+#   term_use_all_ttys(systemprocess)
+#   term_use_all_ptys(systemprocess)
+#',`
+#   term_dontaudit_use_all_ttys(systemprocess)
+#   term_dontaudit_use_all_ptys(systemprocess)
+#')
+
 # these apps are often redirect output to random log files
-logging_inherit_append_all_logs(systemprocess)
+#logging_inherit_append_all_logs(systemprocess)
 
 optional_policy(`
 	abrt_stream_connect(systemprocess)
@@ -1663,24 +1683,24 @@ ifdef(`direct_sysadm_daemon',`
     allow direct_run_init direct_init_entry:file { getattr open read execute };
 ')
 
-optional_policy(`
-    tunable_policy(`daemons_enable_cluster_mode',`
-        rhcs_manage_cluster_pid_files(daemon)
-        rhcs_manage_cluster_lib_files(daemon)
-        rhcs_rw_inherited_cluster_tmp_files(daemon)
-        rhcs_stream_connect_cluster_to(daemon,daemon)
-',`
-        rhcs_read_cluster_lib_files(daemon)
-        rhcs_read_cluster_pid_files(daemon)
-    ')
-    
- ')
+#optional_policy(`
+#    tunable_policy(`daemons_enable_cluster_mode',`
+#        rhcs_manage_cluster_pid_files(daemon)
+#        rhcs_manage_cluster_lib_files(daemon)
+#        rhcs_rw_inherited_cluster_tmp_files(daemon)
+#        rhcs_stream_connect_cluster_to(daemon,daemon)
+#',`
+#        rhcs_read_cluster_lib_files(daemon)
+#        rhcs_read_cluster_pid_files(daemon)
+#    ')
+#    
+# ')
 
-optional_policy(`
-    tunable_policy(`daemons_enable_cluster_mode',`
-        #resource agents placed config files in /etc/cluster
-        ccs_manage_config(daemon)
-',`
-        ccs_read_config(daemon)
-    ')
- ')
+#optional_policy(`
+#    tunable_policy(`daemons_enable_cluster_mode',`
+#        #resource agents placed config files in /etc/cluster
+#        ccs_manage_config(daemon)
+#',`
+#        ccs_read_config(daemon)
+#    ')
+# ')

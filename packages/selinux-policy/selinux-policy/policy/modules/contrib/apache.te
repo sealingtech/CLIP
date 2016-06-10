@@ -1700,8 +1700,10 @@ libs_read_lib_files(httpd_script_type)
 
 allow httpd_script_type httpd_sys_content_t:dir search_dir_perms;
 
-tunable_policy(`httpd_enable_cgi && nis_enabled',`
-	nis_use_ypbind_uncond(httpd_script_type)
+optional_policy(`
+	tunable_policy(`httpd_enable_cgi && nis_enabled',`
+		nis_use_ypbind_uncond(httpd_script_type)
+	')
 ')
 
 optional_policy(`

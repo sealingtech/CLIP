@@ -248,6 +248,10 @@ optional_policy(`
 
 optional_policy(`
 	sudo_role_template(staff, staff_r, staff_t)
+	optional_policy(`
+		toor_entry_spec_domtrans(staff_sudo_t)	
+		toor_role_change(staff_r)
+	')
 ')
 
 optional_policy(`

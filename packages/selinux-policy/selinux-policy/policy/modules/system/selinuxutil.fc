@@ -30,14 +30,14 @@
 #
 # /usr
 #
-/usr/bin/checkpolicy		--	gen_context(system_u:object_r:checkpolicy_exec_t,s0)
+#/usr/bin/checkpolicy		--	gen_context(system_u:object_r:checkpolicy_exec_t,s0)
 /usr/bin/newrole		--	gen_context(system_u:object_r:newrole_exec_t,s0)
 
 /usr/lib/selinux(/.*)?			gen_context(system_u:object_r:policy_src_t,s0)
 
 /usr/sbin/load_policy		--	gen_context(system_u:object_r:load_policy_exec_t,s0)
 /usr/sbin/restorecon		--	gen_context(system_u:object_r:setfiles_exec_t,s0)
-/usr/sbin/restorecond		--	gen_context(system_u:object_r:restorecond_exec_t,s0)
+#/usr/sbin/restorecond		--	gen_context(system_u:object_r:restorecond_exec_t,s0)
 /usr/sbin/run_init		--	gen_context(system_u:object_r:run_init_exec_t,s0)
 /usr/sbin/setfiles.*		--	gen_context(system_u:object_r:setfiles_exec_t,s0)
 /usr/sbin/setsebool		--	gen_context(system_u:object_r:setsebool_exec_t,s0)
@@ -55,7 +55,7 @@
 #
 # /var/run
 #
-/var/run/restorecond\.pid	--	gen_context(system_u:object_r:restorecond_var_run_t,s0)
+#/var/run/restorecond\.pid	--	gen_context(system_u:object_r:restorecond_var_run_t,s0)
 
 
 /etc/share/selinux/targeted(/.*)?	gen_context(system_u:object_r:semanage_store_t,s0)

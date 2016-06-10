@@ -40,7 +40,7 @@ ifdef(`enable_mls',`
 #
 
 allow local_login_t self:capability { dac_override chown fowner fsetid kill setgid setuid sys_admin sys_nice sys_resource sys_tty_config };
-allow local_login_t self:process ~{ ptrace setcurrent setfscreate execmem execstack execheap };
+allow local_login_t self:process ~{ ptrace setcurrent execmem execstack execheap };
 allow local_login_t self:fd use;
 allow local_login_t self:fifo_file rw_fifo_file_perms;
 allow local_login_t self:sock_file read_sock_file_perms;
@@ -134,6 +134,9 @@ auth_use_nsswitch(local_login_t)
 
 init_dontaudit_use_fds(local_login_t)
 init_stream_connect(local_login_t)
+
+auth_dontaudit_manage_shadow(local_login_t)
+auth_dontaudit_manage_passwd(local_login_t)
 
 
 userdom_spec_domtrans_all_users(local_login_t)

@@ -65,6 +65,8 @@ interface(`systemd_systemctl_domain',`
 	role system_r types $1_systemctl_t;
 
 	domtrans_pattern($1_t, systemd_systemctl_exec_t , $1_systemctl_t)
+
+	domain_read_all_domains_state($1_systemctl_t)
 ')
 
 ########################################
@@ -95,7 +97,7 @@ interface(`systemd_exec_systemctl',`
 
 	systemd_login_list_pid_dirs($1)
 	systemd_login_read_pid_files($1)
-	systemd_passwd_agent_exec($1)
+	#systemd_passwd_agent_exec($1)
 
 	dontaudit $1 self:capability net_admin;
 ')
@@ -273,6 +275,44 @@ interface(`systemd_login_read_pid_files',`
 
 ######################################
 ## <summary>
+##	Write to systemd notify sock files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`systemd_notify_write_socket',`
+	gen_require(`
+		type systemd_notify_var_run_t;
+	')
+
+	files_search_pids($1)
+	allow $1 systemd_notify_var_run_t:sock_file write;
+')
+
+######################################
+## <summary>
+##	Relabel to systemd notify sock files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`systemd_notify_relabel_socket',`
+	gen_require(`
+		type systemd_notify_var_run_t;
+	')
+
+	files_search_pids($1)
+	allow $1 systemd_notify_var_run_t:sock_file relabelto;
+')
+
+######################################
+## <summary>
 ##	Read systemd_login PID files.
 ## </summary>
 ## <param name="domain">
@@ -290,6 +330,47 @@ interface(`systemd_login_manage_pid_files',`
 	manage_files_pattern($1, systemd_logind_var_run_t, systemd_logind_var_run_t)
 	files_pid_filetrans($1, systemd_logind_var_run_t, file, "nologin")
 ')
+
+######################################
+## <summary>
+##	Create systemd_login PID files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`systemd_login_create_pid_files',`
+	gen_require(`
+		type systemd_logind_var_run_t;
+	')
+
+	files_search_pids($1)
+	create_files_pattern($1, systemd_logind_var_run_t, systemd_logind_var_run_t)
+	rename_files_pattern($1, systemd_logind_var_run_t, systemd_logind_var_run_t)
+	setattr_files_pattern($1, systemd_logind_var_run_t, systemd_logind_var_run_t)
+')
+
+######################################
+## <summary>
+## Read and write systemd_login PID files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`systemd_login_rw_pid_files',`
+	gen_require(`
+		type systemd_logind_var_run_t;
+	')
+
+	files_search_pids($1)
+	rw_files_pattern($1, systemd_logind_var_run_t, systemd_logind_var_run_t)
+')
+
 
 ######################################
 ## <summary>

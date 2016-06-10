@@ -38,10 +38,10 @@ files_security_file(selinux_login_config_t)
 type selinux_var_lib_t;
 files_type(selinux_var_lib_t)
 
-type checkpolicy_t, can_write_binary_policy;
-type checkpolicy_exec_t;
-application_domain(checkpolicy_t, checkpolicy_exec_t)
-role system_r types checkpolicy_t;
+#type checkpolicy_t, can_write_binary_policy;
+#type checkpolicy_exec_t;
+#application_domain(checkpolicy_t, checkpolicy_exec_t)
+#role system_r types checkpolicy_t;
 
 #
 # default_context_t is the type applied to
@@ -150,35 +150,37 @@ domain_obj_id_change_exemption(setfiles_mac_t)
 # Checkpolicy local policy
 #
 
-allow checkpolicy_t self:capability dac_override;
+#allow checkpolicy_t self:capability dac_override;
 
 # able to create and modify binary policy files
-manage_files_pattern(checkpolicy_t, policy_config_t, policy_config_t)
+#manage_files_pattern(checkpolicy_t, policy_config_t, policy_config_t)
 
 # allow test policies to be created in src directories
-filetrans_add_pattern(checkpolicy_t, policy_src_t, policy_config_t, file)
+#filetrans_add_pattern(checkpolicy_t, policy_src_t, policy_config_t, file)
 
 # only allow read of policy source files
-read_files_pattern(checkpolicy_t, policy_src_t, policy_src_t)
-read_lnk_files_pattern(checkpolicy_t, policy_src_t, policy_src_t)
-allow checkpolicy_t selinux_config_t:dir search_dir_perms;
-allow checkpolicy_t selinux_login_config_t:dir search_dir_perms;
+#read_files_pattern(checkpolicy_t, policy_src_t, policy_src_t)
+#read_lnk_files_pattern(checkpolicy_t, policy_src_t, policy_src_t)
+#allow checkpolicy_t selinux_config_t:dir search_dir_perms;
+#allow checkpolicy_t selinux_login_config_t:dir search_dir_perms;
 
-domain_use_interactive_fds(checkpolicy_t)
+#domain_use_interactive_fds(checkpolicy_t)
 
-files_list_usr(checkpolicy_t)
+#files_list_usr(checkpolicy_t)
 # directory search permissions for path to source and binary policy files
-files_search_etc(checkpolicy_t)
+#files_search_etc(checkpolicy_t)
 
-fs_getattr_xattr_fs(checkpolicy_t)
+#fs_getattr_xattr_fs(checkpolicy_t)
 
-term_use_console(checkpolicy_t)
+#term_use_console(checkpolicy_t)
 
-init_use_fds(checkpolicy_t)
-init_use_script_ptys(checkpolicy_t)
+#init_use_fds(checkpolicy_t)
+#init_use_script_ptys(checkpolicy_t)
 
-userdom_use_inherited_user_terminals(checkpolicy_t)
-userdom_use_all_users_fds(checkpolicy_t)
+#optional_policy(`
+#userdom_use_inherited_user_terminals(checkpolicy_t)
+#userdom_use_all_users_fds(checkpolicy_t)
+#')
 
 ifdef(`distro_ubuntu',`
 	optional_policy(`
@@ -218,9 +220,11 @@ init_write_script_pipes(load_policy_t)
 
 seutil_libselinux_linked(load_policy_t)
 
-userdom_use_inherited_user_terminals(load_policy_t)
-userdom_use_all_users_fds(load_policy_t)
-userdom_dontaudit_read_user_tmp_files(load_policy_t)
+optional_policy(`
+	userdom_use_inherited_user_terminals(load_policy_t)
+	userdom_use_all_users_fds(load_policy_t)
+	userdom_dontaudit_read_user_tmp_files(load_policy_t)
+')
 
 ifdef(`distro_ubuntu',`
 	optional_policy(`
@@ -322,10 +326,12 @@ init_use_fds(newrole_t)
 
 seutil_libselinux_linked(newrole_t)
 
-userdom_use_unpriv_users_fds(newrole_t)
-# for some PAM modules and for cwd
-userdom_dontaudit_search_user_home_content(newrole_t)
-userdom_search_user_home_dirs(newrole_t)
+optional_policy(`
+	userdom_use_unpriv_users_fds(newrole_t)
+	# for some PAM modules and for cwd
+	userdom_dontaudit_search_user_home_content(newrole_t)
+	userdom_search_user_home_dirs(newrole_t)
+')
 
 # need to talk with dbus
 optional_policy(`
@@ -349,15 +355,17 @@ ifdef(`distro_ubuntu',`
 
 # if secure mode is enabled, then newrole
 # can only transition to unprivileged users
-if(secure_mode) {
-	userdom_spec_domtrans_unpriv_users(newrole_t)
-} else {
-	userdom_spec_domtrans_all_users(newrole_t)
-}
-
-tunable_policy(`polyinstantiation_enabled',`
-	files_polyinstantiate_all(newrole_t)
+optional_policy(`
+	if(secure_mode) {
+		userdom_spec_domtrans_unpriv_users(newrole_t)
+	} else {
+		userdom_spec_domtrans_all_users(newrole_t)
+	}
 ')
+
+#tunable_policy(`polyinstantiation_enabled',`
+#	files_polyinstantiate_all(newrole_t)
+#')
 
 ########################################
 #
@@ -400,7 +408,9 @@ logging_send_syslog_msg(restorecond_t)
 
 seutil_libselinux_linked(restorecond_t)
 
+optional_policy(`
 userdom_read_user_home_content_symlinks(restorecond_t)
+')
 
 ifdef(`distro_ubuntu',`
 	optional_policy(`
@@ -475,7 +485,9 @@ logging_send_syslog_msg(run_init_t)
 seutil_libselinux_linked(run_init_t)
 seutil_read_default_contexts(run_init_t)
 
-userdom_use_inherited_user_terminals(run_init_t)
+optional_policy(`
+	userdom_use_inherited_user_terminals(run_init_t)
+')
 
 ifndef(`direct_sysadm_daemon',`
 	ifdef(`distro_gentoo',`
@@ -540,10 +552,12 @@ seutil_domtrans_setfiles(semanage_t)
 # netfilter_contexts:
 seutil_manage_default_contexts(semanage_t)
 
+optional_policy(`
 # Handle pp files created in homedir and /tmp
-userdom_read_user_home_content_files(semanage_t)
-userdom_read_user_tmp_files(semanage_t)
-userdom_home_reader(semanage_t)
+	userdom_read_user_home_content_files(semanage_t)
+	userdom_read_user_tmp_files(semanage_t)
+	userdom_home_reader(semanage_t)
+')
 
 ifdef(`distro_debian',`
 	files_read_var_lib_files(semanage_t)
@@ -674,6 +688,7 @@ kernel_rw_unix_dgram_sockets(setfiles_domain)
 kernel_dontaudit_list_all_proc(setfiles_domain)
 kernel_read_all_sysctls(setfiles_domain)
 kernel_read_network_state_symlinks(setfiles_domain)
+kernel_relabelto_usermodehelper(setfiles_domain)
 
 dev_relabel_all_dev_nodes(setfiles_domain)
 dev_dontaudit_rw_lvm_control(setfiles_domain)
@@ -709,10 +724,12 @@ init_use_script_fds(setfiles_domain)
 init_use_script_ptys(setfiles_domain)
 init_exec_script_files(setfiles_domain)
 
-userdom_use_all_users_fds(setfiles_domain)
-# for config files in a home directory
-userdom_read_user_home_content_files(setfiles_domain)
-userdom_rw_inherited_user_home_content_files(setfiles_domain)
+optional_policy(`
+	userdom_use_all_users_fds(setfiles_domain)
+	# for config files in a home directory
+	userdom_read_user_home_content_files(setfiles_domain)
+	userdom_rw_inherited_user_home_content_files(setfiles_domain)
+')
 
 ifdef(`distro_debian',`
 	# udev tmpfs is populated with static device nodes
@@ -784,8 +801,10 @@ seutil_manage_module_store(policy_manager_domain)
 seutil_get_semanage_trans_lock(policy_manager_domain)
 seutil_get_semanage_read_lock(policy_manager_domain)
 
-userdom_dontaudit_write_user_home_content_files(policy_manager_domain)
-userdom_use_user_ptys(policy_manager_domain)
+optional_policy(`
+	userdom_dontaudit_write_user_home_content_files(policy_manager_domain)
+	userdom_use_user_ptys(policy_manager_domain)
+')
 
 files_rw_inherited_generic_pid_files(setfiles_domain)
 files_rw_inherited_generic_pid_files(policy_manager_domain)

@@ -1,6 +1,6 @@
 ## <summary>Policy for SELinux policy and userland applications.</summary>
 
-#######################################
+######################################
 ## <summary>
 ##	Execute checkpolicy in the checkpolicy domain.
 ## </summary>
@@ -9,7 +9,7 @@
 ##	Domain allowed to transition.
 ##	</summary>
 ## </param>
-#
+
 interface(`seutil_domtrans_checkpolicy',`
 	gen_require(`
 		type checkpolicy_t, checkpolicy_exec_t;
@@ -57,7 +57,7 @@ interface(`seutil_run_checkpolicy',`
 ##	</summary>
 ## </param>
 ## <rolecap/>
-#
+##
 interface(`seutil_exec_checkpolicy',`
 	gen_require(`
 		type checkpolicy_exec_t;

@@ -690,6 +690,100 @@ interface(`init_var_lib_filetrans',`
 
 ########################################
 ## <summary>
+##	Read inits var_lib files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`init_read_var_lib',`
+	gen_require(`
+		type init_var_lib_t;
+	')
+
+	read_files_pattern($1, init_var_lib_t, init_var_lib_t)
+	list_dirs_pattern($1, init_var_lib_t, init_var_lib_t)
+')
+
+########################################
+## <summary>
+##	Relabel inits var_lib files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`init_relabel_var_lib',`
+	gen_require(`
+		type init_var_lib_t;
+	')
+
+	allow $1 init_var_lib_t:file relabel_file_perms;
+	allow $1 init_var_lib_t:dir relabel_dir_perms;
+')
+
+########################################
+## <summary>
+##	Relabel inits var_run files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`init_relabel_pids',`
+	gen_require(`
+		type init_var_run_t;
+	')
+
+	allow $1 {initrc_var_run_t init_var_run_t}:file relabel_file_perms;
+	allow $1 {initrc_var_run_t init_var_run_t}:dir relabel_dir_perms;
+')
+
+########################################
+## <summary>
+##	Create var_run dirs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`init_create_pid_dirs',`
+	gen_require(`
+		type initrc_var_run_t, init_var_run_t;
+	')
+
+	allow $1 { initrc_var_run_t init_var_run_t }:dir create_dir_perms;
+')
+
+########################################
+## <summary>
+##	Create init pid files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`init_create_pid_files',`
+	gen_require(`
+		type init_var_run_t, initrc_var_run_t;
+	')
+
+	allow $1 { initrc_var_run_t init_var_run_t }:file { write setattr create_file_perms };
+')
+
+
+########################################
+## <summary>
 ##	Connect to init with a unix socket.
 ## </summary>
 ## <param name="domain">
@@ -1313,6 +1407,30 @@ interface(`init_write_script_pipes',`
 	')
 
 	allow $1 initrc_t:fifo_file write;
+')
+
+########################################
+## <summary>
+##	Stop old-style sys V init services via systemctl.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to stop services.
+##	</summary>
+## </param>
+#
+interface(`initrc_systemctl_stop',`
+	gen_require(`
+		type initrc_exec_t;
+		type NetworkManager_t;
+	')
+
+	systemd_exec_systemctl($1)
+	init_reload_services($1)
+	allow $1 initrc_exec_t:file read_file_perms;
+	allow $1 initrc_exec_t:service { stop status };
+
+	ps_process_pattern($1, NetworkManager_t)
 ')
 
 ########################################
@@ -2257,7 +2375,7 @@ interface(`init_list_pid_dirs',`
 
 #######################################
 ## <summary>
-##  Create a directory in the /run/systemd directory.
+##  Read and write PID files.
 ## </summary>
 ## <param name="domain">
 ##  <summary>
@@ -2265,13 +2383,32 @@ interface(`init_list_pid_dirs',`
 ##  </summary>
 ## </param>
 #
-interface(`init_create_pid_dirs',`
+interface(`init_rw_pid_files',`
     gen_require(`
         type init_var_run_t;
     ')
 
     allow $1 init_var_run_t:dir list_dir_perms;
-    create_dirs_pattern($1, init_var_run_t, init_var_run_t)
+    rw_files_pattern($1, init_var_run_t, init_var_run_t)
+')
+
+#######################################
+## <summary>
+##  Read PID files.
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed access.
+##  </summary>
+## </param>
+#
+interface(`init_read_pid_files',`
+    gen_require(`
+        type init_var_run_t;
+    ')
+
+    allow $1 init_var_run_t:dir list_dir_perms;
+    read_files_pattern($1, init_var_run_t, init_var_run_t)
 ')
 
 #######################################
@@ -2447,6 +2584,25 @@ interface(`init_ioctl_stream_sockets',`
     ')
 
     allow $1 init_t:unix_stream_socket ioctl;
+')
+
+#######################################
+## <summary>
+##  Dont audit specified domain to ioctl an
+##  init with a unix domain stream sockets.
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed access.
+##  </summary>
+## </param>
+#
+interface(`init_dontaudit_ioctl_stream_sockets',`
+    gen_require(`
+        type init_t;
+    ')
+
+    dontaudit $1 init_t:unix_stream_socket ioctl;
 ')
 
 ########################################

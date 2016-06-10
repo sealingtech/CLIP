@@ -240,7 +240,7 @@ interface(`logging_run_auditd',`
 ##	Domain allowed access.
 ##	</summary>
 ## </param>
-#
+##
 interface(`logging_stream_connect_auditd',`
 	refpolicywarn(`$0($*) has been deprecated, logging_stream_connect_dispatcher() should be used instead.')
 	logging_stream_connect_dispatcher($1)
@@ -264,7 +264,7 @@ interface(`logging_domtrans_dispatcher',`
 	domtrans_pattern($1, audisp_exec_t, audisp_t)
 ')
 
-########################################
+#########################################
 ## <summary>
 ##	Signal the audit dispatcher.
 ## </summary>
@@ -675,6 +675,25 @@ interface(`logging_relabel_syslog_pid_socket',`
 
 ########################################
 ## <summary>
+##	Relabel the syslog pid files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`logging_relabel_syslog_pid_files',`
+	gen_require(`
+		type syslogd_var_run_t;
+	')
+
+	allow $1 syslogd_var_run_t:file { setattr relabel_file_perms };
+	allow $1 syslogd_var_run_t:dir { read setattr relabel_dir_perms };
+')
+
+########################################
+## <summary>
 ##	Connect to the syslog control unix stream socket.
 ## </summary>
 ## <param name="domain">
@@ -944,6 +963,26 @@ interface(`logging_dontaudit_getattr_all_logs',`
 
 ########################################
 ## <summary>
+##	Allow domain to get the attributes
+##	of audit log files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`logging_getattr_audit_logs',`
+	gen_require(`
+		type auditd_log_t;
+	')
+
+	allow $1 auditd_log_t:dir search;
+	allow $1 auditd_log_t:file getattr;
+')
+
+########################################
+## <summary>
 ##	Read the atttributes of any log file
 ## </summary>
 ## <param name="domain">
@@ -1017,6 +1056,26 @@ interface(`logging_read_all_logs',`
 	files_search_var($1)
 	allow $1 logfile:dir list_dir_perms;
 	read_files_pattern($1, logfile, logfile)
+')
+
+########################################
+## <summary>
+##	Read all log dirs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`logging_list_log_dirs',`
+	gen_require(`
+		attribute logfile;
+	')
+
+	files_search_var($1)
+	allow $1 logfile:dir list_dir_perms;
 ')
 
 ########################################
@@ -1235,6 +1294,27 @@ interface(`logging_manage_generic_logs',`
 
 	files_search_var($1)
 	manage_files_pattern($1, var_log_t, var_log_t)
+')
+
+########################################
+## <summary>
+##	Rotate generic log files
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`logging_rotate_generic_logs',`
+	gen_require(`
+		type var_log_t;
+	')
+
+	files_search_var($1)
+	allow $1 var_log_t:dir { write remove_name add_name };
+	allow $1 var_log_t:file { rename unlink create };
 ')
 
 ########################################

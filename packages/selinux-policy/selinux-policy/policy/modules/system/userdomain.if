@@ -747,15 +747,17 @@ template(`userdom_common_user_template',`
 
 	init_read_utmp($1_usertype)
 
-	seutil_read_file_contexts($1_usertype)
-	seutil_read_default_contexts($1_usertype)
-	seutil_run_newrole($1_t,$1_r)
-	seutil_exec_checkpolicy($1_t)
-	seutil_exec_setfiles($1_usertype)
-	# for when the network connection is killed
-	# this is needed when a login role can change
-	# to this one.
-	seutil_dontaudit_signal_newrole($1_t)
+	optional_policy(`
+		seutil_read_file_contexts($1_usertype)
+		seutil_read_default_contexts($1_usertype)
+		seutil_run_newrole($1_t,$1_r)
+		seutil_exec_checkpolicy($1_t)
+		seutil_exec_setfiles($1_usertype)
+		# for when the network connection is killed
+		# this is needed when a login role can change
+		# to this one.
+		seutil_dontaudit_signal_newrole($1_t)
+	')
 
 	term_getattr_all_ttys($1_t)
 
@@ -1712,17 +1714,19 @@ template(`userdom_security_admin',`
 	logging_read_generic_logs($1)
 	logging_read_audit_config($1)
 
-	seutil_manage_bin_policy($1)
-	seutil_manage_default_contexts($1)
-	seutil_manage_file_contexts($1)
-	seutil_manage_module_store($1)
-	seutil_manage_config($1)
-	seutil_manage_login_config($1)
-	seutil_run_checkpolicy($1,$2)
-	seutil_run_loadpolicy($1,$2)
-	seutil_run_semanage($1,$2)
-	seutil_run_setsebool($1,$2)
-	seutil_run_setfiles($1, $2)
+	optional_policy(`
+		seutil_manage_bin_policy($1)
+		seutil_manage_default_contexts($1)
+		seutil_manage_file_contexts($1)
+		seutil_manage_module_store($1)
+		seutil_manage_config($1)
+		seutil_manage_login_config($1)
+		seutil_run_checkpolicy($1,$2)
+		seutil_run_loadpolicy($1,$2)
+		seutil_run_semanage($1,$2)
+		seutil_run_setsebool($1,$2)
+		seutil_run_setfiles($1, $2)
+	')
 
 	optional_policy(`
 		aide_run($1,$2)
@@ -6217,17 +6221,19 @@ template(`userdom_security_admin_template',`
 	logging_read_generic_logs($1)
 	logging_read_audit_config($1)
 
-	seutil_manage_bin_policy($1)
-	seutil_manage_default_contexts($1)
-	seutil_manage_file_contexts($1)
-	seutil_manage_module_store($1)
-	seutil_manage_config($1)
-	seutil_manage_login_config($1)
-	seutil_run_checkpolicy($1,$2)
-	seutil_run_loadpolicy($1,$2)
-	seutil_run_semanage($1,$2)
-	seutil_run_setsebool($1,$2)
-	seutil_run_setfiles($1, $2)
+	optional_policy(`
+		seutil_manage_bin_policy($1)
+		seutil_manage_default_contexts($1)
+		seutil_manage_file_contexts($1)
+		seutil_manage_module_store($1)
+		seutil_manage_config($1)
+		seutil_manage_login_config($1)
+		seutil_run_checkpolicy($1,$2)
+		seutil_run_loadpolicy($1,$2)
+		seutil_run_semanage($1,$2)
+		seutil_run_setsebool($1,$2)
+		seutil_run_setfiles($1, $2)
+	')
 
 	optional_policy(`
 		aide_run($1,$2)

@@ -3478,6 +3478,24 @@ interface(`files_relabel_etc_files',`
 	relabel_files_pattern($1, etc_t, etc_t)
 ')
 
+#######################################
+## <summary>
+##	Relabel from generic dirs in /etc.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_relabelfrom_etc_dirs',`
+	gen_require(`
+		type etc_t;
+	')
+
+	allow $1 etc_t:dir relabelfrom;
+')
+
 ########################################
 ## <summary>
 ##	Read symbolic links in /etc.
@@ -3577,6 +3595,42 @@ interface(`files_create_boot_flag',`
 
 	allow $1 etc_runtime_t:file manage_file_perms;
 	filetrans_pattern($1, root_t, etc_runtime_t, file, $2)
+')
+
+########################################
+## <summary>
+##	Create a boot flag with file trans to specified type.
+## </summary>
+## <desc>
+##	<p>
+##	Create a boot flag, such as
+##	/.readahead
+##	</p>
+## </desc>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="type">
+##	<summary>
+##	The type of the object being created.
+##	</summary>
+## </param>
+## <param name="name" optional="true">
+##	<summary>
+##	The name of the object being created.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`files_create_named_trans_boot_flag',`
+	gen_require(`
+		type root_t;
+	')
+
+	filetrans_pattern($1, root_t, $2, file, $3)
+	allow $1 root_t:dir { read write unlink create add_name };
 ')
 
 ########################################
@@ -6171,6 +6225,116 @@ interface(`files_relabelfrom_usr_files',`
 	relabelfrom_files_pattern($1, usr_t, usr_t)
 ')
 
+
+########################################
+## <summary>
+##	Relabel a dir from the type used in /var.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_relabelfrom_var_dirs',`
+	gen_require(`
+		type var_t;
+	')
+
+	allow $1 var_t:dir relabelfrom;
+')
+
+########################################
+## <summary>
+##	Relabel a dir with the type used in /var.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_relabel_var_dirs',`
+	gen_require(`
+		type var_t;
+	')
+
+	allow $1 var_t:dir { relabelto relabelfrom };
+')
+
+########################################
+## <summary>
+##	Relabel a dir from the type used in /var/lib.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_relabelfrom_var_lib_dirs',`
+	gen_require(`
+		type var_lib_t;
+	')
+
+	allow $1 var_lib_t:dir relabelfrom;
+')
+
+########################################
+## <summary>
+##	Relabel a dir with the type used in /var/lib.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_relabel_var_lib_dirs',`
+	gen_require(`
+		type var_lib_t;
+	')
+
+	allow $1 var_lib_t:dir relabel_dir_perms;
+')
+
+########################################
+## <summary>
+##	Relabel from a dir from the type used in /var/run.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_relabelfrom_var_run_dirs',`
+	gen_require(`
+		type var_run_t;
+	')
+
+	allow $1 var_run_t:dir relabelfrom;
+')
+
+########################################
+## <summary>
+##	Relabel a dir from the type used in /var/run.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_relabel_var_run_dirs',`
+	gen_require(`
+		type var_run_t;
+	')
+
+	allow $1 var_run_t:dir relabel_dir_perms;
+')
+
+
 ########################################
 ## <summary>
 ##	Read symbolic links in /usr.
@@ -6879,6 +7043,24 @@ interface(`files_manage_var_lib_symlinks',`
 	')
 
 	manage_lnk_files_pattern($1,var_lib_t,var_lib_t)
+')
+
+## <summary>
+##	manage generic files 
+##	in the /var/lib directory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_manage_var_lib_files',`
+	gen_require(`
+		type var_lib_t;
+	')
+
+	manage_files_pattern($1,var_lib_t,var_lib_t)
 ')
 
 # cjp: the next two interfaces really need to be fixed

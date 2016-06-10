@@ -109,6 +109,7 @@ interface(`toor_entry_spec_domtrans',`
 	')
 
 	domain_entry_file_spec_domtrans($1, toor_t)
+	allow $1 toor_t:process transition;
 	allow toor_t $1:fd use;
 	allow toor_t $1:fifo_file rw_file_perms;
 	allow toor_t $1:process sigchld;

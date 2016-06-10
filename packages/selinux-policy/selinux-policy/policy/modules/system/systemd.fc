@@ -48,3 +48,5 @@ HOME_DIR/\.local/share/systemd(/.*)?		gen_context(system_u:object_r:systemd_home
 /var/run/systemd/ask-password(/.*)?	gen_context(system_u:object_r:systemd_passwd_var_run_t,s0)
 /var/run/systemd/netif(/.*)? gen_context(system_u:object_r:systemd_networkd_var_run_t,s0)
 /var/run/initramfs(/.*)?	<<none>>
+/var/run/systemd/notify -s gen_context(system_u:object_r:systemd_notify_var_run_t,s0)
+/run/systemd/notify -s gen_context(system_u:object_r:systemd_notify_var_run_t,s0)

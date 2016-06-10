@@ -62,14 +62,16 @@ interface(`auth_use_pam',`
 	auth_create_lastlog($1)
 	auth_manage_faillog($1)
 	auth_exec_pam($1)
-	auth_use_nsswitch($1)
+	#auth_use_nsswitch($1)
 
 	init_rw_stream_sockets($1)
 
 	logging_send_audit_msgs($1)
 	logging_send_syslog_msg($1)
 
-	userdom_search_user_tmp_dirs($1)
+	optional_policy(`
+		userdom_search_user_tmp_dirs($1)
+	')
 
 	optional_policy(`
 		dbus_system_bus_client($1)
@@ -92,9 +94,9 @@ interface(`auth_use_pam',`
 		locallogin_getattr_home_content($1)
  	')
 
-	optional_policy(`
-		nis_authenticate($1)
-	')
+	#optional_policy(`
+	#	nis_authenticate($1)
+	#')
 
 	optional_policy(`
 		systemd_dbus_chat_logind($1)
@@ -721,6 +723,25 @@ interface(`auth_dontaudit_read_shadow',`
 
 ########################################
 ## <summary>
+##	Do not audit attempts to manage the shadow
+##	password file (/etc/shadow).
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`auth_dontaudit_manage_shadow',`
+	gen_require(`
+		type shadow_t;
+	')
+
+	dontaudit $1 shadow_t:file manage_file_perms;
+')
+
+########################################
+## <summary>
 ##	Read and write the shadow password file (/etc/shadow).
 ## </summary>
 ## <param name="domain">
@@ -1200,6 +1221,45 @@ interface(`auth_read_pam_pid',`
 	files_search_pids($1)
 	allow $1 pam_var_run_t:dir list_dir_perms;
 	allow $1 pam_var_run_t:file read_file_perms;
+')
+
+########################################
+## <summary>
+##	Relabel PAM PID files/dirs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`auth_relabel_pam_pid',`
+	gen_require(`
+		type pam_var_run_t;
+	')
+
+	files_search_pids($1)
+	allow $1 pam_var_run_t:dir relabel_dir_perms;
+	allow $1 pam_var_run_t:file relabel_file_perms;
+')
+
+########################################
+## <summary>
+##	Create PAM PID files/dirs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`auth_create_pam_pid',`
+	gen_require(`
+		type pam_var_run_t;
+	')
+
+	files_search_pids($1)
+	create_files_pattern($1,pam_var_run_t,pam_var_run_t)
 ')
 
 #######################################
@@ -1998,7 +2058,7 @@ interface(`auth_use_nsswitch',`
 
 	typeattribute $1 nsswitch_domain;
 
-	corenet_all_recvfrom_netlabel($1)
+	#corenet_all_recvfrom_netlabel($1)
 ')
 
 ########################################
@@ -2163,6 +2223,25 @@ interface(`auth_dontaudit_read_passwd',`
 
 ########################################
 ## <summary>
+##	Do not audit attempts to manage the passwd 
+##	password file (/etc/shadow).
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`auth_dontaudit_manage_passwd',`
+	gen_require(`
+		type passwd_file_t;
+	')
+
+	dontaudit $1 passwd_file_t:file manage_file_perms;
+')
+
+########################################
+## <summary>
 ##	Create, read, write, and delete the passwd
 ##	password file.
 ## </summary>
@@ -2205,9 +2284,11 @@ interface(`auth_filetrans_admin_home_content',`
 		type auth_home_t;
 	')
 
-	userdom_admin_home_dir_filetrans($1, auth_home_t, file, ".google_authenticator")
-	userdom_admin_home_dir_filetrans($1, auth_home_t, file, ".google_authenticator~")
-	userdom_admin_home_dir_filetrans($1, auth_home_t, dir, ".yubico")
+	optional_policy(`
+		userdom_admin_home_dir_filetrans($1, auth_home_t, file, ".google_authenticator")
+		userdom_admin_home_dir_filetrans($1, auth_home_t, file, ".google_authenticator~")
+		userdom_admin_home_dir_filetrans($1, auth_home_t, dir, ".yubico")
+	')
 ')
 
 
@@ -2227,7 +2308,9 @@ interface(`auth_read_home_content',`
 		type auth_home_t;
 	')
 
-	userdom_search_user_home_dirs($1)
+	optional_policy(`
+		userdom_search_user_home_dirs($1)
+	')
 	read_files_pattern($1, auth_home_t, auth_home_t)
 ')
 
@@ -2247,7 +2330,9 @@ interface(`auth_manage_home_content',`
 		type auth_home_t;
 	')
 
-	userdom_search_user_home_dirs($1)
+	optional_policy(`
+		userdom_search_user_home_dirs($1)
+	')
 	manage_files_pattern($1, auth_home_t, auth_home_t)
     manage_dirs_pattern($1, auth_home_t, auth_home_t)
 ')
@@ -2269,9 +2354,11 @@ interface(`auth_filetrans_home_content',`
 		type auth_home_t;
 	')
 
-	userdom_user_home_dir_filetrans($1, auth_home_t, file, ".google_authenticator")
-	userdom_user_home_dir_filetrans($1, auth_home_t, file, ".google_authenticator~")
-	userdom_user_home_dir_filetrans($1, auth_home_t, dir, ".yubico")
+	optional_policy(`
+		userdom_user_home_dir_filetrans($1, auth_home_t, file, ".google_authenticator")
+		userdom_user_home_dir_filetrans($1, auth_home_t, file, ".google_authenticator~")
+		userdom_user_home_dir_filetrans($1, auth_home_t, dir, ".yubico")
+	')
 ')
 
 ########################################
