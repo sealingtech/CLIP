@@ -326,7 +326,7 @@ interface(`sysnet_relabelfrom_dhcpc_state',`
 		type dhcpc_state_t;
 	')
 
-	allow $1 dhcpc_state_t:file relabelfrom;
+	allow $1 dhcpc_state_t:{ dir file } relabelfrom;
 ')
 
 #######################################
@@ -382,7 +382,7 @@ interface(`sysnet_relabelfrom_net_conf',`
                 type net_conf_t;
         ')
 
-        allow $1 net_conf_t:file relabelfrom;
+        allow $1 net_conf_t:{ dir file } relabelfrom;
 ')
 
 ######################################

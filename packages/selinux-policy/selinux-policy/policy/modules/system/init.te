@@ -73,6 +73,9 @@ kernel_domtrans_to(init_t, init_exec_t)
 role system_r types init_t;
 init_initrc_domain(init_t)
 
+fs_relabelfrom_tmpfs(init_t)
+udev_relabelto_db(init_t)
+
 #
 # init_tmp_t is the type for content in /tmp directory
 #
@@ -217,7 +220,7 @@ corecmd_exec_bin(init_t)
 dev_create_all_chr_files(init_t)
 dev_rw_sysfs(init_t)
 dev_read_urand(init_t)
-dev_read_raw_memory(init_t)
+#dev_read_raw_memory(init_t)
 # Early devtmpfs
 dev_rw_generic_chr_files(init_t)
 dev_filetrans_all_named_dev(init_t)

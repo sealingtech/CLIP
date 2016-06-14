@@ -226,7 +226,7 @@ interface(`udev_relabelto_db',`
 	')
 
 	files_search_pids($1)
-	allow $1 udev_var_run_t:file relabelto_file_perms;
+	allow $1 udev_var_run_t:{ file lnk_file } relabelto_file_perms;
 ')
 
 ########################################

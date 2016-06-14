@@ -4599,6 +4599,24 @@ interface(`fs_relabelfrom_tmpfs',`
 
 ########################################
 ## <summary>
+##	Relabel from tmpfs symlinks.
+## </summary>
+## <param name="type">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`fs_relabelfrom_tmpfs_lnk_files',`
+	gen_require(`
+		type tmpfs_t;
+	')
+
+	allow $1 tmpfs_t:lnk_file relabelfrom;
+')
+
+########################################
+## <summary>
 ##	Get the attributes of tmpfs directories.
 ## </summary>
 ## <param name="domain">
