@@ -37,6 +37,7 @@ allow sudodomain self:unix_dgram_socket sendto;
 allow sudodomain self:unix_stream_socket connectto;
 allow sudodomain self:key manage_key_perms;
 allow sudodomain self:netlink_kobject_uevent_socket create_socket_perms;
+dontaudit sudodomain self:netlink_route_socket *;
 
 kernel_getattr_core_if(sudodomain)
 kernel_link_key(sudodomain)
@@ -80,6 +81,8 @@ auth_manage_faillog(sudodomain)
 application_signal(sudodomain)
 
 init_rw_utmp(sudodomain)
+init_dontaudit_getattr_initctl(sudodomain)
+
 
 logging_send_audit_msgs(sudodomain)
 logging_set_audit_parameters(sudodomain)
