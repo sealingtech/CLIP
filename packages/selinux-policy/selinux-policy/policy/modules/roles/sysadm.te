@@ -16,7 +16,8 @@ allow sysadm_t self:netlink_tcpdiag_socket create_netlink_socket_perms;
 # Local policy
 #
 kernel_read_fs_sysctls(sysadm_t)
-kernel_read_all_proc(sysadm_t)
+# SRS: removing for CLIP - gives access to kcore
+#kernel_read_all_proc(sysadm_t)
 
 corecmd_exec_shell(sysadm_t)
 
