@@ -24,7 +24,7 @@ selinux-policy-mls (an MLS policy)
 
 %files 
 %defattr(-,root,root,-)
-%{_mandir}/man*/*
+#%{_mandir}/man*/*
 # policycoreutils owns these manpage directories, we only own the files within them
 %{_mandir}/ru/*/*
 %dir %{_usr}/share/selinux
@@ -50,8 +50,8 @@ Policy documentation
 %files doc
 %defattr(-,root,root,-)
 %doc %{_usr}/share/doc/%{name}-%{version}
-%doc %{_usr}/share/selinux/devel/html
-%attr(755,root,root) %{_usr}/share/selinux/devel/policyhelp
+#%doc %{_usr}/share/selinux/devel/html
+#%attr(755,root,root) %{_usr}/share/selinux/devel/policyhelp
 
 %global genSeparatePolRPM() \
 %package %2-%1 \
@@ -69,8 +69,6 @@ SELinux %2 policy for %1 \
 %post %2-%1 \
 echo %1.pp >> %{_usr}/share/selinux/%2/modules.lst \
 semodule -n -s %2 -i %{_usr}/share/selinux/%2/%1.pp \
-echo "NOTE: installing the %1 policy RPM *does not reload the policy*." \
-echo "To reload the policy run 'semodule -R'" 
 
 %{expand:%( for f in %{separatePkgs}; do echo "%%genSeparatePolRPM $f mcs"; done)}
 
@@ -112,8 +110,7 @@ awk '$1 !~ "/^#/" && $2 == "=" && $3 == "module" { printf "%%s.pp ", $1 }' ./pol
 SORTED_PKGS=`for p in %{separatePkgs}; do echo $p | awk '{ print length($0) " " $0; }'; done | sort -r -n | cut -d ' ' -f 2` \
 for f in ${SORTED_PKGS}; do grep $f\.pp\ %{buildroot}/%{_usr}/share/selinux/%1/modules.lst || (echo "failed to update module.lst for module $f" && exit -1); sed -i -e "s/$f.pp//g" %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done \
 mkdir -p %{buildroot}/%{_sysconfdir}/selinux/%1/modules/active/modules/ \
-cp %{buildroot}/%{_usr}/share/selinux/%1/*.pp %{buildroot}/%{_sysconfdir}/selinux/%1/modules/active/modules/ \
-rm -f  %{buildroot}/%{_sysconfdir}/selinux/%1/modules/active/modules/base.pp \
+cd %{buildroot}/%{_usr}/share/selinux/%1;cp `cat modules.lst` %{buildroot}/%{_sysconfdir}/selinux/%1/modules/active/modules/; cd - \
 cp %{buildroot}/%{_usr}/share/selinux/%1/base.pp %{buildroot}/%{_sysconfdir}/selinux/%1/modules/active/base.pp \
 /usr/sbin/semodule -s %1 -n -B -p %{buildroot}; \
 /usr/bin/sha512sum %{buildroot}%{_sysconfdir}/selinux/%1/policy/policy.%{POLICYVER} | cut -d' ' -f 1 > %{buildroot}%{_sysconfdir}/selinux/%1/.policy.sha512; \
@@ -180,7 +177,7 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %config %{_sysconfdir}/selinux/%1/contexts/files/media \
 %dir %{_sysconfdir}/selinux/%1/contexts/users \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/users/* \
-%{_mandir}/man*/* \
+#%{_mandir}/man*/* \
 %{_mandir}/ru/*/* \
 %{_usr}/share/selinux/%1/*.pp \
 %{_usr}/share/selinux/%1/modules.lst \
@@ -245,21 +242,25 @@ mkdir %{buildroot}%{_usr}/share/selinux/packages/
 install -m 644 selinux_config/Makefile.devel %{buildroot}%{_usr}/share/selinux/devel/Makefile
 install -m 644 doc/example.* %{buildroot}%{_usr}/share/selinux/devel/
 install -m 644 doc/policy.* %{buildroot}%{_usr}/share/selinux/devel/
-echo  "xdg-open file:///usr/share/doc/selinux-policy/html/index.html"> %{buildroot}%{_usr}/share/selinux/devel/policyhelp
-chmod +x %{buildroot}%{_usr}/share/selinux/devel/policyhelp
+#echo  "xdg-open file:///usr/share/doc/selinux-policy/html/index.html"> %{buildroot}%{_usr}/share/selinux/devel/policyhelp
+#chmod +x %{buildroot}%{_usr}/share/selinux/devel/policyhelp
 # This insanity is b/c libselinux always looks at the host's /etc/selinux/config
 # and even though you can specify a diff "root" below, it still uses libselinux 
 # which means the root is only used for output, it is consulted for the pol
-ln -s %{buildroot}/etc/selinux/mcs %{buildroot}/etc/selinux/targeted  
-/usr/bin/sepolicy manpage -a -p %{buildroot}/usr/share/man/man8/ -w -r %{buildroot}
-rm %{buildroot}/etc/selinux/targeted
-mkdir %{buildroot}%{_usr}/share/selinux/devel/html
-htmldir=`compgen -d %{buildroot}%{_usr}/share/man/man8/`
-mv ${htmldir}/* %{buildroot}%{_usr}/share/selinux/devel/html
-mv %{buildroot}%{_usr}/share/man/man8/index.html %{buildroot}%{_usr}/share/selinux/devel/html
-mv %{buildroot}%{_usr}/share/man/man8/style.css %{buildroot}%{_usr}/share/selinux/devel/html
-rm -rf ${htmldir}
-chmod +x %{buildroot}%{_usr}/share/selinux/devel/policyhelp
+# FIXME: man page generation is broken when building separate pol packages.
+# It consults the packages in the pol store which doesn't contain all of the packages
+# configured and dies.
+#ln -s %{buildroot}/etc/selinux/mcs %{buildroot}/etc/selinux/targeted  
+#/usr/bin/sepolicy manpage -a -p %{buildroot}/usr/share/man/man8/ -w -r %{buildroot}
+#rm %{buildroot}/etc/selinux/targeted
+#mkdir %{buildroot}%{_usr}/share/selinux/devel/html
+#htmldir=`compgen -d %{buildroot}%{_usr}/share/man/man8/`
+#mv ${htmldir}/* %{buildroot}%{_usr}/share/selinux/devel/html
+#mv %{buildroot}%{_usr}/share/man/man8/index.html %{buildroot}%{_usr}/share/selinux/devel/html
+#mv %{buildroot}%{_usr}/share/man/man8/style.css %{buildroot}%{_usr}/share/selinux/devel/html
+#rm -rf ${htmldir}
+#chmod +x %{buildroot}%{_usr}/share/selinux/devel/policyhelp
+
 %clean
 %{__rm} -fR %{buildroot}
 
