@@ -64,6 +64,11 @@ gen_levels(mls_num_sens,mls_num_cats)
 # MLS policy for the file classes
 #
 
+# SRS: uncomment onnce you have SECMARK rules in-place
+# only allow kernel_t to send and receive unlabeled packets
+#mlsconstrain packet { send recv }
+#          ((t1 == kernel_t) or ((t2 != unlabeled_t) ));
+
 # make sure these file classes are "single level"
 mlsconstrain { file lnk_file fifo_file } { create relabelto }
 	( l2 eq h2 );
