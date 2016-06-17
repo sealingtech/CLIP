@@ -122727,7 +122727,7 @@ must be negated by the caller.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_search_all" lineno="1583">
+<interface name="files_search_all" lineno="1584">
 <summary>
 Search the contents of all directories on
 extended attribute filesystems.
@@ -122738,7 +122738,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_list_all" lineno="1602">
+<interface name="files_list_all" lineno="1603">
 <summary>
 List the contents of all directories on
 extended attribute filesystems.
@@ -122749,7 +122749,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_all_dirs" lineno="1622">
+<interface name="files_dontaudit_search_all_dirs" lineno="1623">
 <summary>
 Do not audit attempts to search the
 contents of any directories on extended
@@ -122761,7 +122761,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_all_file_type_fs" lineno="1645">
+<interface name="files_getattr_all_file_type_fs" lineno="1646">
 <summary>
 Get the attributes of all filesystems
 with the type of a file.
@@ -122772,7 +122772,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelto_all_file_type_fs" lineno="1663">
+<interface name="files_relabelto_all_file_type_fs" lineno="1664">
 <summary>
 Relabel a filesystem to the type of a file.
 </summary>
@@ -122782,7 +122782,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabel_all_file_type_fs" lineno="1681">
+<interface name="files_relabel_all_file_type_fs" lineno="1682">
 <summary>
 Relabel a filesystem to the type of a file.
 </summary>
@@ -122792,7 +122792,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_mount_all_file_type_fs" lineno="1699">
+<interface name="files_mount_all_file_type_fs" lineno="1700">
 <summary>
 Mount all filesystems with the type of a file.
 </summary>
@@ -122802,7 +122802,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_unmount_all_file_type_fs" lineno="1717">
+<interface name="files_unmount_all_file_type_fs" lineno="1718">
 <summary>
 Unmount all filesystems with the type of a file.
 </summary>
@@ -122812,7 +122812,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_list_non_auth_dirs" lineno="1736">
+<interface name="files_list_non_auth_dirs" lineno="1737">
 <summary>
 Read all non-authentication related
 directories.
@@ -122823,7 +122823,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_non_auth_files" lineno="1755">
+<interface name="files_read_non_auth_files" lineno="1756">
 <summary>
 Read all non-authentication related
 files.
@@ -122834,7 +122834,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_non_auth_symlinks" lineno="1774">
+<interface name="files_read_non_auth_symlinks" lineno="1775">
 <summary>
 Read all non-authentication related
 symbolic links.
@@ -122845,7 +122845,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_non_auth_files" lineno="1792">
+<interface name="files_rw_non_auth_files" lineno="1793">
 <summary>
 rw non-authentication related files.
 </summary>
@@ -122855,7 +122855,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_non_auth_files" lineno="1812">
+<interface name="files_manage_non_auth_files" lineno="1813">
 <summary>
 Manage non-authentication related
 files.
@@ -122867,7 +122867,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_relabel_non_auth_files" lineno="1840">
+<interface name="files_relabel_non_auth_files" lineno="1841">
 <summary>
 Relabel all non-authentication related
 files.
@@ -122879,7 +122879,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_manage_config_dirs" lineno="1868">
+<interface name="files_manage_config_dirs" lineno="1869">
 <summary>
 Manage all configuration directories on filesystem
 </summary>
@@ -122890,7 +122890,7 @@ Domain allowed access.
 </param>
 
 </interface>
-<interface name="files_relabel_config_dirs" lineno="1887">
+<interface name="files_relabel_config_dirs" lineno="1888">
 <summary>
 Relabel configuration directories
 </summary>
@@ -122901,7 +122901,7 @@ Domain allowed access.
 </param>
 
 </interface>
-<interface name="files_read_config_files" lineno="1905">
+<interface name="files_read_config_files" lineno="1906">
 <summary>
 Read config files in /etc.
 </summary>
@@ -122911,7 +122911,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_config_files" lineno="1926">
+<interface name="files_manage_config_files" lineno="1927">
 <summary>
 Manage all configuration files on filesystem
 </summary>
@@ -122922,7 +122922,7 @@ Domain allowed access.
 </param>
 
 </interface>
-<interface name="files_relabel_config_files" lineno="1945">
+<interface name="files_relabel_config_files" lineno="1946">
 <summary>
 Relabel configuration files
 </summary>
@@ -122933,7 +122933,7 @@ Domain allowed access.
 </param>
 
 </interface>
-<interface name="files_mounton_all_mountpoints" lineno="1963">
+<interface name="files_mounton_all_mountpoints" lineno="1964">
 <summary>
 Mount a filesystem on all mount points.
 </summary>
@@ -122943,7 +122943,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_all_mountpoints" lineno="1982">
+<interface name="files_getattr_all_mountpoints" lineno="1983">
 <summary>
 Get the attributes of all mount points.
 </summary>
@@ -122953,7 +122953,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_setattr_all_mountpoints" lineno="2000">
+<interface name="files_setattr_all_mountpoints" lineno="2001">
 <summary>
 Set the attributes of all mount points.
 </summary>
@@ -122963,7 +122963,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelto_all_mountpoints" lineno="2018">
+<interface name="files_relabelto_all_mountpoints" lineno="2019">
 <summary>
 Set the attributes of all mount points.
 </summary>
@@ -122973,7 +122973,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_setattr_all_mountpoints" lineno="2036">
+<interface name="files_dontaudit_setattr_all_mountpoints" lineno="2037">
 <summary>
 Do not audit attempts to set the attributes on all mount points.
 </summary>
@@ -122983,7 +122983,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_search_all_mountpoints" lineno="2054">
+<interface name="files_search_all_mountpoints" lineno="2055">
 <summary>
 Search all mount points.
 </summary>
@@ -122993,7 +122993,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_all_mountpoints" lineno="2072">
+<interface name="files_dontaudit_search_all_mountpoints" lineno="2073">
 <summary>
 Do not audit searching of all mount points.
 </summary>
@@ -123003,7 +123003,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_list_all_mountpoints" lineno="2090">
+<interface name="files_list_all_mountpoints" lineno="2091">
 <summary>
 List all mount points.
 </summary>
@@ -123013,7 +123013,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_list_all_mountpoints" lineno="2108">
+<interface name="files_dontaudit_list_all_mountpoints" lineno="2109">
 <summary>
 Do not audit listing of all mount points.
 </summary>
@@ -123023,7 +123023,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_write_all_mountpoints" lineno="2126">
+<interface name="files_write_all_mountpoints" lineno="2127">
 <summary>
 Write all mount points.
 </summary>
@@ -123033,7 +123033,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_write_all_mountpoints" lineno="2144">
+<interface name="files_dontaudit_write_all_mountpoints" lineno="2145">
 <summary>
 Do not audit attempts to write to mount points.
 </summary>
@@ -123043,7 +123043,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_unmount_all_mountpoints" lineno="2162">
+<interface name="files_dontaudit_unmount_all_mountpoints" lineno="2163">
 <summary>
 Do not audit attempts to unmount all mount points.
 </summary>
@@ -123053,7 +123053,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_read_all_mountpoint_symlinks" lineno="2180">
+<interface name="files_read_all_mountpoint_symlinks" lineno="2181">
 <summary>
 Read  all mountpoint symbolic links.
 </summary>
@@ -123063,7 +123063,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_write_all_dirs" lineno="2198">
+<interface name="files_write_all_dirs" lineno="2199">
 <summary>
 Write all file type directories.
 </summary>
@@ -123073,7 +123073,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_list_root" lineno="2216">
+<interface name="files_list_root" lineno="2217">
 <summary>
 List the contents of the root directory.
 </summary>
@@ -123083,7 +123083,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_write_root_dirs" lineno="2234">
+<interface name="files_write_root_dirs" lineno="2235">
 <summary>
 Do not audit attempts to write to / dirs.
 </summary>
@@ -123093,7 +123093,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_write_root_dirs" lineno="2252">
+<interface name="files_dontaudit_write_root_dirs" lineno="2253">
 <summary>
 Do not audit attempts to write to / dirs.
 </summary>
@@ -123103,7 +123103,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_rw_root_dir" lineno="2271">
+<interface name="files_dontaudit_rw_root_dir" lineno="2272">
 <summary>
 Do not audit attempts to write
 files in the root directory.
@@ -123114,7 +123114,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_access_check_root" lineno="2290">
+<interface name="files_dontaudit_access_check_root" lineno="2291">
 <summary>
 Do not audit attempts to check the
 access on root directory.
@@ -123125,7 +123125,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_root_filetrans" lineno="2325">
+<interface name="files_root_filetrans" lineno="2326">
 <summary>
 Create an object in the root directory, with a private
 type using a type transition.
@@ -123151,7 +123151,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_read_root_files" lineno="2344">
+<interface name="files_dontaudit_read_root_files" lineno="2345">
 <summary>
 Do not audit attempts to read files in
 the root directory.
@@ -123162,7 +123162,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_rw_root_files" lineno="2363">
+<interface name="files_dontaudit_rw_root_files" lineno="2364">
 <summary>
 Do not audit attempts to read or write
 files in the root directory.
@@ -123173,7 +123173,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_rw_root_chr_files" lineno="2382">
+<interface name="files_dontaudit_rw_root_chr_files" lineno="2383">
 <summary>
 Do not audit attempts to read or write
 character device nodes in the root directory.
@@ -123184,7 +123184,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_root_files" lineno="2400">
+<interface name="files_delete_root_files" lineno="2401">
 <summary>
 Delete files in the root directory.
 </summary>
@@ -123194,7 +123194,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_root_dir_entry" lineno="2418">
+<interface name="files_delete_root_dir_entry" lineno="2419">
 <summary>
 Remove entries from the root directory.
 </summary>
@@ -123204,7 +123204,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_setattr_root_dirs" lineno="2436">
+<interface name="files_setattr_root_dirs" lineno="2437">
 <summary>
 Set attributes of the root directory.
 </summary>
@@ -123214,7 +123214,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabel_rootfs" lineno="2454">
+<interface name="files_relabel_rootfs" lineno="2455">
 <summary>
 Relabel a rootfs filesystem.
 </summary>
@@ -123224,7 +123224,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_unmount_rootfs" lineno="2472">
+<interface name="files_unmount_rootfs" lineno="2473">
 <summary>
 Unmount a rootfs filesystem.
 </summary>
@@ -123234,7 +123234,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_mounton_rootfs" lineno="2490">
+<interface name="files_mounton_rootfs" lineno="2491">
 <summary>
 Mount a filesystem on the root file system
 </summary>
@@ -123244,7 +123244,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_mounton_rootfs" lineno="2508">
+<interface name="files_dontaudit_mounton_rootfs" lineno="2509">
 <summary>
 Mount a filesystem on the root file system
 </summary>
@@ -123254,7 +123254,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_boot_dirs" lineno="2526">
+<interface name="files_getattr_boot_dirs" lineno="2527">
 <summary>
 Get attributes of the /boot directory.
 </summary>
@@ -123264,7 +123264,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_getattr_boot_dirs" lineno="2545">
+<interface name="files_dontaudit_getattr_boot_dirs" lineno="2546">
 <summary>
 Do not audit attempts to get attributes
 of the /boot directory.
@@ -123275,7 +123275,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_search_boot" lineno="2563">
+<interface name="files_search_boot" lineno="2564">
 <summary>
 Search the /boot directory.
 </summary>
@@ -123285,7 +123285,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_boot" lineno="2581">
+<interface name="files_dontaudit_search_boot" lineno="2582">
 <summary>
 Do not audit attempts to search the /boot directory.
 </summary>
@@ -123295,7 +123295,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_list_boot" lineno="2599">
+<interface name="files_list_boot" lineno="2600">
 <summary>
 List the /boot directory.
 </summary>
@@ -123305,7 +123305,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_list_boot" lineno="2617">
+<interface name="files_dontaudit_list_boot" lineno="2618">
 <summary>
 Do not audit attempts to list the /boot directory.
 </summary>
@@ -123315,7 +123315,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_create_boot_dirs" lineno="2635">
+<interface name="files_create_boot_dirs" lineno="2636">
 <summary>
 Create directories in /boot
 </summary>
@@ -123325,7 +123325,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_boot_dirs" lineno="2654">
+<interface name="files_manage_boot_dirs" lineno="2655">
 <summary>
 Create, read, write, and delete
 directories in /boot.
@@ -123336,7 +123336,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_boot_filetrans" lineno="2688">
+<interface name="files_boot_filetrans" lineno="2689">
 <summary>
 Create a private type object in boot
 with an automatic type transition
@@ -123362,7 +123362,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_read_boot_files" lineno="2707">
+<interface name="files_read_boot_files" lineno="2708">
 <summary>
 read files in the /boot directory.
 </summary>
@@ -123373,7 +123373,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_manage_boot_files" lineno="2727">
+<interface name="files_manage_boot_files" lineno="2728">
 <summary>
 Create, read, write, and delete files
 in the /boot directory.
@@ -123385,7 +123385,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_relabelfrom_boot_files" lineno="2745">
+<interface name="files_relabelfrom_boot_files" lineno="2746">
 <summary>
 Relabel from files in the /boot directory.
 </summary>
@@ -123395,7 +123395,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelto_boot_files" lineno="2763">
+<interface name="files_relabelto_boot_files" lineno="2764">
 <summary>
 Relabel to files in the /boot directory.
 </summary>
@@ -123405,7 +123405,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_boot_symlinks" lineno="2781">
+<interface name="files_read_boot_symlinks" lineno="2782">
 <summary>
 Read symbolic links in the /boot directory.
 </summary>
@@ -123415,7 +123415,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_boot_symlinks" lineno="2800">
+<interface name="files_rw_boot_symlinks" lineno="2801">
 <summary>
 Read and write symbolic links
 in the /boot directory.
@@ -123426,7 +123426,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_boot_symlinks" lineno="2820">
+<interface name="files_manage_boot_symlinks" lineno="2821">
 <summary>
 Create, read, write, and delete symbolic links
 in the /boot directory.
@@ -123437,7 +123437,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_kernel_img" lineno="2838">
+<interface name="files_read_kernel_img" lineno="2839">
 <summary>
 Read kernel files in the /boot directory.
 </summary>
@@ -123447,7 +123447,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_create_kernel_img" lineno="2859">
+<interface name="files_create_kernel_img" lineno="2860">
 <summary>
 Install a kernel into the /boot directory.
 </summary>
@@ -123458,7 +123458,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_delete_kernel" lineno="2879">
+<interface name="files_delete_kernel" lineno="2880">
 <summary>
 Delete a kernel from /boot.
 </summary>
@@ -123469,7 +123469,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_getattr_default_dirs" lineno="2897">
+<interface name="files_getattr_default_dirs" lineno="2898">
 <summary>
 Getattr of directories with the default file type.
 </summary>
@@ -123479,7 +123479,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_getattr_default_dirs" lineno="2916">
+<interface name="files_dontaudit_getattr_default_dirs" lineno="2917">
 <summary>
 Do not audit attempts to get the attributes of
 directories with the default file type.
@@ -123490,7 +123490,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_search_default" lineno="2934">
+<interface name="files_search_default" lineno="2935">
 <summary>
 Search the contents of directories with the default file type.
 </summary>
@@ -123500,7 +123500,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_list_default" lineno="2952">
+<interface name="files_list_default" lineno="2953">
 <summary>
 List contents of directories with the default file type.
 </summary>
@@ -123510,7 +123510,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_list_default" lineno="2971">
+<interface name="files_dontaudit_list_default" lineno="2972">
 <summary>
 Do not audit attempts to list contents of
 directories with the default file type.
@@ -123521,7 +123521,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_default_dirs" lineno="2990">
+<interface name="files_manage_default_dirs" lineno="2991">
 <summary>
 Create, read, write, and delete directories with
 the default file type.
@@ -123532,7 +123532,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_mounton_default" lineno="3008">
+<interface name="files_mounton_default" lineno="3009">
 <summary>
 Mount a filesystem on a directory with the default file type.
 </summary>
@@ -123542,7 +123542,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_getattr_default_files" lineno="3027">
+<interface name="files_dontaudit_getattr_default_files" lineno="3028">
 <summary>
 Do not audit attempts to get the attributes of
 files with the default file type.
@@ -123553,7 +123553,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_read_default_files" lineno="3045">
+<interface name="files_read_default_files" lineno="3046">
 <summary>
 Read files with the default file type.
 </summary>
@@ -123563,7 +123563,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_read_default_files" lineno="3064">
+<interface name="files_dontaudit_read_default_files" lineno="3065">
 <summary>
 Do not audit attempts to read files
 with the default file type.
@@ -123574,7 +123574,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_default_files" lineno="3083">
+<interface name="files_manage_default_files" lineno="3084">
 <summary>
 Create, read, write, and delete files with
 the default file type.
@@ -123585,7 +123585,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_default_symlinks" lineno="3101">
+<interface name="files_read_default_symlinks" lineno="3102">
 <summary>
 Read symbolic links with the default file type.
 </summary>
@@ -123595,7 +123595,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_default_sockets" lineno="3119">
+<interface name="files_read_default_sockets" lineno="3120">
 <summary>
 Read sockets with the default file type.
 </summary>
@@ -123605,7 +123605,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_default_pipes" lineno="3137">
+<interface name="files_read_default_pipes" lineno="3138">
 <summary>
 Read named pipes with the default file type.
 </summary>
@@ -123615,7 +123615,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_search_etc" lineno="3155">
+<interface name="files_search_etc" lineno="3156">
 <summary>
 Search the contents of /etc directories.
 </summary>
@@ -123625,7 +123625,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_setattr_etc_dirs" lineno="3173">
+<interface name="files_setattr_etc_dirs" lineno="3174">
 <summary>
 Set the attributes of the /etc directories.
 </summary>
@@ -123635,7 +123635,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_list_etc" lineno="3191">
+<interface name="files_list_etc" lineno="3192">
 <summary>
 List the contents of /etc directories.
 </summary>
@@ -123645,7 +123645,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_write_etc_dirs" lineno="3209">
+<interface name="files_dontaudit_write_etc_dirs" lineno="3210">
 <summary>
 Do not audit attempts to write to /etc dirs.
 </summary>
@@ -123655,7 +123655,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_etc_dirs" lineno="3227">
+<interface name="files_rw_etc_dirs" lineno="3228">
 <summary>
 Add and remove entries from /etc directories.
 </summary>
@@ -123665,7 +123665,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_remove_etc_dir" lineno="3245">
+<interface name="files_dontaudit_remove_etc_dir" lineno="3246">
 <summary>
 Dontaudit remove dir /etc directories.
 </summary>
@@ -123675,7 +123675,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_etc_dirs" lineno="3264">
+<interface name="files_manage_etc_dirs" lineno="3265">
 <summary>
 Manage generic directories in /etc
 </summary>
@@ -123686,7 +123686,7 @@ Domain allowed access
 </param>
 
 </interface>
-<interface name="files_read_etc_files" lineno="3316">
+<interface name="files_read_etc_files" lineno="3317">
 <summary>
 Read generic files in /etc.
 </summary>
@@ -123730,7 +123730,7 @@ Domain allowed access.
 </param>
 <infoflow type="read" weight="10"/>
 </interface>
-<interface name="files_dontaudit_write_etc_files" lineno="3337">
+<interface name="files_dontaudit_write_etc_files" lineno="3338">
 <summary>
 Do not audit attempts to write generic files in /etc.
 </summary>
@@ -123740,7 +123740,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_etc_files" lineno="3356">
+<interface name="files_rw_etc_files" lineno="3357">
 <summary>
 Read and write generic files in /etc.
 </summary>
@@ -123751,7 +123751,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_manage_etc_files" lineno="3378">
+<interface name="files_manage_etc_files" lineno="3379">
 <summary>
 Create, read, write, and delete generic
 files in /etc.
@@ -123763,7 +123763,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_dontaudit_access_check_etc" lineno="3398">
+<interface name="files_dontaudit_access_check_etc" lineno="3399">
 <summary>
 Do not audit attempts to check the
 access on etc files
@@ -123774,7 +123774,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_etc_files" lineno="3416">
+<interface name="files_delete_etc_files" lineno="3417">
 <summary>
 Delete system configuration files in /etc.
 </summary>
@@ -123784,7 +123784,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_etc_dir_entry" lineno="3434">
+<interface name="files_delete_etc_dir_entry" lineno="3435">
 <summary>
 Remove entries from the etc directory.
 </summary>
@@ -123794,7 +123794,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_exec_etc_files" lineno="3452">
+<interface name="files_exec_etc_files" lineno="3453">
 <summary>
 Execute generic files in /etc.
 </summary>
@@ -123804,7 +123804,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabel_etc_files" lineno="3472">
+<interface name="files_relabel_etc_files" lineno="3473">
 <summary>
 Relabel from and to generic files in /etc.
 </summary>
@@ -123814,7 +123814,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelfrom_etc_dirs" lineno="3491">
+<interface name="files_relabelfrom_etc_dirs" lineno="3492">
 <summary>
 Relabel from generic dirs in /etc.
 </summary>
@@ -123824,7 +123824,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_etc_symlinks" lineno="3509">
+<interface name="files_read_etc_symlinks" lineno="3510">
 <summary>
 Read symbolic links in /etc.
 </summary>
@@ -123834,7 +123834,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_etc_symlinks" lineno="3527">
+<interface name="files_manage_etc_symlinks" lineno="3528">
 <summary>
 Create, read, write, and delete symbolic links in /etc.
 </summary>
@@ -123844,7 +123844,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_etc_filetrans" lineno="3561">
+<interface name="files_etc_filetrans" lineno="3562">
 <summary>
 Create objects in /etc with a private
 type using a type_transition.
@@ -123870,7 +123870,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_create_boot_flag" lineno="3591">
+<interface name="files_create_boot_flag" lineno="3592">
 <summary>
 Create a boot flag.
 </summary>
@@ -123892,7 +123892,7 @@ The name of the object being created.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_create_named_trans_boot_flag" lineno="3627">
+<interface name="files_create_named_trans_boot_flag" lineno="3628">
 <summary>
 Create a boot flag with file trans to specified type.
 </summary>
@@ -123919,7 +123919,7 @@ The name of the object being created.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_delete_boot_flag" lineno="3653">
+<interface name="files_delete_boot_flag" lineno="3654">
 <summary>
 Delete a boot flag.
 </summary>
@@ -123936,7 +123936,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_read_etc_runtime_files" lineno="3691">
+<interface name="files_read_etc_runtime_files" lineno="3692">
 <summary>
 Read files in /etc that are dynamically
 created on boot, such as mtab.
@@ -123966,7 +123966,7 @@ Domain allowed access.
 <infoflow type="read" weight="10" />
 <rolecap/>
 </interface>
-<interface name="files_dontaudit_setattr_etc_runtime_files" lineno="3711">
+<interface name="files_dontaudit_setattr_etc_runtime_files" lineno="3712">
 <summary>
 Do not audit attempts to set the attributes of the etc_runtime files
 </summary>
@@ -123976,7 +123976,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_write_etc_runtime_files" lineno="3729">
+<interface name="files_dontaudit_write_etc_runtime_files" lineno="3730">
 <summary>
 Do not audit attempts to write etc_runtime files
 </summary>
@@ -123986,7 +123986,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_read_etc_runtime_files" lineno="3749">
+<interface name="files_dontaudit_read_etc_runtime_files" lineno="3750">
 <summary>
 Do not audit attempts to read files
 in /etc that are dynamically
@@ -123998,7 +123998,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_etc_runtime_files" lineno="3769">
+<interface name="files_rw_etc_runtime_files" lineno="3770">
 <summary>
 Read and write files in /etc that are dynamically
 created on boot, such as mtab.
@@ -124010,7 +124010,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_manage_etc_runtime_files" lineno="3792">
+<interface name="files_manage_etc_runtime_files" lineno="3793">
 <summary>
 Create, read, write, and delete files in
 /etc that are dynamically created on boot,
@@ -124023,7 +124023,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_etc_filetrans_etc_runtime" lineno="3822">
+<interface name="files_etc_filetrans_etc_runtime" lineno="3823">
 <summary>
 Create, etc runtime objects with an automatic
 type transition.
@@ -124044,7 +124044,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_isid_type_dirs" lineno="3841">
+<interface name="files_getattr_isid_type_dirs" lineno="3842">
 <summary>
 Getattr of directories on new filesystems
 that have not yet been labeled.
@@ -124055,7 +124055,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_isid_type" lineno="3860">
+<interface name="files_getattr_isid_type" lineno="3861">
 <summary>
 Getattr all file opbjects on new filesystems
 that have not yet been labeled.
@@ -124066,7 +124066,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_setattr_isid_type_dirs" lineno="3879">
+<interface name="files_setattr_isid_type_dirs" lineno="3880">
 <summary>
 Setattr of directories on new filesystems
 that have not yet been labeled.
@@ -124077,7 +124077,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_isid_type_dirs" lineno="3898">
+<interface name="files_dontaudit_search_isid_type_dirs" lineno="3899">
 <summary>
 Do not audit attempts to search directories on new filesystems
 that have not yet been labeled.
@@ -124088,7 +124088,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_list_isid_type_dirs" lineno="3917">
+<interface name="files_list_isid_type_dirs" lineno="3918">
 <summary>
 List the contents of directories on new filesystems
 that have not yet been labeled.
@@ -124099,7 +124099,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_isid_type_dirs" lineno="3936">
+<interface name="files_rw_isid_type_dirs" lineno="3937">
 <summary>
 Read and write directories on new filesystems
 that have not yet been labeled.
@@ -124110,7 +124110,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_isid_type_dirs" lineno="3955">
+<interface name="files_delete_isid_type_dirs" lineno="3956">
 <summary>
 Delete directories on new filesystems
 that have not yet been labeled.
@@ -124121,7 +124121,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_exec_isid_files" lineno="3973">
+<interface name="files_exec_isid_files" lineno="3974">
 <summary>
 Execute files on new filesystems
 that have not yet been labeled.
@@ -124132,7 +124132,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_mounton_isid" lineno="3992">
+<interface name="files_mounton_isid" lineno="3993">
 <summary>
 Moundon directories on new filesystems
 that have not yet been labeled.
@@ -124143,7 +124143,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelfrom_isid_type" lineno="4011">
+<interface name="files_relabelfrom_isid_type" lineno="4012">
 <summary>
 Relabelfrom all file opbjects on new filesystems
 that have not yet been labeled.
@@ -124154,7 +124154,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_isid_type_dirs" lineno="4030">
+<interface name="files_manage_isid_type_dirs" lineno="4031">
 <summary>
 Create, read, write, and delete directories
 on new filesystems that have not yet been labeled.
@@ -124165,7 +124165,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_mounton_isid_type_dirs" lineno="4049">
+<interface name="files_mounton_isid_type_dirs" lineno="4050">
 <summary>
 Mount a filesystem on a directory on new filesystems
 that has not yet been labeled.
@@ -124176,7 +124176,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_mounton_isid_type_chr_file" lineno="4068">
+<interface name="files_mounton_isid_type_chr_file" lineno="4069">
 <summary>
 Mount a filesystem on a new chr_file
 that has not yet been labeled.
@@ -124187,7 +124187,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_isid_type_files" lineno="4087">
+<interface name="files_read_isid_type_files" lineno="4088">
 <summary>
 Read files on new filesystems
 that have not yet been labeled.
@@ -124198,7 +124198,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_isid_type_files" lineno="4106">
+<interface name="files_delete_isid_type_files" lineno="4107">
 <summary>
 Delete files on new filesystems
 that have not yet been labeled.
@@ -124209,7 +124209,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_isid_type_symlinks" lineno="4125">
+<interface name="files_delete_isid_type_symlinks" lineno="4126">
 <summary>
 Delete symbolic links on new filesystems
 that have not yet been labeled.
@@ -124220,7 +124220,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_isid_type_fifo_files" lineno="4144">
+<interface name="files_delete_isid_type_fifo_files" lineno="4145">
 <summary>
 Delete named pipes on new filesystems
 that have not yet been labeled.
@@ -124231,7 +124231,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_isid_type_sock_files" lineno="4163">
+<interface name="files_delete_isid_type_sock_files" lineno="4164">
 <summary>
 Delete named sockets on new filesystems
 that have not yet been labeled.
@@ -124242,7 +124242,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_isid_type_blk_files" lineno="4182">
+<interface name="files_delete_isid_type_blk_files" lineno="4183">
 <summary>
 Delete block files on new filesystems
 that have not yet been labeled.
@@ -124253,7 +124253,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_write_isid_chr_files" lineno="4201">
+<interface name="files_dontaudit_write_isid_chr_files" lineno="4202">
 <summary>
 Do not audit attempts to write to character
 files that have not yet been labeled.
@@ -124264,7 +124264,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_isid_type_chr_files" lineno="4220">
+<interface name="files_delete_isid_type_chr_files" lineno="4221">
 <summary>
 Delete chr files on new filesystems
 that have not yet been labeled.
@@ -124275,7 +124275,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_isid_type_files" lineno="4239">
+<interface name="files_manage_isid_type_files" lineno="4240">
 <summary>
 Create, read, write, and delete files
 on new filesystems that have not yet been labeled.
@@ -124286,7 +124286,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_isid_type_symlinks" lineno="4258">
+<interface name="files_manage_isid_type_symlinks" lineno="4259">
 <summary>
 Create, read, write, and delete symbolic links
 on new filesystems that have not yet been labeled.
@@ -124297,7 +124297,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_isid_type_blk_files" lineno="4277">
+<interface name="files_rw_isid_type_blk_files" lineno="4278">
 <summary>
 Read and write block device nodes on new filesystems
 that have not yet been labeled.
@@ -124308,7 +124308,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_inherited_isid_type_files" lineno="4296">
+<interface name="files_rw_inherited_isid_type_files" lineno="4297">
 <summary>
 rw any files inherited from another process
 on new filesystems that have not yet been labeled.
@@ -124319,7 +124319,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_isid_type_blk_files" lineno="4315">
+<interface name="files_manage_isid_type_blk_files" lineno="4316">
 <summary>
 Create, read, write, and delete block device nodes
 on new filesystems that have not yet been labeled.
@@ -124330,7 +124330,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_isid_type_chr_files" lineno="4334">
+<interface name="files_manage_isid_type_chr_files" lineno="4335">
 <summary>
 Create, read, write, and delete character device nodes
 on new filesystems that have not yet been labeled.
@@ -124341,7 +124341,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_home_dir" lineno="4353">
+<interface name="files_getattr_home_dir" lineno="4354">
 <summary>
 Get the attributes of the home directories root
 (/home).
@@ -124352,7 +124352,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_getattr_home_dir" lineno="4374">
+<interface name="files_dontaudit_getattr_home_dir" lineno="4375">
 <summary>
 Do not audit attempts to get the
 attributes of the home directories root
@@ -124364,7 +124364,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_access_check_home_dir" lineno="4394">
+<interface name="files_dontaudit_access_check_home_dir" lineno="4395">
 <summary>
 Do not audit attempts to check the
 access on home root directory.
@@ -124375,7 +124375,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_search_home" lineno="4414">
+<interface name="files_search_home" lineno="4415">
 <summary>
 Search home directories root (/home).
 </summary>
@@ -124385,7 +124385,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_home" lineno="4434">
+<interface name="files_dontaudit_search_home" lineno="4435">
 <summary>
 Do not audit attempts to search
 home directories root (/home).
@@ -124396,7 +124396,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_list_home" lineno="4454">
+<interface name="files_dontaudit_list_home" lineno="4455">
 <summary>
 Do not audit attempts to list
 home directories root (/home).
@@ -124407,7 +124407,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_list_home" lineno="4473">
+<interface name="files_list_home" lineno="4474">
 <summary>
 Get listing of home directories.
 </summary>
@@ -124417,7 +124417,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelto_home" lineno="4492">
+<interface name="files_relabelto_home" lineno="4493">
 <summary>
 Relabel to user home root (/home).
 </summary>
@@ -124427,7 +124427,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_home_filetrans" lineno="4525">
+<interface name="files_home_filetrans" lineno="4526">
 <summary>
 Create objects in /home.
 </summary>
@@ -124452,7 +124452,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_lost_found_dirs" lineno="4543">
+<interface name="files_getattr_lost_found_dirs" lineno="4544">
 <summary>
 Get the attributes of lost+found directories.
 </summary>
@@ -124462,7 +124462,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_getattr_lost_found_dirs" lineno="4562">
+<interface name="files_dontaudit_getattr_lost_found_dirs" lineno="4563">
 <summary>
 Do not audit attempts to get the attributes of
 lost+found directories.
@@ -124473,7 +124473,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_list_lost_found" lineno="4580">
+<interface name="files_list_lost_found" lineno="4581">
 <summary>
 List the contents of lost+found directories.
 </summary>
@@ -124483,7 +124483,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_lost_found" lineno="4600">
+<interface name="files_manage_lost_found" lineno="4601">
 <summary>
 Create, read, write, and delete objects in
 lost+found directories.
@@ -124495,7 +124495,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_search_mnt" lineno="4622">
+<interface name="files_search_mnt" lineno="4623">
 <summary>
 Search the contents of /mnt.
 </summary>
@@ -124505,7 +124505,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_mnt" lineno="4640">
+<interface name="files_dontaudit_search_mnt" lineno="4641">
 <summary>
 Do not audit attempts to search /mnt.
 </summary>
@@ -124515,7 +124515,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_list_mnt" lineno="4658">
+<interface name="files_list_mnt" lineno="4659">
 <summary>
 List the contents of /mnt.
 </summary>
@@ -124525,7 +124525,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_list_mnt" lineno="4676">
+<interface name="files_dontaudit_list_mnt" lineno="4677">
 <summary>
 dontaudit List the contents of /mnt.
 </summary>
@@ -124535,7 +124535,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_access_check_mnt" lineno="4695">
+<interface name="files_dontaudit_access_check_mnt" lineno="4696">
 <summary>
 Do not audit attempts to check the
 write access on mnt files
@@ -124546,7 +124546,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_mounton_mnt" lineno="4712">
+<interface name="files_mounton_mnt" lineno="4713">
 <summary>
 Mount a filesystem on /mnt.
 </summary>
@@ -124556,7 +124556,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_mnt_dirs" lineno="4731">
+<interface name="files_manage_mnt_dirs" lineno="4732">
 <summary>
 Create, read, write, and delete directories in /mnt.
 </summary>
@@ -124567,7 +124567,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_manage_mnt_files" lineno="4749">
+<interface name="files_manage_mnt_files" lineno="4750">
 <summary>
 Create, read, write, and delete files in /mnt.
 </summary>
@@ -124577,7 +124577,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_mnt_files" lineno="4767">
+<interface name="files_read_mnt_files" lineno="4768">
 <summary>
 read files in /mnt.
 </summary>
@@ -124587,7 +124587,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_mnt_symlinks" lineno="4785">
+<interface name="files_read_mnt_symlinks" lineno="4786">
 <summary>
 Read symbolic links in /mnt.
 </summary>
@@ -124597,7 +124597,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_mnt_symlinks" lineno="4803">
+<interface name="files_manage_mnt_symlinks" lineno="4804">
 <summary>
 Create, read, write, and delete symbolic links in /mnt.
 </summary>
@@ -124607,7 +124607,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_search_kernel_modules" lineno="4821">
+<interface name="files_search_kernel_modules" lineno="4822">
 <summary>
 Search the contents of the kernel module directories.
 </summary>
@@ -124617,7 +124617,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_list_kernel_modules" lineno="4840">
+<interface name="files_list_kernel_modules" lineno="4841">
 <summary>
 List the contents of the kernel module directories.
 </summary>
@@ -124627,7 +124627,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_kernel_modules" lineno="4858">
+<interface name="files_getattr_kernel_modules" lineno="4859">
 <summary>
 Get the attributes of kernel module files.
 </summary>
@@ -124637,7 +124637,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_kernel_modules" lineno="4876">
+<interface name="files_read_kernel_modules" lineno="4877">
 <summary>
 Read kernel module files.
 </summary>
@@ -124647,7 +124647,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_write_kernel_modules" lineno="4896">
+<interface name="files_write_kernel_modules" lineno="4897">
 <summary>
 Write kernel module files.
 </summary>
@@ -124657,7 +124657,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_kernel_modules" lineno="4915">
+<interface name="files_delete_kernel_modules" lineno="4916">
 <summary>
 Delete kernel module files.
 </summary>
@@ -124667,7 +124667,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_kernel_modules" lineno="4935">
+<interface name="files_manage_kernel_modules" lineno="4936">
 <summary>
 Create, read, write, and delete
 kernel module files.
@@ -124679,7 +124679,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_relabel_kernel_modules" lineno="4953">
+<interface name="files_relabel_kernel_modules" lineno="4954">
 <summary>
 Relabel from and to kernel module files.
 </summary>
@@ -124689,7 +124689,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_kernel_modules_filetrans" lineno="4988">
+<interface name="files_kernel_modules_filetrans" lineno="4989">
 <summary>
 Create objects in the kernel module directories
 with a private type via an automatic type transition.
@@ -124715,7 +124715,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_list_world_readable" lineno="5007">
+<interface name="files_list_world_readable" lineno="5008">
 <summary>
 List world-readable directories.
 </summary>
@@ -124726,7 +124726,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_read_world_readable_files" lineno="5026">
+<interface name="files_read_world_readable_files" lineno="5027">
 <summary>
 Read world-readable files.
 </summary>
@@ -124737,7 +124737,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_read_world_readable_symlinks" lineno="5045">
+<interface name="files_read_world_readable_symlinks" lineno="5046">
 <summary>
 Read world-readable symbolic links.
 </summary>
@@ -124748,7 +124748,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_read_world_readable_pipes" lineno="5063">
+<interface name="files_read_world_readable_pipes" lineno="5064">
 <summary>
 Read world-readable named pipes.
 </summary>
@@ -124758,7 +124758,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_world_readable_sockets" lineno="5081">
+<interface name="files_read_world_readable_sockets" lineno="5082">
 <summary>
 Read world-readable sockets.
 </summary>
@@ -124768,7 +124768,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_system_conf_files" lineno="5099">
+<interface name="files_read_system_conf_files" lineno="5100">
 <summary>
 Read manageable system configuration files in /etc
 </summary>
@@ -124778,7 +124778,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_system_conf_files" lineno="5119">
+<interface name="files_manage_system_conf_files" lineno="5120">
 <summary>
 Manage manageable system configuration files in /etc.
 </summary>
@@ -124788,7 +124788,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_filetrans_system_conf_named_files" lineno="5138">
+<interface name="files_filetrans_system_conf_named_files" lineno="5139">
 <summary>
 File name transition for system configuration files in /etc.
 </summary>
@@ -124798,7 +124798,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelto_system_conf_files" lineno="5175">
+<interface name="files_relabelto_system_conf_files" lineno="5176">
 <summary>
 Relabel manageable system configuration files in /etc.
 </summary>
@@ -124808,7 +124808,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelfrom_system_conf_files" lineno="5193">
+<interface name="files_relabelfrom_system_conf_files" lineno="5194">
 <summary>
 Relabel manageable system configuration files in /etc.
 </summary>
@@ -124818,7 +124818,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_etc_filetrans_system_conf" lineno="5212">
+<interface name="files_etc_filetrans_system_conf" lineno="5213">
 <summary>
 Create files in /etc with the type used for
 the manageable system config files.
@@ -124829,7 +124829,7 @@ The type of the process performing this action.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_system_db_files" lineno="5230">
+<interface name="files_manage_system_db_files" lineno="5231">
 <summary>
 Manage manageable system db files in /var/lib.
 </summary>
@@ -124839,7 +124839,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_filetrans_system_db_named_files" lineno="5249">
+<interface name="files_filetrans_system_db_named_files" lineno="5250">
 <summary>
 File name transition for system db files in /var/lib.
 </summary>
@@ -124849,7 +124849,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_associate_tmp" lineno="5270">
+<interface name="files_associate_tmp" lineno="5271">
 <summary>
 Allow the specified type to associate
 to a filesystem with the type of the
@@ -124861,7 +124861,7 @@ Type of the file to associate.
 </summary>
 </param>
 </interface>
-<interface name="files_associate_rootfs" lineno="5290">
+<interface name="files_associate_rootfs" lineno="5291">
 <summary>
 Allow the specified type to associate
 to a filesystem with the type of the
@@ -124873,7 +124873,7 @@ Type of the file to associate.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_tmp_dirs" lineno="5308">
+<interface name="files_getattr_tmp_dirs" lineno="5309">
 <summary>
 Get the	attributes of the tmp directory (/tmp).
 </summary>
@@ -124883,7 +124883,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_access_check_tmp" lineno="5328">
+<interface name="files_dontaudit_access_check_tmp" lineno="5329">
 <summary>
 Do not audit attempts to check the
 access on tmp files
@@ -124894,7 +124894,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_getattr_tmp_dirs" lineno="5347">
+<interface name="files_dontaudit_getattr_tmp_dirs" lineno="5348">
 <summary>
 Do not audit attempts to get the
 attributes of the tmp directory (/tmp).
@@ -124905,7 +124905,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_search_tmp" lineno="5365">
+<interface name="files_search_tmp" lineno="5366">
 <summary>
 Search the tmp directory (/tmp).
 </summary>
@@ -124915,7 +124915,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_tmp" lineno="5385">
+<interface name="files_dontaudit_search_tmp" lineno="5386">
 <summary>
 Do not audit attempts to search the tmp directory (/tmp).
 </summary>
@@ -124925,7 +124925,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_list_tmp" lineno="5403">
+<interface name="files_list_tmp" lineno="5404">
 <summary>
 Read the tmp directory (/tmp).
 </summary>
@@ -124935,7 +124935,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_list_tmp" lineno="5422">
+<interface name="files_dontaudit_list_tmp" lineno="5423">
 <summary>
 Do not audit listing of the tmp directory (/tmp).
 </summary>
@@ -124945,7 +124945,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_generic_tmp_dir" lineno="5440">
+<interface name="files_rw_generic_tmp_dir" lineno="5441">
 <summary>
 Allow read and write to the tmp directory (/tmp).
 </summary>
@@ -124955,7 +124955,7 @@ Domain not to audit.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_tmp_dir_entry" lineno="5459">
+<interface name="files_delete_tmp_dir_entry" lineno="5460">
 <summary>
 Remove entries from the tmp directory.
 </summary>
@@ -124965,7 +124965,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_generic_tmp_files" lineno="5478">
+<interface name="files_read_generic_tmp_files" lineno="5479">
 <summary>
 Read files in the tmp directory (/tmp).
 </summary>
@@ -124975,7 +124975,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_generic_tmp_dirs" lineno="5496">
+<interface name="files_manage_generic_tmp_dirs" lineno="5497">
 <summary>
 Manage temporary directories in /tmp.
 </summary>
@@ -124985,7 +124985,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_execmod_tmp" lineno="5522">
+<interface name="files_execmod_tmp" lineno="5523">
 <summary>
 Allow shared library text relocations in tmp files.
 </summary>
@@ -125003,7 +125003,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_generic_tmp_files" lineno="5540">
+<interface name="files_manage_generic_tmp_files" lineno="5541">
 <summary>
 Manage temporary files and directories in /tmp.
 </summary>
@@ -125013,7 +125013,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_generic_tmp_symlinks" lineno="5558">
+<interface name="files_read_generic_tmp_symlinks" lineno="5559">
 <summary>
 Read symbolic links in the tmp directory (/tmp).
 </summary>
@@ -125023,7 +125023,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_generic_tmp_sockets" lineno="5576">
+<interface name="files_rw_generic_tmp_sockets" lineno="5577">
 <summary>
 Read and write generic named sockets in the tmp directory (/tmp).
 </summary>
@@ -125033,7 +125033,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelfrom_tmp_dirs" lineno="5594">
+<interface name="files_relabelfrom_tmp_dirs" lineno="5595">
 <summary>
 Relabel a dir from the type used in /tmp.
 </summary>
@@ -125043,7 +125043,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelfrom_tmp_files" lineno="5612">
+<interface name="files_relabelfrom_tmp_files" lineno="5613">
 <summary>
 Relabel a file from the type used in /tmp.
 </summary>
@@ -125053,7 +125053,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_setattr_all_tmp_dirs" lineno="5630">
+<interface name="files_setattr_all_tmp_dirs" lineno="5631">
 <summary>
 Set the attributes of all tmp directories.
 </summary>
@@ -125063,7 +125063,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_inherited_tmp_files" lineno="5648">
+<interface name="files_read_inherited_tmp_files" lineno="5649">
 <summary>
 Allow caller to read inherited tmp files.
 </summary>
@@ -125073,7 +125073,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_append_inherited_tmp_files" lineno="5666">
+<interface name="files_append_inherited_tmp_files" lineno="5667">
 <summary>
 Allow caller to append inherited tmp files.
 </summary>
@@ -125083,7 +125083,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_inherited_tmp_file" lineno="5684">
+<interface name="files_rw_inherited_tmp_file" lineno="5685">
 <summary>
 Allow caller to read and write inherited tmp files.
 </summary>
@@ -125093,7 +125093,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_list_all_tmp" lineno="5702">
+<interface name="files_list_all_tmp" lineno="5703">
 <summary>
 List all tmp directories.
 </summary>
@@ -125103,7 +125103,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabel_all_tmp_dirs" lineno="5722">
+<interface name="files_relabel_all_tmp_dirs" lineno="5723">
 <summary>
 Relabel to and from all temporary
 directory types.
@@ -125115,7 +125115,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_dontaudit_getattr_all_tmp_files" lineno="5743">
+<interface name="files_dontaudit_getattr_all_tmp_files" lineno="5744">
 <summary>
 Do not audit attempts to get the attributes
 of all tmp files.
@@ -125126,7 +125126,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_all_tmp_files" lineno="5762">
+<interface name="files_getattr_all_tmp_files" lineno="5763">
 <summary>
 Allow attempts to get the attributes
 of all tmp files.
@@ -125137,7 +125137,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabel_all_tmp_files" lineno="5782">
+<interface name="files_relabel_all_tmp_files" lineno="5783">
 <summary>
 Relabel to and from all temporary
 file types.
@@ -125149,7 +125149,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_dontaudit_getattr_all_tmp_sockets" lineno="5803">
+<interface name="files_dontaudit_getattr_all_tmp_sockets" lineno="5804">
 <summary>
 Do not audit attempts to get the attributes
 of all tmp sock_file.
@@ -125160,7 +125160,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_read_all_tmp_files" lineno="5821">
+<interface name="files_read_all_tmp_files" lineno="5822">
 <summary>
 Read all tmp files.
 </summary>
@@ -125170,7 +125170,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_tmp_file_leaks" lineno="5840">
+<interface name="files_dontaudit_tmp_file_leaks" lineno="5841">
 <summary>
 Do not audit attempts to read or write
 all leaked tmpfiles files.
@@ -125181,7 +125181,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_tmp_file_leaks" lineno="5859">
+<interface name="files_rw_tmp_file_leaks" lineno="5860">
 <summary>
 Do allow attempts to read or write
 all leaked tmpfiles files.
@@ -125192,7 +125192,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_tmp_filetrans" lineno="5893">
+<interface name="files_tmp_filetrans" lineno="5894">
 <summary>
 Create an object in the tmp directories, with a private
 type using a type transition.
@@ -125218,7 +125218,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_purge_tmp" lineno="5911">
+<interface name="files_purge_tmp" lineno="5912">
 <summary>
 Delete the contents of /tmp.
 </summary>
@@ -125228,7 +125228,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_setattr_usr_dirs" lineno="5944">
+<interface name="files_setattr_usr_dirs" lineno="5945">
 <summary>
 Set the attributes of the /usr directory.
 </summary>
@@ -125238,7 +125238,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_search_usr" lineno="5962">
+<interface name="files_search_usr" lineno="5963">
 <summary>
 Search the content of /usr.
 </summary>
@@ -125248,7 +125248,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_list_usr" lineno="5981">
+<interface name="files_list_usr" lineno="5982">
 <summary>
 List the contents of generic
 directories in /usr.
@@ -125259,7 +125259,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_write_usr_dirs" lineno="5999">
+<interface name="files_dontaudit_write_usr_dirs" lineno="6000">
 <summary>
 Do not audit write of /usr dirs
 </summary>
@@ -125269,7 +125269,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_usr_dirs" lineno="6017">
+<interface name="files_rw_usr_dirs" lineno="6018">
 <summary>
 Add and remove entries from /usr directories.
 </summary>
@@ -125279,7 +125279,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_rw_usr_dirs" lineno="6036">
+<interface name="files_dontaudit_rw_usr_dirs" lineno="6037">
 <summary>
 Do not audit attempts to add and remove
 entries from /usr directories.
@@ -125290,7 +125290,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_usr_dirs" lineno="6054">
+<interface name="files_delete_usr_dirs" lineno="6055">
 <summary>
 Delete generic directories in /usr in the caller domain.
 </summary>
@@ -125300,7 +125300,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_usr_files" lineno="6072">
+<interface name="files_delete_usr_files" lineno="6073">
 <summary>
 Delete generic files in /usr in the caller domain.
 </summary>
@@ -125310,7 +125310,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_usr_files" lineno="6090">
+<interface name="files_getattr_usr_files" lineno="6091">
 <summary>
 Get the attributes of files in /usr.
 </summary>
@@ -125320,7 +125320,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_usr_files" lineno="6126">
+<interface name="files_read_usr_files" lineno="6127">
 <summary>
 Read generic files in /usr.
 </summary>
@@ -125348,7 +125348,7 @@ Domain allowed access.
 </param>
 <infoflow type="read" weight="10"/>
 </interface>
-<interface name="files_exec_usr_files" lineno="6146">
+<interface name="files_exec_usr_files" lineno="6147">
 <summary>
 Execute generic programs in /usr in the caller domain.
 </summary>
@@ -125358,7 +125358,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_write_usr_files" lineno="6166">
+<interface name="files_dontaudit_write_usr_files" lineno="6167">
 <summary>
 dontaudit write of /usr files
 </summary>
@@ -125368,7 +125368,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_usr_files" lineno="6184">
+<interface name="files_manage_usr_files" lineno="6185">
 <summary>
 Create, read, write, and delete files in the /usr directory.
 </summary>
@@ -125378,7 +125378,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelto_usr_files" lineno="6202">
+<interface name="files_relabelto_usr_files" lineno="6203">
 <summary>
 Relabel a file to the type used in /usr.
 </summary>
@@ -125388,7 +125388,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelfrom_usr_files" lineno="6220">
+<interface name="files_relabelfrom_usr_files" lineno="6221">
 <summary>
 Relabel a file from the type used in /usr.
 </summary>
@@ -125398,7 +125398,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelfrom_var_dirs" lineno="6239">
+<interface name="files_relabelfrom_var_dirs" lineno="6240">
 <summary>
 Relabel a dir from the type used in /var.
 </summary>
@@ -125408,7 +125408,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabel_var_dirs" lineno="6257">
+<interface name="files_relabel_var_dirs" lineno="6258">
 <summary>
 Relabel a dir with the type used in /var.
 </summary>
@@ -125418,7 +125418,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelfrom_var_lib_dirs" lineno="6275">
+<interface name="files_relabelfrom_var_lib_dirs" lineno="6276">
 <summary>
 Relabel a dir from the type used in /var/lib.
 </summary>
@@ -125428,7 +125428,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabel_var_lib_dirs" lineno="6293">
+<interface name="files_relabel_var_lib_dirs" lineno="6294">
 <summary>
 Relabel a dir with the type used in /var/lib.
 </summary>
@@ -125438,7 +125438,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabelfrom_var_run_dirs" lineno="6311">
+<interface name="files_relabelfrom_var_run_dirs" lineno="6312">
 <summary>
 Relabel from a dir from the type used in /var/run.
 </summary>
@@ -125448,7 +125448,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabel_var_run_dirs" lineno="6329">
+<interface name="files_relabel_var_run_dirs" lineno="6330">
 <summary>
 Relabel a dir from the type used in /var/run.
 </summary>
@@ -125458,7 +125458,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_usr_symlinks" lineno="6348">
+<interface name="files_read_usr_symlinks" lineno="6349">
 <summary>
 Read symbolic links in /usr.
 </summary>
@@ -125468,7 +125468,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_usr_filetrans" lineno="6381">
+<interface name="files_usr_filetrans" lineno="6382">
 <summary>
 Create objects in the /usr directory
 </summary>
@@ -125493,7 +125493,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_src" lineno="6399">
+<interface name="files_dontaudit_search_src" lineno="6400">
 <summary>
 Do not audit attempts to search /usr/src.
 </summary>
@@ -125503,7 +125503,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_usr_src_files" lineno="6417">
+<interface name="files_getattr_usr_src_files" lineno="6418">
 <summary>
 Get the attributes of files in /usr/src.
 </summary>
@@ -125513,7 +125513,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_usr_src_files" lineno="6438">
+<interface name="files_read_usr_src_files" lineno="6439">
 <summary>
 Read files in /usr/src.
 </summary>
@@ -125523,7 +125523,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_exec_usr_src_files" lineno="6459">
+<interface name="files_exec_usr_src_files" lineno="6460">
 <summary>
 Execute programs in /usr/src in the caller domain.
 </summary>
@@ -125533,7 +125533,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_create_kernel_symbol_table" lineno="6479">
+<interface name="files_create_kernel_symbol_table" lineno="6480">
 <summary>
 Install a system.map into the /boot directory.
 </summary>
@@ -125543,7 +125543,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaduit_getattr_kernel_symbol_table" lineno="6498">
+<interface name="files_dontaduit_getattr_kernel_symbol_table" lineno="6499">
 <summary>
 Dontaudit getattr attempts on the system.map file
 </summary>
@@ -125553,7 +125553,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_read_kernel_symbol_table" lineno="6516">
+<interface name="files_read_kernel_symbol_table" lineno="6517">
 <summary>
 Read system.map in the /boot directory.
 </summary>
@@ -125563,7 +125563,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_kernel_symbol_table" lineno="6535">
+<interface name="files_delete_kernel_symbol_table" lineno="6536">
 <summary>
 Delete a system.map in the /boot directory.
 </summary>
@@ -125573,7 +125573,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_search_var" lineno="6554">
+<interface name="files_search_var" lineno="6555">
 <summary>
 Search the contents of /var.
 </summary>
@@ -125583,7 +125583,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_write_var_dirs" lineno="6572">
+<interface name="files_dontaudit_write_var_dirs" lineno="6573">
 <summary>
 Do not audit attempts to write to /var.
 </summary>
@@ -125593,7 +125593,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_write_var_dirs" lineno="6590">
+<interface name="files_write_var_dirs" lineno="6591">
 <summary>
 Allow attempts to write to /var.dirs
 </summary>
@@ -125603,7 +125603,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_var" lineno="6609">
+<interface name="files_dontaudit_search_var" lineno="6610">
 <summary>
 Do not audit attempts to search
 the contents of /var.
@@ -125614,7 +125614,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_list_var" lineno="6627">
+<interface name="files_list_var" lineno="6628">
 <summary>
 List the contents of /var.
 </summary>
@@ -125624,7 +125624,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_list_var" lineno="6645">
+<interface name="files_dontaudit_list_var" lineno="6646">
 <summary>
 Do not audit listing of the var directory (/var).
 </summary>
@@ -125634,7 +125634,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_var_dirs" lineno="6664">
+<interface name="files_manage_var_dirs" lineno="6665">
 <summary>
 Create, read, write, and delete directories
 in the /var directory.
@@ -125645,7 +125645,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_var_files" lineno="6682">
+<interface name="files_read_var_files" lineno="6683">
 <summary>
 Read files in the /var directory.
 </summary>
@@ -125655,7 +125655,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_append_var_files" lineno="6700">
+<interface name="files_append_var_files" lineno="6701">
 <summary>
 Append files in the /var directory.
 </summary>
@@ -125665,7 +125665,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_var_files" lineno="6718">
+<interface name="files_rw_var_files" lineno="6719">
 <summary>
 Read and write files in the /var directory.
 </summary>
@@ -125675,7 +125675,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_rw_var_files" lineno="6737">
+<interface name="files_dontaudit_rw_var_files" lineno="6738">
 <summary>
 Do not audit attempts to read and write
 files in the /var directory.
@@ -125686,7 +125686,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_var_files" lineno="6755">
+<interface name="files_manage_var_files" lineno="6756">
 <summary>
 Create, read, write, and delete files in the /var directory.
 </summary>
@@ -125696,7 +125696,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_var_symlinks" lineno="6773">
+<interface name="files_read_var_symlinks" lineno="6774">
 <summary>
 Read symbolic links in the /var directory.
 </summary>
@@ -125706,7 +125706,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_var_symlinks" lineno="6792">
+<interface name="files_manage_var_symlinks" lineno="6793">
 <summary>
 Create, read, write, and delete symbolic
 links in the /var directory.
@@ -125717,7 +125717,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_var_filetrans" lineno="6825">
+<interface name="files_var_filetrans" lineno="6826">
 <summary>
 Create objects in the /var directory
 </summary>
@@ -125742,7 +125742,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_var_lib_dirs" lineno="6843">
+<interface name="files_getattr_var_lib_dirs" lineno="6844">
 <summary>
 Get the attributes of the /var/lib directory.
 </summary>
@@ -125752,7 +125752,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_search_var_lib" lineno="6875">
+<interface name="files_search_var_lib" lineno="6876">
 <summary>
 Search the /var/lib directory.
 </summary>
@@ -125776,7 +125776,7 @@ Domain allowed access.
 </param>
 <infoflow type="read" weight="5"/>
 </interface>
-<interface name="files_dontaudit_search_var_lib" lineno="6895">
+<interface name="files_dontaudit_search_var_lib" lineno="6896">
 <summary>
 Do not audit attempts to search the
 contents of /var/lib.
@@ -125788,7 +125788,7 @@ Domain to not audit.
 </param>
 <infoflow type="read" weight="5"/>
 </interface>
-<interface name="files_list_var_lib" lineno="6913">
+<interface name="files_list_var_lib" lineno="6914">
 <summary>
 List the contents of the /var/lib directory.
 </summary>
@@ -125798,7 +125798,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_var_lib_dirs" lineno="6931">
+<interface name="files_rw_var_lib_dirs" lineno="6932">
 <summary>
 Read-write /var/lib directories
 </summary>
@@ -125808,7 +125808,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_create_var_lib_dirs" lineno="6949">
+<interface name="files_create_var_lib_dirs" lineno="6950">
 <summary>
 Create directories in /var/lib
 </summary>
@@ -125818,7 +125818,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_var_lib_filetrans" lineno="6983">
+<interface name="files_var_lib_filetrans" lineno="6984">
 <summary>
 Create objects in the /var/lib directory
 </summary>
@@ -125843,7 +125843,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_read_var_lib_files" lineno="7002">
+<interface name="files_read_var_lib_files" lineno="7003">
 <summary>
 Read generic files in /var/lib.
 </summary>
@@ -125853,7 +125853,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_var_lib_symlinks" lineno="7021">
+<interface name="files_read_var_lib_symlinks" lineno="7022">
 <summary>
 Read generic symbolic links in /var/lib
 </summary>
@@ -125863,7 +125863,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_var_lib_symlinks" lineno="7040">
+<interface name="files_manage_var_lib_symlinks" lineno="7041">
 <summary>
 manage generic symbolic links
 in the /var/lib directory.
@@ -125874,7 +125874,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_var_lib_files" lineno="7058">
+<interface name="files_manage_var_lib_files" lineno="7059">
 <summary>
 manage generic files
 in the /var/lib directory.
@@ -125885,7 +125885,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_urandom_seed" lineno="7080">
+<interface name="files_manage_urandom_seed" lineno="7081">
 <summary>
 Create, read, write, and delete the
 pseudorandom number generator seed.
@@ -125896,7 +125896,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_mounttab" lineno="7100">
+<interface name="files_manage_mounttab" lineno="7101">
 <summary>
 Allow domain to manage mount tables
 necessary for rpcd, nfsd, etc.
@@ -125907,7 +125907,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_list_locks" lineno="7119">
+<interface name="files_list_locks" lineno="7120">
 <summary>
 List generic lock directories.
 </summary>
@@ -125917,7 +125917,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_search_locks" lineno="7138">
+<interface name="files_search_locks" lineno="7139">
 <summary>
 Search the locks directory (/var/lock).
 </summary>
@@ -125927,7 +125927,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_locks" lineno="7159">
+<interface name="files_dontaudit_search_locks" lineno="7160">
 <summary>
 Do not audit attempts to search the
 locks directory (/var/lock).
@@ -125938,7 +125938,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_rw_inherited_locks" lineno="7179">
+<interface name="files_dontaudit_rw_inherited_locks" lineno="7180">
 <summary>
 Do not audit attempts to read/write inherited
 locks (/var/lock).
@@ -125949,7 +125949,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_setattr_lock_dirs" lineno="7197">
+<interface name="files_setattr_lock_dirs" lineno="7198">
 <summary>
 Set the attributes of the /var/lock directory.
 </summary>
@@ -125959,7 +125959,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_lock_dirs" lineno="7216">
+<interface name="files_rw_lock_dirs" lineno="7217">
 <summary>
 Add and remove entries in the /var/lock
 directories.
@@ -125970,7 +125970,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_create_lock_dirs" lineno="7235">
+<interface name="files_create_lock_dirs" lineno="7236">
 <summary>
 Create lock directories
 </summary>
@@ -125980,7 +125980,7 @@ Domain allowed access
 </summary>
 </param>
 </interface>
-<interface name="files_relabel_all_lock_dirs" lineno="7255">
+<interface name="files_relabel_all_lock_dirs" lineno="7256">
 <summary>
 Relabel to and from all lock directory types.
 </summary>
@@ -125990,7 +125990,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabel_all_lock_files" lineno="7276">
+<interface name="files_relabel_all_lock_files" lineno="7277">
 <summary>
 Relabel to and from all lock file types.
 </summary>
@@ -126000,7 +126000,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_getattr_generic_locks" lineno="7297">
+<interface name="files_getattr_generic_locks" lineno="7298">
 <summary>
 Get the attributes of generic lock files.
 </summary>
@@ -126010,7 +126010,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_generic_locks" lineno="7317">
+<interface name="files_delete_generic_locks" lineno="7318">
 <summary>
 Delete generic lock files.
 </summary>
@@ -126020,7 +126020,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_generic_locks" lineno="7337">
+<interface name="files_manage_generic_locks" lineno="7338">
 <summary>
 Create, read, write, and delete generic
 lock files.
@@ -126031,7 +126031,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_all_locks" lineno="7357">
+<interface name="files_delete_all_locks" lineno="7358">
 <summary>
 Delete all lock files.
 </summary>
@@ -126042,7 +126042,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_read_all_locks" lineno="7378">
+<interface name="files_read_all_locks" lineno="7379">
 <summary>
 Read all lock files.
 </summary>
@@ -126052,7 +126052,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_all_locks" lineno="7400">
+<interface name="files_manage_all_locks" lineno="7401">
 <summary>
 manage all lock files.
 </summary>
@@ -126062,7 +126062,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_lock_filetrans" lineno="7438">
+<interface name="files_lock_filetrans" lineno="7439">
 <summary>
 Create an object in the locks directory, with a private
 type using a type transition.
@@ -126088,7 +126088,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_getattr_pid_dirs" lineno="7458">
+<interface name="files_dontaudit_getattr_pid_dirs" lineno="7459">
 <summary>
 Do not audit attempts to get the attributes
 of the /var/run directory.
@@ -126099,7 +126099,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_setattr_pid_dirs" lineno="7477">
+<interface name="files_setattr_pid_dirs" lineno="7478">
 <summary>
 Set the attributes of the /var/run directory.
 </summary>
@@ -126109,7 +126109,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_search_pids" lineno="7497">
+<interface name="files_search_pids" lineno="7498">
 <summary>
 Search the contents of runtime process
 ID directories (/var/run).
@@ -126120,7 +126120,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_pid_dirs" lineno="7517">
+<interface name="files_rw_pid_dirs" lineno="7518">
 <summary>
 Add and remove entries from pid directories.
 </summary>
@@ -126130,7 +126130,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_create_var_run_dirs" lineno="7535">
+<interface name="files_create_var_run_dirs" lineno="7536">
 <summary>
 Create generic pid directory.
 </summary>
@@ -126140,7 +126140,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_pids" lineno="7555">
+<interface name="files_dontaudit_search_pids" lineno="7556">
 <summary>
 Do not audit attempts to search
 the /var/run directory.
@@ -126151,7 +126151,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_all_pids" lineno="7575">
+<interface name="files_dontaudit_search_all_pids" lineno="7576">
 <summary>
 Do not audit attempts to search
 the all /var/run directory.
@@ -126162,7 +126162,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_list_pids" lineno="7594">
+<interface name="files_list_pids" lineno="7595">
 <summary>
 List the contents of the runtime process
 ID directories (/var/run).
@@ -126173,7 +126173,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_generic_pids" lineno="7613">
+<interface name="files_read_generic_pids" lineno="7614">
 <summary>
 Read generic process ID files.
 </summary>
@@ -126183,7 +126183,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_write_generic_pid_pipes" lineno="7633">
+<interface name="files_write_generic_pid_pipes" lineno="7634">
 <summary>
 Write named generic process ID pipes
 </summary>
@@ -126193,7 +126193,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_pid_filetrans" lineno="7694">
+<interface name="files_pid_filetrans" lineno="7695">
 <summary>
 Create an object in the process ID directory, with a private type.
 </summary>
@@ -126245,7 +126245,7 @@ The name of the object being created.
 </param>
 <infoflow type="write" weight="10"/>
 </interface>
-<interface name="files_pid_filetrans_lock_dir" lineno="7718">
+<interface name="files_pid_filetrans_lock_dir" lineno="7719">
 <summary>
 Create a generic lock directory within the run directories
 </summary>
@@ -126260,7 +126260,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_inherited_generic_pid_files" lineno="7736">
+<interface name="files_rw_inherited_generic_pid_files" lineno="7737">
 <summary>
 rw generic pid files inherited from another process
 </summary>
@@ -126270,7 +126270,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_generic_pids" lineno="7754">
+<interface name="files_rw_generic_pids" lineno="7755">
 <summary>
 Read and write generic process ID files.
 </summary>
@@ -126280,7 +126280,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_getattr_all_pids" lineno="7775">
+<interface name="files_dontaudit_getattr_all_pids" lineno="7776">
 <summary>
 Do not audit attempts to get the attributes of
 daemon runtime data files.
@@ -126291,7 +126291,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_write_all_pids" lineno="7795">
+<interface name="files_dontaudit_write_all_pids" lineno="7796">
 <summary>
 Do not audit attempts to write to daemon runtime data files.
 </summary>
@@ -126301,7 +126301,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_ioctl_all_pids" lineno="7814">
+<interface name="files_dontaudit_ioctl_all_pids" lineno="7815">
 <summary>
 Do not audit attempts to ioctl daemon runtime data files.
 </summary>
@@ -126311,7 +126311,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_relabel_all_pid_dirs" lineno="7834">
+<interface name="files_relabel_all_pid_dirs" lineno="7835">
 <summary>
 Relable all pid directories
 </summary>
@@ -126321,7 +126321,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_all_pid_sockets" lineno="7852">
+<interface name="files_delete_all_pid_sockets" lineno="7853">
 <summary>
 Delete all pid sockets
 </summary>
@@ -126331,7 +126331,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_create_all_pid_sockets" lineno="7870">
+<interface name="files_create_all_pid_sockets" lineno="7871">
 <summary>
 Create all pid sockets
 </summary>
@@ -126341,7 +126341,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_create_all_pid_pipes" lineno="7888">
+<interface name="files_create_all_pid_pipes" lineno="7889">
 <summary>
 Create all pid named pipes
 </summary>
@@ -126351,7 +126351,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_all_pid_pipes" lineno="7906">
+<interface name="files_delete_all_pid_pipes" lineno="7907">
 <summary>
 Delete all pid named pipes
 </summary>
@@ -126361,7 +126361,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_all_pid_dirs" lineno="7925">
+<interface name="files_manage_all_pid_dirs" lineno="7926">
 <summary>
 manage all pidfile directories
 in the /var/run directory.
@@ -126372,7 +126372,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_all_pids" lineno="7945">
+<interface name="files_read_all_pids" lineno="7946">
 <summary>
 Read all process ID files.
 </summary>
@@ -126383,7 +126383,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_relabel_all_pid_files" lineno="7966">
+<interface name="files_relabel_all_pid_files" lineno="7967">
 <summary>
 Relable all pid files
 </summary>
@@ -126393,7 +126393,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_exec_generic_pid_files" lineno="7984">
+<interface name="files_exec_generic_pid_files" lineno="7985">
 <summary>
 Execute generic programs in /var/run in the caller domain.
 </summary>
@@ -126403,7 +126403,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_all_pids" lineno="8003">
+<interface name="files_manage_all_pids" lineno="8004">
 <summary>
 manage all pidfiles
 in the /var/run directory.
@@ -126414,7 +126414,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_mounton_all_poly_members" lineno="8022">
+<interface name="files_mounton_all_poly_members" lineno="8023">
 <summary>
 Mount filesystems on all polyinstantiation
 member directories.
@@ -126425,7 +126425,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_all_pids" lineno="8041">
+<interface name="files_delete_all_pids" lineno="8042">
 <summary>
 Delete all process IDs.
 </summary>
@@ -126436,7 +126436,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_delete_all_pid_dirs" lineno="8066">
+<interface name="files_delete_all_pid_dirs" lineno="8067">
 <summary>
 Delete all process ID directories.
 </summary>
@@ -126446,7 +126446,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_spool_file" lineno="8116">
+<interface name="files_spool_file" lineno="8117">
 <summary>
 Make the specified type a file
 used for spool files.
@@ -126485,7 +126485,7 @@ spool file.
 </param>
 <infoflow type="none"/>
 </interface>
-<interface name="files_create_all_spool_sockets" lineno="8135">
+<interface name="files_create_all_spool_sockets" lineno="8136">
 <summary>
 Create all spool sockets
 </summary>
@@ -126495,7 +126495,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_all_spool_sockets" lineno="8153">
+<interface name="files_delete_all_spool_sockets" lineno="8154">
 <summary>
 Delete all spool sockets
 </summary>
@@ -126505,7 +126505,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_relabel_all_spool_dirs" lineno="8173">
+<interface name="files_relabel_all_spool_dirs" lineno="8174">
 <summary>
 Relabel to and from all spool
 directory types.
@@ -126517,7 +126517,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_search_spool" lineno="8193">
+<interface name="files_search_spool" lineno="8194">
 <summary>
 Search the contents of generic spool
 directories (/var/spool).
@@ -126528,7 +126528,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_spool" lineno="8212">
+<interface name="files_dontaudit_search_spool" lineno="8213">
 <summary>
 Do not audit attempts to search generic
 spool directories.
@@ -126539,7 +126539,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_list_spool" lineno="8231">
+<interface name="files_list_spool" lineno="8232">
 <summary>
 List the contents of generic spool
 (/var/spool) directories.
@@ -126550,7 +126550,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_generic_spool_dirs" lineno="8250">
+<interface name="files_manage_generic_spool_dirs" lineno="8251">
 <summary>
 Create, read, write, and delete generic
 spool directories (/var/spool).
@@ -126561,7 +126561,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_read_generic_spool" lineno="8269">
+<interface name="files_read_generic_spool" lineno="8270">
 <summary>
 Read generic spool files.
 </summary>
@@ -126571,7 +126571,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_generic_spool" lineno="8289">
+<interface name="files_manage_generic_spool" lineno="8290">
 <summary>
 Create, read, write, and delete generic
 spool files.
@@ -126582,7 +126582,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_spool_filetrans" lineno="8325">
+<interface name="files_spool_filetrans" lineno="8326">
 <summary>
 Create objects in the spool directory
 with a private type with a type transition.
@@ -126609,7 +126609,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_polyinstantiate_all" lineno="8345">
+<interface name="files_polyinstantiate_all" lineno="8346">
 <summary>
 Allow access to manage all polyinstantiated
 directories on the system.
@@ -126620,7 +126620,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_unconfined" lineno="8399">
+<interface name="files_unconfined" lineno="8400">
 <summary>
 Unconfined access to files.
 </summary>
@@ -126630,7 +126630,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_root_files" lineno="8423">
+<interface name="files_manage_root_files" lineno="8424">
 <summary>
 Create a core files in /
 </summary>
@@ -126646,7 +126646,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_create_default_dir" lineno="8447">
+<interface name="files_create_default_dir" lineno="8448">
 <summary>
 Create a default directory
 </summary>
@@ -126662,7 +126662,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_root_filetrans_default" lineno="8471">
+<interface name="files_root_filetrans_default" lineno="8472">
 <summary>
 Create, default_t objects with an automatic
 type transition.
@@ -126678,7 +126678,7 @@ The class of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_filetrans_lib" lineno="8505">
+<interface name="files_filetrans_lib" lineno="8506">
 <summary>
 Create, lib_t objects with an automatic
 type transition.
@@ -126704,7 +126704,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="files_manage_generic_pids_symlinks" lineno="8524">
+<interface name="files_manage_generic_pids_symlinks" lineno="8525">
 <summary>
 manage generic symbolic links
 in the /var/run directory.
@@ -126715,7 +126715,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_getattr_tmpfs_files" lineno="8543">
+<interface name="files_dontaudit_getattr_tmpfs_files" lineno="8544">
 <summary>
 Do not audit attempts to getattr
 all tmpfs files.
@@ -126726,7 +126726,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_tmpfs_files" lineno="8561">
+<interface name="files_delete_tmpfs_files" lineno="8562">
 <summary>
 Allow delete all tmpfs files.
 </summary>
@@ -126736,7 +126736,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_tmpfs_files" lineno="8579">
+<interface name="files_rw_tmpfs_files" lineno="8580">
 <summary>
 Allow read write all tmpfs files
 </summary>
@@ -126746,7 +126746,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_read_security_files" lineno="8597">
+<interface name="files_dontaudit_read_security_files" lineno="8598">
 <summary>
 Do not audit attempts to read security files
 </summary>
@@ -126756,7 +126756,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_search_security_files" lineno="8615">
+<interface name="files_dontaudit_search_security_files" lineno="8616">
 <summary>
 Do not audit attempts to search security files
 </summary>
@@ -126766,7 +126766,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_list_security_dirs" lineno="8633">
+<interface name="files_dontaudit_list_security_dirs" lineno="8634">
 <summary>
 Do not audit attempts to read security dirs
 </summary>
@@ -126776,7 +126776,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_rw_all_inherited_files" lineno="8656">
+<interface name="files_rw_all_inherited_files" lineno="8657">
 <summary>
 rw any files inherited from another process
 </summary>
@@ -126791,7 +126791,7 @@ Object type.
 </summary>
 </param>
 </interface>
-<interface name="files_entrypoint_all_files" lineno="8678">
+<interface name="files_entrypoint_all_files" lineno="8679">
 <summary>
 Allow any file point to be the entrypoint of this domain
 </summary>
@@ -126802,7 +126802,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_dontaudit_all_non_security_leaks" lineno="8696">
+<interface name="files_dontaudit_all_non_security_leaks" lineno="8697">
 <summary>
 Do not audit attempts to rw inherited file perms
 of non security files.
@@ -126813,7 +126813,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_leaks" lineno="8715">
+<interface name="files_dontaudit_leaks" lineno="8716">
 <summary>
 Do not audit attempts to read or write
 all leaked files.
@@ -126824,7 +126824,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_create_as_is_all_files" lineno="8734">
+<interface name="files_create_as_is_all_files" lineno="8735">
 <summary>
 Allow domain to create_file_ass all types
 </summary>
@@ -126834,7 +126834,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_all_access_check" lineno="8754">
+<interface name="files_dontaudit_all_access_check" lineno="8755">
 <summary>
 Do not audit attempts to check the
 access on all files
@@ -126845,7 +126845,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_dontaudit_write_all_files" lineno="8772">
+<interface name="files_dontaudit_write_all_files" lineno="8773">
 <summary>
 Do not audit attempts to write to all files
 </summary>
@@ -126855,7 +126855,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_all_non_security_files" lineno="8790">
+<interface name="files_delete_all_non_security_files" lineno="8791">
 <summary>
 Allow domain to delete to all files
 </summary>
@@ -126865,7 +126865,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_delete_all_non_security_dirs" lineno="8809">
+<interface name="files_delete_all_non_security_dirs" lineno="8810">
 <summary>
 Allow domain to delete to all dirs
 </summary>
@@ -126875,7 +126875,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="files_filetrans_named_content" lineno="8827">
+<interface name="files_filetrans_named_content" lineno="8828">
 <summary>
 Transition named content in the var_run_t directory
 </summary>
@@ -126885,7 +126885,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_base_file" lineno="8898">
+<interface name="files_base_file" lineno="8899">
 <summary>
 Make the specified type a
 base file.
@@ -126903,7 +126903,7 @@ Type to be used as a base files.
 </param>
 <infoflow type="none"/>
 </interface>
-<interface name="files_ro_base_file" lineno="8923">
+<interface name="files_ro_base_file" lineno="8924">
 <summary>
 Make the specified type a
 base read only file.
@@ -126920,7 +126920,7 @@ Type to be used as a base read only files.
 </param>
 <infoflow type="none"/>
 </interface>
-<interface name="files_read_all_base_ro_files" lineno="8942">
+<interface name="files_read_all_base_ro_files" lineno="8943">
 <summary>
 Read all ro base files.
 </summary>
@@ -126931,7 +126931,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_exec_all_base_ro_files" lineno="8963">
+<interface name="files_exec_all_base_ro_files" lineno="8964">
 <summary>
 Execute all base ro files.
 </summary>
@@ -126942,7 +126942,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="files_config_all_files" lineno="8982">
+<interface name="files_config_all_files" lineno="8983">
 <summary>
 Allow the specified domain to modify the systemd configuration of
 any file.
@@ -126953,7 +126953,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="files_status_etc" lineno="9000">
+<interface name="files_status_etc" lineno="9001">
 <summary>
 Get the status of etc_t files
 </summary>
@@ -129636,7 +129636,17 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_getattr_tmpfs_dirs" lineno="4610">
+<interface name="fs_relabelfrom_tmpfs_lnk_files" lineno="4610">
+<summary>
+Relabel from tmpfs symlinks.
+</summary>
+<param name="type">
+<summary>
+Domain allowed access.
+</summary>
+</param>
+</interface>
+<interface name="fs_getattr_tmpfs_dirs" lineno="4628">
 <summary>
 Get the attributes of tmpfs directories.
 </summary>
@@ -129646,7 +129656,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_getattr_tmpfs_dirs" lineno="4629">
+<interface name="fs_dontaudit_getattr_tmpfs_dirs" lineno="4647">
 <summary>
 Do not audit attempts to get the attributes
 of tmpfs directories.
@@ -129657,7 +129667,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_setattr_tmpfs_dirs" lineno="4647">
+<interface name="fs_setattr_tmpfs_dirs" lineno="4665">
 <summary>
 Set the attributes of tmpfs directories.
 </summary>
@@ -129667,7 +129677,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_search_tmpfs" lineno="4665">
+<interface name="fs_search_tmpfs" lineno="4683">
 <summary>
 Search tmpfs directories.
 </summary>
@@ -129677,7 +129687,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_list_tmpfs" lineno="4683">
+<interface name="fs_list_tmpfs" lineno="4701">
 <summary>
 List the contents of generic tmpfs directories.
 </summary>
@@ -129687,7 +129697,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_list_tmpfs" lineno="4702">
+<interface name="fs_dontaudit_list_tmpfs" lineno="4720">
 <summary>
 Do not audit attempts to list the
 contents of generic tmpfs directories.
@@ -129698,7 +129708,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_relabel_tmpfs_dirs" lineno="4720">
+<interface name="fs_relabel_tmpfs_dirs" lineno="4738">
 <summary>
 Relabel directory  on tmpfs filesystems.
 </summary>
@@ -129708,7 +129718,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_relabel_tmpfs_fifo_files" lineno="4738">
+<interface name="fs_relabel_tmpfs_fifo_files" lineno="4756">
 <summary>
 Relabel fifo_file  on tmpfs filesystems.
 </summary>
@@ -129718,7 +129728,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_relabel_tmpfs_files" lineno="4756">
+<interface name="fs_relabel_tmpfs_files" lineno="4774">
 <summary>
 Relabel files  on tmpfs filesystems.
 </summary>
@@ -129728,7 +129738,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_manage_tmpfs_dirs" lineno="4775">
+<interface name="fs_manage_tmpfs_dirs" lineno="4793">
 <summary>
 Create, read, write, and delete
 tmpfs directories
@@ -129739,7 +129749,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_write_tmpfs_dirs" lineno="4794">
+<interface name="fs_dontaudit_write_tmpfs_dirs" lineno="4812">
 <summary>
 Do not audit attempts to write
 tmpfs directories
@@ -129750,7 +129760,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_tmpfs_filetrans" lineno="4828">
+<interface name="fs_tmpfs_filetrans" lineno="4846">
 <summary>
 Create an object in a tmpfs filesystem, with a private
 type using a type transition.
@@ -129776,7 +129786,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_getattr_tmpfs_files" lineno="4848">
+<interface name="fs_dontaudit_getattr_tmpfs_files" lineno="4866">
 <summary>
 Do not audit attempts to getattr
 generic tmpfs files.
@@ -129787,7 +129797,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_rw_tmpfs_files" lineno="4867">
+<interface name="fs_dontaudit_rw_tmpfs_files" lineno="4885">
 <summary>
 Do not audit attempts to read or write
 generic tmpfs files.
@@ -129798,7 +129808,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_manage_auto_mountpoints" lineno="4886">
+<interface name="fs_manage_auto_mountpoints" lineno="4904">
 <summary>
 Create, read, write, and delete
 auto moutpoints.
@@ -129809,7 +129819,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_read_tmpfs_files" lineno="4904">
+<interface name="fs_read_tmpfs_files" lineno="4922">
 <summary>
 Read generic tmpfs files.
 </summary>
@@ -129819,7 +129829,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_rw_tmpfs_files" lineno="4922">
+<interface name="fs_rw_tmpfs_files" lineno="4940">
 <summary>
 Read and write generic tmpfs files.
 </summary>
@@ -129829,7 +129839,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_rw_inherited_tmpfs_files" lineno="4940">
+<interface name="fs_rw_inherited_tmpfs_files" lineno="4958">
 <summary>
 Read and write generic tmpfs files.
 </summary>
@@ -129839,7 +129849,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_read_tmpfs_symlinks" lineno="4958">
+<interface name="fs_read_tmpfs_symlinks" lineno="4976">
 <summary>
 Read tmpfs link files.
 </summary>
@@ -129849,7 +129859,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_rw_tmpfs_chr_files" lineno="4976">
+<interface name="fs_rw_tmpfs_chr_files" lineno="4994">
 <summary>
 Read and write character nodes on tmpfs filesystems.
 </summary>
@@ -129859,7 +129869,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_use_tmpfs_chr_dev" lineno="4995">
+<interface name="fs_dontaudit_use_tmpfs_chr_dev" lineno="5013">
 <summary>
 Do not audit attempts to read and write character nodes on tmpfs filesystems.
 </summary>
@@ -129869,7 +129879,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_create_tmpfs_chr_dev" lineno="5014">
+<interface name="fs_dontaudit_create_tmpfs_chr_dev" lineno="5032">
 <summary>
 Do not audit attempts to create character nodes on tmpfs filesystems.
 </summary>
@@ -129879,7 +129889,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_read_tmpfs_blk_dev" lineno="5032">
+<interface name="fs_dontaudit_read_tmpfs_blk_dev" lineno="5050">
 <summary>
 Do not audit attempts to dontaudit read block nodes on tmpfs filesystems.
 </summary>
@@ -129889,7 +129899,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_read_tmpfs_files" lineno="5050">
+<interface name="fs_dontaudit_read_tmpfs_files" lineno="5068">
 <summary>
 Do not audit attempts to read files on tmpfs filesystems.
 </summary>
@@ -129899,7 +129909,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_relabel_tmpfs_chr_file" lineno="5068">
+<interface name="fs_relabel_tmpfs_chr_file" lineno="5086">
 <summary>
 Relabel character nodes on tmpfs filesystems.
 </summary>
@@ -129909,7 +129919,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_rw_tmpfs_blk_files" lineno="5087">
+<interface name="fs_rw_tmpfs_blk_files" lineno="5105">
 <summary>
 Read and write block nodes on tmpfs filesystems.
 </summary>
@@ -129919,7 +129929,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_relabel_tmpfs_blk_file" lineno="5106">
+<interface name="fs_relabel_tmpfs_blk_file" lineno="5124">
 <summary>
 Relabel block nodes on tmpfs filesystems.
 </summary>
@@ -129929,7 +129939,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_relabel_tmpfs_sock_file" lineno="5125">
+<interface name="fs_relabel_tmpfs_sock_file" lineno="5143">
 <summary>
 Relabel sock nodes on tmpfs filesystems.
 </summary>
@@ -129939,7 +129949,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_delete_tmpfs_files" lineno="5144">
+<interface name="fs_delete_tmpfs_files" lineno="5162">
 <summary>
 Delete generic files in tmpfs directory.
 </summary>
@@ -129949,7 +129959,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_manage_tmpfs_files" lineno="5164">
+<interface name="fs_manage_tmpfs_files" lineno="5182">
 <summary>
 Read and write, create and delete generic
 files on tmpfs filesystems.
@@ -129960,7 +129970,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_exec_tmpfs_files" lineno="5183">
+<interface name="fs_exec_tmpfs_files" lineno="5201">
 <summary>
 Execute files on a tmpfs filesystem.
 </summary>
@@ -129971,7 +129981,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="fs_manage_tmpfs_symlinks" lineno="5202">
+<interface name="fs_manage_tmpfs_symlinks" lineno="5220">
 <summary>
 Read and write, create and delete symbolic
 links on tmpfs filesystems.
@@ -129982,7 +129992,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_manage_tmpfs_sockets" lineno="5221">
+<interface name="fs_manage_tmpfs_sockets" lineno="5239">
 <summary>
 Read and write, create and delete socket
 files on tmpfs filesystems.
@@ -129993,7 +130003,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_manage_tmpfs_chr_files" lineno="5240">
+<interface name="fs_manage_tmpfs_chr_files" lineno="5258">
 <summary>
 Read and write, create and delete character
 nodes on tmpfs filesystems.
@@ -130004,7 +130014,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_manage_tmpfs_blk_files" lineno="5259">
+<interface name="fs_manage_tmpfs_blk_files" lineno="5277">
 <summary>
 Read and write, create and delete block nodes
 on tmpfs filesystems.
@@ -130015,7 +130025,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_mount_xenfs" lineno="5277">
+<interface name="fs_mount_xenfs" lineno="5295">
 <summary>
 Mount a XENFS filesystem.
 </summary>
@@ -130025,7 +130035,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_search_xenfs" lineno="5295">
+<interface name="fs_search_xenfs" lineno="5313">
 <summary>
 Search the XENFS filesystem.
 </summary>
@@ -130035,7 +130045,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_manage_xenfs_dirs" lineno="5315">
+<interface name="fs_manage_xenfs_dirs" lineno="5333">
 <summary>
 Create, read, write, and delete directories
 on a XENFS filesystem.
@@ -130047,7 +130057,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="fs_dontaudit_manage_xenfs_dirs" lineno="5335">
+<interface name="fs_dontaudit_manage_xenfs_dirs" lineno="5353">
 <summary>
 Do not audit attempts to create, read,
 write, and delete directories
@@ -130059,7 +130069,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_manage_xenfs_files" lineno="5355">
+<interface name="fs_manage_xenfs_files" lineno="5373">
 <summary>
 Create, read, write, and delete files
 on a XENFS filesystem.
@@ -130071,7 +130081,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="fs_dontaudit_manage_xenfs_files" lineno="5375">
+<interface name="fs_dontaudit_manage_xenfs_files" lineno="5393">
 <summary>
 Do not audit attempts to create,
 read, write, and delete files
@@ -130083,7 +130093,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_mount_all_fs" lineno="5393">
+<interface name="fs_mount_all_fs" lineno="5411">
 <summary>
 Mount all filesystems.
 </summary>
@@ -130093,7 +130103,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_remount_all_fs" lineno="5414">
+<interface name="fs_remount_all_fs" lineno="5432">
 <summary>
 Remount all filesystems.  This
 allows some mount options to be changed.
@@ -130104,7 +130114,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_unmount_all_fs" lineno="5432">
+<interface name="fs_unmount_all_fs" lineno="5450">
 <summary>
 Unmount all filesystems.
 </summary>
@@ -130114,7 +130124,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_getattr_all_fs" lineno="5464">
+<interface name="fs_getattr_all_fs" lineno="5482">
 <summary>
 Get the attributes of all filesystems.
 </summary>
@@ -130138,7 +130148,7 @@ Domain allowed access.
 <infoflow type="read" weight="5"/>
 <rolecap/>
 </interface>
-<interface name="fs_dontaudit_getattr_all_fs" lineno="5484">
+<interface name="fs_dontaudit_getattr_all_fs" lineno="5502">
 <summary>
 Do not audit attempts to get the attributes
 all filesystems.
@@ -130149,7 +130159,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_all_access_check" lineno="5503">
+<interface name="fs_dontaudit_all_access_check" lineno="5521">
 <summary>
 Do not audit attempts to check the
 access on all filesystems.
@@ -130160,7 +130170,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_get_all_fs_quotas" lineno="5523">
+<interface name="fs_get_all_fs_quotas" lineno="5541">
 <summary>
 Get the quotas of all filesystems.
 </summary>
@@ -130171,7 +130181,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="fs_set_all_quotas" lineno="5542">
+<interface name="fs_set_all_quotas" lineno="5560">
 <summary>
 Set the quotas of all filesystems.
 </summary>
@@ -130182,7 +130192,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="fs_relabelfrom_all_fs" lineno="5560">
+<interface name="fs_relabelfrom_all_fs" lineno="5578">
 <summary>
 Relabelfrom all filesystems.
 </summary>
@@ -130192,7 +130202,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_getattr_all_dirs" lineno="5579">
+<interface name="fs_getattr_all_dirs" lineno="5597">
 <summary>
 Get the attributes of all directories
 with a filesystem type.
@@ -130203,7 +130213,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_getattr_all_dirs" lineno="5598">
+<interface name="fs_dontaudit_getattr_all_dirs" lineno="5616">
 <summary>
 Dontaudit Get the attributes of all directories
 with a filesystem type.
@@ -130214,7 +130224,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_search_all" lineno="5616">
+<interface name="fs_search_all" lineno="5634">
 <summary>
 Search all directories with a filesystem type.
 </summary>
@@ -130224,7 +130234,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_list_all" lineno="5634">
+<interface name="fs_list_all" lineno="5652">
 <summary>
 List all directories with a filesystem type.
 </summary>
@@ -130234,7 +130244,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_getattr_all_files" lineno="5653">
+<interface name="fs_getattr_all_files" lineno="5671">
 <summary>
 Get the attributes of all files with
 a filesystem type.
@@ -130245,7 +130255,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_getattr_all_files" lineno="5672">
+<interface name="fs_dontaudit_getattr_all_files" lineno="5690">
 <summary>
 Do not audit attempts to get the attributes
 of all files with a filesystem type.
@@ -130256,7 +130266,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_getattr_all_symlinks" lineno="5691">
+<interface name="fs_getattr_all_symlinks" lineno="5709">
 <summary>
 Get the attributes of all symbolic links with
 a filesystem type.
@@ -130267,7 +130277,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_getattr_all_symlinks" lineno="5710">
+<interface name="fs_dontaudit_getattr_all_symlinks" lineno="5728">
 <summary>
 Do not audit attempts to get the attributes
 of all symbolic links with a filesystem type.
@@ -130278,7 +130288,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_getattr_all_pipes" lineno="5729">
+<interface name="fs_getattr_all_pipes" lineno="5747">
 <summary>
 Get the attributes of all named pipes with
 a filesystem type.
@@ -130289,7 +130299,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_getattr_all_pipes" lineno="5748">
+<interface name="fs_dontaudit_getattr_all_pipes" lineno="5766">
 <summary>
 Do not audit attempts to get the attributes
 of all named pipes with a filesystem type.
@@ -130300,7 +130310,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_getattr_all_sockets" lineno="5767">
+<interface name="fs_getattr_all_sockets" lineno="5785">
 <summary>
 Get the attributes of all named sockets with
 a filesystem type.
@@ -130311,7 +130321,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_getattr_all_sockets" lineno="5786">
+<interface name="fs_dontaudit_getattr_all_sockets" lineno="5804">
 <summary>
 Do not audit attempts to get the attributes
 of all named sockets with a filesystem type.
@@ -130322,7 +130332,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_getattr_all_blk_files" lineno="5805">
+<interface name="fs_getattr_all_blk_files" lineno="5823">
 <summary>
 Get the attributes of all block device nodes with
 a filesystem type.
@@ -130333,7 +130343,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_getattr_all_chr_files" lineno="5824">
+<interface name="fs_getattr_all_chr_files" lineno="5842">
 <summary>
 Get the attributes of all character device nodes with
 a filesystem type.
@@ -130344,7 +130354,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_unconfined" lineno="5842">
+<interface name="fs_unconfined" lineno="5860">
 <summary>
 Unconfined access to filesystems
 </summary>
@@ -130354,7 +130364,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="fs_dontaudit_leaks" lineno="5861">
+<interface name="fs_dontaudit_leaks" lineno="5879">
 <summary>
 Do not audit attempts to read or write
 all leaked filesystems files.
@@ -130365,7 +130375,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="fs_tmpfs_filetrans_named_content" lineno="5881">
+<interface name="fs_tmpfs_filetrans_named_content" lineno="5899">
 <summary>
 Transition named content in tmpfs_t directory
 </summary>
@@ -135740,7 +135750,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="toor_entry_spec_domtrans_to" lineno="141">
+<interface name="toor_entry_spec_domtrans_to" lineno="142">
 <summary>
 Allow toor to execute all entrypoint files in
 a specified domain.  This is an explicit transition,
@@ -135764,7 +135774,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="toor_bin_spec_domtrans_to" lineno="175">
+<interface name="toor_bin_spec_domtrans_to" lineno="176">
 <summary>
 Allow toor to execute a generic bin program in
 a specified domain.  This is an explicit transition,
@@ -135787,7 +135797,7 @@ Domain to execute in.
 </summary>
 </param>
 </interface>
-<interface name="toor_sigchld" lineno="196">
+<interface name="toor_sigchld" lineno="197">
 <summary>
 Send a SIGCHLD signal to toor users.
 </summary>
@@ -135797,7 +135807,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="toor_use_fds" lineno="214">
+<interface name="toor_use_fds" lineno="215">
 <summary>
 Inherit and use toor file descriptors
 </summary>
@@ -135807,7 +135817,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="toor_rw_pipes" lineno="232">
+<interface name="toor_rw_pipes" lineno="233">
 <summary>
 Read and write toor user unnamed pipes.
 </summary>
@@ -136297,6 +136307,9 @@ Allow unprivileged user to create and transition to svirt domains.
 	Policy modules for system services, like cron, and network services,
 	like sshd.
 </summary>
+<module name="ec2ssh" filename="policy/modules/services/ec2ssh.if">
+<summary>Policy for for the script that fetches the ssh key from EC2</summary>
+</module>
 <module name="postgresql" filename="policy/modules/services/postgresql.if">
 <summary>PostgreSQL relational database</summary>
 <interface name="postgresql_role" lineno="18">
@@ -141475,7 +141488,17 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_pid_filetrans" lineno="2422">
+<interface name="init_read_pid_files" lineno="2405">
+<summary>
+Read PID files.
+</summary>
+<param name="domain">
+<summary>
+Domain allowed access.
+</summary>
+</param>
+</interface>
+<interface name="init_pid_filetrans" lineno="2441">
 <summary>
 Create objects in /run/systemd directory
 with an automatic type transition to
@@ -141502,7 +141525,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="init_named_pid_filetrans" lineno="2458">
+<interface name="init_named_pid_filetrans" lineno="2477">
 <summary>
 Create objects in /run/systemd directory
 with an automatic type transition to
@@ -141529,7 +141552,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="init_tcp_recvfrom_all_daemons" lineno="2477">
+<interface name="init_tcp_recvfrom_all_daemons" lineno="2496">
 <summary>
 Allow the specified domain to connect to daemon with a tcp socket
 </summary>
@@ -141539,7 +141562,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_udp_recvfrom_all_daemons" lineno="2495">
+<interface name="init_udp_recvfrom_all_daemons" lineno="2514">
 <summary>
 Allow the specified domain to connect to daemon with a udp socket
 </summary>
@@ -141549,7 +141572,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_script_role_transition" lineno="2522">
+<interface name="init_script_role_transition" lineno="2541">
 <summary>
 Transition to system_r when execute an init script
 </summary>
@@ -141569,7 +141592,7 @@ Role to transition from.
 </summary>
 </param>
 </interface>
-<interface name="init_dontaudit_script_leaks" lineno="2540">
+<interface name="init_dontaudit_script_leaks" lineno="2559">
 <summary>
 dontaudit read and write an leaked init scrip file descriptors
 </summary>
@@ -141579,7 +141602,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="init_ioctl_stream_sockets" lineno="2562">
+<interface name="init_ioctl_stream_sockets" lineno="2581">
 <summary>
 Allow the specified domain to ioctl an
 init with a unix domain stream sockets.
@@ -141590,7 +141613,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_dontaudit_ioctl_stream_sockets" lineno="2581">
+<interface name="init_dontaudit_ioctl_stream_sockets" lineno="2600">
 <summary>
 Dont audit specified domain to ioctl an
 init with a unix domain stream sockets.
@@ -141601,7 +141624,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_rw_stream_sockets" lineno="2600">
+<interface name="init_rw_stream_sockets" lineno="2619">
 <summary>
 Allow the specified domain to read/write to
 init with a unix domain stream sockets.
@@ -141612,7 +141635,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_write_pid_socket" lineno="2619">
+<interface name="init_write_pid_socket" lineno="2638">
 <summary>
 Allow the specified domain to write to
 init sock file.
@@ -141623,7 +141646,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_dgram_send" lineno="2638">
+<interface name="init_dgram_send" lineno="2657">
 <summary>
 Send a message to init over a unix domain
 datagram socket.
@@ -141634,7 +141657,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_stream_send" lineno="2657">
+<interface name="init_stream_send" lineno="2676">
 <summary>
 Send a message to init over a unix domain
 stream socket.
@@ -141645,7 +141668,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_sock_file" lineno="2682">
+<interface name="init_sock_file" lineno="2701">
 <summary>
 Create a file type used for init socket files.
 </summary>
@@ -141662,7 +141685,7 @@ Type to be used for a sock file.
 </param>
 <infoflow type="none"/>
 </interface>
-<interface name="init_read_pipes" lineno="2701">
+<interface name="init_read_pipes" lineno="2720">
 <summary>
 Read init unnamed pipes.
 </summary>
@@ -141672,7 +141695,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_rw_pipes" lineno="2719">
+<interface name="init_rw_pipes" lineno="2738">
 <summary>
 Read/Write init unnamed pipes.
 </summary>
@@ -141682,7 +141705,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_rw_tcp_sockets" lineno="2737">
+<interface name="init_rw_tcp_sockets" lineno="2756">
 <summary>
 Read and write init TCP sockets.
 </summary>
@@ -141692,7 +141715,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_status" lineno="2755">
+<interface name="init_status" lineno="2774">
 <summary>
 Get the system status information from init
 </summary>
@@ -141702,7 +141725,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_reboot" lineno="2774">
+<interface name="init_reboot" lineno="2793">
 <summary>
 Tell init to reboot the system.
 </summary>
@@ -141712,7 +141735,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_enable_services" lineno="2793">
+<interface name="init_enable_services" lineno="2812">
 <summary>
 Tell init to enable the services.
 </summary>
@@ -141722,7 +141745,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_disable_services" lineno="2811">
+<interface name="init_disable_services" lineno="2830">
 <summary>
 Tell init to disable the services.
 </summary>
@@ -141732,7 +141755,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_reload_services" lineno="2829">
+<interface name="init_reload_services" lineno="2848">
 <summary>
 Tell init to reload the services.
 </summary>
@@ -141742,7 +141765,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_halt" lineno="2847">
+<interface name="init_halt" lineno="2866">
 <summary>
 Tell init to halt the system.
 </summary>
@@ -141752,7 +141775,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_undefined" lineno="2866">
+<interface name="init_undefined" lineno="2885">
 <summary>
 Tell init to do an unknown access.
 </summary>
@@ -141762,7 +141785,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_start_transient_unit" lineno="2884">
+<interface name="init_start_transient_unit" lineno="2903">
 <summary>
 Tell init to do an unknown access.
 </summary>
@@ -141772,7 +141795,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_stop_transient_unit" lineno="2902">
+<interface name="init_stop_transient_unit" lineno="2921">
 <summary>
 Tell init to do an unknown access.
 </summary>
@@ -141782,7 +141805,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_reload_transient_unit" lineno="2920">
+<interface name="init_reload_transient_unit" lineno="2939">
 <summary>
 Tell init to do an unknown access.
 </summary>
@@ -141792,7 +141815,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_status_transient_unit" lineno="2938">
+<interface name="init_status_transient_unit" lineno="2957">
 <summary>
 Tell init to do an unknown access.
 </summary>
@@ -141802,7 +141825,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_manage_transient_unit" lineno="2956">
+<interface name="init_manage_transient_unit" lineno="2975">
 <summary>
 Tell init to do an unknown access.
 </summary>
@@ -141812,7 +141835,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="init_filetrans_named_content" lineno="2974">
+<interface name="init_filetrans_named_content" lineno="2993">
 <summary>
 Transition to init named content
 </summary>
@@ -141822,13 +141845,6 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<tunable name="daemons_use_tty" dftval="false">
-<desc>
-<p>
-Allow all daemons the ability to read/write terminals
-</p>
-</desc>
-</tunable>
 </module>
 <module name="ipsec" filename="policy/modules/system/ipsec.if">
 <summary>TCP/IP encryption</summary>
@@ -146508,7 +146524,17 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_login_list_pid_dirs" lineno="365">
+<interface name="systemd_login_rw_pid_files" lineno="365">
+<summary>
+Read and write systemd_login PID files.
+</summary>
+<param name="domain">
+<summary>
+Domain allowed access.
+</summary>
+</param>
+</interface>
+<interface name="systemd_login_list_pid_dirs" lineno="385">
 <summary>
 Read systemd_login PID files.
 </summary>
@@ -146518,7 +146544,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_use_fds_logind" lineno="385">
+<interface name="systemd_use_fds_logind" lineno="405">
 <summary>
 Use and and inherited systemd
 logind file descriptors.
@@ -146529,7 +146555,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_read_logind_sessions_files" lineno="403">
+<interface name="systemd_read_logind_sessions_files" lineno="423">
 <summary>
 Read logind sessions files.
 </summary>
@@ -146539,7 +146565,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_write_inherited_logind_sessions_pipes" lineno="423">
+<interface name="systemd_write_inherited_logind_sessions_pipes" lineno="443">
 <summary>
 Write inherited logind sessions pipes.
 </summary>
@@ -146549,7 +146575,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_dontaudit_write_inherited_logind_sessions_pipes" lineno="443">
+<interface name="systemd_dontaudit_write_inherited_logind_sessions_pipes" lineno="463">
 <summary>
 Dontaudit attempts to write inherited logind sessions pipes.
 </summary>
@@ -146559,7 +146585,7 @@ Domain to not audit.
 </summary>
 </param>
 </interface>
-<interface name="systemd_write_inhibit_pipes" lineno="461">
+<interface name="systemd_write_inhibit_pipes" lineno="481">
 <summary>
 Write systemd inhibit pipes.
 </summary>
@@ -146569,7 +146595,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_dbus_chat_logind" lineno="480">
+<interface name="systemd_dbus_chat_logind" lineno="500">
 <summary>
 Send and receive messages from
 systemd logind over dbus.
@@ -146580,7 +146606,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_tmpfiles_domtrans" lineno="503">
+<interface name="systemd_tmpfiles_domtrans" lineno="523">
 <summary>
 Execute a domain transition to run systemd-tmpfiles.
 </summary>
@@ -146590,7 +146616,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_localed_domtrans" lineno="521">
+<interface name="systemd_localed_domtrans" lineno="541">
 <summary>
 Execute a domain transition to run systemd-localed.
 </summary>
@@ -146600,7 +146626,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_passwd_agent_domtrans" lineno="539">
+<interface name="systemd_passwd_agent_domtrans" lineno="559">
 <summary>
 Execute a domain transition to run systemd-tty-ask-password-agent.
 </summary>
@@ -146610,7 +146636,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_passwd_agent_exec" lineno="557">
+<interface name="systemd_passwd_agent_exec" lineno="577">
 <summary>
 Execute systemd-tty-ask-password-agent in the caller domain
 </summary>
@@ -146620,7 +146646,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_notify_domtrans" lineno="576">
+<interface name="systemd_notify_domtrans" lineno="596">
 <summary>
 Execute a domain transition to run systemd_notify.
 </summary>
@@ -146630,7 +146656,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_passwd_agent_run" lineno="600">
+<interface name="systemd_passwd_agent_run" lineno="620">
 <summary>
 Execute systemd-tty-ask-password-agent in the systemd_passwd_agent domain, and
 allow the specified role the systemd_passwd_agent domain.
@@ -146646,7 +146672,7 @@ The role to be allowed the systemd_passwd_agent domain.
 </summary>
 </param>
 </interface>
-<interface name="systemd_passwd_agent_role" lineno="624">
+<interface name="systemd_passwd_agent_role" lineno="644">
 <summary>
 Role access for systemd_passwd_agent
 </summary>
@@ -146661,7 +146687,7 @@ User domain for the role
 </summary>
 </param>
 </interface>
-<interface name="systemd_signal_passwd_agent" lineno="647">
+<interface name="systemd_signal_passwd_agent" lineno="667">
 <summary>
 Send generic signals to systemd_passwd_agent processes.
 </summary>
@@ -146671,7 +146697,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_read_fifo_file_passwd_run" lineno="665">
+<interface name="systemd_read_fifo_file_passwd_run" lineno="685">
 <summary>
 Allow to domain to read systemd-passwd pipe
 </summary>
@@ -146681,7 +146707,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_relabelto_fifo_file_passwd_run" lineno="684">
+<interface name="systemd_relabelto_fifo_file_passwd_run" lineno="704">
 <summary>
 Relabel to user home directories.
 </summary>
@@ -146691,7 +146717,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_relabel_unit_dirs" lineno="702">
+<interface name="systemd_relabel_unit_dirs" lineno="722">
 <summary>
 Relabel systemd unit directories
 </summary>
@@ -146701,7 +146727,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_relabel_unit_files" lineno="720">
+<interface name="systemd_relabel_unit_files" lineno="740">
 <summary>
 Relabel systemd unit files
 </summary>
@@ -146711,7 +146737,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_manage_passwd_run" lineno="738">
+<interface name="systemd_manage_passwd_run" lineno="758">
 <summary>
 Send generic signals to systemd_passwd_agent processes.
 </summary>
@@ -146721,7 +146747,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_passwd_agent_dev_template" lineno="765">
+<interface name="systemd_passwd_agent_dev_template" lineno="785">
 <summary>
 Template for temporary sockets and files in /dev/.systemd/ask-password
 which are used by systemd-passwd-agent
@@ -146733,7 +146759,7 @@ is the prefix for user_t).
 </summary>
 </param>
 </interface>
-<interface name="systemd_logger_stream_connect" lineno="796">
+<interface name="systemd_logger_stream_connect" lineno="816">
 <summary>
 Allow the specified domain to connect to
 systemd_logger with a unix socket.
@@ -146744,7 +146770,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_manage_unit_dirs" lineno="814">
+<interface name="systemd_manage_unit_dirs" lineno="834">
 <summary>
 manage systemd unit dirs
 </summary>
@@ -146754,7 +146780,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_manage_unit_symlinks" lineno="832">
+<interface name="systemd_manage_unit_symlinks" lineno="852">
 <summary>
 manage systemd unit link files
 </summary>
@@ -146764,7 +146790,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_manage_all_unit_files" lineno="850">
+<interface name="systemd_manage_all_unit_files" lineno="870">
 <summary>
 manage all systemd unit files
 </summary>
@@ -146774,7 +146800,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_manage_all_unit_lnk_files" lineno="869">
+<interface name="systemd_manage_all_unit_lnk_files" lineno="889">
 <summary>
 manage all systemd unit lnk_files
 </summary>
@@ -146784,7 +146810,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_start_all_services" lineno="887">
+<interface name="systemd_start_all_services" lineno="907">
 <summary>
 Allow the specified domain to start all systemd services.
 </summary>
@@ -146794,7 +146820,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_reload_all_services" lineno="905">
+<interface name="systemd_reload_all_services" lineno="925">
 <summary>
 Allow the specified domain to reload all systemd services.
 </summary>
@@ -146804,7 +146830,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_config_all_services" lineno="924">
+<interface name="systemd_config_all_services" lineno="944">
 <summary>
 Allow the specified domain to modify the systemd configuration of
 all systemd services
@@ -146815,7 +146841,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_start_systemd_services" lineno="943">
+<interface name="systemd_start_systemd_services" lineno="963">
 <summary>
 Allow the specified domain to start systemd services.
 </summary>
@@ -146825,7 +146851,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_reload_systemd_services" lineno="961">
+<interface name="systemd_reload_systemd_services" lineno="981">
 <summary>
 Allow the specified domain to reload all systemd services.
 </summary>
@@ -146835,7 +146861,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_config_systemd_services" lineno="980">
+<interface name="systemd_config_systemd_services" lineno="1000">
 <summary>
 Allow the specified domain to modify the systemd configuration of
 all systemd services
@@ -146846,7 +146872,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_manage_random_seed" lineno="999">
+<interface name="systemd_manage_random_seed" lineno="1019">
 <summary>
 manage all systemd random seed file
 </summary>
@@ -146856,7 +146882,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_hostnamed_read_config" lineno="1019">
+<interface name="systemd_hostnamed_read_config" lineno="1039">
 <summary>
 Allow process to read hostname config file.
 </summary>
@@ -146867,7 +146893,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="systemd_hostnamed_manage_config" lineno="1039">
+<interface name="systemd_hostnamed_manage_config" lineno="1059">
 <summary>
 Allow process to manage hostname config file.
 </summary>
@@ -146878,7 +146904,7 @@ Domain allowed access.
 </param>
 <rolecap/>
 </interface>
-<interface name="systemd_unit_file_filetrans" lineno="1076">
+<interface name="systemd_unit_file_filetrans" lineno="1096">
 <summary>
 Create objects in /run/systemd/generator directory
 with an automatic type transition to
@@ -146905,7 +146931,7 @@ The name of the object being created.
 </summary>
 </param>
 </interface>
-<interface name="systemd_create_unit_file_dirs" lineno="1095">
+<interface name="systemd_create_unit_file_dirs" lineno="1115">
 <summary>
 Create a directory in the /usr/lib/systemd/system directory.
 </summary>
@@ -146915,7 +146941,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_create_unit_file_lnk" lineno="1113">
+<interface name="systemd_create_unit_file_lnk" lineno="1133">
 <summary>
 Create a link in the /usr/lib/systemd/system directory.
 </summary>
@@ -146925,7 +146951,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_filetrans_named_content" lineno="1131">
+<interface name="systemd_filetrans_named_content" lineno="1151">
 <summary>
 Transition to systemd named content
 </summary>
@@ -146935,7 +146961,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_read_home_content" lineno="1156">
+<interface name="systemd_read_home_content" lineno="1176">
 <summary>
 read systemd homedir content
 </summary>
@@ -146945,7 +146971,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_manage_home_content" lineno="1178">
+<interface name="systemd_manage_home_content" lineno="1198">
 <summary>
 Manage systemd homedir content
 </summary>
@@ -146955,7 +146981,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_filetrans_home_content" lineno="1203">
+<interface name="systemd_filetrans_home_content" lineno="1223">
 <summary>
 Transition to systemd named content
 </summary>
@@ -146965,7 +146991,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_filetrans_named_hostname" lineno="1223">
+<interface name="systemd_filetrans_named_hostname" lineno="1243">
 <summary>
 Transition to systemd named content for /etc/hostname
 </summary>
@@ -146975,7 +147001,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_login_status" lineno="1242">
+<interface name="systemd_login_status" lineno="1262">
 <summary>
 Get the system status information from systemd_login
 </summary>
@@ -146985,7 +147011,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_login_signull" lineno="1260">
+<interface name="systemd_login_signull" lineno="1280">
 <summary>
 Send systemd_login a null signal.
 </summary>
@@ -146995,7 +147021,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_login_reboot" lineno="1278">
+<interface name="systemd_login_reboot" lineno="1298">
 <summary>
 Tell systemd_login to reboot the system.
 </summary>
@@ -147005,7 +147031,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_login_halt" lineno="1296">
+<interface name="systemd_login_halt" lineno="1316">
 <summary>
 Tell systemd_login to halt the system.
 </summary>
@@ -147015,7 +147041,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_login_undefined" lineno="1314">
+<interface name="systemd_login_undefined" lineno="1334">
 <summary>
 Tell systemd_login to do an unknown access.
 </summary>
@@ -147025,7 +147051,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_config_generic_services" lineno="1332">
+<interface name="systemd_config_generic_services" lineno="1352">
 <summary>
 Configure generic unit files domain.
 </summary>
@@ -147035,7 +147061,7 @@ Domain allowed to transition.
 </summary>
 </param>
 </interface>
-<interface name="systemd_config_power_services" lineno="1352">
+<interface name="systemd_config_power_services" lineno="1372">
 <summary>
 Configure power unit files domain.
 </summary>
@@ -147045,7 +147071,7 @@ Domain allowed to transition.
 </summary>
 </param>
 </interface>
-<interface name="systemd_start_power_services" lineno="1372">
+<interface name="systemd_start_power_services" lineno="1392">
 <summary>
 Start power unit files domain.
 </summary>
@@ -147055,7 +147081,7 @@ Domain allowed to transition.
 </summary>
 </param>
 </interface>
-<interface name="systemd_status_power_services" lineno="1391">
+<interface name="systemd_status_power_services" lineno="1411">
 <summary>
 Status power unit files domain.
 </summary>
@@ -147065,7 +147091,7 @@ Domain allowed to transition.
 </summary>
 </param>
 </interface>
-<interface name="systemd_start_all_unit_files" lineno="1410">
+<interface name="systemd_start_all_unit_files" lineno="1430">
 <summary>
 Start power unit files domain.
 </summary>
@@ -147075,7 +147101,7 @@ Domain allowed to transition.
 </summary>
 </param>
 </interface>
-<interface name="systemd_status_all_unit_files" lineno="1429">
+<interface name="systemd_status_all_unit_files" lineno="1449">
 <summary>
 Start power unit files domain.
 </summary>
@@ -147085,7 +147111,7 @@ Domain allowed to transition.
 </summary>
 </param>
 </interface>
-<interface name="systemd_dbus_chat_timedated" lineno="1449">
+<interface name="systemd_dbus_chat_timedated" lineno="1469">
 <summary>
 Send and receive messages from
 systemd timedated over dbus.
@@ -147096,7 +147122,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_dbus_chat_hostnamed" lineno="1471">
+<interface name="systemd_dbus_chat_hostnamed" lineno="1491">
 <summary>
 Send and receive messages from
 systemd hostnamed over dbus.
@@ -147107,7 +147133,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_dbus_chat_localed" lineno="1493">
+<interface name="systemd_dbus_chat_localed" lineno="1513">
 <summary>
 Send and receive messages from
 systemd localed over dbus.
@@ -147118,7 +147144,7 @@ Domain allowed access.
 </summary>
 </param>
 </interface>
-<interface name="systemd_dontaudit_dbus_chat" lineno="1514">
+<interface name="systemd_dontaudit_dbus_chat" lineno="1534">
 <summary>
 Dontaudit attempts to send dbus domains chat messages
 </summary>
