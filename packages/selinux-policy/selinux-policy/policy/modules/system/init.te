@@ -1299,6 +1299,7 @@ optional_policy(`
 
 optional_policy(`
 	plymouthd_stream_connect(initrc_t)
+	plymouthd_domtrans_plymouth(initrc_t)
 ')
 
 optional_policy(`
