@@ -8011,6 +8011,44 @@ interface(`files_manage_all_pids',`
 
 ########################################
 ## <summary>
+##	create all pid dirs
+##	in the /var/run or in /run directory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_create_all_pid_dirs',`
+	gen_require(`
+		attribute pidfile;
+	')
+
+	create_dirs_pattern($1,pidfile,pidfile)
+')
+
+########################################
+## <summary>
+##	Setattr all pid dirs
+##	in the /var/run or in /run directory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_setattr_all_pid_dirs',`
+	gen_require(`
+		attribute pidfile;
+	')
+
+	allow $1 pidfile:dir setattr;
+')
+
+########################################
+## <summary>
 ##	Mount filesystems on all polyinstantiation
 ##	member directories.
 ## </summary>

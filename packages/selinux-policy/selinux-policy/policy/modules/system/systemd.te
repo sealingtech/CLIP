@@ -387,10 +387,16 @@ files_relabel_all_tmp_dirs(systemd_tmpfiles_t)
 
 files_relabel_var_dirs(systemd_tmpfiles_t)
 
+# SRS: the short and sweet of it... tmpfiles
+# copies everything from /var/run into /run
+# however it doesn't need manage or unlink etc
 files_relabel_var_run_dirs(systemd_tmpfiles_t)
 files_create_var_run_dirs(systemd_tmpfiles_t)
 files_rw_pid_dirs(systemd_tmpfiles_t)
+files_setattr_all_pid_dirs(systemd_tmpfiles_t)
+files_create_all_pid_dirs(systemd_tmpfiles_t)
 files_read_all_pids(systemd_tmpfiles_t)
+files_relabel_all_pid_dirs(systemd_tmpfiles_t)
 
 files_relabel_all_lock_files(systemd_tmpfiles_t)
 files_relabel_all_lock_dirs(systemd_tmpfiles_t)
