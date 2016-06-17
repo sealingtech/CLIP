@@ -1,0 +1,18 @@
+
+if [ -f /etc/centos-release ]; then
+        xccdf='centos7'
+else   
+        xccdf='rhel7'
+fi
+
+mkdir -p /root/scap/{pre,post}/html
+oscap xccdf eval --profile stig-rhel7-server-upstream \
+--report /root/scap/pre/html/report.html \
+--results /root/scap/pre/html/results.xml \
+/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
+
+oscap xccdf generate fix \
+--result-id xccdf_org.open-scap_testresult_stig-rhel7-server-upstream \
+/root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
+
+chmod +x /root/scap/pre/remediation-script.sh

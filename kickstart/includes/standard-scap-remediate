@@ -1,0 +1,9 @@
+if [ x"$CONFIG_BUILD_REMEDIATE" == "xy" ]; then
+        /root/scap/pre/remediation-script.sh
+        # Un-remediate things SSG broke...
+        sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
+fi
+
+# Un-remeidate things SSG broke...
+sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
+

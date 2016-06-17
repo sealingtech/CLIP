@@ -1,0 +1,15 @@
+
+# We don't want the final remediation script to set the system to targeted
+sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
+
+oscap xccdf eval --profile stig-rhel7-server-upstream \
+--report /root/scap/post/html/report.html \
+--results /root/scap/post/html/results.xml \
+/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
+
+oscap xccdf generate fix \
+--result-id xccdf_org.open-scap_testresult_stig-rhel7-server-upstream \
+/root/scap/post/html/results.xml > /root/scap/post/remediation-script.sh
+chmod +x /root/scap/post/remediation-script.sh
+
+sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config

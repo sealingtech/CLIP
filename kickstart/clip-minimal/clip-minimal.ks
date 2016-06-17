@@ -62,9 +62,9 @@ reboot --eject
 #CONFIG-BUILD-ADDTL-PACKAGES
 selinux-policy
 selinux-policy-mcs
-#selinux-policy-mcs-ssh
-#selinux-policy-mcs-unprivuser
-#selinux-policy-mcs-aide
+selinux-policy-mcs-ssh
+selinux-policy-mcs-unprivuser
+selinux-policy-mcs-aide
 #selinux-policy-mcs-ec2ssh
 clip-miscfiles
 clip-dracut-module
@@ -75,47 +75,13 @@ clip-dracut-module
 %post --interpreter=/bin/bash
 # DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
 #CONFIG-BUILD-PLACEHOLDER
-export PATH="/sbin:/usr/sbin:/usr/bin:/bin:/usr/local/bin"
-exec >/root/clip_post_install.log 2>&1
-if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "xy" ] \
-        && [ x"$CONFIG_BUILD_AWS" != "xy" ];
-then
-        # Print the log to tty7 so that the user know what's going on
-        tail -f /root/clip_post_install.log >/dev/tty7 &
-        TAILPID=$!
-        chvt 7
-fi
 
-echo "Installation timestamp: `date`" > /root/clip-info.txt
-echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
+# Do not remove this line unless you remove all the other stanard include files below
+# as they rekly on things defined in this include
+%include includes/standard-prep-post-env
 
-export POLNAME=$(awk -F= '/^SELINUXTYPE/ { print $2; }' /etc/selinux/config)
-
-if [ -f /etc/centos-release ]; then
-        xccdf='centos7'
-else   
-        xccdf='rhel7'
-fi
-
-mkdir -p /root/scap/{pre,post}/html
-oscap xccdf eval --profile stig-rhel7-server-upstream \
---report /root/scap/pre/html/report.html \
---results /root/scap/pre/html/results.xml \
-/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
-
-oscap xccdf generate fix \
---result-id xccdf_org.open-scap_testresult_stig-rhel7-server-upstream \
-/root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
-
-chmod +x /root/scap/pre/remediation-script.sh
-if [ x"$CONFIG_BUILD_REMEDIATE" == "xy" ]; then
-        /root/scap/pre/remediation-script.sh
-        # Un-remediate things SSG broke...
-        sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
-fi
-
-# Un-remeidate things SSG broke...
-sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
+%include includes/standard-early-scap-audit
+%include includes/standard-scap-remediate
 
 # FIXME: Change the username and password.
 #        If a hashed password is specified it will be used
@@ -180,81 +146,24 @@ fi
 echo "Turning sshd off"
 /sbin/chkconfig --level 0123456 sshd off
 
-
-# Disable all that GUI stuff during boot so we can actually see what is going on during boot.
-if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
-	# The first users of a CLIP system will be devs. Lets make things a little easier on them.
-	# by getting rid of the framebuffer effects, rhgb, and quiet.
-	grubby --update-kernel=ALL --remove-args="rhgb quiet"
-	sed -i -e 's/^\(splashimage.*\)/#\1/' -e 's/^\(hiddenmenu.*\)/#\1/' /boot/grub/grub.conf
-	# This is ugly but when plymouth re-rolls the initrd it creates a new entry in grub.conf that is redundant.
-	# Actually rather benign but may impact developers using grubby who think there is only one kernel to work with.
-	title="$(sed 's/ release.*$//' < /etc/redhat-release) ($(uname -r))"
-	sed -i -e "s;title.*;title $title;" /boot/grub/grub.conf
-	echo "Modifying splash screen with plymouth..."
-	plymouth-set-default-theme details --rebuild-initrd &> /dev/null
-fi
+# You can remove this if you'd prefer a
+# more graphical boot that also hides boot-time
+# messages
+%include includes/disable-graphical-boot
 
 ###### START - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
 if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
     echo "Setting permissive mode..."
     echo -e "#THIS IS A DEBUG BUILD HENCE SELINUX IS IN PERMISSIVE MODE\nSELINUX=permissive\nSELINUXTYPE=$POLNAME\n" > /etc/selinux/config
-        echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
-        # This line is used to make policy development easier.  It disables the "setfiles" check used by 
-        # semodule/semanage that prevents transactions containing invalid and dupe fc entries from rollin
-g forward.
-        echo -e "module-store = direct\n[setfiles]\npath=/bin/true\n[end]\n" > /etc/selinux/semanage.conf
-        if [ -f /etc/grub.conf ]; then
-                grubby --update-kernel=ALL --remove-args=enforcing
-                grubby --update-kernel=ALL --args=enforcing=0
-        fi 
+    echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
+    # This line is used to make policy development easier.  It disables the "setfiles" check used by 
+    # semodule/semanage that prevents transactions containing invalid and dupe fc entries from rolling forward.
+    echo -e "module-store = direct\n[setfiles]\npath=/bin/true\n[end]\n" > /etc/selinux/semanage.conf
 fi
 ###### END - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
 
-# This remediation doesn't appear to be added to the script, it might have been added after the SSG release
-# platform = Red Hat Enterprise Linux 6
-# If system does not contain control-alt-delete.override,
-if [ ! -f /etc/init/control-alt-delete.override ]; then
-
-        # but does have control-alt-delete.conf file,
-        if [ -f /etc/init/control-alt-delete.conf ]; then
-
-                # then copy .conf to .override to maintain persistency
-                cp /etc/init/control-alt-delete.conf /etc/init/control-alt-delete.override
-        fi
-fi
-
-sed -i 's,^exec.*$,exec /usr/bin/logger -p authpriv.notice -t init "Ctrl-Alt-Del was pressed and ignored",' /etc/init/control-alt-delete.override
-
-# also these PAM fixes aren't being remediated automatically
-for file in /etc/pam.d/system-auth /etc/pam.d/password-auth-ac; do
-        sed -i -e 's/^auth\s\+required\s\+pam_faillock.*/auth required pam_faillock.so preauth silent deny=3 unlock_time=604800 fail_interval=900/' $file
-        sed -i -e 's/^auth\s\+\[default.*pam_faillock.*/auth [default=die] pam_faillock.so authfail deny=3 unlock_time=604800 fail_interval=900/'  $file
-        # this already appears to be the default... false positive probably
-        #sed -i -e 's/^account.*pam_unix.*/account required pam_faillock.so \n&/' $file
-
-done
-
-if grep -q "maxrepeat" /etc/pam.d/system-auth; then
-        sed -i --follow-symlink "s/\(maxrepeat *= *\).*/\13/" /etc/pam.d/system-auth
-else
-        sed -i --follow-symlink "s/\(.*pam_cracklib\.so.*\)/\1 maxrepeat=3/" /etc/pam.d/system-auth
-fi
-
-# We don't want the final remediation script to set the system to targeted
-sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
-
-oscap xccdf eval --profile stig-rhel7-server-upstream \
---report /root/scap/post/html/report.html \
---results /root/scap/post/html/results.xml \
-/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
-
-oscap xccdf generate fix \
---result-id xccdf_org.open-scap_testresult_stig-rhel7-server-upstream \
-/root/scap/post/html/results.xml > /root/scap/post/remediation-script.sh
-chmod +x /root/scap/post/remediation-script.sh
-
-sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
+%include includes/standard-fix-bad-scap
+%include includes/standard-late-scap-audit
 
 # Need to do some additional customizations if we're building for AWS
 if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
