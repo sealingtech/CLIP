@@ -138,6 +138,11 @@ init_stream_connect(local_login_t)
 auth_dontaudit_manage_shadow(local_login_t)
 auth_dontaudit_manage_passwd(local_login_t)
 
+# SRS: SCAP content forces tracking of old passwords
+# No clue why login itself is doing this intead of updpwd
+# b/c both need manage perms on this for password updates
+# to work.
+auth_manage_oshadow(local_login_t)
 
 userdom_spec_domtrans_all_users(local_login_t)
 userdom_signal_all_users(local_login_t)
