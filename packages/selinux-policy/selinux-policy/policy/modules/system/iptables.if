@@ -183,3 +183,21 @@ interface(`iptables_manage_config',`
 	files_search_etc($1)
 	manage_files_pattern($1, iptables_conf_t, iptables_conf_t)
 ')
+
+###################################
+## <summary>
+##	Read iptables PID files
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`iptables_read_pid',`
+	gen_require(`
+		type iptables_var_run_t;
+	')
+
+	read_files_pattern($1, iptables_var_run_t, iptables_var_run_t)
+')

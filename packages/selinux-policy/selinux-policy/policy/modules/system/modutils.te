@@ -205,6 +205,8 @@ userdom_dontaudit_search_user_home_dirs(insmod_t)
 
 kernel_domtrans_to(insmod_t, insmod_exec_t)
 
+iptables_read_pid(insmod_t)
+
 optional_policy(`
 	alsa_domtrans(insmod_t)
 ')
