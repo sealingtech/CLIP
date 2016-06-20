@@ -650,6 +650,27 @@ interface(`auth_read_shadow',`
 
 ########################################
 ## <summary>
+##	Read the oshadow passwords file (/etc/security/opasswd)
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`auth_read_oshadow',`
+	gen_require(`
+		type oshadow_t;
+		attribute can_read_oshadow_passwords;
+	')
+
+	
+	allow $1 oshadow_t:file read_file_perms;
+	typeattribute $1 can_read_oshadow_passwords;
+')
+
+########################################
+## <summary>
 ##	Pass shadow assertion for reading.
 ## </summary>
 ## <desc>
@@ -784,6 +805,28 @@ interface(`auth_manage_shadow',`
 	files_var_filetrans($1, shadow_t, file, "shadow-")
 	files_etc_filetrans($1, shadow_t, file, "gshadow")
 	files_etc_filetrans($1, shadow_t, file, "nshadow")
+')
+
+########################################
+## <summary>
+##	Create, read, write, and delete the oshadow
+##	password file.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`auth_manage_oshadow',`
+	gen_require(`
+		attribute can_read_oshadow_passwords, can_write_oshadow_passwords;
+		type oshadow_t;
+	')
+
+	allow $1 oshadow_t:file manage_file_perms;
+	typeattribute $1 can_read_oshadow_passwords, can_write_oshadow_passwords;
+	files_etc_filetrans($1, oshadow_t, file, "opasswd")
 ')
 
 #######################################
@@ -2086,11 +2129,15 @@ interface(`auth_unconfined',`
 		attribute can_read_shadow_passwords;
 		attribute can_write_shadow_passwords;
 		attribute can_relabelto_shadow_passwords;
+		attribute can_read_oshadow_passwords;
+		attribute can_write_oshadow_passwords;
 	')
 
 	typeattribute $1 can_read_shadow_passwords;
 	typeattribute $1 can_write_shadow_passwords;
 	typeattribute $1 can_relabelto_shadow_passwords;
+	typeattribute $1 can_read_oshadow_passwords;
+	typeattribute $1 can_write_oshadow_passwords;
 ')
 
 ########################################
@@ -2106,6 +2153,7 @@ interface(`auth_unconfined',`
 interface(`auth_filetrans_named_content',`
 	gen_require(`
 		type shadow_t;
+		type oshadow_t;
 		type passwd_file_t;
 		type faillog_t;
 		type lastlog_t;
@@ -2130,7 +2178,7 @@ interface(`auth_filetrans_named_content',`
 	files_etc_filetrans($1, shadow_t, file, "shadow")
 	files_etc_filetrans($1, shadow_t, file, "shadow-")
 	files_etc_filetrans($1, shadow_t, file, "gshadow")
-	files_etc_filetrans($1, shadow_t, file, "opasswd")
+	files_etc_filetrans($1, oshadow_t, file, "opasswd")
 	logging_log_named_filetrans($1, lastlog_t, file, "lastlog")
 	logging_log_named_filetrans($1, faillog_t, file, "tallylog")
 	logging_log_named_filetrans($1, faillog_t, file, "faillog")

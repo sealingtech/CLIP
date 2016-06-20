@@ -897,6 +897,7 @@ interface(`files_read_all_files',`
 
 	optional_policy(`
 		auth_read_shadow($1)
+		auth_read_oshadow($1)
 	')
 ')
 
