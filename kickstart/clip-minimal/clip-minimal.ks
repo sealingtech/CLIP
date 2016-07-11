@@ -272,6 +272,9 @@ echo "UseRoaming no" >> /etc/ssh/ssh_config
 kill $(jobs -p) 2>/dev/null 1>/dev/null
 kill $TAILPID 2>/dev/null 1>/dev/null
 
+systemctl mask firewalld
+systemctl enable iptables
+
 echo "Done with post install scripts..."
 
 
