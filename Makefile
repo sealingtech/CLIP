@@ -40,7 +40,7 @@ export TOOLS_DIR ?= $(ROOT_DIR)/tmp/tools
 export LIVECD_VERSION ?= $(shell rpm --eval `sed -n -e 's/Release: \(.*\)/\1/p' -e 's/Version: \(.*\)/\1/p' \
                  packages/livecd-tools/livecd-tools.spec| sed 'N;s/\n/-/'`)
 
-export PUNGI_VERSION ?= 3.12-3.el7.centos.1
+export PUNGI_VERSION ?= 3.12-3.el7*
 
 # Config deps
 CONFIG_BUILD_DEPS := $(ROOT_DIR)/CONFIG_BUILD $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
