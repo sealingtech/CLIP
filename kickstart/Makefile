@@ -148,7 +148,7 @@ setup-live-ks: $(SETUP_DEPS)
 	@echo "Modifying kickstart with build variables..."
 	$(VERBOSE)sed -i -e 's;#REPO-REPLACEMENT-PLACEHOLDER;$(REPO_LINES);' $(LIVE_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(LIVE_CONFIG_BUILD_BASH_VARS);' $(LIVE_KS)
-	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/');' $(INST_KS)
+	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/');' $(LIVE_KS)
 	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
 
 setup-aws-ks: $(SETUP_DEPS)
