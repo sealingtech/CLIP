@@ -42,7 +42,8 @@ if [ x"$tmpfile" != "x" ]; then
 fi
 
 # install packages that we need but aren't commonly present on default RHEL installs.
-for i in createrepo rpm-build make anaconda policycoreutils-python lorax python-lockfile hfsplus-tools; do
+LIVECD_TOOL_DEPS="sssd-client system-config-keyboard hfsplus-tools"
+for i in createrepo rpm-build make anaconda policycoreutils-python lorax python-lockfile ${LIVECD_TOOL_DEPS}; do
 	/bin/rpm -q "$i" >/dev/null || sudo /usr/bin/yum install -y $i
 done;
 
