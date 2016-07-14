@@ -83,7 +83,7 @@ AWS_CONFIG_BUILD_BASH_VARS := $(CONFIG_BUILD_BASH_VARS) CONFIG_BUILD_AWS=y CONFI
 # This is only useful for building out of this subdir.  The top-level Makefile passes this variable down
 # pointing to the yum repos CLIP creates and manages in repos/*.  What this means is that you should
 # probably just ignore this.
-REPO_LINES ?= repo --name=centos --baseurl=http://mirror.centos.org/centos/6.2/os/$$basearch\nrepo --name=epel   --baseurl=http://download.fedora.redhat.com/pub/epel/$(RHEL_VER)/$$basearch
+REPO_LINES ?= repo --name=centos --baseurl=http://mirror.centos.org/centos/$(CENTOS_VER)/os/$$basearch\nrepo --name=epel   --baseurl=http://download.fedora.redhat.com/pub/epel/$(RHEL_VER)/$$basearch
 
 SETUP_DEPS := $(CURDIR)/../Makefile $(KS)
 
