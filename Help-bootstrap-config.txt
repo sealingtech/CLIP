@@ -1,0 +1,17 @@
+Bootstrap configuration
+----------------------------------
+
+The bootstrap script can optionally take the -c option with an argument
+that is the full path to a configuration file. The value is a text file
+that contains key = value pairs describing how to setup configuration
+needed for CLIP to build successfully. The supported configuration
+values are as follows:
+
+	- distro: Describes whether CLIP is building on a centos or redhat machine.
+	Valid values are c for CentOS and r for redhat.
+	- repo_name: Name of a yum repo that clip will use for packages when building
+	Note: All repo names must be associated with a path. Names will be matched to
+	paths in the order they are read from the config file.
+	- repo_path: Absolute path of the directory containing the packages for the
+	yum repo. Note: All repos must be associated with a name. Paths will be matched
+	to names in the order they are found in the config file.

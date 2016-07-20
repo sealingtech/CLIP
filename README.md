@@ -17,7 +17,8 @@ DO NOT LEAVE THIS PASSWORD LINE INTACT!
 
 3. Go back and re-read #2.
 
-4. Run "./bootstrap.sh". 
+4. Run "./bootstrap.sh" or "./bootstrap.sh -c <config file>". See [Help-bootstrap-config.txt]
+for details.
 
 5. After you have run bootstrap once you do not have to run it again. 
 Roll an ISO by running "$ make clip-minimal-inst-iso". This will generate
