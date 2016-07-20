@@ -1,0 +1,25 @@
+diff -puNr livecd-tools-21.4-orig/imgcreate/kickstart.py livecd-tools-21.4/imgcreate/kickstart.py
+--- livecd-tools-21.4-orig/imgcreate/kickstart.py	2016-07-15 10:59:16.416850105 -0400
++++ livecd-tools-21.4/imgcreate/kickstart.py	2016-07-19 12:04:50.545243719 -0400
+@@ -447,15 +447,13 @@ class SelinuxConfig(KickstartConfig):
+         if ksselinux.selinux == ksconstants.SELINUX_DISABLED:
+             return
+ 
+-        if not os.path.exists(self.path("/sbin/setfiles")):
++        if not os.path.exists(self.path("/sbin/restorecon")):
+             return
+-
+-        rc = self.call(["/sbin/setfiles", "-p", "-e", "/proc", "-e", "/sys", "-e", "/dev", selinux.selinux_file_context_path(), "/"])
++	#Init labels with restorceon since it won't complain about custom policies in the the chroot
++        rc = self.call(["/sbin/restorecon", "-F", "-R", "-e", "/proc", "-e", "/sys", "-e", "/dev", "/"])
++        #Since the policy installed may be very different from the installed host we will just log an error
+         if rc:
+-            if ksselinux.selinux == ksconstants.SELINUX_ENFORCING:
+-                raise errors.KickstartError("SELinux relabel failed.")
+-            else:
+-                logging.error("SELinux relabel failed.")
++            logging.error("SELinux relabel failed.")
+ 
+     def apply(self, ksselinux):
+         selinux_config = "/etc/selinux/config"
+Binary files livecd-tools-21.4-orig/imgcreate/.kickstart.py.swp and livecd-tools-21.4/imgcreate/.kickstart.py.swp differ

@@ -17,6 +17,7 @@ URL: http://git.fedorahosted.org/git/livecd
 # make dist
 # scp livecd*.tar.bz2 fedorahosted.org:livecd
 Source0: http://fedorahosted.org/releases/l/i/livecd/%{name}-%{version}.tar.bz2
+Patch0: relabel-with-restorecon.patch
 # Drop the requirements for grub2-efi and shim: breaks 32-bit compose
 # and not needed as we have them in comps
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -30,10 +31,11 @@ Requires: dosfstools
 Requires: e2fsprogs
 Requires: lorax >= 18.3
 Requires: rsync
+Requires: system-config-keyboard
 %ifarch %{ix86} x86_64 ppc ppc64
 Requires: hfsplus-tools
 %endif
-#%ifarch %{ix86} x86_64
+%ifarch %{ix86} x86_64
 Requires: syslinux 
 #Requires: syslinux-nonlinux 
 Requires: syslinux-extlinux
@@ -45,7 +47,6 @@ Requires: dumpet
 Requires: sssd-client
 BuildRequires: python
 BuildRequires: /usr/bin/pod2man
-
 %description 
 Tools for generating live CDs on Fedora based systems including
 derived distributions such as RHEL, CentOS and others. See
@@ -66,6 +67,7 @@ Requires: python-urlgrabber
 Requires: libselinux-python
 Requires: dbus-python
 Requires: policycoreutils
+
 
 %description -n python-imgcreate
 Python modules that can be used for building images for things

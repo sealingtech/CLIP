@@ -1,8 +1,10 @@
-# Copyright (C) 2011 Tresys Technology, LLC
-# Copyright (C) 2014 Quark Security, Inc
+# Copyright (C) 2012 Tresys Technology, LLC
+# Copyright (C) 2013 Cubic Corporation
+# Copyright (C) 2016 Quark Security, Inc.
 #
 # Authors: Spencer Shimko <sshimko@tresys.com>
-# Authors: Spencer Shimko <spencer@quarksecurity.com>
+#          Spencer Shimko <spencer@quarksecurity.com>
+#          Quentin Swain <quentin@quarksecurity.com>
 #
 
 # The name of the package
@@ -12,52 +14,53 @@ PKGNAME := livecd-tools
 # generated.  Typically you bump this for delivery.
 VERSION := 21.4
 
-# bump this if creating multiple releases from the same
-# version (think about this... why are you doing this?)
+# Bump this if creating multiple releases from the same
+# version.
 RELEASE := 2.el7.centos
 
-# snag the architecture, hard code an arch if cross-compiling or going noarch
-ARCH := $(uname -p)
+# The name of the Vendor
+VENDOR := null
 
-
+# The name of the Packager
 PACKAGER := Quark Security, Inc
+
+# Snag the architecture.  Assume host arch.
+# Hard code an arch if cross-compiling or going noarch.
+ARCH := noarch
+
+SOURCES := $(PKGNAME)-$(VERSION).tar.bz2 *.patch
+
+# Spec file name
+RPM_SPEC := $(PKGNAME).spec
 
 ####################################################
 ## things below this line should rarely change
 ROOT_DIR ?= $(CURDIR)
 OUTPUT_DIR ?= $(ROOT_DIR)
+SRPM_OUTPUT_DIR ?= $(OUTPUT_DIR)
+
+# exhaustive list of deps for the RPM, used to determine if RPM needs to be rebuilt
+RPM_DEPS := $(SOURCES) $(RPM_SPEC) Makefile
+
 RPM_TMPDIR ?= $(ROOT_DIR)/tmp
 RPM_TOPDIR ?= $(RPM_TMPDIR)/src/redhat
 RPM_BUILDROOT ?= $(RPM_TMPDIR)/rpm-buildroot
-SRPM_OUTPUT_DIR ?= $(RPM_TOPDIR)/SRPMS
 
-# srpm file name
-SRC_SRPM := $(CURDIR)/livecd-tools-21.4-2.el7.src.rpm
-RPM := $(PKGNAME)-$(VERSION)-$(RELEASE).$(ARCH).rpm
-SRPM := $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm
-
-RPMQ_DEFS := --query --define 'pkgname $(PKGNAME)' --define '_sysconfdir /etc' --define 'version $(VERSION)' --define 'release $(RELEASE)' --define 'packager $(PACKAGER)' --qf '%{NAME}\n'
-
-RPM_SPEC := $(RPM_TMPDIR)/$(PKGNAME).spec
+RPMQ_DEFS := --query --define 'pkgname $(PKGNAME)' --define '_sysconfdir /etc' --define 'version $(VERSION)' --define 'release $(RELEASE)' --define 'vendor $(VENDOR)' --define 'packager $(PACKAGER)' --qf '%{NAME}\n'
 
 MKDIR = test -d $(1) || mkdir -p $(1)
 
-RPMBUILD_ARGS := --define '_topdir $(RPM_TOPDIR)'  --define '_tmppath $(RPM_TMPDIR)' --buildroot $(RPM_BUILDROOT)
+RPMBUILD_ARGS := --define '_topdir $(RPM_TOPDIR)'  --define '_tmppath $(RPM_TMPDIR)'
 
 define rpm-prep
-	$(call MKDIR,$(RPM_TOPDIR)/SOURCES);\
-$(call MKDIR,$(RPM_TOPDIR)/SPECS);\
-$(call MKDIR,$(RPM_TOPDIR)/BUILD);\
-$(call MKDIR,$(RPM_TOPDIR)/RPMS/$(ARCH));\
-$(call MKDIR,$(RPM_TOPDIR)/SRPMS);
+	$(call MKDIR,$(RPM_TOPDIR)/SOURCES)
+	$(call MKDIR,$(RPM_TOPDIR)/SPECS)
+	$(call MKDIR,$(RPM_TOPDIR)/BUILD)
+	$(call MKDIR,$(RPM_TOPDIR)/RPMS/$(ARCH))
+	$(call MKDIR,$(RPM_TOPDIR)/SRPMS)
 endef
 
 all: $(PKGNAME)-rpm $(PKGNAME)-srpm
-
-Makefile:
-	echo "Eror: you must generate a Makefile for package $(PKGNAME)."
-	echo "$ cd $(CURDIR); ./gen-makefile-from-src-rpm.sh *.src.rpm; cd -"
-	exit 1
 
 rpm: $(PKGNAME)-rpm
 
@@ -65,24 +68,22 @@ srpm: $(PKGNAME)-srpm
 
 $(PKGNAME)-rpm: $(OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).$(ARCH).rpm
 
-$(PKGNAME)-srpm: $(SRPM)
+$(PKGNAME)-srpm: $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm
 
-$(OUTPUT_DIR)/$(RPM): $(SRPM)
+$(OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).$(ARCH).rpm: $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm
 	@echo "Building $(PKGNAME) RPM..."
 	$(call rpm-prep)
-	cd $(RPM_TOPDIR)/SRPMS && rpmbuild --rebuild $(RPMBUILD_ARGS) -bb $<
-	cp $(RPM_TOPDIR)/RPMS/$(ARCH)/* $(OUTPUT_DIR)/ 2>&1 >/dev/null; exit 0;
+	cd $(RPM_TOPDIR)/SRPMS && rpmbuild --rebuild --target=$(ARCH) $(RPMBUILD_ARGS) --buildroot $(RPM_BUILDROOT) -bb $<
 	mv  $(RPM_TOPDIR)/RPMS/$(ARCH)/$(PKGNAME)-$(VERSION)-$(RELEASE)*.rpm $(OUTPUT_DIR)
 
-$(SRPM): $(SRC_SRPM)
-	@if [ ! "$(SRPM_OUTPUT_DIR)" -ef "$(RPM_TOPDIR)/SRPMS" ]; then\
-		$(call rpm-prep)\
-	fi
-	cp  $(SRC_SRPM) $(SRPM) 2>&1 1>/dev/null;
-
-$(RPM_SPEC): $(SRC_SRPM)
-	$(call MKDIR,$(RPM_TMPDIR))
-	( cd $(RPM_TMPDIR); rpm2cpio $< | cpio --quiet -i ${PKGNAME}.spec ) 2>&1 >/dev/null
+$(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm: $(RPM_DEPS)
+	@echo "Building $(PKGNAME) SRPM..."
+	$(call rpm-prep)
+	cp $(SOURCES) $(RPM_TOPDIR)/SOURCES/
+	echo -e "%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n" > $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
+	cat $(RPM_SPEC) >> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
+	cd $(RPM_TOPDIR) && rpmbuild $(RPMBUILD_ARGS) -bs SPECS/$(notdir $(RPM_SPEC)) --nodeps
+	mv  $(RPM_TOPDIR)/SRPMS/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm $(SRPM_OUTPUT_DIR)
 
 patchy: $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm
 	@echo "Prepping environment for patching existing sources..."
@@ -101,13 +102,10 @@ patchy: $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm
 clean:
 	$(RM) -r $(RPM_TMPDIR)
 
-# This is slightly undesirable, but in order to cleanup *all& RONs properly we need
-# to query the spec file, so in the bare target we have to extract the spec file :(
-bare: $(RPM_SPEC) FORCE
-	$(foreach f,$(shell rpm $(RPMQ_DEFS) --specfile $(RPM_SPEC)),export GLOBIGNORE='$(SRC_SRPM)'; $(RM) $(OUTPUT_DIR)/$(f)*.rpm;)
-	$(RM) -r $(RPM_TMPDIR)
-
-FORCE:
+bare: clean
+	$(foreach f,$(shell rpm $(RPMQ_DEFS) --specfile $(RPM_SPEC)),$(RM) $(OUTPUT_DIR)/$(f)*.rpm;)
+	$(RM) $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm
+	$(RM) -r a b
 
 .SUFFIXES:
-.PHONY: all $(PKGNAME)-rpm $(PKGNAME)-srpm clean bare rpm srpm FORCE
+.PHONY: all rpm srpm $(PKGNAME)-rpm $(PKGNAME)-srpm clean bare
