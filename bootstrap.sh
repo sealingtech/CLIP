@@ -111,14 +111,23 @@ if [ $# -eq 2 ] && [ $1 == "-c" ] && [ ! -z $2 ]; then
 	esac
 	set_selinux_permissive
 else
+	/bin/echo -e "Creating an environment for building software and ISOs can be a little
+complicated.  This script will automate some of those tasks.  Keep in mind that
+this script isn't exhaustive; depending on a variety of factors you may have to
+install some additional packages.\n\nYour user *must* have sudo access for any
+of this to work.
+
+If you are using RHEL enter 'r'.
+If you are using CentOS 'c'."
+
+	read distro
+
 	tmpfile=''
 	while :; do
-		/bin/echo -e "
-		Enter a name for this yum repo.  Just leave empty if you are done adding, or don't wish to change the repositories.\n"
+		/bin/echo -e "Enter a name for this yum repo.  Just leave empty if you are done adding, or don't wish to change the repositories.\n"
 		read name
 		[ x"$name" == "x" ] && break
-		/bin/echo -e "
-		Enter a fully qualified path for this yum repo.  Just leave empty if you are done adding, or don't wish to change the repositories.\n"
+		/bin/echo -e "Enter a fully qualified path for this yum repo.  Just leave empty if you are done adding, or don't wish to change the repositories.\n"
 		read path
 		[ x"$path" == "x" ] && break
 
@@ -131,32 +140,24 @@ else
 
 	if [ x"$tmpfile" != "x" ]; then
 		mv $tmpfile CONFIG_REPOS
+		chown ${SUDO_USER}:${SUDO_USER} CONFIG_REPOS
 	fi
 
-	/bin/echo -e "Creating an environment for building software and ISOs can be a little
-	complicated.  This script will automate some of those tasks.  Keep in mind that
-	this script isn't exhaustive; depending on a variety of factors you may have to
-	install some additional packages.\n\nYour user *must* have sudo access for any
-	of this to work.
-
-	If you are using RHEL enter 'r'.
-	If you are using CentOS 'c'."
-	read distro
 # if we're on RHEL add the Opt channel
 	if [ "$distro" == "r" ]; then
 		/bin/echo "We're going to try to subscribe to the RHEL Optional channel for your distro.
-		This might not work if you don't have credentials or you're out of entitlements.
-		We *NEED* packages from Opt to be installed on the build host *and* need to pull
-		packages from there to put on the generated installable media.  If you're using
-		RHEL and want to work-around this issue (hack):
-		1. Grab a CentOS ISO.
-		2. Mount it.
-		3. Add it as a yum repo:
-			http://docs.oracle.com/cd/E37670_01/E37355/html/ol_create_repo.html
-		4. Re-run this script and pick CentOS.
-		5. Refer to the same path in the CONFIG_REPOS file.
-		Press enter to continue.
-		"
+This might not work if you don't have credentials or you're out of entitlements.
+We *NEED* packages from Opt to be installed on the build host *and* need to pull
+packages from there to put on the generated installable media.  If you're using
+RHEL and want to work-around this issue (hack):
+1. Grab a CentOS ISO.
+2. Mount it.
+3. Add it as a yum repo:
+	http://docs.oracle.com/cd/E37670_01/E37355/html/ol_create_repo.html
+4. Re-run this script and pick CentOS.
+5. Refer to the same path in the CONFIG_REPOS file.
+Press enter to continue."
+
 	read
 		rhn_subscribe
 	fi
