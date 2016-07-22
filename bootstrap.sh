@@ -19,15 +19,20 @@ rhn_subscribe() {
 	#If we are building on a redhat machine register with rhn
 	#TODO: Update to the new method for rhel 7
 	arch=`rpm --eval %_host_cpu`
-	/usr/bin/sudo rhn-channel --add --channel=rhel-$arch-server-optional-`/bin/awk '{ print $7; }' /etc/redhat-release`.z
+	rhn-channel --add --channel=rhel-$arch-server-optional-`/bin/awk '{ print $7; }' /etc/redhat-release`.z
 }
 
 
 set_selinux_permissive() {
 	#Make eselinux permissive due to requirements of build tools
-	/usr/bin/sudo /usr/sbin/setenforce 0
-	/usr/bin/sudo /bin/sed -i -e 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
+	/usr/sbin/setenforce 0
+	/bin/sed -i -e 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 }
+
+if [ $EUID -ne 0 ]; then
+	echo "The bootstrap script requires root; try re-running with sudo."
+	exit
+fi
 
 if [ $# -eq 2 ] && [ $1 == "-c" ] && [ ! -z $2 ]; then
 	config_var=""
@@ -89,6 +94,7 @@ if [ $# -eq 2 ] && [ $1 == "-c" ] && [ ! -z $2 ]; then
 		add_repo $tmpfile ${repo_names[i]} ${repo_paths[i]}
 	done
 	mv $tmpfile CONFIG_REPOS
+	chown ${SUDO_USER}:${SUDO_USER} CONFIG_REPOS
 	case $distro in
 		r)
 			echo "Using distro: Redhat"
@@ -174,6 +180,6 @@ done;
 # install packages from epel that we carry in CLIP
 pushd . >/dev/null
 cd host_packages/epel
-/usr/bin/sudo /usr/bin/yum -y localinstall *.rpm
+/usr/bin/yum -y localinstall *.rpm
 popd > /dev/null
-/usr/bin/sudo /usr/sbin/usermod -aG mock `id -un`
+/usr/sbin/usermod -aG mock `id -un`
