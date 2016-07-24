@@ -10,9 +10,12 @@ set -e
 add_repo() {
 	#Copy the current repo config to a tmp file
 	tmp_config=$1
-	repo_name=$2
-	repo_path=$3
-	echo -e "# INSERTED BY BOOTSTRAP.SH\n ${repo_name} = ${repo_path}" >> ${tmp_config}
+	repo_names=$2
+	repo_paths=$3
+	echo -e "# INSERTED BY BOOTSTRAP.SH" >> ${tmp_config}
+	for (( i=0; i<${#repo_names[@]}; i++)); do
+		echo "${repo_names[$i]} = ${repo_paths[$i]}" >> ${tmp_config}
+	done
 }
 
 rhn_subscribe() {
@@ -90,9 +93,7 @@ if [ $# -eq 2 ] && [ $1 == "-c" ] && [ ! -z $2 ]; then
 	repo_count=${#repo_names[@]}
 	tmpfile=`/bin/mktemp`
 	/bin/cat CONFIG_REPOS | /bin/sed -e 's/^\([a-zA-Z0-9].*\)$/#\1/' > $tmpfile
-	for (( i=0; i<${repo_count}; i++)); do
-		add_repo $tmpfile ${repo_names[i]} ${repo_paths[i]}
-	done
+	add_repo $tmpfile $repo_names $repo_paths
 	mv $tmpfile CONFIG_REPOS
 	chown ${SUDO_USER}:${SUDO_USER} CONFIG_REPOS
 	case $distro in
@@ -169,6 +170,7 @@ Press enter to continue."
 	set_selinux_permissive
 
 fi
+
 # install packages that we need but aren't commonly present on default RHEL installs.
 LIVECD_TOOL_DEPS="sssd-client system-config-keyboard"
 for i in createrepo rpm-build make anaconda policycoreutils-python python-lockfile ${LIVECD_TOOL_DEPS}; do

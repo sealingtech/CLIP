@@ -20,7 +20,7 @@ do
 	case ${case_type} in
 		good)
 			echo "Running expected pass test: ${case}"
-			./bootstrap.sh -c ${case}
+			sudo ./bootstrap.sh -c ${case}
 			result=$?
 			if [ $result -eq 0 ]; then
 				echo "Test ${case}: Passed"
@@ -33,7 +33,7 @@ do
 		#We expect these to fail; hence the inverted logic
 		bad)
 			echo "Running expected failure test: ${case}"
-			./bootstrap.sh -c ${case}
+			sudo ./bootstrap.sh -c ${case}
 			result=$?
 			if [ $result -eq 0 ]; then
 				echo "Test ${case}: Failed"
