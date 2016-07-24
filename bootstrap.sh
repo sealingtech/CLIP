@@ -168,9 +168,6 @@ Press enter to continue."
 	read
 	set_selinux_permissive
 
-	/bin/echo -e "Basic bootstrapping of build host is complete.\nPress 'enter' to run 'make clip-minimal-inst-iso' or ctrl-c to quit."
-	read
-	/usr/bin/make clip-minimal-inst-iso
 fi
 # install packages that we need but aren't commonly present on default RHEL installs.
 LIVECD_TOOL_DEPS="sssd-client system-config-keyboard hfsplus-tools"
@@ -184,3 +181,9 @@ cd host_packages/epel
 /usr/bin/yum -y localinstall *.rpm
 popd > /dev/null
 /usr/sbin/usermod -aG mock `id -un`
+
+if [ $# -lt 2 ]; then
+	/bin/echo -e "Basic bootstrapping of build host is complete.\nPress 'enter' to run 'make clip-minimal-inst-iso' or ctrl-c to quit."
+	read
+	/usr/bin/make clip-minimal-inst-iso
+fi
