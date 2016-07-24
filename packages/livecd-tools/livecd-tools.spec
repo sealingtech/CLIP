@@ -76,6 +76,7 @@ like live image or appliances.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 make
