@@ -187,3 +187,5 @@ if [ $# -lt 2 ]; then
 	read
 	/usr/bin/make clip-minimal-inst-iso
 fi
+
+exit 0
