@@ -180,7 +180,7 @@ pushd . >/dev/null
 cd host_packages/epel
 /usr/bin/yum -y localinstall *.rpm
 popd > /dev/null
-/usr/sbin/usermod -aG mock `id -un`
+/usr/sbin/usermod -aG mock ${SUDO_USER}
 
 if [ $# -lt 2 ]; then
 	/bin/echo -e "Basic bootstrapping of build host is complete.\nPress 'enter' to run 'make clip-minimal-inst-iso' or ctrl-c to quit."
