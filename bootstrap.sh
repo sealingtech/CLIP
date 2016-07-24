@@ -175,7 +175,7 @@ fi
 # install packages that we need but aren't commonly present on default RHEL installs.
 LIVECD_TOOL_DEPS="sssd-client system-config-keyboard hfsplus-tools"
 for i in createrepo rpm-build make anaconda policycoreutils-python python-lockfile ${LIVECD_TOOL_DEPS}; do
-	/bin/rpm -q "$i" >/dev/null || sudo /usr/bin/yum install -y $i
+	/bin/rpm -q "$i" >/dev/null || /usr/bin/yum install -y $i
 done;
 
 # install packages from epel that we carry in CLIP
