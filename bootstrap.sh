@@ -5,19 +5,6 @@
 # Authors: Spencer Shimko <spencer@quarksecurity.com>
 set -e
 
-#Append repos into the REPO configuration file. This function assumes
-#that the temp configuration has already been created
-add_repo() {
-	#Copy the current repo config to a tmp file
-	tmp_config=$1
-	names=$2
-	paths=$3
-	echo -e "# INSERTED BY BOOTSTRAP.SH" >> ${tmp_config}
-	for (( i=0; i<${#names[@]}; i++)); do
-		echo "${names[$i]} = ${paths[$i]}" >> ${tmp_config}
-	done
-}
-
 rhn_subscribe() {
 	#If we are building on a redhat machine register with rhn
 	#TODO: Update to the new method for rhel 7
@@ -93,7 +80,11 @@ if [ $# -eq 2 ] && [ $1 == "-c" ] && [ ! -z $2 ]; then
 	repo_count=${#repo_names[@]}
 	tmpfile=`/bin/mktemp`
 	/bin/cat CONFIG_REPOS | /bin/sed -e 's/^\([a-zA-Z0-9].*\)$/#\1/' > $tmpfile
-	add_repo $tmpfile repo_names repo_paths
+	echo -e "# INSERTED BY BOOTSTRAP.SH" >> ${tmpfile}
+	for (( i=0; i<${#repo_names[@]}; i++)); do
+		echo "${repo_names[$i]} = ${repo_paths[$i]}" >> ${tmpfile}
+	done
+
 	mv $tmpfile CONFIG_REPOS
 	chown ${SUDO_USER}:${SUDO_USER} CONFIG_REPOS
 	case $distro in
