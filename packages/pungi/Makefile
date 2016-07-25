@@ -14,7 +14,7 @@ VERSION := 3.12
 
 # Bump this if creating multiple releases from the same
 # version.
-RELEASE := 3.el7.centos.1
+RELEASE := 3.el7.1
 
 # The name of the Vendor
 VENDOR := null
