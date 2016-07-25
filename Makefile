@@ -41,7 +41,9 @@ export TOOLS_DIR ?= $(ROOT_DIR)/tmp/tools
 export LIVECD_VERSION ?= $(shell rpm --eval `sed -n -e 's/Release: \(.*\)/\1/p' -e 's/Version: \(.*\)/\1/p' \
                  packages/livecd-tools/livecd-tools.spec| sed 'N;s/\n/-/'`)
 
+#TODO: Investigate how to handle updates better
 export PUNGI_VERSION ?= 3.12-3.el7*
+export LORAX_VERSION ?= 19.6.66-1.el7
 
 # Config deps
 CONFIG_BUILD_DEPS := $(ROOT_DIR)/CONFIG_BUILD $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
@@ -221,11 +223,14 @@ define MAKE_LIVE_TOOLS
 endef
 
 define MAKE_PUNGI
-	$(MAKE) pungi-rpm; \
+	$(MAKE) pungi-rpm lorax-rpm; \
 	mkdir -p $(TOOLS_DIR); \
 	cp $(CLIP_REPO_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm $(TOOLS_DIR); \
+	cp $(CLIP_REPO_DIR)/lorax-$(LORAX_VERSION).noarch.rpm $(TOOLS_DIR); \
 	rpm2cpio $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm > $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm.cpio; \
-	cd $(TOOLS_DIR) && cpio -idv < pungi-$(PUNGI_VERSION).noarch.rpm.cpio
+	rpm2cpio $(TOOLS_DIR)/lorax-$(LORAX_VERSION).noarch.rpm > $(TOOLS_DIR)/lorax-$(LORAX_VERSION).noarch.rpm.cpio; \
+	cd $(TOOLS_DIR) && cpio -idv < pungi-$(PUNGI_VERSION).noarch.rpm.cpio \
+	&& cpio -idv < lorax-$(LORAX_VERSION).noarch.rpm.cpio;
 endef
 
 ######################################################

@@ -5,7 +5,7 @@ diff -purN a/src/pylorax/__init__.py b/src/pylorax/__init__.py
          else:
              vernum = pylorax.version.num
  
-+	domacboot = False
++        domacboot = False
          if domacboot:
              try:
                  runcmd(["rpm", "-q", "hfsplus-tools"])
