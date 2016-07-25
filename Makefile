@@ -305,7 +305,7 @@ $(REPO_DIR)/$(REPO_ID)-repo/last-updated: $(CONF_DIR)/pkglist.$(REPO_ID) $(CONFI
 		elif [ -f "$(REPO_PATH)/Packages/$$$$fil" ]; then \
 			$(REPO_LINK) "$(REPO_PATH)/Packages/$$$$fil" $(REPO_DIR)/$(REPO_ID)-repo/$$$$fil; \
 		else \
-			echo "Can't find $$$$file in repo $(REPO_PATH)!"; exit 1; \
+			echo "Can't find $$$$fil in repo $(REPO_PATH)!"; exit 1; \
 		fi; \
 	done < $(CONF_DIR)/pkglist.$(REPO_ID)
 	@echo "Generating $(REPO_ID) yum repo metadata, this could take a few minutes..."
