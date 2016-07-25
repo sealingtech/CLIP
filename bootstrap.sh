@@ -30,8 +30,8 @@ if [ $# -eq 2 ] && [ $1 == "-c" ] && [ ! -z $2 ]; then
 	distro_flag=false
 	#Use two arrays since we don't know whether the config acutally makes sense
 	distro=""
-	repo_names=()
-	repo_paths=()
+	declare -a repo_names
+	declare -a repo_paths
 	while read -r line;
 	do
 		if [[ ${line} =~ ^(.*)=(.*)$ ]]; then
@@ -40,18 +40,22 @@ if [ $# -eq 2 ] && [ $1 == "-c" ] && [ ! -z $2 ]; then
 			echo "Read config setting ${config_var} and value ${config_val}"
 			case ${config_var} in
 				repo_name)
-					if [ -z ${config_val} ]; then
+					if [ -z "${config_val}" ]; then
 						echo "Invalid repo name: Name must not be empty"
 						exit 1
+					else
+						repo_names+=("${config_val}")
+						echo ${repo_names[@]}
 					fi
-					repo_names+=("${config_val}")
 					;;
 				repo_path)
-					if [ ! -d ${config_val} ]; then
+					if [[ -z "${config_val}" || ! -d "${config_val}" ]]; then
 						echo "Invalid repo path: Specify a valid repo directory"
 						exit 1
+					else
+						repo_paths+=("${config_val}")
+						echo ${repo_paths[@]}
 					fi
-					repo_paths+=("${config_val}")
 					;;
 				distro)
 					if ${distro_flag} ; then
@@ -81,10 +85,11 @@ if [ $# -eq 2 ] && [ $1 == "-c" ] && [ ! -z $2 ]; then
 	tmpfile=`/bin/mktemp`
 	/bin/cat CONFIG_REPOS | /bin/sed -e 's/^\([a-zA-Z0-9].*\)$/#\1/' > $tmpfile
 	echo -e "# INSERTED BY BOOTSTRAP.SH" >> ${tmpfile}
-	for (( i=0; i<${#repo_names[@]}; i++)); do
-		echo "${repo_names[$i]} = ${repo_paths[$i]}" >> ${tmpfile}
+	echo "Appending $repo_count repos"
+	for (( i=0; i<${repo_count}; i++)); do
+		echo "Adding repos ${repo_names[$i]}"
+		echo "${repo_names[$i]}=${repo_paths[$i]}" >> ${tmpfile}
 	done
-
 	mv $tmpfile CONFIG_REPOS
 	chown ${SUDO_USER}:${SUDO_USER} CONFIG_REPOS
 	case $distro in
