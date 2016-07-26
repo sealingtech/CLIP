@@ -13,7 +13,7 @@ Patch0:         0001-replace-tabs-with-spaces.patch
 Patch1:         0001-Make-our-OS-iso-bootable-on-aarch64.patch
 Patch2:		0002-fix-absolute-paths.patch
 Patch3:		0003-follow-symlinks.patch
-Patch4:		0004-call-lorax-with-custom-args
+Patch4:		0004-call-lorax-with-custom-args.patch
 Requires:       yum => 3.4.3-28, repoview, createrepo >= 0.4.11
 Requires:       lorax, python-lockfile
 BuildRequires:  python-devel
