@@ -1,0 +1,38 @@
+diff -uNr pungi-orig/src/pypungi/__init__.py pungi-3.12/src/pypungi/__init__.py
+--- pungi-orig/src/pypungi/__init__.py	2014-09-11 15:53:33.000000000 +0000
++++ pungi-3.12/src/pypungi/__init__.py	2016-07-26 16:32:45.809010087 +0000
+@@ -1400,6 +1400,7 @@
+             self.ayum.compatarch = 'ppc64le'
+
+         # Only supported mac hardware is x86 make sure we only enable mac support on arches that need it
++	# Disable efi in general for CLIP specific pungi
+         if self.tree_arch in ['x86_64']:
+             domacboot = True
+         else:
+@@ -1407,10 +1408,23 @@
+
+         # run the command
+         lorax = pylorax.Lorax()
+-        lorax.configure()
+-
++        lorax_config = ConfigParser.SafeConfigParser()
++        lorax_config.add_section("lorax")
++        clip_tool_dir = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),  "../../../../../"))
++        clip_template_dir = os.path.join(clip_tool_dir, "usr","share","lorax")
++        clip_etc_dir = os.path.join(clip_tool_dir, "etc","clip");
++        clip_lorax_cfg = os.path.join(clip_etc_dir, "clip.cfg")
++
++        lorax_config.set("lorax","sharedir", clip_template_dir)
++        if not os.path.exists(clip_etc_dir):
++            os.makedirs(clip_etc_dir, 755)
++        with open(clip_lorax_cfg, "w") as conf:
++            lorax_config.write(conf);
++            conf.close()
++        lorax.configure(conf_file=clip_lorax_cfg)
++	#Add in the path of the CLIP lorax templates
+         lorax.run(self.ayum, product=product, version=version, release=release,
+-                  variant=variant, bugurl=bugurl, isfinal=isfinal, domacboot=domacboot,
++                  variant=variant, bugurl=bugurl, isfinal=isfinal, domacboot=False,
+                   workdir=workdir, outputdir=outputdir, volid=volid)
+
+         # write out the tree data for snake

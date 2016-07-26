@@ -10,7 +10,6 @@ License:        GPLv2+
 URL:            http://git.fedorahosted.org/git/?p=lorax.git
 Source0:        https://fedorahosted.org/releases/l/o/%{name}/%{name}-%{version}.tar.gz
 Patch0: setfiles-fixes.patch
-Patch1: disable-macboot.patch
 
 BuildRequires:  python2-devel
 
@@ -79,7 +78,6 @@ Anaconda's image install feature.
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p1
 
 %build
 
