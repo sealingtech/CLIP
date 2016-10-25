@@ -14,7 +14,7 @@ VERSION := 0.8.8b
 
 # bump this if creating multiple releases from the same
 # version (think about this... why are you doing this?)
-RELEASE := 1$(shell rpm --eval "%{dist}")
+RELEASE := 1.el$(shell rpm -q --qf "%{VERSION}" $$(rpm -q --whatprovides redhat-release))
 
 # snag the architecture, hard code an arch if cross-compiling or going noarch
 ARCH := noarch
