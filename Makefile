@@ -65,6 +65,16 @@ else
 $(foreach VARIANT,$(VARIANTS), $(eval include kickstart/$(VARIANT)/variant_pkgs.mk))
 endif
 
+# FIXME: remove when AWS is supported by CLIP for v7
+ifneq ($(filter %-aws-ami,$(MAKECMDGOALS)),)
+$(error "AWS/EC2 targets not supported for RHEL/CentOS v7 quite yet. Stay tuned.")
+endif
+#
+# FIXME: remove when VPN variants supported by CLIP for v7
+ifneq ($(filter clip-vpn-%,$(MAKECMDGOALS)),)
+$(error "The CLIP VPN variant is not supported for RHEL/CentOS v7 quite yet. Stay tuned.")
+endif
+
 ifeq ($(CONFIG_BUILD_ENABLE_SSH_6),n)
 PACKAGES := $(filter-out openssh-six,$(PACKAGES))
 endif
@@ -166,7 +176,7 @@ endif
 
 MKDIR = $(VERBOSE)test -d $(1) || mkdir -p $(1)
 
-SYSTEMS := $(shell find $(KICKSTART_DIR) -maxdepth 1 ! -name kickstart -type d -printf "%f\n")
+SYSTEMS := $(shell find $(KICKSTART_DIR) -maxdepth 1 ! -name kickstart ! -name includes -type d -printf "%f\n")
 
 # These are targets supported by the kickstart/Makefile that will be used to generate LiveCD images.
 LIVECDS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -live-iso,$(SYSTEM)))
@@ -344,17 +354,19 @@ endef
 PHONIES += help
 help:
 	$(call CHECK_DEPS)
-	@echo "The following make targets are available for generating installable ISOs:"
+	@echo "The following make target is available for generating all supported installable ISOs and live CDs:"
 	@echo "	all"
+	@echo
+	@echo "The following make targets are available for generating installable ISOs:"
 	@for cd in $(INSTISOS); do echo "	$$cd"; done
 	@echo
 	@echo "The following make targets are available for generating Live CDs:"
-	@echo "	all"
 	@for cd in $(LIVECDS); do echo "	$$cd"; done
 	@echo
-	@echo "The following make targets are available for generating AWS :"
-	@for cd in $(AWSBUNDLES); do echo "	$$cd"; done
-	@echo
+# FIXME: re-enabled when AWS/EC2 support exists for v7
+#	@echo "The following make targets are available for generating AWS :"
+#	@for cd in $(AWSBUNDLES); do echo "	$$cd"; done
+#	@echo
 	@echo "To burn a livecd image to a thumbdrive:"
 	@echo "	iso-to-disk ISO_FILE=<isofilename> USB_DEV=<devname>"
 	@echo "	iso-to-disk ISO_FILE=<isofilename> USB_DEV=<devname> OVERLAY_SIZE=<size in MB>"
