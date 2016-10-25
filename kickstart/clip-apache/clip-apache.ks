@@ -73,35 +73,12 @@ webpageexample
 clip-dracut-module
 mod_ssl
 
-mysql
-mysql-server
-mysql-test
+mariadb
+mariadb-server
 httpd
 php
-php-cli
 php-common
-php-gd
-php-imap
-php-intl
-php-ldap
-php-mbstring
 php-mysql
-php-pdo
-php-pear
-php-pecl-apc
-php-pecl-memcache
-php-pecl-Fileinfo
-php-pgsql
-php-process
-php-pspell
-php-recode
-php-snmp
-php-soap
-php-tidy
-php-xml
-php-xmlrpc
-php-zts
-php-devel
 #####
 
 %end
