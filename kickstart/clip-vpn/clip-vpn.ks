@@ -61,11 +61,11 @@ selinux-policy
 # by default use MCS policy (selinux-policy-clip)
 -selinux-policy-mls
 selinux-policy-mcs
-#selinux-policy-mcs-ssh
-#selinux-policy-mcs-unprivuser
-#selinux-policy-mcs-ec2ssh
-#selinux-policy-mcs-config-strongswan
-#selinux-policy-mcs-vpnadm
+selinux-policy-mcs-ssh
+selinux-policy-mcs-unprivuser
+selinux-policy-mcs-ec2ssh
+selinux-policy-mcs-config-strongswan
+selinux-policy-mcs-vpnadm
 clip-miscfiles
 
 %end
@@ -88,41 +88,12 @@ fi
 echo "Installation timestamp: `date`" > /root/clip-info.txt
 echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 
-export POLNAME=$(awk -F= '/^SELINUXTYPE/ { print $2; }' /etc/selinux/config)
+# Do not remove this line unless you remove all the other stanard include files below
+# as they rekly on things defined in this include
+%include includes/standard-prep-post-env
 
-#NOTE: while the following lines allow the SCAP content to be interprested on
-# CentOS, the results might be wrong in a few places, like FIPS compliance and
-# gpgp keys etc.
-if [ -f /etc/centos-release ]; then
-	awk '/o:redhat:enterprise_linux:6/{print "<platform idref=\"cpe:/o:centos:centos:6\"/>"}1' < /usr/share/xml/scap/ssg/content/ssg-rhel6-xccdf.xml > /usr/share/xml/scap/ssg/content/ssg-centos6-xccdf.xml
-	xccdf='centos6'
-else
-	xccdf='rhel6'
-fi
-
-mkdir -p /root/scap/{pre,post}/html
-oscap xccdf eval --profile stig-rhel6-server-upstream \
---report /root/scap/pre/html/report.html \
---results /root/scap/pre/html/results.xml \
-/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
-
-oscap xccdf generate fix \
---result-id xccdf_org.open-scap_testresult_stig-rhel6-server-upstream \
-/root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
-
-chmod +x /root/scap/pre/remediation-script.sh
-if [ x"$CONFIG_BUILD_REMEDIATE" == "xy" ]; then
-        mkdir -p /tmp/service
-        echo "#!/bin/bash" > /tmp/service/service
-        echo "echo \"ignoring service call \$1\" >> /tmp/service/service.log" >> /tmp/service/service
-        chmod a+x /tmp/service/service
-        PATH=/tmp/service:$PATH /root/scap/pre/remediation-script.sh
-        # Un-remeidate things SSG broke...
-        sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
-        cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' | fold -sw 80 > /etc/issue.net
-        cp /etc/issue.net /etc/issue
-fi
-
+%include includes/standard-early-scap-audit
+%include includes/standard-scap-remediate
 
 if [ x"$CONFIG_BUILD_AWS" != "xy" -o x"$CONFIG_BUILD_VPN_ENABLE_TOOR" == "xy" ]; then
 	# FIXME: Change the username and password.
@@ -188,19 +159,10 @@ IPV6_PRIVACY=rfc3041
 EOF
 fi
 
-# Disable all that GUI stuff during boot so we can actually see what is going on during boot.
-if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
-	# The first users of a CLIP system will be devs. Lets make things a little easier on them.
-	# by getting rid of the framebuffer effects, rhgb, and quiet.
-	grubby --update-kernel=ALL --remove-args="rhgb quiet"
-	sed -i -e 's/^\(splashimage.*\)/#\1/' -e 's/^\(hiddenmenu.*\)/#\1/' /boot/grub/grub.conf
-	# This is ugly but when plymouth re-rolls the initrd it creates a new entry in grub.conf that is redundant.
-	# Actually rather benign but may impact developers using grubby who think there is only one kernel to work with.
-	title="$(sed 's/ release.*$//' < /etc/redhat-release) ($(uname -r))"
-	sed -i -e "s;title.*;title $title;" /boot/grub/grub.conf
-	echo "Modifying splash screen with plymouth..."
-	plymouth-set-default-theme details --rebuild-initrd &> /dev/null
-fi
+# You can remove this if you'd prefer a
+# more graphical boot that also hides boot-time
+# messages
+%include includes/disable-graphical-boot
 
 if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
 	echo "Setting permissive mode..."
@@ -215,47 +177,8 @@ if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
 	fi	
 fi
 
-# This remediation doesn't appear to be added to the script, it might have been added after the SSG release
-# platform = Red Hat Enterprise Linux 6
-# If system does not contain control-alt-delete.override,
-if [ ! -f /etc/init/control-alt-delete.override ]; then
-
-        # but does have control-alt-delete.conf file,
-        if [ -f /etc/init/control-alt-delete.conf ]; then
-
-                # then copy .conf to .override to maintain persistency
-                cp /etc/init/control-alt-delete.conf /etc/init/control-alt-delete.override
-        fi
-fi
-
-sed -i 's,^exec.*$,exec /usr/bin/logger -p authpriv.notice -t init "Ctrl-Alt-Del was pressed and ignored",' /etc/init/control-alt-delete.override
-
-# also these PAM fixes aren't being remediated automatically
-for file in /etc/pam.d/system-auth /etc/pam.d/password-auth-ac; do
-        sed -i -e 's/^auth\s\+required\s\+pam_faillock.*/auth required pam_faillock.so preauth silent deny=3 unlock_time=604800 fail_interval=900/' $file
-        sed -i -e 's/^auth\s\+\[default.*pam_faillock.*/auth [default=die] pam_faillock.so authfail deny=3 unlock_time=604800 fail_interval=900/'  $file
-        # this already appears to be the default... false positive probably
-        #sed -i -e 's/^account.*pam_unix.*/account required pam_faillock.so \n&/' $file
-
-done
-
-if grep -q "maxrepeat" /etc/pam.d/system-auth; then
-        sed -i --follow-symlink "s/\(maxrepeat *= *\).*/\13/" /etc/pam.d/system-auth
-else
-        sed -i --follow-symlink "s/\(.*pam_cracklib\.so.*\)/\1 maxrepeat=3/" /etc/pam.d/system-auth
-fi
-
-oscap xccdf eval --profile stig-rhel6-server-upstream \
---report /root/scap/post/html/report.html \
---results /root/scap/post/html/results.xml \
-/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
-
-oscap xccdf generate fix \
---result-id xccdf_org.open-scap_testresult_stig-rhel6-server-upstream \
-/root/scap/post/html/results.xml > /root/scap/post/remediation-script.sh
-chmod +x /root/scap/post/remediation-script.sh
-
-sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
+%include includes/standard-fix-bad-scap
+%include includes/standard-late-scap-audit
 
 echo "session optional pam_umask.so umask=0077" >> /etc/pam.d/sshd
 
