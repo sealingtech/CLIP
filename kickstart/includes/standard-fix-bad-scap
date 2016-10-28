@@ -1,1 +1,29 @@
 systemctl disable kdump
+
+# also these PAM fixes aren't being remediated automatically
+for file in /etc/pam.d/system-auth /etc/pam.d/password-auth-ac; do
+        sed -i -e 's/^auth\s\+required\s\+pam_faillock.*/auth required pam_faillock.so preauth silent deny=3 unlock_time=604800 fail_interval=900/' $file
+        sed -i -e 's/^auth\s\+\[default.*pam_faillock.*/auth [default=die] pam_faillock.so authfail deny=3 unlock_time=604800 fail_interval=900/'  $file
+        # this already appears to be the default... false positive probably
+        #sed -i -e 's/^account.*pam_unix.*/account required pam_faillock.so \n&/' $file
+
+done
+
+if grep -q "maxrepeat" /etc/pam.d/system-auth; then
+        sed -i --follow-symlink "s/\(maxrepeat *= *\).*/\13/" /etc/pam.d/system-auth
+else
+        sed -i --follow-symlink "s/\(.*pam_cracklib\.so.*\)/\1 maxrepeat=3/" /etc/pam.d/system-auth
+fi
+
+sed -i 's,^ExecStart.*$,ExecStart=/usr/bin/logger -p authpriv.notice -t init "Ctrl-Alt-Del was pressed and ignored",' /usr/lib/systemd/system/systemd-reboot.service
+
+# SSG fix corrupts /etc/issue*
+cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
+| fold -sw 80 > /etc/issue.net
+cp /etc/issue.net /etc/issue
+
+systemctl mask ctrl-alt-del.target
+
+# And I have yet to figure out how to use SECMARK with firewalld.
+systemctl mask firewalld
+systemctl enable iptables
