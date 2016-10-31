@@ -60,7 +60,7 @@ VARIANTS := $(subst -inst-iso,,$(VARIANTS))
 VARIANTS := $(subst -aws-ami,,$(VARIANTS))
 VARIANTS := $(subst -live-iso,,$(VARIANTS))
 ifeq ($(strip $(VARIANTS)),)
-PACKAGES := $(shell ls $(PKG_DIR) | grep -v examples)
+PACKAGES := $(shell ls $(PKG_DIR) | grep -v examples|grep -v strongswan)
 else
 $(foreach VARIANT,$(VARIANTS), $(eval include kickstart/$(VARIANT)/variant_pkgs.mk))
 endif
@@ -179,12 +179,16 @@ MKDIR = $(VERBOSE)test -d $(1) || mkdir -p $(1)
 SYSTEMS := $(shell find $(KICKSTART_DIR) -maxdepth 1 ! -name kickstart ! -name includes -type d -printf "%f\n")
 
 # These are targets supported by the kickstart/Makefile that will be used to generate LiveCD images.
-LIVECDS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -live-iso,$(SYSTEM)))
+# FIXME: remove when VPN is supported by CLIP for v7
+#LIVECDS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -live-iso,$(SYSTEM)))
+LIVECDS := $(foreach SYSTEM,$(filter-out clip-vpn,$(SYSTEMS)),$(addsuffix -live-iso,$(SYSTEM)))
 
 # These are targets supported by the kickstart/Makefile that will be used to generate installation ISOs.
-INSTISOS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -inst-iso,$(SYSTEM)))
+# FIXME: remove when AWS is supported by CLIP for v7
+#INSTISOS := $(foreach SYSTEM,$(SYSTEMS)),$(addsuffix -inst-iso,$(SYSTEM)))
+INSTISOS := $(foreach SYSTEM,$(filter-out clip-vpn,$(SYSTEMS)),$(addsuffix -inst-iso,$(SYSTEM)))
 
-# These are targets supported by the kickstart/Makefile that will be used to generate AWS AMI 
+# These are targets supported by the kickstart/Makefile that will be used to generate AWS AMI
 AWSBUNDLES := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -aws-ami,$(SYSTEM)))
 
 # Add a file to a repo by either downloading it (if http/ftp), or symlinking if local.
