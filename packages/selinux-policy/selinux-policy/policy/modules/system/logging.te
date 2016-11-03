@@ -171,11 +171,15 @@ logging_run_auditctl(augenrules_t,system_r)
 logging_read_audit_config(augenrules_t)
 allow augenrules_t auditd_etc_t:file { read getattr open };
 
+kernel_read_system_state(augenrules_t)
+
 manage_dirs_pattern(augenrules_t, augenrules_tmp_t, augenrules_tmp_t)
 manage_files_pattern(augenrules_t, augenrules_tmp_t, augenrules_tmp_t)
 files_tmp_filetrans(augenrules_t, augenrules_tmp_t,{ file dir })
 
 corecmd_exec_bin(augenrules_t)
+
+logging_manage_audit_config(augenrules_t)
 
 ########################################
 #
@@ -196,7 +200,7 @@ allow auditd_t auditd_etc_t:file read_file_perms;
 manage_dirs_pattern(auditd_t, auditd_log_t, auditd_log_t)
 append_files_pattern(auditd_t, auditd_log_t, auditd_log_t)
 read_files_pattern(auditd_t, auditd_log_t, auditd_log_t)
-allow auditd_t auditd_log_t:file setattr;
+allow auditd_t auditd_log_t:file { create setattr };
 manage_lnk_files_pattern(auditd_t, auditd_log_t, auditd_log_t)
 logging_log_filetrans(auditd_t, auditd_log_t, dir, "audit")
 
@@ -482,6 +486,8 @@ corecmd_exec_shell(syslogd_t)
 #corenet_sendrecv_syslogd_server_packets(syslogd_t)
 #corenet_sendrecv_postgresql_client_packets(syslogd_t)
 #corenet_sendrecv_mysqld_client_packets(syslogd_t)
+#
+sysnet_read_config(syslogd_t)
 
 tunable_policy(`logging_syslogd_use_tty',`
    term_use_all_ttys(syslogd_t)

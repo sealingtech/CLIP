@@ -324,6 +324,8 @@ ifdef(`distro_redhat',`
 init_daemon_domain(httpd_t, httpd_exec_t)
 role system_r types httpd_t;
 
+systemd_notify_write_socket(httpd_t)
+
 # httpd_cache_t is the type given to the /var/cache/httpd
 # directory and the files under that directory
 type httpd_cache_t;
@@ -608,7 +610,7 @@ fs_read_hugetlbfs_files(httpd_t)
 
 auth_use_nsswitch(httpd_t)
 
-application_exec_all(httpd_t)
+#application_exec_all(httpd_t)
 
 # execute perl
 corecmd_exec_bin(httpd_t)
@@ -644,6 +646,8 @@ manage_lnk_files_pattern(httpd_sys_script_t, httpd_tmp_t, httpd_tmp_t)
 files_tmp_filetrans(httpd_sys_script_t, httpd_sys_rw_content_t, { dir file lnk_file sock_file fifo_file })
 
 libs_read_lib_files(httpd_t)
+
+sysnet_read_config(httpd_t)
 
 ifdef(`hide_broken_symptoms',`
 	libs_exec_lib_files(httpd_t)
