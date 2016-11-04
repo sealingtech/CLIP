@@ -27,3 +27,4 @@ systemctl mask ctrl-alt-del.target
 # And I have yet to figure out how to use SECMARK with firewalld.
 systemctl mask firewalld
 systemctl enable iptables
+systemctl enable ip6tables
