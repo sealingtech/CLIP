@@ -9,8 +9,11 @@ type cyrus_t;
 type cyrus_exec_t;
 init_daemon_domain(cyrus_t, cyrus_exec_t)
 
+type cyrus_initrc_t;
+domain_type(cyrus_initrc_t)
+
 type cyrus_initrc_exec_t;
-init_script_file(cyrus_initrc_exec_t)
+init_domain(cyrus_initrc_t, cyrus_initrc_exec_t)
 
 type cyrus_keytab_t;
 files_type(cyrus_keytab_t)
@@ -42,7 +45,10 @@ allow cyrus_t self:msgq create_msgq_perms;
 allow cyrus_t self:msg { send receive };
 allow cyrus_t self:unix_dgram_socket sendto;
 allow cyrus_t self:unix_stream_socket { accept connectto listen };
-allow cyrus_t self:tcp_socket { accept listen };
+allow cyrus_t self:tcp_socket { accept listen bind create connect setopt getopt };
+allow cyrus_t self:udp_socket { create connect getattr };
+# required for getifaddr in IPV6?
+allow cyrus_t self:netlink_route_socket { bind create getattr nlmsg_read write read };
 
 allow cyrus_t cyrus_keytab_t:file read_file_perms;
 
@@ -145,3 +151,46 @@ optional_policy(`
 optional_policy(`
 	udev_read_db(cyrus_t)
 ')
+
+########################################
+#
+# cyrus_initrc_t Local policy
+#
+allow cyrus_initrc_t self:capability { setuid dac_read_search setgid net_admin audit_write dac_override };
+allow cyrus_initrc_t self:unix_dgram_socket { create connect };
+
+kernel_read_system_state(cyrus_initrc_t)
+
+dev_read_sysfs(cyrus_initrc_t)
+
+corecmd_exec_ls(cyrus_initrc_t)
+
+consoletype_domtrans(cyrus_initrc_t)
+
+hostname_domtrans(cyrus_initrc_t)
+
+auth_read_passwd(cyrus_initrc_t)
+
+dbus_read_pid_files(cyrus_initrc_t)
+dbus_send_system_bus(cyrus_initrc_t)
+dbus_system_bus_client(cyrus_initrc_t)
+init_dbus_chat(cyrus_initrc_t)
+
+init_read_state(cyrus_initrc_t)
+init_rw_stream_sockets(cyrus_initrc_t)
+init_read_pipes(cyrus_initrc_t)
+
+logging_send_syslog_msg(cyrus_initrc_t)
+
+# runuser
+systemd_dbus_chat_logind(cyrus_initrc_t)
+init_ioctl_stream_sockets(cyrus_initrc_t)
+systemd_write_inherited_logind_sessions_pipes(cyrus_initrc_t)
+allow cyrus_initrc_t self:netlink_audit_socket { write nlmsg_relay create read nlmsg_relay };
+allow cyrus_initrc_t self:process setsched;
+allow cyrus_initrc_t self:key write;
+
+allow cyrus_initrc_t cyrus_var_lib_t:file { rename write getattr read create unlink open };
+
+cyrus_stream_connect(cyrus_initrc_t)
+cyrus_manage_data(cyrus_initrc_t)
