@@ -80,7 +80,10 @@ allow named_t self:capability2 block_suspend;
 allow named_t self:process { setsched getcap setcap setrlimit signal_perms };
 allow named_t self:fifo_file rw_fifo_file_perms;
 allow named_t self:unix_stream_socket { accept listen };
-allow named_t self:tcp_socket { accept listen };
+allow named_t self:tcp_socket { accept listen accept getattr setopt create bind };
+allow named_t self:udp_socket { getattr setopt bind create ioctl connect getopt };
+# getifaddr ipv6?
+allow named_t self:netlink_route_socket { bind create getattr read write nlmsg_read };
 
 allow named_t dnssec_t:file read_file_perms;
 
@@ -141,6 +144,8 @@ corenet_udp_sendrecv_all_ports(named_t)
 corenet_sendrecv_all_client_packets(named_t)
 corenet_tcp_connect_all_ports(named_t)
 corenet_tcp_sendrecv_all_ports(named_t)
+
+sysnet_dns_name_resolve(named_t)
 
 dev_read_sysfs(named_t)
 dev_read_rand(named_t)
