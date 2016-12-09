@@ -805,6 +805,8 @@ auth_delete_pam_pid(initrc_t)
 auth_delete_pam_console_data(initrc_t)
 auth_use_nsswitch(initrc_t)
 
+init_reload_transient_unit(initrc_t)
+
 libs_rw_ld_so_cache(initrc_t)
 libs_exec_lib_files(initrc_t)
 libs_exec_ld_so(initrc_t)
@@ -819,8 +821,11 @@ logging_send_syslog_msg(initrc_t)
 # slapd needs to read cert files from its initscript
 #miscfiles_manage_generic_cert_files(initrc_t)
 
-
 seutil_read_config(initrc_t)
+
+optional_policy(`
+	bind_systemctl(initrc_t)
+')
 
 optional_policy(`
 	userdom_read_admin_home_files(initrc_t)
