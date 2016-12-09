@@ -1632,9 +1632,10 @@ interface(`kernel_dontaudit_list_all_proc',`
 interface(`kernel_read_all_proc',`
 	gen_require(`
 		attribute proc_type;
+		type proc_kcore_t;
 	')
 
-	read_files_pattern($1, proc_type, proc_type)
+	read_files_pattern($1, { proc_type -proc_kcore_t }, { proc_type -proc_kcore_t })
 ')
 
 ########################################

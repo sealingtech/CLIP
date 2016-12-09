@@ -2542,6 +2542,25 @@ interface(`fs_getattr_hugetlbfs',`
 
 ########################################
 ## <summary>
+##	Dont audit geting the attributes of an hugetlbfs
+##	filesystem.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`fs_dontaudit_getattr_hugetlbfs',`
+	gen_require(`
+		type hugetlbfs_t;
+	')
+
+	dontaudit $1 hugetlbfs_t:filesystem getattr;
+')
+
+########################################
+## <summary>
 ##	List hugetlbfs.
 ## </summary>
 ## <param name="domain">
