@@ -218,8 +218,8 @@ sysnet_read_config(system_mail_t)
 allow system_mail_t self:udp_socket create_socket_perms;
 
 optional_policy(`
-	apache_read_squirrelmail_data(system_mail_t)
-	apache_append_squirrelmail_data(system_mail_t)
+#	apache_read_squirrelmail_data(system_mail_t)
+	#apache_append_squirrelmail_data(system_mail_t)
 
 	# apache should set close-on-exec
 	apache_dontaudit_append_log(system_mail_t)
@@ -233,7 +233,7 @@ optional_policy(`
 	# apache should set close-on-exec
 	apache_dontaudit_rw_stream_sockets(mta_user_agent)
 	apache_dontaudit_rw_sys_script_stream_sockets(mta_user_agent)
-	apache_append_log(mta_user_agent)
+	#apache_append_log(mta_user_agent)
 ')
 
 optional_policy(`
