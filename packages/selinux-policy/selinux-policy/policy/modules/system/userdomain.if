@@ -3206,6 +3206,7 @@ interface(`userdom_dontaudit_read_user_tmp_files',`
 	')
 
 	dontaudit $1 user_tmp_t:file read_inherited_file_perms;
+	dontaudit $1 user_tmp_t:dir search;
 ')
 
 ########################################
