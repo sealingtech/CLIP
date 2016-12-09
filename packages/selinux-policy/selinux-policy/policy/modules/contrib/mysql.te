@@ -51,6 +51,10 @@ init_daemon_domain(mysqlmanagerd_t, mysqlmanagerd_exec_t)
 type mysqlmanagerd_initrc_exec_t;
 init_script_file(mysqlmanagerd_initrc_exec_t)
 
+type mysqld_prepare_t;
+type mysqld_prepare_exec_t;
+init_domain(mysqld_prepare_t, mysqld_prepare_exec_t)
+
 type mysqlmanagerd_var_run_t;
 files_pid_file(mysqlmanagerd_var_run_t)
 
@@ -64,9 +68,10 @@ dontaudit mysqld_t self:capability sys_tty_config;
 allow mysqld_t self:process { setsched getsched setrlimit signal_perms rlimitinh };
 allow mysqld_t self:fifo_file rw_fifo_file_perms;
 allow mysqld_t self:shm create_shm_perms;
-allow mysqld_t self:unix_stream_socket create_stream_socket_perms;
+allow mysqld_t self:unix_stream_socket { connectto create_stream_socket_perms };
 allow mysqld_t self:tcp_socket create_stream_socket_perms;
 allow mysqld_t self:udp_socket create_socket_perms;
+allow mysqld_t self:netlink_route_socket { bind create getattr read write nlmsg_read };
 
 manage_dirs_pattern(mysqld_t, mysqld_db_t, mysqld_db_t)
 manage_files_pattern(mysqld_t, mysqld_db_t, mysqld_db_t)
@@ -220,6 +225,57 @@ mysql_write_log(mysqld_safe_t)
 optional_policy(`
 	hostname_exec(mysqld_safe_t)
 ')
+
+#######################################
+#
+# Local mysqld_prepare policy
+#
+
+# Note: mariadb-prepare is a script that 
+# does all sorts of things like ensuring the db
+# dirs have the correct perms, fixing them if they don't
+# relabling them. It is pretty scary.
+
+kernel_read_system_state(mysqld_prepare_t)
+
+dev_getattr_fs(mysqld_prepare_t)
+dev_getattr_fs(mysqld_prepare_t)
+dev_read_urand(mysqld_prepare_t)
+dev_read_sysfs(mysqld_prepare_t)
+
+fs_dontaudit_getattr_all_fs(mysqld_prepare_t)
+
+term_getattr_pty_fs(mysqld_prepare_t)
+term_search_ptys(mysqld_prepare_t)
+
+systemd_getattr_unit_files(mysqld_prepare_t)
+systemd_exec_systemctl(mysqld_prepare_t)
+init_dbus_chat(mysqld_prepare_t)
+init_read_state(mysqld_prepare_t)
+dbus_read_pid_files(mysqld_prepare_t)
+dbus_send_system_bus(mysqld_prepare_t)
+dbus_system_bus_client(mysqld_prepare_t)
+
+corecmd_exec_ls(mysqld_prepare_t)
+
+mysql_read_config(mysqld_prepare_t)
+mysql_rw_db_files(mysqld_prepare_t)
+mysql_systemctl(mysqld_prepare_t)
+allow mysqld_prepare_t mysqld_log_t:dir { search getattr setattr };
+mysql_write_log(mysqld_prepare_t)
+
+allow mysqld_prepare_t { mysqld_log_t mysqld_db_t }:{ dir file } { relabelto };
+
+# it restorecons the mysql data...
+seutil_exec_setfiles(mysqld_prepare_t)
+seutil_read_file_contexts(mysqld_prepare_t)
+# restorecon is stating audit log dir?
+logging_dontaudit_search_audit_logs(mysqld_prepare_t)
+
+userdom_dontaudit_read_user_tmp_files(mysqld_prepare_t)
+
+# needs to lookup UID of mysql
+auth_read_passwd(mysqld_prepare_t)
 
 ########################################
 #
