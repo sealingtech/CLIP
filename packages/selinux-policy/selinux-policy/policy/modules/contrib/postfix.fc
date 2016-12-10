@@ -37,10 +37,12 @@ ifdef(`distro_redhat', `
 /usr/sbin/postcat	--	gen_context(system_u:object_r:postfix_master_exec_t,s0)
 /usr/sbin/postdrop	--	gen_context(system_u:object_r:postfix_postdrop_exec_t,s0)
 /usr/sbin/postfix	--	gen_context(system_u:object_r:postfix_master_exec_t,s0)
+/sbin/postfix		--	gen_context(system_u:object_r:postfix_master_exec_t,s0)
 /usr/sbin/postkick	--	gen_context(system_u:object_r:postfix_master_exec_t,s0)
 /usr/sbin/postlock	--	gen_context(system_u:object_r:postfix_master_exec_t,s0)
 /usr/sbin/postlog	--	gen_context(system_u:object_r:postfix_master_exec_t,s0)
 /usr/sbin/postmap	--	gen_context(system_u:object_r:postfix_map_exec_t,s0)
+/usr/sbin/postconf	--	gen_context(system_u:object_r:postfix_map_exec_t,s0)
 /usr/sbin/postqueue	--	gen_context(system_u:object_r:postfix_postqueue_exec_t,s0)
 /usr/sbin/postsuper	--	gen_context(system_u:object_r:postfix_master_exec_t,s0)
 

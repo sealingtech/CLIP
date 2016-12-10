@@ -42,6 +42,7 @@ mta_mailserver_delivery(postfix_local_t)
 type postfix_map_t;
 type postfix_map_exec_t;
 application_domain(postfix_map_t, postfix_map_exec_t)
+init_domain(postfix_map_t, postfix_map_exec_t)
 role system_r types postfix_map_t;
 
 type postfix_map_tmp_t;
@@ -52,6 +53,7 @@ typealias postfix_master_t alias postfix_t;
 # alias is a hack to make the disable trans bool
 # generation macro work
 mta_mailserver(postfix_t, postfix_master_exec_t)
+init_daemon_domain(postfix_t,postfix_master_exec_t)
 
 type postfix_initrc_exec_t;
 init_script_file(postfix_initrc_exec_t)
@@ -205,6 +207,8 @@ seutil_sigchld_newrole(postfix_master_t)
 mta_rw_aliases(postfix_master_t)
 mta_read_sendmail_bin(postfix_master_t)
 mta_getattr_spool(postfix_master_t)
+
+postfix_domtrans_map(postfix_master_t)
 
 ifdef(`distro_redhat',`
 	# for newer main.cf that uses /etc/aliases
@@ -385,6 +389,7 @@ allow postfix_map_t self:unix_stream_socket create_stream_socket_perms;
 allow postfix_map_t self:unix_dgram_socket create_socket_perms;
 allow postfix_map_t self:tcp_socket create_stream_socket_perms;
 allow postfix_map_t self:udp_socket create_socket_perms;
+allow postfix_map_t self:netlink_route_socket { bind create getattr read write nlmsg_read };
 
 manage_dirs_pattern(postfix_map_t, postfix_etc_t, postfix_etc_t)
 manage_files_pattern(postfix_map_t, postfix_etc_t, postfix_etc_t)
@@ -407,6 +412,9 @@ corenet_tcp_sendrecv_all_ports(postfix_map_t)
 corenet_udp_sendrecv_all_ports(postfix_map_t)
 corenet_tcp_connect_all_ports(postfix_map_t)
 corenet_sendrecv_all_client_packets(postfix_map_t)
+
+sysnet_read_config(postfix_map_t)
+kernel_read_network_state(postfix_map_t)
 
 corecmd_list_bin(postfix_map_t)
 corecmd_read_bin_symlinks(postfix_map_t)
@@ -747,6 +755,7 @@ userdom_filetrans_home_content(postfix_virtual_t)
 allow postfix_domain self:capability { sys_nice sys_chroot };
 dontaudit postfix_domain self:capability sys_tty_config;
 allow postfix_domain self:process { signal_perms setpgid setsched };
+allow postfix_domain self:netlink_route_socket { bind create getattr read write nlmsg_read };
 allow postfix_domain self:unix_dgram_socket create_socket_perms;
 allow postfix_domain self:unix_stream_socket create_stream_socket_perms;
 allow postfix_domain self:unix_stream_socket connectto;
@@ -800,6 +809,8 @@ mta_read_config(postfix_domain)
 mta_read_aliases(postfix_domain)
 
 miscfiles_read_generic_certs(postfix_domain)
+
+sysnet_read_config(postfix_domain)
 
 userdom_dontaudit_use_unpriv_user_fds(postfix_domain)
 
