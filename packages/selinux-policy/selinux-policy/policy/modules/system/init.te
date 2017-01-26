@@ -618,6 +618,9 @@ allow initrc_t self:tcp_socket create_stream_socket_perms;
 allow initrc_t self:udp_socket create_socket_perms;
 allow initrc_t self:fifo_file rw_file_perms;
 
+# needed if NetworkManager isn't present so sysv init scripts can run ipcalc
+allow initrc_t self:netlink_route_socket { bind create setopt nlmsg_read getattr };
+
 allow initrc_t initrc_devpts_t:chr_file rw_term_perms;
 term_create_pty(initrc_t, initrc_devpts_t)
 
@@ -1541,6 +1544,7 @@ init_dontaudit_script_leaks(daemon)
 allow init_t var_run_t:dir relabelto;
 
 init_stream_connect(initrc_t)
+
 
 allow initrc_t daemon:process siginh;
 allow daemon initrc_transition_domain:fifo_file rw_inherited_fifo_file_perms;
