@@ -33,7 +33,7 @@ ARCH ?= noarch
 # e.g., clip-selinux-policy-apache
 # Listing a module here will also cause it to be enabled even if it
 # disabled in modules.conf.
-SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser ec2ssh
+SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser ec2ssh cyrus snmp ntp bind sasl amavis denyhosts
 
 # the filename of the tarball
 TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
