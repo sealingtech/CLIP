@@ -45,7 +45,7 @@ allow cyrus_t self:msgq create_msgq_perms;
 allow cyrus_t self:msg { send receive };
 allow cyrus_t self:unix_dgram_socket sendto;
 allow cyrus_t self:unix_stream_socket { accept connectto listen };
-allow cyrus_t self:tcp_socket { accept listen bind create connect setopt getopt };
+allow cyrus_t self:tcp_socket { accept listen bind create connect setopt getopt getattr shutdown };
 allow cyrus_t self:udp_socket { create connect getattr };
 # required for getifaddr in IPV6?
 allow cyrus_t self:netlink_route_socket { bind create getattr nlmsg_read write read };
@@ -69,7 +69,6 @@ kernel_read_kernel_sysctls(cyrus_t)
 kernel_read_system_state(cyrus_t)
 kernel_read_all_sysctls(cyrus_t)
 
-corenet_all_recvfrom_netlabel(cyrus_t)
 corenet_tcp_sendrecv_generic_if(cyrus_t)
 corenet_tcp_sendrecv_generic_node(cyrus_t)
 corenet_tcp_sendrecv_all_ports(cyrus_t)
@@ -81,17 +80,14 @@ corenet_tcp_bind_mail_port(cyrus_t)
 corenet_sendrecv_lmtp_server_packets(cyrus_t)
 corenet_tcp_bind_lmtp_port(cyrus_t)
 
-corenet_sendrecv_innd_server_packets(cyrus_t)
-corenet_tcp_bind_innd_port(cyrus_t)
-
-corenet_sendrecv_pop_server_packets(cyrus_t)
-corenet_tcp_bind_pop_port(cyrus_t)
-
 corenet_sendrecv_sieve_server_packets(cyrus_t)
 corenet_tcp_bind_sieve_port(cyrus_t)
+sysnet_read_config(cyrus_t)
 
 corenet_sendrecv_all_client_packets(cyrus_t)
 corenet_tcp_connect_all_ports(cyrus_t)
+
+corenet_dontaudit_tcp_bind_pop_port(cyrus_t)
 
 corecmd_exec_bin(cyrus_t)
 
@@ -191,6 +187,8 @@ allow cyrus_initrc_t self:process setsched;
 allow cyrus_initrc_t self:key write;
 
 allow cyrus_initrc_t cyrus_var_lib_t:file { rename write getattr read create unlink open };
+
+manage_files_pattern(cyrus_initrc_t, cyrus_var_run_t, cyrus_var_run_t)
 
 cyrus_stream_connect(cyrus_initrc_t)
 cyrus_manage_data(cyrus_initrc_t)
