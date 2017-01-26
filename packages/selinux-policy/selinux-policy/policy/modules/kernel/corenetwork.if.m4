@@ -611,6 +611,27 @@ interface(`corenet_tcp_bind_$1_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the $1 port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_$1_port',`
+	gen_require(`
+		$3 $1_$2;
+	')
+
+	dontaudit dollarsone $1_$2:tcp_socket name_bind;
+	$4
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the $1 port.
 ## </summary>
 ## <param name="domain">
