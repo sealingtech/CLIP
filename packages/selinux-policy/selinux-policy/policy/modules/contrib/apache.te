@@ -490,7 +490,7 @@ allow httpd_t self:tcp_socket create_stream_socket_perms;
 allow httpd_t self:udp_socket create_socket_perms;
 dontaudit httpd_t self:netlink_audit_socket create_socket_perms;
 # needed to getifaddr on IPV6?
-allow httpd_t self:netlink_route_socket { bind create getattr read write nlmsg_read };
+allow httpd_t self:netlink_route_socket { bind create getattr read write nlmsg_read setopt };
 
 # Allow httpd_t to put files in /var/cache/httpd etc
 manage_dirs_pattern(httpd_t, httpd_cache_t, httpd_cache_t)
