@@ -4152,6 +4152,27 @@ interface(`corenet_tcp_bind_afs_bos_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the afs_bos port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_afs_bos_port',`
+	gen_require(`
+		type afs_bos_port_t;
+	')
+
+	dontaudit $1 afs_bos_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the afs_bos port.
 ## </summary>
 ## <param name="domain">
@@ -4629,6 +4650,27 @@ interface(`corenet_tcp_bind_afs_fs_port',`
 	allow $1 afs_fs_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the afs_fs port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_afs_fs_port',`
+	gen_require(`
+		type afs_fs_port_t;
+	')
+
+	dontaudit $1 afs_fs_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -5112,6 +5154,27 @@ interface(`corenet_tcp_bind_afs_ka_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the afs_ka port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_afs_ka_port',`
+	gen_require(`
+		type afs_ka_port_t;
+	')
+
+	dontaudit $1 afs_ka_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the afs_ka port.
 ## </summary>
 ## <param name="domain">
@@ -5589,6 +5652,27 @@ interface(`corenet_tcp_bind_afs_pt_port',`
 	allow $1 afs_pt_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the afs_pt port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_afs_pt_port',`
+	gen_require(`
+		type afs_pt_port_t;
+	')
+
+	dontaudit $1 afs_pt_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -6072,6 +6156,27 @@ interface(`corenet_tcp_bind_afs_vl_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the afs_vl port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_afs_vl_port',`
+	gen_require(`
+		type afs_vl_port_t;
+	')
+
+	dontaudit $1 afs_vl_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the afs_vl port.
 ## </summary>
 ## <param name="domain">
@@ -6549,6 +6654,27 @@ interface(`corenet_tcp_bind_afs3_callback_port',`
 	allow $1 afs3_callback_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the afs3_callback port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_afs3_callback_port',`
+	gen_require(`
+		type afs3_callback_port_t;
+	')
+
+	dontaudit $1 afs3_callback_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -7032,6 +7158,27 @@ interface(`corenet_tcp_bind_agentx_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the agentx port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_agentx_port',`
+	gen_require(`
+		type agentx_port_t;
+	')
+
+	dontaudit $1 agentx_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the agentx port.
 ## </summary>
 ## <param name="domain">
@@ -7509,6 +7656,27 @@ interface(`corenet_tcp_bind_amanda_port',`
 	allow $1 amanda_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the amanda port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_amanda_port',`
+	gen_require(`
+		type amanda_port_t;
+	')
+
+	dontaudit $1 amanda_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -7992,6 +8160,27 @@ interface(`corenet_tcp_bind_amavisd_recv_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the amavisd_recv port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_amavisd_recv_port',`
+	gen_require(`
+		type amavisd_recv_port_t;
+	')
+
+	dontaudit $1 amavisd_recv_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the amavisd_recv port.
 ## </summary>
 ## <param name="domain">
@@ -8469,6 +8658,27 @@ interface(`corenet_tcp_bind_amavisd_send_port',`
 	allow $1 amavisd_send_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the amavisd_send port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_amavisd_send_port',`
+	gen_require(`
+		type amavisd_send_port_t;
+	')
+
+	dontaudit $1 amavisd_send_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -8952,6 +9162,27 @@ interface(`corenet_tcp_bind_amqp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the amqp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_amqp_port',`
+	gen_require(`
+		type amqp_port_t;
+	')
+
+	dontaudit $1 amqp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the amqp port.
 ## </summary>
 ## <param name="domain">
@@ -9429,6 +9660,27 @@ interface(`corenet_tcp_bind_aol_port',`
 	allow $1 aol_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the aol port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_aol_port',`
+	gen_require(`
+		type aol_port_t;
+	')
+
+	dontaudit $1 aol_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -9912,6 +10164,27 @@ interface(`corenet_tcp_bind_apc_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the apc port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_apc_port',`
+	gen_require(`
+		type apc_port_t;
+	')
+
+	dontaudit $1 apc_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the apc port.
 ## </summary>
 ## <param name="domain">
@@ -10389,6 +10662,27 @@ interface(`corenet_tcp_bind_apcupsd_port',`
 	allow $1 apcupsd_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the apcupsd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_apcupsd_port',`
+	gen_require(`
+		type apcupsd_port_t;
+	')
+
+	dontaudit $1 apcupsd_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -10872,6 +11166,27 @@ interface(`corenet_tcp_bind_apertus_ldp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the apertus_ldp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_apertus_ldp_port',`
+	gen_require(`
+		type apertus_ldp_port_t;
+	')
+
+	dontaudit $1 apertus_ldp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the apertus_ldp port.
 ## </summary>
 ## <param name="domain">
@@ -11349,6 +11664,27 @@ interface(`corenet_tcp_bind_asterisk_port',`
 	allow $1 asterisk_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the asterisk port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_asterisk_port',`
+	gen_require(`
+		type asterisk_port_t;
+	')
+
+	dontaudit $1 asterisk_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -11832,6 +12168,27 @@ interface(`corenet_tcp_bind_audit_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the audit port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_audit_port',`
+	gen_require(`
+		type audit_port_t;
+	')
+
+	dontaudit $1 audit_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the audit port.
 ## </summary>
 ## <param name="domain">
@@ -12309,6 +12666,27 @@ interface(`corenet_tcp_bind_auth_port',`
 	allow $1 auth_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the auth port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_auth_port',`
+	gen_require(`
+		type auth_port_t;
+	')
+
+	dontaudit $1 auth_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -12792,6 +13170,27 @@ interface(`corenet_tcp_bind_bacula_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the bacula port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_bacula_port',`
+	gen_require(`
+		type bacula_port_t;
+	')
+
+	dontaudit $1 bacula_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the bacula port.
 ## </summary>
 ## <param name="domain">
@@ -13269,6 +13668,27 @@ interface(`corenet_tcp_bind_bgp_port',`
 	allow $1 bgp_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the bgp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_bgp_port',`
+	gen_require(`
+		type bgp_port_t;
+	')
+
+	dontaudit $1 bgp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -13752,6 +14172,27 @@ interface(`corenet_tcp_bind_boinc_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the boinc port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_boinc_port',`
+	gen_require(`
+		type boinc_port_t;
+	')
+
+	dontaudit $1 boinc_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the boinc port.
 ## </summary>
 ## <param name="domain">
@@ -14229,6 +14670,27 @@ interface(`corenet_tcp_bind_boinc_client_port',`
 	allow $1 boinc_client_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the boinc_client port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_boinc_client_port',`
+	gen_require(`
+		type boinc_client_port_t;
+	')
+
+	dontaudit $1 boinc_client_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -14712,6 +15174,27 @@ interface(`corenet_tcp_bind_brlp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the brlp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_brlp_port',`
+	gen_require(`
+		type brlp_port_t;
+	')
+
+	dontaudit $1 brlp_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the brlp port.
 ## </summary>
 ## <param name="domain">
@@ -15189,6 +15672,27 @@ interface(`corenet_tcp_bind_biff_port',`
 	allow $1 biff_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the biff port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_biff_port',`
+	gen_require(`
+		type biff_port_t;
+	')
+
+	dontaudit $1 biff_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -15672,6 +16176,27 @@ interface(`corenet_tcp_bind_certmaster_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the certmaster port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_certmaster_port',`
+	gen_require(`
+		type certmaster_port_t;
+	')
+
+	dontaudit $1 certmaster_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the certmaster port.
 ## </summary>
 ## <param name="domain">
@@ -16149,6 +16674,27 @@ interface(`corenet_tcp_bind_collectd_port',`
 	allow $1 collectd_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the collectd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_collectd_port',`
+	gen_require(`
+		type collectd_port_t;
+	')
+
+	dontaudit $1 collectd_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -16632,6 +17178,27 @@ interface(`corenet_tcp_bind_chronyd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the chronyd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_chronyd_port',`
+	gen_require(`
+		type chronyd_port_t;
+	')
+
+	dontaudit $1 chronyd_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the chronyd port.
 ## </summary>
 ## <param name="domain">
@@ -17109,6 +17676,27 @@ interface(`corenet_tcp_bind_clamd_port',`
 	allow $1 clamd_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the clamd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_clamd_port',`
+	gen_require(`
+		type clamd_port_t;
+	')
+
+	dontaudit $1 clamd_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -17592,6 +18180,27 @@ interface(`corenet_tcp_bind_clockspeed_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the clockspeed port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_clockspeed_port',`
+	gen_require(`
+		type clockspeed_port_t;
+	')
+
+	dontaudit $1 clockspeed_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the clockspeed port.
 ## </summary>
 ## <param name="domain">
@@ -18069,6 +18678,27 @@ interface(`corenet_tcp_bind_cluster_port',`
 	allow $1 cluster_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the cluster port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_cluster_port',`
+	gen_require(`
+		type cluster_port_t;
+	')
+
+	dontaudit $1 cluster_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -18552,6 +19182,27 @@ interface(`corenet_tcp_bind_cma_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the cma port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_cma_port',`
+	gen_require(`
+		type cma_port_t;
+	')
+
+	dontaudit $1 cma_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the cma port.
 ## </summary>
 ## <param name="domain">
@@ -19029,6 +19680,27 @@ interface(`corenet_tcp_bind_cobbler_port',`
 	allow $1 cobbler_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the cobbler port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_cobbler_port',`
+	gen_require(`
+		type cobbler_port_t;
+	')
+
+	dontaudit $1 cobbler_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -19512,6 +20184,27 @@ interface(`corenet_tcp_bind_commplex_link_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the commplex_link port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_commplex_link_port',`
+	gen_require(`
+		type commplex_link_port_t;
+	')
+
+	dontaudit $1 commplex_link_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the commplex_link port.
 ## </summary>
 ## <param name="domain">
@@ -19989,6 +20682,27 @@ interface(`corenet_tcp_bind_commplex_main_port',`
 	allow $1 commplex_main_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the commplex_main port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_commplex_main_port',`
+	gen_require(`
+		type commplex_main_port_t;
+	')
+
+	dontaudit $1 commplex_main_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -20472,6 +21186,27 @@ interface(`corenet_tcp_bind_comsat_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the comsat port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_comsat_port',`
+	gen_require(`
+		type comsat_port_t;
+	')
+
+	dontaudit $1 comsat_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the comsat port.
 ## </summary>
 ## <param name="domain">
@@ -20949,6 +21684,27 @@ interface(`corenet_tcp_bind_condor_port',`
 	allow $1 condor_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the condor port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_condor_port',`
+	gen_require(`
+		type condor_port_t;
+	')
+
+	dontaudit $1 condor_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -21432,6 +22188,27 @@ interface(`corenet_tcp_bind_conman_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the conman port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_conman_port',`
+	gen_require(`
+		type conman_port_t;
+	')
+
+	dontaudit $1 conman_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the conman port.
 ## </summary>
 ## <param name="domain">
@@ -21909,6 +22686,27 @@ interface(`corenet_tcp_bind_connlcli_port',`
 	allow $1 connlcli_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the connlcli port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_connlcli_port',`
+	gen_require(`
+		type connlcli_port_t;
+	')
+
+	dontaudit $1 connlcli_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -22392,6 +23190,27 @@ interface(`corenet_tcp_bind_couchdb_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the couchdb port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_couchdb_port',`
+	gen_require(`
+		type couchdb_port_t;
+	')
+
+	dontaudit $1 couchdb_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the couchdb port.
 ## </summary>
 ## <param name="domain">
@@ -22869,6 +23688,27 @@ interface(`corenet_tcp_bind_ctdb_port',`
 	allow $1 ctdb_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the ctdb port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ctdb_port',`
+	gen_require(`
+		type ctdb_port_t;
+	')
+
+	dontaudit $1 ctdb_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -23352,6 +24192,27 @@ interface(`corenet_tcp_bind_cvs_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the cvs port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_cvs_port',`
+	gen_require(`
+		type cvs_port_t;
+	')
+
+	dontaudit $1 cvs_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the cvs port.
 ## </summary>
 ## <param name="domain">
@@ -23829,6 +24690,27 @@ interface(`corenet_tcp_bind_cyphesis_port',`
 	allow $1 cyphesis_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the cyphesis port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_cyphesis_port',`
+	gen_require(`
+		type cyphesis_port_t;
+	')
+
+	dontaudit $1 cyphesis_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -24312,6 +25194,27 @@ interface(`corenet_tcp_bind_daap_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the daap port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_daap_port',`
+	gen_require(`
+		type daap_port_t;
+	')
+
+	dontaudit $1 daap_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the daap port.
 ## </summary>
 ## <param name="domain">
@@ -24789,6 +25692,27 @@ interface(`corenet_tcp_bind_dbskkd_port',`
 	allow $1 dbskkd_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the dbskkd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_dbskkd_port',`
+	gen_require(`
+		type dbskkd_port_t;
+	')
+
+	dontaudit $1 dbskkd_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -25272,6 +26196,27 @@ interface(`corenet_tcp_bind_dcc_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the dcc port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_dcc_port',`
+	gen_require(`
+		type dcc_port_t;
+	')
+
+	dontaudit $1 dcc_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the dcc port.
 ## </summary>
 ## <param name="domain">
@@ -25749,6 +26694,27 @@ interface(`corenet_tcp_bind_dccm_port',`
 	allow $1 dccm_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the dccm port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_dccm_port',`
+	gen_require(`
+		type dccm_port_t;
+	')
+
+	dontaudit $1 dccm_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -26232,6 +27198,27 @@ interface(`corenet_tcp_bind_dey_sapi_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the dey_sapi port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_dey_sapi_port',`
+	gen_require(`
+		type dey_sapi_port_t;
+	')
+
+	dontaudit $1 dey_sapi_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the dey_sapi port.
 ## </summary>
 ## <param name="domain">
@@ -26709,6 +27696,27 @@ interface(`corenet_tcp_bind_dhcpc_port',`
 	allow $1 dhcpc_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the dhcpc port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_dhcpc_port',`
+	gen_require(`
+		type dhcpc_port_t;
+	')
+
+	dontaudit $1 dhcpc_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -27192,6 +28200,27 @@ interface(`corenet_tcp_bind_dhcpd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the dhcpd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_dhcpd_port',`
+	gen_require(`
+		type dhcpd_port_t;
+	')
+
+	dontaudit $1 dhcpd_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the dhcpd port.
 ## </summary>
 ## <param name="domain">
@@ -27669,6 +28698,27 @@ interface(`corenet_tcp_bind_dict_port',`
 	allow $1 dict_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the dict port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_dict_port',`
+	gen_require(`
+		type dict_port_t;
+	')
+
+	dontaudit $1 dict_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -28152,6 +29202,27 @@ interface(`corenet_tcp_bind_distccd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the distccd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_distccd_port',`
+	gen_require(`
+		type distccd_port_t;
+	')
+
+	dontaudit $1 distccd_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the distccd port.
 ## </summary>
 ## <param name="domain">
@@ -28629,6 +29700,27 @@ interface(`corenet_tcp_bind_dogtag_port',`
 	allow $1 dogtag_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the dogtag port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_dogtag_port',`
+	gen_require(`
+		type dogtag_port_t;
+	')
+
+	dontaudit $1 dogtag_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -29112,6 +30204,27 @@ interface(`corenet_tcp_bind_dns_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the dns port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_dns_port',`
+	gen_require(`
+		type dns_port_t;
+	')
+
+	dontaudit $1 dns_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the dns port.
 ## </summary>
 ## <param name="domain">
@@ -29589,6 +30702,27 @@ interface(`corenet_tcp_bind_dnssec_port',`
 	allow $1 dnssec_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the dnssec port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_dnssec_port',`
+	gen_require(`
+		type dnssec_port_t;
+	')
+
+	dontaudit $1 dnssec_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -30072,6 +31206,27 @@ interface(`corenet_tcp_bind_echo_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the echo port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_echo_port',`
+	gen_require(`
+		type echo_port_t;
+	')
+
+	dontaudit $1 echo_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the echo port.
 ## </summary>
 ## <param name="domain">
@@ -30549,6 +31704,27 @@ interface(`corenet_tcp_bind_efs_port',`
 	allow $1 efs_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the efs port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_efs_port',`
+	gen_require(`
+		type efs_port_t;
+	')
+
+	dontaudit $1 efs_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -31032,6 +32208,27 @@ interface(`corenet_tcp_bind_embrace_dp_c_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the embrace_dp_c port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_embrace_dp_c_port',`
+	gen_require(`
+		type embrace_dp_c_port_t;
+	')
+
+	dontaudit $1 embrace_dp_c_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the embrace_dp_c port.
 ## </summary>
 ## <param name="domain">
@@ -31509,6 +32706,27 @@ interface(`corenet_tcp_bind_epmap_port',`
 	allow $1 epmap_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the epmap port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_epmap_port',`
+	gen_require(`
+		type epmap_port_t;
+	')
+
+	dontaudit $1 epmap_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -31992,6 +33210,27 @@ interface(`corenet_tcp_bind_epmd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the epmd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_epmd_port',`
+	gen_require(`
+		type epmd_port_t;
+	')
+
+	dontaudit $1 epmd_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the epmd port.
 ## </summary>
 ## <param name="domain">
@@ -32469,6 +33708,27 @@ interface(`corenet_tcp_bind_fingerd_port',`
 	allow $1 fingerd_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the fingerd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_fingerd_port',`
+	gen_require(`
+		type fingerd_port_t;
+	')
+
+	dontaudit $1 fingerd_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -32952,6 +34212,27 @@ interface(`corenet_tcp_bind_fmpro_internal_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the fmpro_internal port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_fmpro_internal_port',`
+	gen_require(`
+		type fmpro_internal_port_t;
+	')
+
+	dontaudit $1 fmpro_internal_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the fmpro_internal port.
 ## </summary>
 ## <param name="domain">
@@ -33429,6 +34710,27 @@ interface(`corenet_tcp_bind_flash_port',`
 	allow $1 flash_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the flash port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_flash_port',`
+	gen_require(`
+		type flash_port_t;
+	')
+
+	dontaudit $1 flash_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -33912,6 +35214,27 @@ interface(`corenet_tcp_bind_freeipmi_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the freeipmi port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_freeipmi_port',`
+	gen_require(`
+		type freeipmi_port_t;
+	')
+
+	dontaudit $1 freeipmi_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the freeipmi port.
 ## </summary>
 ## <param name="domain">
@@ -34389,6 +35712,27 @@ interface(`corenet_tcp_bind_ftp_port',`
 	allow $1 ftp_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the ftp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ftp_port',`
+	gen_require(`
+		type ftp_port_t;
+	')
+
+	dontaudit $1 ftp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -34872,6 +36216,27 @@ interface(`corenet_tcp_bind_ftp_data_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the ftp_data port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ftp_data_port',`
+	gen_require(`
+		type ftp_data_port_t;
+	')
+
+	dontaudit $1 ftp_data_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the ftp_data port.
 ## </summary>
 ## <param name="domain">
@@ -35349,6 +36714,27 @@ interface(`corenet_tcp_bind_gatekeeper_port',`
 	allow $1 gatekeeper_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the gatekeeper port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_gatekeeper_port',`
+	gen_require(`
+		type gatekeeper_port_t;
+	')
+
+	dontaudit $1 gatekeeper_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -35832,6 +37218,27 @@ interface(`corenet_tcp_bind_gear_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the gear port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_gear_port',`
+	gen_require(`
+		type gear_port_t;
+	')
+
+	dontaudit $1 gear_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the gear port.
 ## </summary>
 ## <param name="domain">
@@ -36309,6 +37716,27 @@ interface(`corenet_tcp_bind_gdomap_port',`
 	allow $1 gdomap_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the gdomap port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_gdomap_port',`
+	gen_require(`
+		type gdomap_port_t;
+	')
+
+	dontaudit $1 gdomap_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -36792,6 +38220,27 @@ interface(`corenet_tcp_bind_gds_db_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the gds_db port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_gds_db_port',`
+	gen_require(`
+		type gds_db_port_t;
+	')
+
+	dontaudit $1 gds_db_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the gds_db port.
 ## </summary>
 ## <param name="domain">
@@ -37269,6 +38718,27 @@ interface(`corenet_tcp_bind_giftd_port',`
 	allow $1 giftd_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the giftd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_giftd_port',`
+	gen_require(`
+		type giftd_port_t;
+	')
+
+	dontaudit $1 giftd_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -37752,6 +39222,27 @@ interface(`corenet_tcp_bind_git_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the git port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_git_port',`
+	gen_require(`
+		type git_port_t;
+	')
+
+	dontaudit $1 git_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the git port.
 ## </summary>
 ## <param name="domain">
@@ -38229,6 +39720,27 @@ interface(`corenet_tcp_bind_glance_port',`
 	allow $1 glance_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the glance port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_glance_port',`
+	gen_require(`
+		type glance_port_t;
+	')
+
+	dontaudit $1 glance_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -38712,6 +40224,27 @@ interface(`corenet_tcp_bind_glance_registry_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the glance_registry port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_glance_registry_port',`
+	gen_require(`
+		type glance_registry_port_t;
+	')
+
+	dontaudit $1 glance_registry_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the glance_registry port.
 ## </summary>
 ## <param name="domain">
@@ -39189,6 +40722,27 @@ interface(`corenet_tcp_bind_gluster_port',`
 	allow $1 gluster_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the gluster port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_gluster_port',`
+	gen_require(`
+		type gluster_port_t;
+	')
+
+	dontaudit $1 gluster_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -39672,6 +41226,27 @@ interface(`corenet_tcp_bind_gopher_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the gopher port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_gopher_port',`
+	gen_require(`
+		type gopher_port_t;
+	')
+
+	dontaudit $1 gopher_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the gopher port.
 ## </summary>
 ## <param name="domain">
@@ -40149,6 +41724,27 @@ interface(`corenet_tcp_bind_gpsd_port',`
 	allow $1 gpsd_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the gpsd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_gpsd_port',`
+	gen_require(`
+		type gpsd_port_t;
+	')
+
+	dontaudit $1 gpsd_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -40632,6 +42228,27 @@ interface(`corenet_tcp_bind_hadoop_datanode_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the hadoop_datanode port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_hadoop_datanode_port',`
+	gen_require(`
+		type hadoop_datanode_port_t;
+	')
+
+	dontaudit $1 hadoop_datanode_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the hadoop_datanode port.
 ## </summary>
 ## <param name="domain">
@@ -41109,6 +42726,27 @@ interface(`corenet_tcp_bind_hadoop_namenode_port',`
 	allow $1 hadoop_namenode_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the hadoop_namenode port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_hadoop_namenode_port',`
+	gen_require(`
+		type hadoop_namenode_port_t;
+	')
+
+	dontaudit $1 hadoop_namenode_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -41592,6 +43230,27 @@ interface(`corenet_tcp_bind_hddtemp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the hddtemp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_hddtemp_port',`
+	gen_require(`
+		type hddtemp_port_t;
+	')
+
+	dontaudit $1 hddtemp_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the hddtemp port.
 ## </summary>
 ## <param name="domain">
@@ -42069,6 +43728,27 @@ interface(`corenet_tcp_bind_howl_port',`
 	allow $1 howl_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the howl port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_howl_port',`
+	gen_require(`
+		type howl_port_t;
+	')
+
+	dontaudit $1 howl_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -42552,6 +44232,27 @@ interface(`corenet_tcp_bind_hplip_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the hplip port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_hplip_port',`
+	gen_require(`
+		type hplip_port_t;
+	')
+
+	dontaudit $1 hplip_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the hplip port.
 ## </summary>
 ## <param name="domain">
@@ -43029,6 +44730,27 @@ interface(`corenet_tcp_bind_http_port',`
 	allow $1 http_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the http port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_http_port',`
+	gen_require(`
+		type http_port_t;
+	')
+
+	dontaudit $1 http_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -43512,6 +45234,27 @@ interface(`corenet_tcp_bind_http_cache_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the http_cache port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_http_cache_port',`
+	gen_require(`
+		type http_cache_port_t;
+	')
+
+	dontaudit $1 http_cache_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the http_cache port.
 ## </summary>
 ## <param name="domain">
@@ -43989,6 +45732,27 @@ interface(`corenet_tcp_bind_i18n_input_port',`
 	allow $1 i18n_input_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the i18n_input port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_i18n_input_port',`
+	gen_require(`
+		type i18n_input_port_t;
+	')
+
+	dontaudit $1 i18n_input_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -44472,6 +46236,27 @@ interface(`corenet_tcp_bind_imaze_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the imaze port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_imaze_port',`
+	gen_require(`
+		type imaze_port_t;
+	')
+
+	dontaudit $1 imaze_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the imaze port.
 ## </summary>
 ## <param name="domain">
@@ -44949,6 +46734,27 @@ interface(`corenet_tcp_bind_inetd_child_port',`
 	allow $1 inetd_child_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the inetd_child port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_inetd_child_port',`
+	gen_require(`
+		type inetd_child_port_t;
+	')
+
+	dontaudit $1 inetd_child_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -45432,6 +47238,27 @@ interface(`corenet_tcp_bind_innd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the innd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_innd_port',`
+	gen_require(`
+		type innd_port_t;
+	')
+
+	dontaudit $1 innd_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the innd port.
 ## </summary>
 ## <param name="domain">
@@ -45909,6 +47736,27 @@ interface(`corenet_tcp_bind_interwise_port',`
 	allow $1 interwise_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the interwise port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_interwise_port',`
+	gen_require(`
+		type interwise_port_t;
+	')
+
+	dontaudit $1 interwise_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -46392,6 +48240,27 @@ interface(`corenet_tcp_bind_ionixnetmon_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the ionixnetmon port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ionixnetmon_port',`
+	gen_require(`
+		type ionixnetmon_port_t;
+	')
+
+	dontaudit $1 ionixnetmon_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the ionixnetmon port.
 ## </summary>
 ## <param name="domain">
@@ -46869,6 +48738,27 @@ interface(`corenet_tcp_bind_ipmi_port',`
 	allow $1 ipmi_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the ipmi port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ipmi_port',`
+	gen_require(`
+		type ipmi_port_t;
+	')
+
+	dontaudit $1 ipmi_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -47352,6 +49242,27 @@ interface(`corenet_tcp_bind_ipp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the ipp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ipp_port',`
+	gen_require(`
+		type ipp_port_t;
+	')
+
+	dontaudit $1 ipp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the ipp port.
 ## </summary>
 ## <param name="domain">
@@ -47829,6 +49740,27 @@ interface(`corenet_tcp_bind_ipsecnat_port',`
 	allow $1 ipsecnat_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the ipsecnat port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ipsecnat_port',`
+	gen_require(`
+		type ipsecnat_port_t;
+	')
+
+	dontaudit $1 ipsecnat_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -48312,6 +50244,27 @@ interface(`corenet_tcp_bind_ircd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the ircd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ircd_port',`
+	gen_require(`
+		type ircd_port_t;
+	')
+
+	dontaudit $1 ircd_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the ircd port.
 ## </summary>
 ## <param name="domain">
@@ -48789,6 +50742,27 @@ interface(`corenet_tcp_bind_isakmp_port',`
 	allow $1 isakmp_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the isakmp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_isakmp_port',`
+	gen_require(`
+		type isakmp_port_t;
+	')
+
+	dontaudit $1 isakmp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -49272,6 +51246,27 @@ interface(`corenet_tcp_bind_iscsi_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the iscsi port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_iscsi_port',`
+	gen_require(`
+		type iscsi_port_t;
+	')
+
+	dontaudit $1 iscsi_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the iscsi port.
 ## </summary>
 ## <param name="domain">
@@ -49749,6 +51744,27 @@ interface(`corenet_tcp_bind_isns_port',`
 	allow $1 isns_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the isns port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_isns_port',`
+	gen_require(`
+		type isns_port_t;
+	')
+
+	dontaudit $1 isns_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -50232,6 +52248,27 @@ interface(`corenet_tcp_bind_jabber_client_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the jabber_client port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_jabber_client_port',`
+	gen_require(`
+		type jabber_client_port_t;
+	')
+
+	dontaudit $1 jabber_client_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the jabber_client port.
 ## </summary>
 ## <param name="domain">
@@ -50709,6 +52746,27 @@ interface(`corenet_tcp_bind_jabber_interserver_port',`
 	allow $1 jabber_interserver_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the jabber_interserver port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_jabber_interserver_port',`
+	gen_require(`
+		type jabber_interserver_port_t;
+	')
+
+	dontaudit $1 jabber_interserver_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -51192,6 +53250,27 @@ interface(`corenet_tcp_bind_jabber_router_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the jabber_router port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_jabber_router_port',`
+	gen_require(`
+		type jabber_router_port_t;
+	')
+
+	dontaudit $1 jabber_router_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the jabber_router port.
 ## </summary>
 ## <param name="domain">
@@ -51669,6 +53748,27 @@ interface(`corenet_tcp_bind_jacorb_port',`
 	allow $1 jacorb_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the jacorb port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_jacorb_port',`
+	gen_require(`
+		type jacorb_port_t;
+	')
+
+	dontaudit $1 jacorb_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -52152,6 +54252,27 @@ interface(`corenet_tcp_bind_jboss_debug_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the jboss_debug port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_jboss_debug_port',`
+	gen_require(`
+		type jboss_debug_port_t;
+	')
+
+	dontaudit $1 jboss_debug_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the jboss_debug port.
 ## </summary>
 ## <param name="domain">
@@ -52629,6 +54750,27 @@ interface(`corenet_tcp_bind_jboss_messaging_port',`
 	allow $1 jboss_messaging_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the jboss_messaging port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_jboss_messaging_port',`
+	gen_require(`
+		type jboss_messaging_port_t;
+	')
+
+	dontaudit $1 jboss_messaging_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -53112,6 +55254,27 @@ interface(`corenet_tcp_bind_jboss_management_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the jboss_management port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_jboss_management_port',`
+	gen_require(`
+		type jboss_management_port_t;
+	')
+
+	dontaudit $1 jboss_management_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the jboss_management port.
 ## </summary>
 ## <param name="domain">
@@ -53589,6 +55752,27 @@ interface(`corenet_tcp_bind_kerberos_port',`
 	allow $1 kerberos_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the kerberos port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_kerberos_port',`
+	gen_require(`
+		type kerberos_port_t;
+	')
+
+	dontaudit $1 kerberos_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -54072,6 +56256,27 @@ interface(`corenet_tcp_bind_kerberos_admin_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the kerberos_admin port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_kerberos_admin_port',`
+	gen_require(`
+		type kerberos_admin_port_t;
+	')
+
+	dontaudit $1 kerberos_admin_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the kerberos_admin port.
 ## </summary>
 ## <param name="domain">
@@ -54549,6 +56754,27 @@ interface(`corenet_tcp_bind_kerberos_password_port',`
 	allow $1 kerberos_password_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the kerberos_password port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_kerberos_password_port',`
+	gen_require(`
+		type kerberos_password_port_t;
+	')
+
+	dontaudit $1 kerberos_password_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -55032,6 +57258,27 @@ interface(`corenet_tcp_bind_keystone_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the keystone port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_keystone_port',`
+	gen_require(`
+		type keystone_port_t;
+	')
+
+	dontaudit $1 keystone_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the keystone port.
 ## </summary>
 ## <param name="domain">
@@ -55509,6 +57756,27 @@ interface(`corenet_tcp_bind_kubernetes_port',`
 	allow $1 kubernetes_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the kubernetes port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_kubernetes_port',`
+	gen_require(`
+		type kubernetes_port_t;
+	')
+
+	dontaudit $1 kubernetes_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -55992,6 +58260,27 @@ interface(`corenet_tcp_bind_rabbitmq_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the rabbitmq port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_rabbitmq_port',`
+	gen_require(`
+		type rabbitmq_port_t;
+	')
+
+	dontaudit $1 rabbitmq_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the rabbitmq port.
 ## </summary>
 ## <param name="domain">
@@ -56469,6 +58758,27 @@ interface(`corenet_tcp_bind_rlogin_port',`
 	allow $1 rlogin_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the rlogin port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_rlogin_port',`
+	gen_require(`
+		type rlogin_port_t;
+	')
+
+	dontaudit $1 rlogin_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -56952,6 +59262,27 @@ interface(`corenet_tcp_bind_rtsclient_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the rtsclient port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_rtsclient_port',`
+	gen_require(`
+		type rtsclient_port_t;
+	')
+
+	dontaudit $1 rtsclient_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the rtsclient port.
 ## </summary>
 ## <param name="domain">
@@ -57429,6 +59760,27 @@ interface(`corenet_tcp_bind_kprop_port',`
 	allow $1 kprop_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the kprop port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_kprop_port',`
+	gen_require(`
+		type kprop_port_t;
+	')
+
+	dontaudit $1 kprop_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -57912,6 +60264,27 @@ interface(`corenet_tcp_bind_ktalkd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the ktalkd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ktalkd_port',`
+	gen_require(`
+		type ktalkd_port_t;
+	')
+
+	dontaudit $1 ktalkd_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the ktalkd port.
 ## </summary>
 ## <param name="domain">
@@ -58389,6 +60762,27 @@ interface(`corenet_tcp_bind_ldap_port',`
 	allow $1 ldap_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the ldap port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ldap_port',`
+	gen_require(`
+		type ldap_port_t;
+	')
+
+	dontaudit $1 ldap_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -58872,6 +61266,27 @@ interface(`corenet_tcp_bind_lirc_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the lirc port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_lirc_port',`
+	gen_require(`
+		type lirc_port_t;
+	')
+
+	dontaudit $1 lirc_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the lirc port.
 ## </summary>
 ## <param name="domain">
@@ -59349,6 +61764,27 @@ interface(`corenet_tcp_bind_luci_port',`
 	allow $1 luci_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the luci port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_luci_port',`
+	gen_require(`
+		type luci_port_t;
+	')
+
+	dontaudit $1 luci_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -59832,6 +62268,27 @@ interface(`corenet_tcp_bind_lmtp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the lmtp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_lmtp_port',`
+	gen_require(`
+		type lmtp_port_t;
+	')
+
+	dontaudit $1 lmtp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the lmtp port.
 ## </summary>
 ## <param name="domain">
@@ -60309,6 +62766,27 @@ interface(`corenet_tcp_bind_lrrd_port',`
 	allow $1 lrrd_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the lrrd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_lrrd_port',`
+	gen_require(`
+		type lrrd_port_t;
+	')
+
+	dontaudit $1 lrrd_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -60792,6 +63270,27 @@ interface(`corenet_tcp_bind_lsm_plugin_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the lsm_plugin port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_lsm_plugin_port',`
+	gen_require(`
+		type lsm_plugin_port_t;
+	')
+
+	dontaudit $1 lsm_plugin_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the lsm_plugin port.
 ## </summary>
 ## <param name="domain">
@@ -61269,6 +63768,27 @@ interface(`corenet_tcp_bind_l2tp_port',`
 	allow $1 l2tp_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the l2tp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_l2tp_port',`
+	gen_require(`
+		type l2tp_port_t;
+	')
+
+	dontaudit $1 l2tp_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -61752,6 +64272,27 @@ interface(`corenet_tcp_bind_mail_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the mail port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_mail_port',`
+	gen_require(`
+		type mail_port_t;
+	')
+
+	dontaudit $1 mail_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the mail port.
 ## </summary>
 ## <param name="domain">
@@ -62229,6 +64770,27 @@ interface(`corenet_tcp_bind_matahari_port',`
 	allow $1 matahari_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the matahari port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_matahari_port',`
+	gen_require(`
+		type matahari_port_t;
+	')
+
+	dontaudit $1 matahari_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -62712,6 +65274,27 @@ interface(`corenet_tcp_bind_memcache_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the memcache port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_memcache_port',`
+	gen_require(`
+		type memcache_port_t;
+	')
+
+	dontaudit $1 memcache_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the memcache port.
 ## </summary>
 ## <param name="domain">
@@ -63189,6 +65772,27 @@ interface(`corenet_tcp_bind_milter_port',`
 	allow $1 milter_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the milter port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_milter_port',`
+	gen_require(`
+		type milter_port_t;
+	')
+
+	dontaudit $1 milter_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -63672,6 +66276,27 @@ interface(`corenet_tcp_bind_mmcc_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the mmcc port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_mmcc_port',`
+	gen_require(`
+		type mmcc_port_t;
+	')
+
+	dontaudit $1 mmcc_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the mmcc port.
 ## </summary>
 ## <param name="domain">
@@ -64149,6 +66774,27 @@ interface(`corenet_tcp_bind_mongod_port',`
 	allow $1 mongod_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the mongod port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_mongod_port',`
+	gen_require(`
+		type mongod_port_t;
+	')
+
+	dontaudit $1 mongod_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -64632,6 +67278,27 @@ interface(`corenet_tcp_bind_monopd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the monopd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_monopd_port',`
+	gen_require(`
+		type monopd_port_t;
+	')
+
+	dontaudit $1 monopd_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the monopd port.
 ## </summary>
 ## <param name="domain">
@@ -65109,6 +67776,27 @@ interface(`corenet_tcp_bind_mountd_port',`
 	allow $1 mountd_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the mountd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_mountd_port',`
+	gen_require(`
+		type mountd_port_t;
+	')
+
+	dontaudit $1 mountd_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -65592,6 +68280,27 @@ interface(`corenet_tcp_bind_movaz_ssc_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the movaz_ssc port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_movaz_ssc_port',`
+	gen_require(`
+		type movaz_ssc_port_t;
+	')
+
+	dontaudit $1 movaz_ssc_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the movaz_ssc port.
 ## </summary>
 ## <param name="domain">
@@ -66069,6 +68778,27 @@ interface(`corenet_tcp_bind_mpd_port',`
 	allow $1 mpd_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the mpd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_mpd_port',`
+	gen_require(`
+		type mpd_port_t;
+	')
+
+	dontaudit $1 mpd_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -66552,6 +69282,27 @@ interface(`corenet_tcp_bind_msnp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the msnp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_msnp_port',`
+	gen_require(`
+		type msnp_port_t;
+	')
+
+	dontaudit $1 msnp_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the msnp port.
 ## </summary>
 ## <param name="domain">
@@ -67029,6 +69780,27 @@ interface(`corenet_tcp_bind_mssql_port',`
 	allow $1 mssql_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the mssql port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_mssql_port',`
+	gen_require(`
+		type mssql_port_t;
+	')
+
+	dontaudit $1 mssql_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -67512,6 +70284,27 @@ interface(`corenet_tcp_bind_ms_streaming_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the ms_streaming port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ms_streaming_port',`
+	gen_require(`
+		type ms_streaming_port_t;
+	')
+
+	dontaudit $1 ms_streaming_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the ms_streaming port.
 ## </summary>
 ## <param name="domain">
@@ -67989,6 +70782,27 @@ interface(`corenet_tcp_bind_munin_port',`
 	allow $1 munin_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the munin port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_munin_port',`
+	gen_require(`
+		type munin_port_t;
+	')
+
+	dontaudit $1 munin_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -68472,6 +71286,27 @@ interface(`corenet_tcp_bind_mxi_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the mxi port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_mxi_port',`
+	gen_require(`
+		type mxi_port_t;
+	')
+
+	dontaudit $1 mxi_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the mxi port.
 ## </summary>
 ## <param name="domain">
@@ -68949,6 +71784,27 @@ interface(`corenet_tcp_bind_mysqld_port',`
 	allow $1 mysqld_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the mysqld port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_mysqld_port',`
+	gen_require(`
+		type mysqld_port_t;
+	')
+
+	dontaudit $1 mysqld_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -69432,6 +72288,27 @@ interface(`corenet_tcp_bind_mysqlmanagerd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the mysqlmanagerd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_mysqlmanagerd_port',`
+	gen_require(`
+		type mysqlmanagerd_port_t;
+	')
+
+	dontaudit $1 mysqlmanagerd_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the mysqlmanagerd port.
 ## </summary>
 ## <param name="domain">
@@ -69909,6 +72786,27 @@ interface(`corenet_tcp_bind_mythtv_port',`
 	allow $1 mythtv_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the mythtv port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_mythtv_port',`
+	gen_require(`
+		type mythtv_port_t;
+	')
+
+	dontaudit $1 mythtv_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -70392,6 +73290,27 @@ interface(`corenet_tcp_bind_nessus_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the nessus port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_nessus_port',`
+	gen_require(`
+		type nessus_port_t;
+	')
+
+	dontaudit $1 nessus_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the nessus port.
 ## </summary>
 ## <param name="domain">
@@ -70869,6 +73788,27 @@ interface(`corenet_tcp_bind_netport_port',`
 	allow $1 netport_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the netport port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_netport_port',`
+	gen_require(`
+		type netport_port_t;
+	')
+
+	dontaudit $1 netport_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -71352,6 +74292,27 @@ interface(`corenet_tcp_bind_netsupport_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the netsupport port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_netsupport_port',`
+	gen_require(`
+		type netsupport_port_t;
+	')
+
+	dontaudit $1 netsupport_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the netsupport port.
 ## </summary>
 ## <param name="domain">
@@ -71829,6 +74790,27 @@ interface(`corenet_tcp_bind_nfs_port',`
 	allow $1 nfs_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the nfs port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_nfs_port',`
+	gen_require(`
+		type nfs_port_t;
+	')
+
+	dontaudit $1 nfs_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -72312,6 +75294,27 @@ interface(`corenet_tcp_bind_nmbd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the nmbd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_nmbd_port',`
+	gen_require(`
+		type nmbd_port_t;
+	')
+
+	dontaudit $1 nmbd_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the nmbd port.
 ## </summary>
 ## <param name="domain">
@@ -72789,6 +75792,27 @@ interface(`corenet_tcp_bind_nodejs_debug_port',`
 	allow $1 nodejs_debug_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the nodejs_debug port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_nodejs_debug_port',`
+	gen_require(`
+		type nodejs_debug_port_t;
+	')
+
+	dontaudit $1 nodejs_debug_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -73272,6 +76296,27 @@ interface(`corenet_tcp_bind_ntop_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the ntop port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ntop_port',`
+	gen_require(`
+		type ntop_port_t;
+	')
+
+	dontaudit $1 ntop_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the ntop port.
 ## </summary>
 ## <param name="domain">
@@ -73749,6 +76794,27 @@ interface(`corenet_tcp_bind_ntp_port',`
 	allow $1 ntp_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the ntp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ntp_port',`
+	gen_require(`
+		type ntp_port_t;
+	')
+
+	dontaudit $1 ntp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -74232,6 +77298,27 @@ interface(`corenet_tcp_bind_oracle_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the oracle port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_oracle_port',`
+	gen_require(`
+		type oracle_port_t;
+	')
+
+	dontaudit $1 oracle_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the oracle port.
 ## </summary>
 ## <param name="domain">
@@ -74709,6 +77796,27 @@ interface(`corenet_tcp_bind_oa_system_port',`
 	allow $1 oa_system_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the oa_system port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_oa_system_port',`
+	gen_require(`
+		type oa_system_port_t;
+	')
+
+	dontaudit $1 oa_system_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -75192,6 +78300,27 @@ interface(`corenet_tcp_bind_ocsp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the ocsp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ocsp_port',`
+	gen_require(`
+		type ocsp_port_t;
+	')
+
+	dontaudit $1 ocsp_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the ocsp port.
 ## </summary>
 ## <param name="domain">
@@ -75669,6 +78798,27 @@ interface(`corenet_tcp_bind_openflow_port',`
 	allow $1 openflow_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the openflow port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_openflow_port',`
+	gen_require(`
+		type openflow_port_t;
+	')
+
+	dontaudit $1 openflow_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -76152,6 +79302,27 @@ interface(`corenet_tcp_bind_openhpid_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the openhpid port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_openhpid_port',`
+	gen_require(`
+		type openhpid_port_t;
+	')
+
+	dontaudit $1 openhpid_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the openhpid port.
 ## </summary>
 ## <param name="domain">
@@ -76629,6 +79800,27 @@ interface(`corenet_tcp_bind_openvpn_port',`
 	allow $1 openvpn_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the openvpn port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_openvpn_port',`
+	gen_require(`
+		type openvpn_port_t;
+	')
+
+	dontaudit $1 openvpn_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -77112,6 +80304,27 @@ interface(`corenet_tcp_bind_openvswitch_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the openvswitch port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_openvswitch_port',`
+	gen_require(`
+		type openvswitch_port_t;
+	')
+
+	dontaudit $1 openvswitch_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the openvswitch port.
 ## </summary>
 ## <param name="domain">
@@ -77589,6 +80802,27 @@ interface(`corenet_tcp_bind_osapi_compute_port',`
 	allow $1 osapi_compute_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the osapi_compute port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_osapi_compute_port',`
+	gen_require(`
+		type osapi_compute_port_t;
+	')
+
+	dontaudit $1 osapi_compute_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -78072,6 +81306,27 @@ interface(`corenet_tcp_bind_pdps_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the pdps port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pdps_port',`
+	gen_require(`
+		type pdps_port_t;
+	')
+
+	dontaudit $1 pdps_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the pdps port.
 ## </summary>
 ## <param name="domain">
@@ -78549,6 +81804,27 @@ interface(`corenet_tcp_bind_pegasus_http_port',`
 	allow $1 pegasus_http_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the pegasus_http port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pegasus_http_port',`
+	gen_require(`
+		type pegasus_http_port_t;
+	')
+
+	dontaudit $1 pegasus_http_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -79032,6 +82308,27 @@ interface(`corenet_tcp_bind_pegasus_https_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the pegasus_https port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pegasus_https_port',`
+	gen_require(`
+		type pegasus_https_port_t;
+	')
+
+	dontaudit $1 pegasus_https_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the pegasus_https port.
 ## </summary>
 ## <param name="domain">
@@ -79509,6 +82806,27 @@ interface(`corenet_tcp_bind_pgpkeyserver_port',`
 	allow $1 pgpkeyserver_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the pgpkeyserver port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pgpkeyserver_port',`
+	gen_require(`
+		type pgpkeyserver_port_t;
+	')
+
+	dontaudit $1 pgpkeyserver_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -79992,6 +83310,27 @@ interface(`corenet_tcp_bind_pingd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the pingd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pingd_port',`
+	gen_require(`
+		type pingd_port_t;
+	')
+
+	dontaudit $1 pingd_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the pingd port.
 ## </summary>
 ## <param name="domain">
@@ -80469,6 +83808,27 @@ interface(`corenet_tcp_bind_pki_ca_port',`
 	allow $1 pki_ca_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the pki_ca port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pki_ca_port',`
+	gen_require(`
+		type pki_ca_port_t;
+	')
+
+	dontaudit $1 pki_ca_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -80952,6 +84312,27 @@ interface(`corenet_tcp_bind_pki_kra_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the pki_kra port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pki_kra_port',`
+	gen_require(`
+		type pki_kra_port_t;
+	')
+
+	dontaudit $1 pki_kra_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the pki_kra port.
 ## </summary>
 ## <param name="domain">
@@ -81429,6 +84810,27 @@ interface(`corenet_tcp_bind_pki_ocsp_port',`
 	allow $1 pki_ocsp_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the pki_ocsp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pki_ocsp_port',`
+	gen_require(`
+		type pki_ocsp_port_t;
+	')
+
+	dontaudit $1 pki_ocsp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -81912,6 +85314,27 @@ interface(`corenet_tcp_bind_pki_tks_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the pki_tks port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pki_tks_port',`
+	gen_require(`
+		type pki_tks_port_t;
+	')
+
+	dontaudit $1 pki_tks_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the pki_tks port.
 ## </summary>
 ## <param name="domain">
@@ -82389,6 +85812,27 @@ interface(`corenet_tcp_bind_pki_ra_port',`
 	allow $1 pki_ra_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the pki_ra port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pki_ra_port',`
+	gen_require(`
+		type pki_ra_port_t;
+	')
+
+	dontaudit $1 pki_ra_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -82872,6 +86316,27 @@ interface(`corenet_tcp_bind_pki_tps_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the pki_tps port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pki_tps_port',`
+	gen_require(`
+		type pki_tps_port_t;
+	')
+
+	dontaudit $1 pki_tps_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the pki_tps port.
 ## </summary>
 ## <param name="domain">
@@ -83349,6 +86814,27 @@ interface(`corenet_tcp_bind_pktcable_cops_port',`
 	allow $1 pktcable_cops_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the pktcable_cops port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pktcable_cops_port',`
+	gen_require(`
+		type pktcable_cops_port_t;
+	')
+
+	dontaudit $1 pktcable_cops_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -83832,6 +87318,27 @@ interface(`corenet_tcp_bind_pop_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the pop port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pop_port',`
+	gen_require(`
+		type pop_port_t;
+	')
+
+	dontaudit $1 pop_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the pop port.
 ## </summary>
 ## <param name="domain">
@@ -84309,6 +87816,27 @@ interface(`corenet_tcp_bind_portmap_port',`
 	allow $1 portmap_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the portmap port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_portmap_port',`
+	gen_require(`
+		type portmap_port_t;
+	')
+
+	dontaudit $1 portmap_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -84792,6 +88320,27 @@ interface(`corenet_tcp_bind_postfix_policyd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the postfix_policyd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_postfix_policyd_port',`
+	gen_require(`
+		type postfix_policyd_port_t;
+	')
+
+	dontaudit $1 postfix_policyd_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the postfix_policyd port.
 ## </summary>
 ## <param name="domain">
@@ -85269,6 +88818,27 @@ interface(`corenet_tcp_bind_postgresql_port',`
 	allow $1 postgresql_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the postgresql port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_postgresql_port',`
+	gen_require(`
+		type postgresql_port_t;
+	')
+
+	dontaudit $1 postgresql_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -85752,6 +89322,27 @@ interface(`corenet_tcp_bind_postgrey_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the postgrey port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_postgrey_port',`
+	gen_require(`
+		type postgrey_port_t;
+	')
+
+	dontaudit $1 postgrey_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the postgrey port.
 ## </summary>
 ## <param name="domain">
@@ -86229,6 +89820,27 @@ interface(`corenet_tcp_bind_pptp_port',`
 	allow $1 pptp_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the pptp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pptp_port',`
+	gen_require(`
+		type pptp_port_t;
+	')
+
+	dontaudit $1 pptp_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -86712,6 +90324,27 @@ interface(`corenet_tcp_bind_prelude_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the prelude port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_prelude_port',`
+	gen_require(`
+		type prelude_port_t;
+	')
+
+	dontaudit $1 prelude_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the prelude port.
 ## </summary>
 ## <param name="domain">
@@ -87189,6 +90822,27 @@ interface(`corenet_tcp_bind_presence_port',`
 	allow $1 presence_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the presence port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_presence_port',`
+	gen_require(`
+		type presence_port_t;
+	')
+
+	dontaudit $1 presence_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -87672,6 +91326,27 @@ interface(`corenet_tcp_bind_preupgrade_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the preupgrade port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_preupgrade_port',`
+	gen_require(`
+		type preupgrade_port_t;
+	')
+
+	dontaudit $1 preupgrade_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the preupgrade port.
 ## </summary>
 ## <param name="domain">
@@ -88149,6 +91824,27 @@ interface(`corenet_tcp_bind_printer_port',`
 	allow $1 printer_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the printer port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_printer_port',`
+	gen_require(`
+		type printer_port_t;
+	')
+
+	dontaudit $1 printer_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -88632,6 +92328,27 @@ interface(`corenet_tcp_bind_ptal_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the ptal port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ptal_port',`
+	gen_require(`
+		type ptal_port_t;
+	')
+
+	dontaudit $1 ptal_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the ptal port.
 ## </summary>
 ## <param name="domain">
@@ -89109,6 +92826,27 @@ interface(`corenet_tcp_bind_pulseaudio_port',`
 	allow $1 pulseaudio_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the pulseaudio port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pulseaudio_port',`
+	gen_require(`
+		type pulseaudio_port_t;
+	')
+
+	dontaudit $1 pulseaudio_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -89592,6 +93330,27 @@ interface(`corenet_tcp_bind_puppet_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the puppet port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_puppet_port',`
+	gen_require(`
+		type puppet_port_t;
+	')
+
+	dontaudit $1 puppet_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the puppet port.
 ## </summary>
 ## <param name="domain">
@@ -90069,6 +93828,27 @@ interface(`corenet_tcp_bind_pxe_port',`
 	allow $1 pxe_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the pxe port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pxe_port',`
+	gen_require(`
+		type pxe_port_t;
+	')
+
+	dontaudit $1 pxe_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -90552,6 +94332,27 @@ interface(`corenet_tcp_bind_pyzor_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the pyzor port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_pyzor_port',`
+	gen_require(`
+		type pyzor_port_t;
+	')
+
+	dontaudit $1 pyzor_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the pyzor port.
 ## </summary>
 ## <param name="domain">
@@ -91029,6 +94830,27 @@ interface(`corenet_tcp_bind_neutron_port',`
 	allow $1 neutron_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the neutron port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_neutron_port',`
+	gen_require(`
+		type neutron_port_t;
+	')
+
+	dontaudit $1 neutron_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -91512,6 +95334,27 @@ interface(`corenet_tcp_bind_radacct_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the radacct port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_radacct_port',`
+	gen_require(`
+		type radacct_port_t;
+	')
+
+	dontaudit $1 radacct_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the radacct port.
 ## </summary>
 ## <param name="domain">
@@ -91989,6 +95832,27 @@ interface(`corenet_tcp_bind_radius_port',`
 	allow $1 radius_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the radius port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_radius_port',`
+	gen_require(`
+		type radius_port_t;
+	')
+
+	dontaudit $1 radius_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -92472,6 +96336,27 @@ interface(`corenet_tcp_bind_radsec_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the radsec port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_radsec_port',`
+	gen_require(`
+		type radsec_port_t;
+	')
+
+	dontaudit $1 radsec_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the radsec port.
 ## </summary>
 ## <param name="domain">
@@ -92949,6 +96834,27 @@ interface(`corenet_tcp_bind_razor_port',`
 	allow $1 razor_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the razor port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_razor_port',`
+	gen_require(`
+		type razor_port_t;
+	')
+
+	dontaudit $1 razor_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -93432,6 +97338,27 @@ interface(`corenet_tcp_bind_time_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the time port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_time_port',`
+	gen_require(`
+		type time_port_t;
+	')
+
+	dontaudit $1 time_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the time port.
 ## </summary>
 ## <param name="domain">
@@ -93909,6 +97836,27 @@ interface(`corenet_tcp_bind_redis_port',`
 	allow $1 redis_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the redis port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_redis_port',`
+	gen_require(`
+		type redis_port_t;
+	')
+
+	dontaudit $1 redis_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -94392,6 +98340,27 @@ interface(`corenet_tcp_bind_repository_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the repository port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_repository_port',`
+	gen_require(`
+		type repository_port_t;
+	')
+
+	dontaudit $1 repository_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the repository port.
 ## </summary>
 ## <param name="domain">
@@ -94869,6 +98838,27 @@ interface(`corenet_tcp_bind_ricci_port',`
 	allow $1 ricci_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the ricci port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ricci_port',`
+	gen_require(`
+		type ricci_port_t;
+	')
+
+	dontaudit $1 ricci_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -95352,6 +99342,27 @@ interface(`corenet_tcp_bind_ricci_modcluster_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the ricci_modcluster port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ricci_modcluster_port',`
+	gen_require(`
+		type ricci_modcluster_port_t;
+	')
+
+	dontaudit $1 ricci_modcluster_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the ricci_modcluster port.
 ## </summary>
 ## <param name="domain">
@@ -95829,6 +99840,27 @@ interface(`corenet_tcp_bind_rlogind_port',`
 	allow $1 rlogind_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the rlogind port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_rlogind_port',`
+	gen_require(`
+		type rlogind_port_t;
+	')
+
+	dontaudit $1 rlogind_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -96312,6 +100344,27 @@ interface(`corenet_tcp_bind_rndc_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the rndc port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_rndc_port',`
+	gen_require(`
+		type rndc_port_t;
+	')
+
+	dontaudit $1 rndc_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the rndc port.
 ## </summary>
 ## <param name="domain">
@@ -96789,6 +100842,27 @@ interface(`corenet_tcp_bind_router_port',`
 	allow $1 router_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the router port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_router_port',`
+	gen_require(`
+		type router_port_t;
+	')
+
+	dontaudit $1 router_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -97272,6 +101346,27 @@ interface(`corenet_tcp_bind_rsh_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the rsh port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_rsh_port',`
+	gen_require(`
+		type rsh_port_t;
+	')
+
+	dontaudit $1 rsh_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the rsh port.
 ## </summary>
 ## <param name="domain">
@@ -97749,6 +101844,27 @@ interface(`corenet_tcp_bind_rsync_port',`
 	allow $1 rsync_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the rsync port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_rsync_port',`
+	gen_require(`
+		type rsync_port_t;
+	')
+
+	dontaudit $1 rsync_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -98232,6 +102348,27 @@ interface(`corenet_tcp_bind_rtp_media_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the rtp_media port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_rtp_media_port',`
+	gen_require(`
+		type rtp_media_port_t;
+	')
+
+	dontaudit $1 rtp_media_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the rtp_media port.
 ## </summary>
 ## <param name="domain">
@@ -98709,6 +102846,27 @@ interface(`corenet_tcp_bind_rtsp_port',`
 	allow $1 rtsp_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the rtsp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_rtsp_port',`
+	gen_require(`
+		type rtsp_port_t;
+	')
+
+	dontaudit $1 rtsp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -99192,6 +103350,27 @@ interface(`corenet_tcp_bind_rwho_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the rwho port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_rwho_port',`
+	gen_require(`
+		type rwho_port_t;
+	')
+
+	dontaudit $1 rwho_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the rwho port.
 ## </summary>
 ## <param name="domain">
@@ -99669,6 +103848,27 @@ interface(`corenet_tcp_bind_salt_port',`
 	allow $1 salt_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the salt port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_salt_port',`
+	gen_require(`
+		type salt_port_t;
+	')
+
+	dontaudit $1 salt_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -100152,6 +104352,27 @@ interface(`corenet_tcp_bind_sap_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the sap port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_sap_port',`
+	gen_require(`
+		type sap_port_t;
+	')
+
+	dontaudit $1 sap_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the sap port.
 ## </summary>
 ## <param name="domain">
@@ -100629,6 +104850,27 @@ interface(`corenet_tcp_bind_saphostctrl_port',`
 	allow $1 saphostctrl_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the saphostctrl port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_saphostctrl_port',`
+	gen_require(`
+		type saphostctrl_port_t;
+	')
+
+	dontaudit $1 saphostctrl_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -101112,6 +105354,27 @@ interface(`corenet_tcp_bind_servistaitsm_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the servistaitsm port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_servistaitsm_port',`
+	gen_require(`
+		type servistaitsm_port_t;
+	')
+
+	dontaudit $1 servistaitsm_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the servistaitsm port.
 ## </summary>
 ## <param name="domain">
@@ -101589,6 +105852,27 @@ interface(`corenet_tcp_bind_sge_port',`
 	allow $1 sge_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the sge port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_sge_port',`
+	gen_require(`
+		type sge_port_t;
+	')
+
+	dontaudit $1 sge_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -102072,6 +106356,27 @@ interface(`corenet_tcp_bind_shellinaboxd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the shellinaboxd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_shellinaboxd_port',`
+	gen_require(`
+		type shellinaboxd_port_t;
+	')
+
+	dontaudit $1 shellinaboxd_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the shellinaboxd port.
 ## </summary>
 ## <param name="domain">
@@ -102549,6 +106854,27 @@ interface(`corenet_tcp_bind_sieve_port',`
 	allow $1 sieve_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the sieve port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_sieve_port',`
+	gen_require(`
+		type sieve_port_t;
+	')
+
+	dontaudit $1 sieve_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -103032,6 +107358,27 @@ interface(`corenet_tcp_bind_sip_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the sip port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_sip_port',`
+	gen_require(`
+		type sip_port_t;
+	')
+
+	dontaudit $1 sip_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the sip port.
 ## </summary>
 ## <param name="domain">
@@ -103509,6 +107856,27 @@ interface(`corenet_tcp_bind_sixxsconfig_port',`
 	allow $1 sixxsconfig_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the sixxsconfig port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_sixxsconfig_port',`
+	gen_require(`
+		type sixxsconfig_port_t;
+	')
+
+	dontaudit $1 sixxsconfig_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -103992,6 +108360,27 @@ interface(`corenet_tcp_bind_smbd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the smbd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_smbd_port',`
+	gen_require(`
+		type smbd_port_t;
+	')
+
+	dontaudit $1 smbd_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the smbd port.
 ## </summary>
 ## <param name="domain">
@@ -104469,6 +108858,27 @@ interface(`corenet_tcp_bind_smtp_port',`
 	allow $1 smtp_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the smtp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_smtp_port',`
+	gen_require(`
+		type smtp_port_t;
+	')
+
+	dontaudit $1 smtp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -104952,6 +109362,27 @@ interface(`corenet_tcp_bind_snmp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the snmp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_snmp_port',`
+	gen_require(`
+		type snmp_port_t;
+	')
+
+	dontaudit $1 snmp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the snmp port.
 ## </summary>
 ## <param name="domain">
@@ -105429,6 +109860,27 @@ interface(`corenet_tcp_bind_socks_port',`
 	allow $1 socks_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the socks port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_socks_port',`
+	gen_require(`
+		type socks_port_t;
+	')
+
+	dontaudit $1 socks_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -105912,6 +110364,27 @@ interface(`corenet_tcp_bind_soundd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the soundd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_soundd_port',`
+	gen_require(`
+		type soundd_port_t;
+	')
+
+	dontaudit $1 soundd_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the soundd port.
 ## </summary>
 ## <param name="domain">
@@ -106389,6 +110862,27 @@ interface(`corenet_tcp_bind_spamd_port',`
 	allow $1 spamd_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the spamd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_spamd_port',`
+	gen_require(`
+		type spamd_port_t;
+	')
+
+	dontaudit $1 spamd_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -106872,6 +111366,27 @@ interface(`corenet_tcp_bind_speech_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the speech port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_speech_port',`
+	gen_require(`
+		type speech_port_t;
+	')
+
+	dontaudit $1 speech_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the speech port.
 ## </summary>
 ## <param name="domain">
@@ -107349,6 +111864,27 @@ interface(`corenet_tcp_bind_squid_port',`
 	allow $1 squid_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the squid port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_squid_port',`
+	gen_require(`
+		type squid_port_t;
+	')
+
+	dontaudit $1 squid_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -107832,6 +112368,27 @@ interface(`corenet_tcp_bind_ssdp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the ssdp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ssdp_port',`
+	gen_require(`
+		type ssdp_port_t;
+	')
+
+	dontaudit $1 ssdp_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the ssdp port.
 ## </summary>
 ## <param name="domain">
@@ -108309,6 +112866,27 @@ interface(`corenet_tcp_bind_ssh_port',`
 	allow $1 ssh_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the ssh port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ssh_port',`
+	gen_require(`
+		type ssh_port_t;
+	')
+
+	dontaudit $1 ssh_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -108792,6 +113370,27 @@ interface(`corenet_tcp_bind_stunnel_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the stunnel port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_stunnel_port',`
+	gen_require(`
+		type stunnel_port_t;
+	')
+
+	dontaudit $1 stunnel_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the stunnel port.
 ## </summary>
 ## <param name="domain">
@@ -109269,6 +113868,27 @@ interface(`corenet_tcp_bind_svn_port',`
 	allow $1 svn_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the svn port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_svn_port',`
+	gen_require(`
+		type svn_port_t;
+	')
+
+	dontaudit $1 svn_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -109752,6 +114372,27 @@ interface(`corenet_tcp_bind_svrloc_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the svrloc port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_svrloc_port',`
+	gen_require(`
+		type svrloc_port_t;
+	')
+
+	dontaudit $1 svrloc_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the svrloc port.
 ## </summary>
 ## <param name="domain">
@@ -110229,6 +114870,27 @@ interface(`corenet_tcp_bind_swat_port',`
 	allow $1 swat_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the swat port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_swat_port',`
+	gen_require(`
+		type swat_port_t;
+	')
+
+	dontaudit $1 swat_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -110712,6 +115374,27 @@ interface(`corenet_tcp_bind_swift_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the swift port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_swift_port',`
+	gen_require(`
+		type swift_port_t;
+	')
+
+	dontaudit $1 swift_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the swift port.
 ## </summary>
 ## <param name="domain">
@@ -111189,6 +115872,27 @@ interface(`corenet_tcp_bind_sype_transport_port',`
 	allow $1 sype_transport_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the sype_transport port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_sype_transport_port',`
+	gen_require(`
+		type sype_transport_port_t;
+	')
+
+	dontaudit $1 sype_transport_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -111672,6 +116376,27 @@ interface(`corenet_tcp_bind_syslogd_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the syslogd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_syslogd_port',`
+	gen_require(`
+		type syslogd_port_t;
+	')
+
+	dontaudit $1 syslogd_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the syslogd port.
 ## </summary>
 ## <param name="domain">
@@ -112149,6 +116874,27 @@ interface(`corenet_tcp_bind_syslog_tls_port',`
 	allow $1 syslog_tls_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the syslog_tls port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_syslog_tls_port',`
+	gen_require(`
+		type syslog_tls_port_t;
+	')
+
+	dontaudit $1 syslog_tls_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -112632,6 +117378,27 @@ interface(`corenet_tcp_bind_tcs_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the tcs port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_tcs_port',`
+	gen_require(`
+		type tcs_port_t;
+	')
+
+	dontaudit $1 tcs_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the tcs port.
 ## </summary>
 ## <param name="domain">
@@ -113109,6 +117876,27 @@ interface(`corenet_tcp_bind_telnetd_port',`
 	allow $1 telnetd_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the telnetd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_telnetd_port',`
+	gen_require(`
+		type telnetd_port_t;
+	')
+
+	dontaudit $1 telnetd_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -113592,6 +118380,27 @@ interface(`corenet_tcp_bind_tftp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the tftp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_tftp_port',`
+	gen_require(`
+		type tftp_port_t;
+	')
+
+	dontaudit $1 tftp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the tftp port.
 ## </summary>
 ## <param name="domain">
@@ -114069,6 +118878,27 @@ interface(`corenet_tcp_bind_tor_port',`
 	allow $1 tor_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the tor port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_tor_port',`
+	gen_require(`
+		type tor_port_t;
+	')
+
+	dontaudit $1 tor_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -114552,6 +119382,27 @@ interface(`corenet_tcp_bind_traceroute_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the traceroute port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_traceroute_port',`
+	gen_require(`
+		type traceroute_port_t;
+	')
+
+	dontaudit $1 traceroute_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the traceroute port.
 ## </summary>
 ## <param name="domain">
@@ -115029,6 +119880,27 @@ interface(`corenet_tcp_bind_tram_port',`
 	allow $1 tram_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the tram port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_tram_port',`
+	gen_require(`
+		type tram_port_t;
+	')
+
+	dontaudit $1 tram_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -115512,6 +120384,27 @@ interface(`corenet_tcp_bind_transproxy_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the transproxy port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_transproxy_port',`
+	gen_require(`
+		type transproxy_port_t;
+	')
+
+	dontaudit $1 transproxy_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the transproxy port.
 ## </summary>
 ## <param name="domain">
@@ -115989,6 +120882,27 @@ interface(`corenet_tcp_bind_trisoap_port',`
 	allow $1 trisoap_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the trisoap port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_trisoap_port',`
+	gen_require(`
+		type trisoap_port_t;
+	')
+
+	dontaudit $1 trisoap_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -116472,6 +121386,27 @@ interface(`corenet_tcp_bind_trivnet1_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the trivnet1 port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_trivnet1_port',`
+	gen_require(`
+		type trivnet1_port_t;
+	')
+
+	dontaudit $1 trivnet1_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the trivnet1 port.
 ## </summary>
 ## <param name="domain">
@@ -116949,6 +121884,27 @@ interface(`corenet_tcp_bind_ups_port',`
 	allow $1 ups_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the ups port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_ups_port',`
+	gen_require(`
+		type ups_port_t;
+	')
+
+	dontaudit $1 ups_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -117432,6 +122388,27 @@ interface(`corenet_tcp_bind_utcpserver_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the utcpserver port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_utcpserver_port',`
+	gen_require(`
+		type utcpserver_port_t;
+	')
+
+	dontaudit $1 utcpserver_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the utcpserver port.
 ## </summary>
 ## <param name="domain">
@@ -117909,6 +122886,27 @@ interface(`corenet_tcp_bind_uucpd_port',`
 	allow $1 uucpd_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the uucpd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_uucpd_port',`
+	gen_require(`
+		type uucpd_port_t;
+	')
+
+	dontaudit $1 uucpd_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -118392,6 +123390,27 @@ interface(`corenet_tcp_bind_us_cli_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the us_cli port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_us_cli_port',`
+	gen_require(`
+		type us_cli_port_t;
+	')
+
+	dontaudit $1 us_cli_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the us_cli port.
 ## </summary>
 ## <param name="domain">
@@ -118869,6 +123888,27 @@ interface(`corenet_tcp_bind_varnishd_port',`
 	allow $1 varnishd_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the varnishd port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_varnishd_port',`
+	gen_require(`
+		type varnishd_port_t;
+	')
+
+	dontaudit $1 varnishd_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -119352,6 +124392,27 @@ interface(`corenet_tcp_bind_virt_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the virt port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_virt_port',`
+	gen_require(`
+		type virt_port_t;
+	')
+
+	dontaudit $1 virt_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the virt port.
 ## </summary>
 ## <param name="domain">
@@ -119829,6 +124890,27 @@ interface(`corenet_tcp_bind_virtual_places_port',`
 	allow $1 virtual_places_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the virtual_places port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_virtual_places_port',`
+	gen_require(`
+		type virtual_places_port_t;
+	')
+
+	dontaudit $1 virtual_places_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -120312,6 +125394,27 @@ interface(`corenet_tcp_bind_virt_migration_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the virt_migration port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_virt_migration_port',`
+	gen_require(`
+		type virt_migration_port_t;
+	')
+
+	dontaudit $1 virt_migration_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the virt_migration port.
 ## </summary>
 ## <param name="domain">
@@ -120789,6 +125892,27 @@ interface(`corenet_tcp_bind_vnc_port',`
 	allow $1 vnc_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the vnc port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_vnc_port',`
+	gen_require(`
+		type vnc_port_t;
+	')
+
+	dontaudit $1 vnc_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -121272,6 +126396,27 @@ interface(`corenet_tcp_bind_wccp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the wccp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_wccp_port',`
+	gen_require(`
+		type wccp_port_t;
+	')
+
+	dontaudit $1 wccp_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the wccp port.
 ## </summary>
 ## <param name="domain">
@@ -121749,6 +126894,27 @@ interface(`corenet_tcp_bind_websm_port',`
 	allow $1 websm_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the websm port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_websm_port',`
+	gen_require(`
+		type websm_port_t;
+	')
+
+	dontaudit $1 websm_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -122232,6 +127398,27 @@ interface(`corenet_tcp_bind_whois_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the whois port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_whois_port',`
+	gen_require(`
+		type whois_port_t;
+	')
+
+	dontaudit $1 whois_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the whois port.
 ## </summary>
 ## <param name="domain">
@@ -122709,6 +127896,27 @@ interface(`corenet_tcp_bind_winshadow_port',`
 	allow $1 winshadow_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the winshadow port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_winshadow_port',`
+	gen_require(`
+		type winshadow_port_t;
+	')
+
+	dontaudit $1 winshadow_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -123192,6 +128400,27 @@ interface(`corenet_tcp_bind_wsdapi_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the wsdapi port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_wsdapi_port',`
+	gen_require(`
+		type wsdapi_port_t;
+	')
+
+	dontaudit $1 wsdapi_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the wsdapi port.
 ## </summary>
 ## <param name="domain">
@@ -123669,6 +128898,27 @@ interface(`corenet_tcp_bind_wsicopy_port',`
 	allow $1 wsicopy_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the wsicopy port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_wsicopy_port',`
+	gen_require(`
+		type wsicopy_port_t;
+	')
+
+	dontaudit $1 wsicopy_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -124152,6 +129402,27 @@ interface(`corenet_tcp_bind_xdmcp_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the xdmcp port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_xdmcp_port',`
+	gen_require(`
+		type xdmcp_port_t;
+	')
+
+	dontaudit $1 xdmcp_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the xdmcp port.
 ## </summary>
 ## <param name="domain">
@@ -124629,6 +129900,27 @@ interface(`corenet_tcp_bind_xen_port',`
 	allow $1 xen_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the xen port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_xen_port',`
+	gen_require(`
+		type xen_port_t;
+	')
+
+	dontaudit $1 xen_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -125112,6 +130404,27 @@ interface(`corenet_tcp_bind_xfs_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the xfs port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_xfs_port',`
+	gen_require(`
+		type xfs_port_t;
+	')
+
+	dontaudit $1 xfs_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the xfs port.
 ## </summary>
 ## <param name="domain">
@@ -125589,6 +130902,27 @@ interface(`corenet_tcp_bind_xserver_port',`
 	allow $1 xserver_port_t:tcp_socket name_bind;
 	allow $1 self:capability net_bind_service;
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the xserver port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_xserver_port',`
+	gen_require(`
+		type xserver_port_t;
+	')
+
+	dontaudit $1 xserver_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
 
 ########################################
 ## <summary>
@@ -126072,6 +131406,27 @@ interface(`corenet_tcp_bind_zarafa_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the zarafa port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_zarafa_port',`
+	gen_require(`
+		type zarafa_port_t;
+	')
+
+	dontaudit $1 zarafa_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the zarafa port.
 ## </summary>
 ## <param name="domain">
@@ -126549,6 +131904,27 @@ interface(`corenet_tcp_bind_zabbix_port',`
 	allow $1 zabbix_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the zabbix port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_zabbix_port',`
+	gen_require(`
+		type zabbix_port_t;
+	')
+
+	dontaudit $1 zabbix_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -127032,6 +132408,27 @@ interface(`corenet_tcp_bind_zabbix_agent_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the zabbix_agent port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_zabbix_agent_port',`
+	gen_require(`
+		type zabbix_agent_port_t;
+	')
+
+	dontaudit $1 zabbix_agent_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the zabbix_agent port.
 ## </summary>
 ## <param name="domain">
@@ -127509,6 +132906,27 @@ interface(`corenet_tcp_bind_zookeeper_client_port',`
 	allow $1 zookeeper_client_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the zookeeper_client port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_zookeeper_client_port',`
+	gen_require(`
+		type zookeeper_client_port_t;
+	')
+
+	dontaudit $1 zookeeper_client_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -127992,6 +133410,27 @@ interface(`corenet_tcp_bind_zookeeper_election_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the zookeeper_election port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_zookeeper_election_port',`
+	gen_require(`
+		type zookeeper_election_port_t;
+	')
+
+	dontaudit $1 zookeeper_election_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the zookeeper_election port.
 ## </summary>
 ## <param name="domain">
@@ -128469,6 +133908,27 @@ interface(`corenet_tcp_bind_zookeeper_leader_port',`
 	allow $1 zookeeper_leader_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the zookeeper_leader port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_zookeeper_leader_port',`
+	gen_require(`
+		type zookeeper_leader_port_t;
+	')
+
+	dontaudit $1 zookeeper_leader_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
@@ -128952,6 +134412,27 @@ interface(`corenet_tcp_bind_zebra_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the zebra port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_zebra_port',`
+	gen_require(`
+		type zebra_port_t;
+	')
+
+	dontaudit $1 zebra_port_t:tcp_socket name_bind;
+	allow $1 self:capability net_bind_service;
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the zebra port.
 ## </summary>
 ## <param name="domain">
@@ -129432,6 +134913,27 @@ interface(`corenet_tcp_bind_zented_port',`
 
 ########################################
 ## <summary>
+##	Dont audit bind TCP sockets to the zented port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_zented_port',`
+	gen_require(`
+		type zented_port_t;
+	')
+
+	dontaudit $1 zented_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
 ##	Bind UDP sockets to the zented port.
 ## </summary>
 ## <param name="domain">
@@ -129909,6 +135411,27 @@ interface(`corenet_tcp_bind_zope_port',`
 	allow $1 zope_port_t:tcp_socket name_bind;
 	
 ')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the zope port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_zope_port',`
+	gen_require(`
+		type zope_port_t;
+	')
+
+	dontaudit $1 zope_port_t:tcp_socket name_bind;
+	
+')
+
 
 ########################################
 ## <summary>
