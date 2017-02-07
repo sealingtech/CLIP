@@ -1728,9 +1728,9 @@ template(`userdom_security_admin',`
 		seutil_run_setfiles($1, $2)
 	')
 
-	optional_policy(`
-		aide_run($1,$2)
-	')
+	#optional_policy(`
+#		aide_run($1,$2)
+#	')
 
 	optional_policy(`
 		consoletype_exec($1)
@@ -6236,9 +6236,9 @@ template(`userdom_security_admin_template',`
 		seutil_run_setfiles($1, $2)
 	')
 
-	optional_policy(`
-		aide_run($1,$2)
-	')
+#	optional_policy(`
+#		aide_run($1,$2)
+#	')
 
 	optional_policy(`
 		consoletype_exec($1)
