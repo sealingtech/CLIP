@@ -68,6 +68,7 @@ policycoreutils
 policycoreutils-newrole
 policycoreutils-python
 procps-ng
+psmisc
 rootfiles
 rpm
 rsyslog
