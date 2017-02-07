@@ -129,6 +129,7 @@ files_etc_filetrans_etc_runtime(fsadm_t, file)
 files_rw_isid_type_dirs(fsadm_t)
 files_rw_isid_type_blk_files(fsadm_t)
 files_read_isid_type_files(fsadm_t)
+files_list_var(fsadm_t)
 
 fs_search_auto_mountpoints(fsadm_t)
 fs_getattr_xattr_fs(fsadm_t)
