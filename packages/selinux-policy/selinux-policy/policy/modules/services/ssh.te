@@ -453,6 +453,8 @@ kernel_read_system_state(sshd_keygen_t)
 
 corecmd_exec_bin(sshd_keygen_t)
 
+miscfiles_read_generic_certs(sshd_keygen_t)
+
 auth_read_passwd(sshd_keygen_t)
 
 files_rw_etc_dirs(sshd_keygen_t)
