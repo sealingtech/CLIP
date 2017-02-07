@@ -133,7 +133,7 @@ optional_policy(`
 # polkit_auth local policy
 #
 
-allow policykit_auth_t self:capability { sys_nice ipc_lock setgid setuid };
+allow policykit_auth_t self:capability { sys_nice ipc_lock setgid setuid dac_override };
 dontaudit policykit_auth_t self:capability sys_tty_config;
 allow policykit_auth_t self:process { setsched getsched signal };
 
@@ -184,6 +184,7 @@ userdom_dontaudit_read_user_home_content_files(policykit_auth_t)
 userdom_dontaudit_write_user_tmp_files(policykit_auth_t)
 userdom_dontaudit_access_check_user_content(policykit_auth_t)
 userdom_read_admin_home_files(policykit_auth_t)
+userdom_use_inherited_user_ttys(policykit_auth_t)
 
 optional_policy(`
 	dbus_system_domain( policykit_auth_t, policykit_auth_exec_t)
