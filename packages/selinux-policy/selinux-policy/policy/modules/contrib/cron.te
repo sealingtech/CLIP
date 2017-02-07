@@ -667,6 +667,10 @@ optional_policy(`
 	userdom_filetrans_home_content(crond_t)
 ')
 
+optional_policy(`
+	rhsmcertd_domtrans(system_cronjob_t)
+')
+
 ########################################
 #
 # User cronjobs local policy
