@@ -258,6 +258,9 @@ dbus_system_bus_client(mysqld_prepare_t)
 
 corecmd_exec_ls(mysqld_prepare_t)
 
+mysql_domtrans_mysql_safe(mysqld_prepare_t)
+mysql_domtrans(mysqld_prepare_t)
+
 mysql_read_config(mysqld_prepare_t)
 mysql_rw_db_files(mysqld_prepare_t)
 mysql_systemctl(mysqld_prepare_t)
