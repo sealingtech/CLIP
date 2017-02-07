@@ -85,6 +85,7 @@ kernel_request_load_module(user_mail_domain)
 #corenet_sendrecv_all_client_packets(user_mail_domain)
 #corenet_tcp_connect_all_ports(user_mail_domain)
 #corenet_tcp_sendrecv_all_ports(user_mail_domain)
+corenet_tcp_connect_smtp_port(user_mail_domain)
 
 corecmd_exec_bin(user_mail_domain)
 
@@ -181,7 +182,7 @@ dontaudit system_mail_t self:capability net_admin;
 # required for getifaddr in non-IPV4
 allow system_mail_t self:netlink_route_socket { bind create getattr read write nlmsg_read };
 
-allow system_mail_t self:tcp_socket create_socket_perms;
+allow system_mail_t self:tcp_socket { accept create_socket_perms };
 
 allow system_mail_t mail_home_t:file manage_file_perms;
 
@@ -213,11 +214,13 @@ manage_files_pattern(system_mail_t, mail_home_rw_t, mail_home_rw_t)
 allow system_mail_t mail_home_t:file manage_file_perms;
 userdom_admin_home_dir_filetrans(system_mail_t, mail_home_t, file)
 
-logging_append_all_logs(system_mail_t)
+logging_rw_all_logs(system_mail_t)
 
 logging_send_syslog_msg(system_mail_t)
+logging_append_all_logs(system_mail_t)
 # requried for postfix newaliases
 sysnet_read_config(system_mail_t)
+corenet_tcp_connect_smtp_port(system_mail_t)
 allow system_mail_t self:udp_socket create_socket_perms;
 
 optional_policy(`
@@ -440,6 +443,10 @@ optional_policy(`
 # User send mail local policy
 #
 
+
+allow user_mail_t self:udp_socket create_socket_perms;
+allow user_mail_t self:tcp_socket {accept create_socket_perms };
+
 domain_use_interactive_fds(user_mail_t)
 
 userdom_use_inherited_user_terminals(user_mail_t)
@@ -465,6 +472,24 @@ userdom_dontaudit_append_user_tmp_files(user_mail_t)
 userdom_read_user_tmp_files(mta_user_agent)
 
 dev_read_sysfs(user_mail_t)
+
+corenet_tcp_connect_smtp_port(user_mail_t)
+
+logging_send_syslog_msg(user_mail_t)
+logging_append_all_logs(user_mail_t)
+# requried for postfix newaliases
+sysnet_read_config(user_mail_t)
+
+optional_policy(`
+	manage_dirs_pattern(user_mail_t, etc_aliases_t, etc_aliases_t)
+	manage_files_pattern(user_mail_t, etc_aliases_t, etc_aliases_t)
+	manage_lnk_files_pattern(user_mail_t, etc_aliases_t, etc_aliases_t)
+	manage_fifo_files_pattern(user_mail_t, etc_aliases_t, etc_aliases_t)
+	manage_sock_files_pattern(user_mail_t, etc_aliases_t, etc_aliases_t)
+	files_etc_filetrans(user_mail_t, etc_aliases_t, { file lnk_file sock_file fifo_file })
+
+	domain_use_interactive_fds(user_mail_t)
+')
 
 tunable_policy(`use_samba_home_dirs',`
 	fs_manage_cifs_files(user_mail_t)
