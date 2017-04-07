@@ -151,19 +151,9 @@ echo "Turning sshd off"
 # messages
 %include includes/disable-graphical-boot
 
-###### START - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
-if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
-    echo "Setting permissive mode..."
-    echo -e "#THIS IS A DEBUG BUILD HENCE SELINUX IS IN PERMISSIVE MODE\nSELINUX=permissive\nSELINUXTYPE=$POLNAME\n" > /etc/selinux/config
-    echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
-    # This line is used to make policy development easier.  It disables the "setfiles" check used by 
-    # semodule/semanage that prevents transactions containing invalid and dupe fc entries from rolling forward.
-    echo -e "module-store = direct\n[setfiles]\npath=/bin/true\n[end]\n" > /etc/selinux/semanage.conf
-fi
-###### END - ADJUST SYSTEM BASED ON BUILD CONFIGURATION VARIABLES ###########
-
-%include includes/standard-fix-bad-scap
 %include includes/standard-late-scap-audit
+%include includes/standard-fix-bad-scap
+%include includes/standard-set-enforcement-mode
 
 # Need to do some additional customizations if we're building for AWS
 if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then

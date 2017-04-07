@@ -191,21 +191,9 @@ fi
 # messages
 %include includes/disable-graphical-boot
 
-if [ x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
-    echo "Setting permissive mode..."
-    echo -e "#THIS IS A DEBUG BUILD HENCE SELINUX IS IN PERMISSIVE MODE\nSELINUX=permissive\nSELINUXTYPE=$POLNAME\n" > /etc/selinux/config
-	echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
-	# This line is used to make policy development easier.  It disables the "setfiles" check used by 
-	# semodule/semanage that prevents transactions containing invalid and dupe fc entries from rolling forward.
-	echo -e "module-store = direct\n[setfiles]\npath=/bin/true\n[end]\n" > /etc/selinux/semanage.conf
-	if [ -f /etc/grub.conf ]; then
-		grubby --update-kernel=ALL --remove-args=enforcing
-		grubby --update-kernel=ALL --args=enforcing=0
-	fi	
-fi
-
 %include includes/standard-fix-bad-scap
 %include includes/standard-late-scap-audit
+%include includes/standard-set-enforcement-mode
 
 echo "session optional pam_umask.so umask=0077" >> /etc/pam.d/sshd
 

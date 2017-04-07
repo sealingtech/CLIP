@@ -19,6 +19,7 @@ devel_mode := y
 endif
 
 ifeq ($(CONFIG_BUILD_ENFORCING_MODE),n)
+FIX_KS_ENFORCING_MODE = $(VERBOSE)sed -i -e 's/selinux --enforcing/selinux --permissive/'
 devel_mode := y
 endif
 
@@ -135,6 +136,7 @@ setup-inst-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -i -e 's;#REPO-REPLACEMENT-PLACEHOLDER;$(REPO_LINES);' $(INST_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(CONFIG_BUILD_BASH_VARS);' $(INST_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/');' $(INST_KS)
+	$(FIX_KS_ENFORCING_MODE) $(INST_KS)
 	$(VERBOSE)sed -e 's/^repo/#repo/' $(INST_KS) > $(PUNGI_OS_DIR)/$(notdir $(INST_KS))
 	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
 
@@ -149,6 +151,7 @@ setup-live-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -i -e 's;#REPO-REPLACEMENT-PLACEHOLDER;$(REPO_LINES);' $(LIVE_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(LIVE_CONFIG_BUILD_BASH_VARS);' $(LIVE_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/');' $(LIVE_KS)
+	$(FIX_KS_ENFORCING_MODE) $(LIVE_KS)
 	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
 
 setup-aws-ks: $(SETUP_DEPS)
@@ -158,6 +161,7 @@ setup-aws-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -i -e 's;#REPO-REPLACEMENT-PLACEHOLDER;$(REPO_LINES);' $(AWS_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(AWS_CONFIG_BUILD_BASH_VARS);' $(AWS_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/');' $(INST_KS)
+	$(FIX_KS_ENFORCING_MODE) $(AWS_KS)
 	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
 
 clean:
