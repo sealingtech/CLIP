@@ -225,6 +225,11 @@ allow groupadd_t self:unix_stream_socket create_stream_socket_perms;
 allow groupadd_t self:unix_dgram_socket sendto;
 allow groupadd_t self:unix_stream_socket connectto;
 
+# groupadd uses avc_context_to_sid_raw which causes it to act like a userspace obj mgr
+# same issue su has see:
+# http://oss.tresys.com/pipermail/refpolicy/2014-April/007058.html
+allow groupadd_t self:netlink_selinux_socket { create bind };
+
 fs_getattr_xattr_fs(groupadd_t)
 fs_search_auto_mountpoints(groupadd_t)
 

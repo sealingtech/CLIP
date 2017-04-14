@@ -47,6 +47,9 @@ template(`su_restricted_domain_template', `
 	allow $1_su_t self:process { setexec setsched setrlimit };
 	allow $1_su_t self:fifo_file rw_fifo_file_perms;
 	allow $1_su_t self:netlink_audit_socket { nlmsg_relay create_netlink_socket_perms };
+	# su/pam uses avc_context_to_sid_raw which causes it to act like a userspace obj mgr
+	# http://oss.tresys.com/pipermail/refpolicy/2014-April/007058.html
+	allow $1_su_t self:netlink_selinux_socket { create bind };
 	allow $1_su_t self:unix_stream_socket create_stream_socket_perms;
 
 	# Transition from the user domain to this domain.
