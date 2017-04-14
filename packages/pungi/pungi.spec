@@ -14,6 +14,7 @@ Patch1:         0001-Make-our-OS-iso-bootable-on-aarch64.patch
 Patch2:		0002-fix-absolute-paths.patch
 Patch3:		0003-follow-symlinks.patch
 Patch4:		0004-call-lorax-with-custom-args.patch
+Patch5:		0005-ignore-missing-srpms.patch
 Requires:       yum => 3.4.3-28, repoview, createrepo >= 0.4.11
 Requires:       lorax, python-lockfile
 BuildRequires:  python-devel
@@ -31,6 +32,7 @@ A tool to create anaconda based installation trees/isos of a set of rpms.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
 
 %build
 %{__python} setup.py build
