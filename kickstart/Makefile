@@ -19,8 +19,10 @@ devel_mode := y
 endif
 
 ifeq ($(CONFIG_BUILD_ENFORCING_MODE),n)
-FIX_KS_ENFORCING_MODE = $(VERBOSE)sed -i -e 's/selinux --enforcing/selinux --permissive/'
+FIX_KS_ENFORCING_MODE = $(VERBOSE)sed -i -e 's/^selinux --.*/selinux --permissive/'
 devel_mode := y
+else
+FIX_KS_ENFORCING_MODE = $(VERBOSE)sed -i -e 's/^selinux --.*/selinux --enforcing/'
 endif
 
 ifdef devel_mode
