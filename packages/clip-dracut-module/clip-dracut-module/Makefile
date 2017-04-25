@@ -2,7 +2,7 @@
 #
 # Authors: Spencer Shimko <spencer@quarksecurity.com>
 #
-PREFIX ?= $(DESTDIR)/usr/share/dracut/modules.d
+PREFIX ?= $(DESTDIR)/usr/lib/dracut/modules.d
 INSTDIR := $(PREFIX)/96clip
 
 FILES := check install clip.sh

@@ -31,9 +31,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(755,root,root,-)
-/usr/share/dracut/modules.d/96clip/check
-/usr/share/dracut/modules.d/96clip/install
-/usr/share/dracut/modules.d/96clip/clip.sh
+/usr/lib/dracut/modules.d/96clip/check
+/usr/lib/dracut/modules.d/96clip/install
+/usr/lib/dracut/modules.d/96clip/clip.sh
 
 %post
 
