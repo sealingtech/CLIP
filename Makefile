@@ -129,11 +129,11 @@ EC2_API_TOOLS_URL    := http://s3.amazonaws.com/ec2-downloads/ec2-api-tools.zip
 
 export MOCK_YUM_CONF :=
 export setup_all_repos := setup-clip-repo
-CLIP_REPO_DIRS :=
+export CLIP_REPO_DIRS :=
 
 # These are the directories where we will put our custom copies of
 # the yum repos.  These will be removed by "make bare".
-CLIP_REPO_DIR := $(REPO_DIR)/clip-repo
+export CLIP_REPO_DIR := $(REPO_DIR)/clip-repo
 CLIP_SRPM_REPO_DIR := $(REPO_DIR)/clip-srpms
 export REPO_LINES := repo --name=clip-repo --baseurl=file://$(CLIP_REPO_DIR)\n
 
@@ -298,7 +298,7 @@ $(eval MOCK_YUM_CONF := $(MOCK_YUM_CONF)[$(REPO_ID)]\\nname=$(REPO_ID)\\nbaseurl
 $(eval MY_REPO_DEPS += $(REPO_DIR)/$(REPO_ID)-repo/last-updated)
 $(eval REPO_LINES := $(REPO_LINES)repo --name=$(REPO_ID) --baseurl=file://$(REPO_DIR)/$(REPO_ID)-repo\n)
 
-$(eval CLIP_REPO_DIRS += "$(REPO_DIR)/$(REPO_ID)-repo")
+$(eval export CLIP_REPO_DIRS += "$(REPO_DIR)/$(REPO_ID)-repo")
 $(eval PKG_LISTS += "./$(shell basename $(CONF_DIR))/pkglist.$(REPO_ID)")
 $(eval REPO_DEPS += $(REPO_DIR)/$(REPO_ID)-repo/last-updated)
 

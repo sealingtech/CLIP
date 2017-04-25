@@ -86,7 +86,7 @@ AWS_CONFIG_BUILD_BASH_VARS := $(CONFIG_BUILD_BASH_VARS) CONFIG_BUILD_AWS=y CONFI
 # probably just ignore this.
 REPO_LINES ?= repo --name=centos --baseurl=http://mirror.centos.org/centos/$(CENTOS_VER)/os/$$basearch\nrepo --name=epel   --baseurl=http://download.fedora.redhat.com/pub/epel/$(RHEL_VER)/$$basearch
 
-SETUP_DEPS := $(CURDIR)/../Makefile $(KS)
+SETUP_DEPS := $(CURDIR)/../Makefile $(KS) $(shell find $(CURDIR)/../includes -type f) $(CURDIR)/variant_pkgs.mk $(shell find $(CLIP_REPO_DIRS) $(CLIP_REPO_DIR) -name repomd.xml)
 
 all: iso live-iso setup-ks
 
@@ -127,7 +127,8 @@ aws: $(ADDTL_DEPS) setup-aws-ks
 
 setup-inst-ks: $(SETUP_DEPS)
 	@echo "Cleaning up after any previous builds to avoid conflicts..."
-	# OK, this is dangerous. Need to find a better way to address the cruft problem.
+	@# Pungi doesn't do the right things when things change, and assumes the things is previously
+	@# did are good to go. Bad assumption on pungi's part, which leaves us with removing everything
 	$(VERBOSE)sudo rm -rf $(BUILD_DIR)
 	$(VERBOSE)test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)
 	$(VERBOSE)mkdir -p $(PUNGI_OS_DIR)
