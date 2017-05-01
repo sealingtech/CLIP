@@ -15,8 +15,6 @@ else
         sed -i --follow-symlink "s/\(.*pam_cracklib\.so.*\)/\1 maxrepeat=3/" /etc/pam.d/system-auth
 fi
 
-sed -i 's,^ExecStart.*$,ExecStart=/usr/bin/logger -p authpriv.notice -t init "Ctrl-Alt-Del was pressed and ignored",' /usr/lib/systemd/system/systemd-reboot.service
-
 # SSG fix corrupts /etc/issue*
 cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
 | fold -sw 80 > /etc/issue.net
