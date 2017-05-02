@@ -181,12 +181,13 @@ cd host_packages/epel
 cd ../extras
 /usr/bin/yum -y localinstall *.rpm
 popd > /dev/null
+
+# add us to the mock group
+/bin/echo "Adding user to mock group and configuring sudo."
 /usr/sbin/usermod -aG mock ${SUDO_USER}
 
-if [ $# -lt 2 ]; then
-	/bin/echo -e "Basic bootstrapping of build host is complete.\nPress 'enter' to run 'make clip-minimal-inst-iso' or ctrl-c to quit."
-	read
-	/usr/bin/make clip-minimal-inst-iso
-fi
+
+/bin/echo "Basic bootstrapping of build host is complete.\n"
+/bin/echo "Run 'make clip-minimal-inst-iso' to build the minimal CLIP installation ISO."
 
 exit 0
