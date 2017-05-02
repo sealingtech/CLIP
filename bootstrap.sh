@@ -169,13 +169,16 @@ fi
 
 # install packages that we need but aren't commonly present on default RHEL installs.
 LIVECD_TOOL_DEPS="sssd-client system-config-keyboard"
-for i in createrepo rpm-build make anaconda policycoreutils-python python-lockfile ruby ${LIVECD_TOOL_DEPS}; do
+for i in createrepo rpm-build make anaconda policycoreutils-python ruby ${LIVECD_TOOL_DEPS}; do
 	/bin/rpm -q "$i" >/dev/null || /usr/bin/yum install -y $i
 done;
 
 # install packages from epel that we carry in CLIP
 pushd . >/dev/null
 cd host_packages/epel
+/usr/bin/yum -y localinstall *.rpm
+# install packages from centos extras that we carry in CLIP
+cd ../extras
 /usr/bin/yum -y localinstall *.rpm
 popd > /dev/null
 /usr/sbin/usermod -aG mock ${SUDO_USER}
