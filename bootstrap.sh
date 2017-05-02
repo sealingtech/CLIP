@@ -186,8 +186,14 @@ popd > /dev/null
 /bin/echo "Adding user to mock group and configuring sudo."
 /usr/sbin/usermod -aG mock ${SUDO_USER}
 
+# set it up so mock members dont need to enter a pw
+# this isnt ideal but noone sits around waiting for a CLIP build to
+# prompt for a pw, and sudo will timeout and the build is borked.
+/bin/echo "%mock   ALL=(ALL)       NOPASSWD: ALL" | (sudo su -c 'EDITOR="tee -a" visudo -f /etc/sudoers.d/mock >/dev/null')
 
-/bin/echo "Basic bootstrapping of build host is complete.\n"
-/bin/echo "Run 'make clip-minimal-inst-iso' to build the minimal CLIP installation ISO."
+
+/bin/echo "Basic bootstrapping of build host is complete."
+/bin/echo "Run '/usr/bin/newgrp mock' as your unprivileged user then"
+/bin/echo "run 'make clip-minimal-inst-iso' to build the minimal CLIP installation ISO."
 
 exit 0
