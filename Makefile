@@ -166,6 +166,11 @@ SRPM_FROM_PKG_NAME = $(1)-$(call PKG_VER,$(1))-$(call PKG_REL,$(1)).src.rpm
 PKG_NAME_FROM_RPM = $(shell echo "$(1)" | $(SED) -r -e 's/^([^-]+[A-Za-z_-]?+)-.*$$/\1/')
 SRPM_FROM_RPM = $(patsubst %.$(call PKG_ARCH,$(call PKG_NAME_FROM_RPM,$(1))).rpm,%.src.rpm,$(1))
 
+# Multiple kickstart/foo/variants_pkgs.mk can include the same pacakge name, remove dupes
+# to avoid redeclaring recipes for the same target
+# Doing this in make is too ugly even for me...
+PACKAGES := $(shell echo $(PACKAGES)|tr ' ' '\n'|sort|uniq)
+
 # Create the list of RPMs based on package list.
 RPMS := $(addprefix $(CLIP_REPO_DIR)/,$(foreach PKG,$(PACKAGES),$(call RPM_FROM_PKG_NAME,$(strip $(PKG)))))
 SRPMS := $(addprefix $(SRPM_OUTPUT_DIR)/,$(foreach RPM,$(RPMS),$(call SRPM_FROM_RPM,$(notdir $(RPM)))))
