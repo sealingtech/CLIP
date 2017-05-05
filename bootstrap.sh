@@ -169,7 +169,7 @@ fi
 
 # install packages that we need but aren't commonly present on default RHEL installs.
 LIVECD_TOOL_DEPS="sssd-client system-config-keyboard"
-for i in createrepo rpm-build make anaconda policycoreutils-python ruby ${LIVECD_TOOL_DEPS}; do
+for i in createrepo rpm-build make anaconda policycoreutils-python ruby squashfs-tools ${LIVECD_TOOL_DEPS}; do
 	/bin/rpm -q "$i" >/dev/null || /usr/bin/yum install -y $i
 done;
 
