@@ -6,8 +6,6 @@
 
 #
 
-clip-dracut-module
-
 acl
 aide
 at
@@ -55,6 +53,7 @@ mdadm
 ncurses
 ntp
 ntpdate
+chrony
 openscap
 #openscap-content
 openscap-utils

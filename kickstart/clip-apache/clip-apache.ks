@@ -70,7 +70,6 @@ selinux-policy-mcs-postfix
 #selinux-policy-mcs-ec2ssh
 clip-miscfiles
 webpageexample
-clip-dracut-module
 mod_ssl
 
 mariadb
