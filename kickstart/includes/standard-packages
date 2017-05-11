@@ -53,7 +53,7 @@ mdadm
 ncurses
 ntp
 ntpdate
-chrony
+-chrony
 openscap
 #openscap-content
 openscap-utils
