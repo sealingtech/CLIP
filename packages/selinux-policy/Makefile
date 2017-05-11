@@ -4,6 +4,8 @@
 # Authors: Spencer Shimko <sshimko@tresys.com>
 # 	   Spencer Shimko <spencer@quarksecurity.com>
 #
+#
+#
 
 # The name of the package
 PKGNAME := selinux-policy
@@ -38,8 +40,12 @@ SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser ec2ss
 # the filename of the tarball
 TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
 
+# Since the policy structure changes between 7.2 and 7.3, we need to decide which spec to use
+# <3 awk
+OS_VER := $(shell rpm -q --provides $$(rpm -q --whatprovides "system-release(releasever)") | awk ' /^system-release =/ { print ($$3 >= 7.3) ? 7.3 : 7.2; }')
+
 # spec file name
-RPM_SPEC = $(CURDIR)/$(PKGNAME).spec
+RPM_SPEC = $(CURDIR)/$(PKGNAME)$(OS_VER).spec
 
 ####################################################
 ## things below this line should rarely change
