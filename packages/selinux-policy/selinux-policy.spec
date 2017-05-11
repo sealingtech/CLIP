@@ -95,16 +95,14 @@ make UNK_PERMS=%4 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=n DIRECT_INITRC=%3 MONOL
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/active/modules/disabled \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/logins \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs \
-# TODO: \
-#install -m0644 selinux_config/securetty_types-%1 %{buildroot}%{_sysconfdir}/selinux/%1/contexts/securetty_types \
-#install -m0644 selinux_config/file_contexts.subs_dist %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files \
-#install -m0644 selinux_config/setrans-%1.conf %{buildroot}%{_sysconfdir}/selinux/%1/setrans.conf \
-#install -m0644 selinux_config/customizable_types %{buildroot}%{_sysconfdir}/selinux/%1/contexts/customizable_types \
+install -m0644 selinux_config/securetty_types-%1 %{buildroot}%{_sysconfdir}/selinux/%1/contexts/securetty_types \
+install -m0644 selinux_config/file_contexts.subs_dist %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files \
+install -m0644 selinux_config/setrans-%1.conf %{buildroot}%{_sysconfdir}/selinux/%1/setrans.conf \
+install -m0644 selinux_config/customizable_types %{buildroot}%{_sysconfdir}/selinux/%1/contexts/customizable_types \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.local \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.local.bin \
 sefcontext_compile -o %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.bin %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/policy \
-#%{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/active/modules/ \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/contexts/files \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/logins \
 touch %{buildroot}/%{_sysconfdir}/selinux/%1/semanage.read.LOCK \
@@ -128,7 +126,6 @@ SORTED_PKGS=`for p in %{separatePkgs}; do echo $p | awk '{ print length($0) " " 
 for f in ${SORTED_PKGS}; do grep $f\.pp\ %{buildroot}/%{_usr}/share/selinux/%1/modules.lst || (echo "failed to update module.lst for module $f" && exit -1); sed -i -e "s/$f.pp//g" %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done \
 mkdir -p %{buildroot}/%{_sysconfdir}/selinux/%1/active/modules/100 \
 mkdir -p %{buildroot}/%{_sysconfdir}/selinux/%1/active/modules/disabled \
-#/usr/sbin/semodule -X 100 -s %1 -n -p %{buildroot} -i %{buildroot}/%{_usr}/share/selinux/%1/*.pp ; \
 /usr/bin/sha512sum %{buildroot}%{_sysconfdir}/selinux/%1/policy/policy.%{POLICYVER} | cut -d' ' -f 1 > %{buildroot}%{_sysconfdir}/selinux/%1/.policy.sha512; \
 rm -rf %{buildroot}%{_sysconfdir}/selinux/%1/contexts/netfilter_contexts  \
 rm -rf %{buildroot}%{_sysconfdir}/selinux/%1/active/policy.kern \
@@ -151,10 +148,6 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/commit_num \
 # TODO: stop globbing \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/modules/100/*/* \
-#%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/modules/file_contexts \
-#%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/modules/file_contexts.homedirs \
-#%config(noreplace) %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/seusers.final \
-#%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/netfilter_contexts \
 %config(noreplace) %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/users_extra \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/homedir_template \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/policy.kern \
@@ -188,9 +181,10 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %ghost %{_sysconfdir}/selinux/%1/contexts/files/*.bin \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts.local \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs \
-#%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs_dist \
+%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs_dist \
 %config %{_sysconfdir}/selinux/%1/contexts/files/media \
 %dir %{_sysconfdir}/selinux/%1/contexts/users \
+%config(noreplace) %{_sysconfdir}/selinux/%1/setrans.conf \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/users/* \
 #%{_mandir}/man*/* \
 %{_mandir}/ru/*/* \
