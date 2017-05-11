@@ -32,7 +32,7 @@ Requires: dosfstools
 Requires: e2fsprogs
 Requires: lorax >= 18.3
 Requires: rsync
-Requires: system-config-keyboard
+Requires: system-config-keyboard >= 1.3.0
 %ifarch %{ix86} x86_64 ppc ppc64
 Requires: hfsplus-tools
 %endif
