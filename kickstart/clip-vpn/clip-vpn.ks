@@ -56,6 +56,7 @@ reboot --eject
 
 %packages --excludedocs
 %include includes/standard-packages
+#CONFIG-BUILD-ADDTL-PACKAGES
 @Base
 selinux-policy
 # by default use MCS policy (selinux-policy-clip)
