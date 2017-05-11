@@ -22,6 +22,9 @@ cp /etc/issue.net /etc/issue
 
 systemctl mask ctrl-alt-del.target
 
+# https://github.com/OpenSCAP/scap-security-guide/issues/1435
+sed -i -e 's/cbcMACs/cbc\nMACS/' /etc/ssh/sshd_config 
+
 # And I have yet to figure out how to use SECMARK with firewalld.
 systemctl mask firewalld
 systemctl enable iptables
