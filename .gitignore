@@ -13,3 +13,5 @@ conf/yum/yum.conf
 conf/yum/yum_all.conf
 *CHECKSUM
 CONFIG_AWS
+*.pyc
+*.pyo
