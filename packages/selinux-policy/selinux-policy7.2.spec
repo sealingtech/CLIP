@@ -162,6 +162,7 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %config %{_sysconfdir}/selinux/%1/contexts/lxc_contexts \
 %config %{_sysconfdir}/selinux/%1/contexts/systemd_contexts \
 %config %{_sysconfdir}/selinux/%1/contexts/sepgsql_contexts \
+%config %{_sysconfdir}/selinux/%1/contexts/snapperd_contexts \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/default_type \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/failsafe_context \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/initrc_context \
