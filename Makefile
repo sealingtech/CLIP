@@ -51,6 +51,11 @@ CONFIG_BUILD_DEPS := $(ROOT_DIR)/CONFIG_BUILD $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DI
 # MOCK_REL must be configured in MOCK_CONF_DIR/MOCK_REL.cfg
 MOCK_REL := rhel-$(RHEL_VER)-$(TARGET_ARCH)
 
+# This lets sub-makes take actions based on the full OS rver+release found in the mock repos instead of on host version
+# E.g., the SELinux policy uses different spec files based on release
+# Make sure $(YUM_CONF_ALL_FILE) is a dep for any recipes that use this feature
+export OS_VER = $(strip $(shell repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery --whatprovides -c $(YUM_CONF_ALL_FILE) "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}'))
+
 # This directory contains all of our packages we will be building.
 PKG_DIR += $(CURDIR)/packages
 
@@ -264,13 +269,18 @@ endif
 
 $(eval PHONIES += $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-rpm $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-nomock-rpm)
 $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-rpm:  $(1)
-$(call PKG_NAME_FROM_RPM,$(notdir $(1)))-nomock-rpm:  $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
+# TODO: we do not yet handle deps for nomock as we put the same output RPMs in the same location of mock'd RPMs.
+# In essence, we do not know if the RPM that exists was built inside or outside of mock
+# so for now, clobber the output RPM and rebuild
+$(call PKG_NAME_FROM_RPM,$(notdir $(1)))-nomock-rpm:
 	$(call CHECK_DEPS)
 	$(call MKDIR,$(CLIP_REPO_DIR))
-	$(VERBOSE)OUTPUT_DIR=$(CLIP_REPO_DIR) $(MAKE) -C $(PKG_DIR)/$(call PKG_NAME_FROM_RPM,$(notdir $(1))) rpm
+	$(RM) $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
+	$(VERBOSE)OUTPUT_DIR=$(CLIP_REPO_DIR) $(MAKE) -C $(PKG_DIR)/$(call PKG_NAME_FROM_RPM,$(notdir $(1))) srpm rpm
 	cd $(CLIP_REPO_DIR) && $(REPO_CREATE)
 
 $(eval PHONIES += $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-srpm $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-clean)
+
 $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-srpm:  $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
 $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-clean:
 	$(call CHECK_DEPS)
@@ -296,8 +306,8 @@ $(eval REPO_ID := $(call GET_REPO_ID, $(1)))
 ifneq ($(strip $(1)),)
 $(eval REPO_PATH := $(call GET_REPO_PATH,$(1)))
 $(eval REPO_URL := $(call GET_REPO_URL,$(call GET_REPO_PATH,$(1))))
+$(eval REPO_FAILED += $(strip $(shell if ! /usr/bin/find $(REPO_PATH) -type f -name repomd.xml 2>/dev/null >/dev/null; then echo $(REPO_PATH); fi)))
 $(eval setup_all_repos += setup-$(REPO_ID)-repo)
-
 $(eval YUM_CONF := [$(REPO_ID)]\\nname=$(REPO_ID)\\nbaseurl=$(REPO_URL)\\nenabled=1\\n\\nexclude=$(strip $(PKG_BLACKLIST))\\n)
 $(eval MOCK_YUM_CONF := $(MOCK_YUM_CONF)[$(REPO_ID)]\\nname=$(REPO_ID)\\nbaseurl=file://$(REPO_DIR)/$(REPO_ID)-repo\\nenabled=1\\n\\nexclude=$(strip $(PKG_BLACKLIST))\\n)
 $(eval MY_REPO_DEPS += $(REPO_DIR)/$(REPO_ID)-repo/last-updated)
@@ -308,7 +318,7 @@ $(eval PKG_LISTS += "./$(shell basename $(CONF_DIR))/pkglist.$(REPO_ID)")
 $(eval REPO_DEPS += $(REPO_DIR)/$(REPO_ID)-repo/last-updated)
 
 $(eval PHONIES += setup-$(REPO_ID)-repo)
-setup-$(REPO_ID)-repo:  $(REPO_DIR)/$(REPO_ID)-repo/last-updated $(CONFIG_BUILD_DEPS) 
+setup-$(REPO_ID)-repo:  $(REPO_DIR)/$(REPO_ID)-repo/last-updated $(CONFIG_BUILD_DEPS)
 
 # This is the key target for managing yum repos.  If the pkg list for the repo
 # is more recent then our private repo regen the repo by symlink'ing the packages into our repo.
@@ -406,6 +416,11 @@ all: $(INSTISOS) $(LIVECDS)
 # Generate custom targets for managing the yum repos.  We have to generate the rules since the user provides the set of repos.
 $(foreach REPO,$(strip $(shell cat CONFIG_REPOS|$(GREP) -E '^[a-zA-Z].*=.*'|$(SED) -e 's/ \?= \?/=/')),$(eval $(call REPO_RULE_template,$(REPO))))
 
+ifneq ($(strip $(REPO_FAILED)),)
+$(info Yum repository paths do not contain a valid repo indicated by a repomd.xml somewhere)
+$(error $(REPO_FAILED))
+endif
+
 # The following line calls our RPM rule template defined above allowing us to build a proper dependency list.
 $(foreach RPM,$(RPMS),$(eval $(call RPM_RULE_template,$(RPM))))
 
@@ -439,7 +454,7 @@ rpms: $(RPMS)
 PHONIES += srpms
 srpms: $(SRPMS)
 
-%.src.rpm:  FORCE
+%.src.rpm: $(MY_REPO_DEPS) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg $(YUM_CONF_ALL_FILE) $(CLIP_REPO_DIR)/exists FORCE
 	$(call CHECK_DEPS)
 	$(call MKDIR,$(SRPM_OUTPUT_DIR))
 	$(MAKE) -C $(PKG_DIR)/$(call PKG_NAME_FROM_RPM,$(notdir $@)) srpm

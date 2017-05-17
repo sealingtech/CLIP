@@ -42,10 +42,15 @@ TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
 
 # Since the policy structure changes between 7.2 and 7.3, we need to decide which spec to use
 # <3 awk
-OS_VER := $(shell rpm -q --provides $$(rpm -q --whatprovides "system-release(releasever)") | awk ' /^system-release =/ { print ($$3 >= 7.3) ? 7.3 : 7.2; }')
+ifeq ($(OS_VER),)
+override OS_VER := $(shell rpm -q --provides $$(rpm -q --whatprovides "system-release(releasever)") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}')
+endif
 
-# spec file name
-RPM_SPEC = $(CURDIR)/$(PKGNAME)$(OS_VER).spec
+# Yes, use awk to perform floating point math. Believe it or not, bc is not installed by default and bash only does integer math and make doesn't have a clean way to do it.
+SPEC_VER := $(strip $(shell awk 'BEGIN { print ($(OS_VER) >= 7.3) ? 7.3 : 7.2; }'))
+# version-specific spec file name
+RPM_V_SPEC = $(CURDIR)/$(PKGNAME)$(SPEC_VER).spec
+RPM_SPEC = $(RPM_TOPDIR)/SPECS/$(PKGNAME).spec
 
 ####################################################
 ## things below this line should rarely change
@@ -55,7 +60,7 @@ SRPM_OUTPUT_DIR ?= $(OUTPUT_DIR)
 
 # exhaustive list of deps for the RPM, used to determine if RPM needs to be rebuilt
 TAR_DEPS := $(CURDIR)/Makefile $(shell find $(CURDIR)/$(PKGNAME)/* -type f -or -type d | sed -e "s/ /\\\ /g")
-RPM_DEPS := $(TARBALL) $(RPM_SPEC) $(CURDIR)/Makefile
+RPM_DEPS = $(TARBALL) $(RPM_V_SPEC) $(CURDIR)/Makefile
 
 RPM_TMPDIR ?= $(ROOT_DIR)/tmp
 RPM_TOPDIR ?= $(RPM_TMPDIR)/src/redhat
@@ -64,6 +69,14 @@ RPM_BUILDROOT ?= $(RPM_TMPDIR)/rpm-buildroot
 MKDIR = test -d $(1) || mkdir -p $(1)
 
 RPMBUILD_ARGS := --define '_topdir $(RPM_TOPDIR)'  --define '_tmppath $(RPM_TMPDIR)' --buildroot $(RPM_BUILDROOT)
+
+# this hack is because I can not figure out hot the heck to get rpm query to expand a variable defined in a spec file.
+# --eval only expxands built-in macros and eval %dump is no help either.
+# In short, since we need to rebuild the src RPM whenever the OS_VER changes, we need to remove the spec file
+ifeq ($(strip $(shell test -f $(RPM_SPEC) && grep "OS_VER $(OS_VER)" $(RPM_SPEC))),)
+$(shell rm -f $(RPM_SPEC))
+endif
+
 
 define rpm-prep
 	$(call MKDIR,$(RPM_TOPDIR)/SOURCES)
@@ -122,16 +135,16 @@ $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm: $(RPM_DEPS)
 	@echo "Building $(PKGNAME) SRPM..."
 	$(call rpm-prep)
 	cp $(TARBALL) $(RPM_TOPDIR)/SOURCES/
-	echo -e "%define enable_modules $(ENABLE_MODULES)\n%define enforcing_mode $(ENFORCING_MODE)\n%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n%define separatePkgs $(SEPARATE_PKGS)\n"> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
-	cat $(RPM_SPEC) >> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
-	cd $(RPM_TOPDIR) && rpmbuild $(RPMBUILD_ARGS) -bs SPECS/$(notdir $(RPM_SPEC)) --nodeps
+	echo -e "%define enable_modules $(ENABLE_MODULES)\n%define enforcing_mode $(ENFORCING_MODE)\n%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n%define separatePkgs $(SEPARATE_PKGS)\n%define OS_VER $(OS_VER)\n"> $(RPM_SPEC)
+	cat $(RPM_V_SPEC) >> $(RPM_SPEC)
+	cd $(RPM_TOPDIR) && rpmbuild $(RPMBUILD_ARGS) -bs $(RPM_SPEC) --nodeps
 	mv  $(RPM_TOPDIR)/SRPMS/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm $(SRPM_OUTPUT_DIR)
 
 clean:
 	$(RM) -r $(RPM_TMPDIR)
 
 bare: clean
-	$(foreach f,$(shell rpm $(RPMQ_DEFS) --specfile $(RPM_SPEC)),$(RM) $(OUTPUT_DIR)/$(f)*.rpm;)
+	$(foreach f,$(shell rpm $(RPMQ_DEFS) --specfile $(RPM_V_SPEC)),$(RM) $(OUTPUT_DIR)/$(f)*.rpm;)
 	$(RM) $(TARBALL) $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm $(OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).$(ARCH).rpm
 
 .PHONY: all rpm srpm $(PKGNAME)-rpm $(PKGNAME)-srpm clean bare
