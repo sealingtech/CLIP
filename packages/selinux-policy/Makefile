@@ -60,7 +60,7 @@ SRPM_OUTPUT_DIR ?= $(OUTPUT_DIR)
 
 # exhaustive list of deps for the RPM, used to determine if RPM needs to be rebuilt
 TAR_DEPS := $(CURDIR)/Makefile $(shell find $(CURDIR)/$(PKGNAME)/* -type f -or -type d | sed -e "s/ /\\\ /g")
-RPM_DEPS = $(TARBALL) $(RPM_V_SPEC) $(CURDIR)/Makefile
+RPM_DEPS = $(TARBALL) $(RPM_V_SPEC) $(CURDIR)/Makefile $(ADDTL_DEPS)
 
 RPM_TMPDIR ?= $(ROOT_DIR)/tmp
 RPM_TOPDIR ?= $(RPM_TMPDIR)/src/redhat
@@ -75,8 +75,13 @@ RPMBUILD_ARGS := --define '_topdir $(RPM_TOPDIR)'  --define '_tmppath $(RPM_TMPD
 # In short, since we need to rebuild the src RPM whenever the OS_VER changes, we need to remove the spec file
 ifeq ($(strip $(shell test -f $(RPM_SPEC) && grep "OS_VER $(OS_VER)" $(RPM_SPEC))),)
 $(shell rm -f $(RPM_SPEC))
+$(shell rm -f $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm)
 endif
 
+# FIXME: This and the shell above can probably be fixed by extract the spec from the src rpm
+# and looking at that spec for the value.
+# For now assume that if we don't have a spec file to analyze remove the srpm.
+$(shell test -f $(RPM_SPEC) ||  rm -f $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm)
 
 define rpm-prep
 	$(call MKDIR,$(RPM_TOPDIR)/SOURCES)
