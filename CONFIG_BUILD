@@ -51,7 +51,7 @@ endif
 
 # This variable can be leveraged by sub-makes (eg in the packages/foo/Makefile).
 # if files at this top-level should trigger a rebuild.
-ADDTL_DEPS := $(CURDIR)/CONFIG_REPOS $(CURDIR)/CONFIG_BUILD
+ADDTL_DEPS := $(CURDIR)/CONFIG_REPOS $(CURDIR)/CONFIG_BUILD $(CURDIR)/Makefile
 
 # Translate the CONFIG_BUILD_* flags into BASH vars that we insert into things like a kickstart %post
 CONFIG_BUILD_BASH_VARS := export CONFIG_BUILD_ENFORCING_MODE=$(strip $(CONFIG_BUILD_ENFORCING_MODE)) CONFIG_BUILD_UNCONFINED_TOOR=$(strip $(CONFIG_BUILD_UNCONFINED_TOOR)) CONFIG_BUILD_REMEDIATE=$(strip $(CONFIG_BUILD_REMEDIATE)) ISO_VERSION=$(strip $(ISO_VERSION)) CONFIG_BUILD_ENABLE_DHCP=$(strip $(CONFIG_BUILD_ENABLE_DHCP))
