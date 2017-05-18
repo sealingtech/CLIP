@@ -54,7 +54,7 @@ MOCK_REL := rhel-$(RHEL_VER)-$(TARGET_ARCH)
 # This lets sub-makes take actions based on the full OS rver+release found in the mock repos instead of on host version
 # E.g., the SELinux policy uses different spec files based on release
 # Make sure $(YUM_CONF_ALL_FILE) is a dep for any recipes that use this feature
-export OS_VER = $(strip $(shell repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery --whatprovides -c $(YUM_CONF_ALL_FILE) "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}'))
+export OS_VER = $(strip $(shell test -f $(YUM_CONF_ALL_FILE) && $(YUM_CONF_ALL_FILE)repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery --whatprovides -c $(YUM_CONF_ALL_FILE) "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}'))
 
 # This directory contains all of our packages we will be building.
 PKG_DIR += $(CURDIR)/packages
@@ -262,7 +262,7 @@ $(1): $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1))) $(MY_REPO_DEPS) $(
 	$(call MKDIR,$(CLIP_REPO_DIR))
 	$(VERBOSE)$(MOCK) $(MOCK_ARGS) $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
 	cd $(CLIP_REPO_DIR) && $(REPO_CREATE)
-	$(VERBOSE)$(call REPO_QUERY,$(YUM_CONF_ALL_FILE)) --repoid=clip-repo |sort 1>$(CONF_DIR)/pkglist.clip-repo
+	$(VERBOSE)$(call REPO_QUERY,$(YUM_CONF_ALL_FILE)) --repoid=clip-repo 2>/dev/null|sort 1>$(CONF_DIR)/pkglist.clip-repo
 ifeq ($(ENABLE_SIGNING),y)
 	$(RPM) --addsign $(CLIP_REPO_DIR)/*
 endif
@@ -342,6 +342,10 @@ $(REPO_DIR)/$(REPO_ID)-repo/last-updated: $(CONF_DIR)/pkglist.$(REPO_ID) $(CONFI
 	test -f $(YUM_CONF_ALL_FILE) || ( cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE);\
 		echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_ALL_FILE))
 	echo -e $(YUM_CONF) >> $(YUM_CONF_ALL_FILE)
+# This lets sub-makes take actions based on the full OS rver+release found in the mock repos instead of on host version
+# E.g., the SELinux policy uses different spec files based on release
+# Make sure YUM_CONF_ALL_FILE is a dep for any recipes that use this feature
+	$(eval export OS_VER = $(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery --whatprovides -c $(YUM_CONF_ALL_FILE) "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}')))
 	$(VERBOSE)touch $(REPO_DIR)/$(REPO_ID)-repo/last-updated
 
 # If a pkglist is missing then assume we should generate one ourselves.
@@ -537,13 +541,13 @@ iso-to-disk:
 
 PHONIES += clean-mock
 clean-mock: $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
-	$(VERBOSE)$(RM) $(YUM_CONF_FILE)
-	$(VERBOSE)$(RM) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg
+	$(VERBOSE)$(RM) -f $(YUM_CONF_FILE)
+	$(VERBOSE)$(RM) -f $(MOCK_CONF_DIR)/$(MOCK_REL).cfg
 	$(VERBOSE)$(RM) -rf $(REPO_DIR)/yumcache
 
 PHONIES += bare-repos
 bare-repos: clean-mock
-	$(VERBOSE)$(RM) $(YUM_CONF_ALL_FILE)
+	$(VERBOSE)$(RM) -f $(YUM_CONF_ALL_FILE)
 	$(VERBOSE)$(RM) -rf repos/*
 
 PHONIES += clean
@@ -554,8 +558,8 @@ clean:
 PHONIES += bare
 bare: bare-repos clean
 	for pkg in $(PACKAGES); do $(MAKE) -C $(PKG_DIR)/$$pkg $@; done
-	$(VERBOSE)$(RM) $(addprefix $(SRPM_OUTPUT_DIR),$(SRPMS))
-	$(VERBOSE)$(RM) $(addprefix $(OUTPUT_DIR),$(RPMS))
+	$(VERBOSE)$(RM) -f $(addprefix $(SRPM_OUTPUT_DIR),$(SRPMS))
+	$(VERBOSE)$(RM) -f $(addprefix $(OUTPUT_DIR),$(RPMS))
 
 PHONIES += FORCE
 FORCE:
@@ -563,7 +567,7 @@ FORCE:
 # Unfortunately mock isn't exactly "parallel" friendly which sucks since we could roll a bunch of packages in parallel.
 .NOTPARALLEL:
 .SUFFIXES:
-.PHONY: $(PHONIES) $(YUM_CONF_PHONIES) 
+.PHONY: $(PHONIES) $(YUM_CONF_PHONIES)
 
 
 # END RULES
