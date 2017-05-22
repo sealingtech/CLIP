@@ -26,6 +26,13 @@ ifneq ($(QUIET),y)
 $(info Boot strapping build system...)
 endif
 
+# This lets sub-makes take actions based on the full OS rver+release found in the mock repos instead of on host version
+# E.g., the SELinux policy uses different spec files based on release
+# Make sure $(YUM_CONF_ALL_FILE) is a dep for any recipes that use this feature
+define OS_REL
+$(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery --whatprovides -c $(YUM_CONF_ALL_FILE) "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}'))
+endef
+
 # NOTE: DO NOT REMOVE THIS CHECK. RUNNING MOCK AS ROOT *WILL* BREAK THINGS.
 ifeq ($(shell id -u),0)
 $(error Never build CLIP as root! The tools used by CLIP (mock) will break things! Try again as an unprivileged user with sudo access.)
@@ -50,11 +57,6 @@ CONFIG_BUILD_DEPS := $(ROOT_DIR)/CONFIG_BUILD $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DI
 
 # MOCK_REL must be configured in MOCK_CONF_DIR/MOCK_REL.cfg
 MOCK_REL := rhel-$(RHEL_VER)-$(TARGET_ARCH)
-
-# This lets sub-makes take actions based on the full OS rver+release found in the mock repos instead of on host version
-# E.g., the SELinux policy uses different spec files based on release
-# Make sure $(YUM_CONF_ALL_FILE) is a dep for any recipes that use this feature
-export OS_VER := $(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery --whatprovides -c $(YUM_CONF_ALL_FILE) "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}'))
 
 # This directory contains all of our packages we will be building.
 PKG_DIR += $(CURDIR)/packages
@@ -461,7 +463,7 @@ srpms: $(SRPMS)
 %.src.rpm: $(MY_REPO_DEPS) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg $(YUM_CONF_ALL_FILE) $(CLIP_REPO_DIR)/exists FORCE
 	$(call CHECK_DEPS)
 	$(call MKDIR,$(SRPM_OUTPUT_DIR))
-	$(MAKE) -C $(PKG_DIR)/$(call PKG_NAME_FROM_RPM,$(notdir $@)) srpm
+	$(VERBOSE)OS_REL="$(call OS_REL)" $(MAKE) -C $(PKG_DIR)/$(call PKG_NAME_FROM_RPM,$(notdir $@)) srpm
 
 PHONIES += $(LIVECDS)
 $(LIVECDS):  $(CONFIG_BUILD_DEPS) $(RPMS)
