@@ -34,6 +34,11 @@ filesystem
 firewalld
 glibc
 grub2
+grub2-efi
+grub2-efi-modules
+grub2-tools
+efibootmgr
+shim
 hostname
 initscripts
 iproute
@@ -53,7 +58,7 @@ mdadm
 ncurses
 ntp
 ntpdate
--chrony
+chrony
 openscap
 #openscap-content
 openscap-utils
@@ -102,7 +107,7 @@ yum
 -b43-openfwwf
 -blktrace
 -bridge-utils
--dosfstools
+dosfstools
 -enchant
 -fprintd
 -fprintd-pam
