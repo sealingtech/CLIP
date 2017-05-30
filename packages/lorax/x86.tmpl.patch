@@ -1,0 +1,13 @@
+diff --git a/share/x86.tmpl b/share/x86.tmpl
+index 5a835d3..c851be6 100644
+--- a/share/x86.tmpl
++++ b/share/x86.tmpl
+@@ -26,7 +26,7 @@ install boot/memtest* ${BOOTDIR}/memtest
+ ## configure bootloader
+ replace @VERSION@ ${product.version} ${BOOTDIR}/grub.conf ${BOOTDIR}/isolinux.cfg ${BOOTDIR}/*.msg
+ replace @PRODUCT@ '${product.name}'  ${BOOTDIR}/grub.conf ${BOOTDIR}/isolinux.cfg ${BOOTDIR}/*.msg
+-replace @ROOT@ 'inst.stage2=hd:LABEL=${isolabel|udev}' ${BOOTDIR}/isolinux.cfg
++replace @ROOT@ 'ks=hd:LABEL=${isolabel|udev}:/${product.name}.ks inst.stage2=hd:LABEL=${isolabel|udev}' ${BOOTDIR}/isolinux.cfg
+ 
+ ## install kernels
+ mkdir ${KERNELDIR}

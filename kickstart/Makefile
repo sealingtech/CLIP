@@ -35,7 +35,7 @@ BUILD_DIR ?= $(TMP_DIR)/$(NAME)
 SUPPORT_DIR ?= $(ROOT_DIR)/support
 OUTPUT_DIR ?= $(ROOT_DIR)
 
-INST_KS := $(BUILD_DIR)/$(NAME)-inst.ks
+INST_KS := $(BUILD_DIR)/$(NAME).ks
 LIVE_KS := $(BUILD_DIR)/$(NAME)-live.ks
 AWS_KS  := $(BUILD_DIR)/$(NAME)-aws.ks
 
@@ -101,10 +101,6 @@ iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) setup-inst-ks check-volume-id
 	@# THis "hack" is b/c pungi does absolutely nothing to %includes to get the files into the ISO
 	$(VERBOSE)sed -i 's;%include\s\+\(.*\);%include /mnt/install/repo/\1;' $(PUNGI_OS_DIR)$(notdir $(INST_KS))
 	$(VERBOSE)cp -a $(INC) $(PUNGI_OS_DIR)
-	$(VERBOSE)sudo sed -i -e "s/^label linux$$/label $(NAME)/" \
-	       -e "s/append initrd=initrd.img\(.*\)$$/append initrd=initrd.img \1 ks=cdrom:$(notdir $(INST_KS)) text/" \
-	       -e "s/or upgrade an existing system/$(NAME)/" \
-	$(PUNGI_OS_DIR)/isolinux/isolinux.cfg
 	@echo "Building ISO with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
 	$(VERBOSE)cd $(BUILD_DIR);sudo $(RUN_PUNGI) "$(PUNGI_PYTHONPATH)" $(PUNGI_ARGS) -I -c $(INST_KS)

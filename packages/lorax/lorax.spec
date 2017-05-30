@@ -10,6 +10,9 @@ License:        GPLv2+
 URL:            http://git.fedorahosted.org/git/?p=lorax.git
 Source0:        https://fedorahosted.org/releases/l/o/%{name}/%{name}-%{version}.tar.gz
 Patch0: setfiles-fixes.patch
+Patch1: x86.tmpl.patch
+Patch2: efi.tmpl.patch
+Patch3: buildstamp.patch
 
 BuildRequires:  python2-devel
 
@@ -78,6 +81,9 @@ Anaconda's image install feature.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
 
 %build
 

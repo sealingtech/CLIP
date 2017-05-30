@@ -1,0 +1,52 @@
+diff -purN a/src/pylorax/__init__.py b/src/pylorax/__init__.py
+--- a/src/pylorax/__init__.py	2017-05-30 14:18:39.195752739 -0400
++++ b/src/pylorax/__init__.py	2017-05-30 14:26:17.672511555 -0400
+@@ -255,7 +255,15 @@ class Lorax(BaseLoraxClass):
+         rb.install()
+ 
+         # write .buildstamp
+-        buildstamp = BuildStamp(self.product.name, self.product.version,
++        build_name = rb.get_release().lower()
++        build_name, _suffix = build_name.split('-', 1)
++        if build_name == "centos":
++            build_name = "CentOS"
++        elif build_name == "redhat":
++            build_name = "Red Hat Enterprise"
++        else:
++            build_name = "Fedora"
++        buildstamp = BuildStamp(build_name, self.product.version,
+                                 self.product.bugurl, self.product.isfinal, self.arch.buildarch)
+ 
+         buildstamp.write(joinpaths(self.inroot, ".buildstamp"))
+diff -purN a/src/pylorax/treebuilder.py b/src/pylorax/treebuilder.py
+--- a/src/pylorax/treebuilder.py	2017-05-30 14:18:39.196752749 -0400
++++ b/src/pylorax/treebuilder.py	2017-05-30 14:31:33.763798507 -0400
+@@ -83,7 +83,7 @@ class RuntimeBuilder(object):
+         self.add_template_vars = add_template_vars or {}
+         self._runner.defaults = self.vars
+ 
+-    def _install_branding(self):
++    def get_release (self):
+         release = None
+         for pkg in self.yum.whatProvides('/etc/system-release', None, None):
+             if pkg.name.startswith('generic'):
+@@ -94,14 +94,17 @@ class RuntimeBuilder(object):
+ 
+         if not release:
+             logger.error('could not get the release')
+-            return
++            return None
+ 
+         # release
+         logger.info('got release: %s', release)
+-        self._runner.installpkg(release)
++        return release
+ 
+         # logos
++    def _install_branding(self):
++        release = self.get_release()
+         release, _suffix = release.split('-', 1)
++        self._runner.installpkg(release)
+         self._runner.installpkg('%s-logos' % release)
+ 
+     def install(self):
