@@ -1,26 +1,13 @@
+# We have three approaches here:
+# 1. don't fix things that are broken - obviously the wrong choice in general
+# 2. fix it by shipping a custom profile that disables the broken stuff
+# which is bad b/c then we're carrying custom profiles
+# 3. fix it for now and wait until the tools make it easier to disable 
+# individual checks and remedidation:
+# https://github.com/OpenSCAP/openscap/issues/633
+# We'll go with #3 and wait for the tools to catch up
+
 systemctl disable kdump
-
-# also these PAM fixes aren't being remediated automatically
-for file in /etc/pam.d/system-auth /etc/pam.d/password-auth-ac; do
-        sed -i -e 's/^auth\s\+required\s\+pam_faillock.*/auth required pam_faillock.so preauth silent deny=3 unlock_time=604800 fail_interval=900/' $file
-        sed -i -e 's/^auth\s\+\[default.*pam_faillock.*/auth [default=die] pam_faillock.so authfail deny=3 unlock_time=604800 fail_interval=900/'  $file
-        # this already appears to be the default... false positive probably
-        #sed -i -e 's/^account.*pam_unix.*/account required pam_faillock.so \n&/' $file
-
-done
-
-if grep -q "maxrepeat" /etc/pam.d/system-auth; then
-        sed -i --follow-symlink "s/\(maxrepeat *= *\).*/\13/" /etc/pam.d/system-auth
-else
-        sed -i --follow-symlink "s/\(.*pam_cracklib\.so.*\)/\1 maxrepeat=3/" /etc/pam.d/system-auth
-fi
-
-# SSG fix corrupts /etc/issue*
-cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
-| fold -sw 80 > /etc/issue.net
-cp /etc/issue.net /etc/issue
-
-systemctl mask ctrl-alt-del.target
 
 # https://github.com/OpenSCAP/scap-security-guide/issues/1435
 sed -i -e 's/cbcMACs/cbc\nMACS/' /etc/ssh/sshd_config 
@@ -29,3 +16,9 @@ sed -i -e 's/cbcMACs/cbc\nMACS/' /etc/ssh/sshd_config
 systemctl mask firewalld
 systemctl enable iptables
 systemctl enable ip6tables
+
+# re-enable USB
+if [ -f /etc/default/grub ]; then
+	sed -i "s/nousb//g" /etc/default/grub
+	grubby --update-kernel=ALL --remove-args=nousb
+fi
