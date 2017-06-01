@@ -22,6 +22,7 @@ chkconfig
 coreutils
 cpio
 cronie
+cryptsetup
 crontabs
 curl
 dbus
@@ -30,6 +31,7 @@ device-mapper
 dmraid
 dracut
 e2fsprogs
+ethtool
 filesystem
 firewalld
 glibc
