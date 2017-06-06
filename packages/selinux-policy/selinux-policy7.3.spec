@@ -74,11 +74,10 @@ SELinux %2 policy for %1 \
 echo %1.pp >> %{_usr}/share/selinux/%2/modules.lst \
 semodule -n -s %2 -i %{_usr}/share/selinux/%2/%1.pp \
 %preun %2-%1 \
-semodule -n -s %2 -d %1 2>/dev/null \
+semodule -n -s %2 -d %1 -X 100 2>/dev/null \
 if /usr/sbin/selinuxenabled ; then \
     /usr/sbin/load_policy \
 fi;exit 0
-
 
 %{expand:%( for f in %{separatePkgs}; do echo "%%genSeparatePolRPM $f mcs"; done)}
 
@@ -86,12 +85,12 @@ fi;exit 0
 
 %define installCmds() \
 make UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}  %{separatePkgs}" SEMOD_EXP="/usr/bin/semodule_expand" base.pp \
-make %{?_smp_mflags} validate UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}  %{separatePkgs}" SEMOD_EXP="/usr/bin/semodule_expand" modules \
-make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}  %{separatePkgs}" install \
+make %{?_smp_mflags} validate UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" SEMOD_EXP="/usr/bin/semodule_expand" modules \
+make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" install \
 #make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules} %{separatePkgs}" install-appconfig \
 mkdir -p %{buildroot}%{_usr}/share/selinux/%1/ \
 %{__cp} *.pp %{buildroot}/%{_usr}/share/selinux/%1/ \
-make UNK_PERMS=%4 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=n DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} MLS_CATS=1024 MCS_CATS=1024 SEMODULE="semodule -p %{buildroot} -X 100 " load \
+make UNK_PERMS=%4 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=n DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} MLS_CATS=1024 MCS_CATS=1024 SEMODULE="semodule -p %{buildroot} -X 100 " APPS_MODS="%{enable_modules}" load \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/active/modules/disabled \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/logins \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs \
@@ -126,6 +125,7 @@ SORTED_PKGS=`for p in %{separatePkgs}; do echo $p | awk '{ print length($0) " " 
 for f in ${SORTED_PKGS}; do grep $f\.pp\ %{buildroot}/%{_usr}/share/selinux/%1/modules.lst || (echo "failed to update module.lst for module $f" && exit -1); sed -i -e "s/$f.pp//g" %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done \
 mkdir -p %{buildroot}/%{_sysconfdir}/selinux/%1/active/modules/100 \
 mkdir -p %{buildroot}/%{_sysconfdir}/selinux/%1/active/modules/disabled \
+/sbin/semodule -s %1 -p %{buildroot} -X 100 -r %{separatePkgs} \
 /usr/bin/sha512sum %{buildroot}%{_sysconfdir}/selinux/%1/policy/policy.%{POLICYVER} | cut -d' ' -f 1 > %{buildroot}%{_sysconfdir}/selinux/%1/.policy.sha512; \
 rm -rf %{buildroot}%{_sysconfdir}/selinux/%1/contexts/netfilter_contexts  \
 rm -rf %{buildroot}%{_sysconfdir}/selinux/%1/active/policy.kern \
@@ -133,7 +133,7 @@ ln -sf /etc/selinux/%1/policy/policy.%{POLICYVER}  %{buildroot}%{_sysconfdir}/se
 rm -rf %{buildroot}/usr/share/selinux/devel/include
 %nil
 
-%global excludes() %(for f in %{separatePkgs}; do echo "%exclude %{_usr}/share/selinux/%1/${f}.pp"; done )
+%global excludes() %(for f in %{separatePkgs}; do echo -e "%exclude %{_usr}/share/selinux/%1/${f}.pp"; done )
  
 %define fileList() \
 %defattr(-,root,root) \
