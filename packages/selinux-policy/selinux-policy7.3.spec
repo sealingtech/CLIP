@@ -193,30 +193,6 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %dir %{_usr}/share/selinux/%1/include \
 %{_usr}/share/selinux/%1/include/*
 
-
-%define saveFileContext() \
-if [ -s /etc/selinux/config ]; then \
-     . %{_sysconfdir}/selinux/config; \
-     FILE_CONTEXT=%{_sysconfdir}/selinux/%1/contexts/files/file_contexts; \
-     if [ "${SELINUXTYPE}" = %1 -a -f ${FILE_CONTEXT} ]; then \
-        [ -f ${FILE_CONTEXT}.pre ] || cp -f ${FILE_CONTEXT} ${FILE_CONTEXT}.pre; \
-     fi \
-fi
-
-#%define loadpolicy() \
-#. %{_sysconfdir}/selinux/config; \
-#( cd /usr/share/selinux/%1; semodule -n -b base.pp -i %2 -s %1 2>&1 ); \
-
-%define relabel() \
-. %{_sysconfdir}/selinux/config; \
-FILE_CONTEXT=%{_sysconfdir}/selinux/%1/contexts/files/file_contexts; \
-selinuxenabled; \
-if [ $? = 0  -a "${SELINUXTYPE}" = %1 -a -f ${FILE_CONTEXT}.pre ]; then \
-     fixfiles -C ${FILE_CONTEXT}.pre restore; \
-     restorecon -R /root /var/log /var/run 2> /dev/null; \
-     rm -f ${FILE_CONTEXT}.pre; \
-fi; 
-
 %description
 SELinux Reference Policy - modular.
 
@@ -310,6 +286,53 @@ if [ $1 = 0 ]; then
 fi
 exit 0
 
+%define relabel() \
+. %{_sysconfdir}/selinux/config; \
+FILE_CONTEXT=%{_sysconfdir}/selinux/%1/contexts/files/file_contexts; \
+/usr/sbin/selinuxenabled; \
+if [ $? = 0  -a "${SELINUXTYPE}" = %1 -a -f ${FILE_CONTEXT}.pre ]; then \
+     /sbin/fixfiles -C ${FILE_CONTEXT}.pre restore 2> /dev/null; \
+     rm -f ${FILE_CONTEXT}.pre; \
+fi; \
+if /sbin/restorecon -e /run/media -R /root /var/log /var/run /etc/passwd* /etc/group* /etc/*shadow* 2> /dev/null;then \
+    continue; \
+fi; \
+
+
+%define preInstall() \
+if [ $1 -ne 1 ] && [ -s /etc/selinux/config ]; then \
+     . %{_sysconfdir}/selinux/config; \
+     FILE_CONTEXT=%{_sysconfdir}/selinux/%1/contexts/files/file_contexts; \
+     if [ "${SELINUXTYPE}" = %1 -a -f ${FILE_CONTEXT} ]; then \
+        [ -f ${FILE_CONTEXT}.pre ] || cp -f ${FILE_CONTEXT} ${FILE_CONTEXT}.pre; \
+     fi; \
+     touch /etc/selinux/%1/.rebuild; \
+     if [ -e /etc/selinux/%1/.policy.sha512 ]; then \
+        POLICY_FILE=`ls /etc/selinux/%1/policy/policy.* | sort | head -1` \
+        sha512=`sha512sum $POLICY_FILE | cut -d ' ' -f 1`; \
+        checksha512=`cat /etc/selinux/%1/.policy.sha512`; \
+        if [ "$sha512" == "$checksha512" ] ; then \
+                rm /etc/selinux/%1/.rebuild; \
+        fi; \
+   fi; \
+fi;
+
+%define postInstall() \
+. %{_sysconfdir}/selinux/config; \
+#TODO: (cd /etc/selinux/%2/modules/active/modules; rm -f vbetool.pp l2tpd.pp shutdown.pp amavis.pp clamav.pp gnomeclock.pp nsplugin.pp matahari.pp xfs.pp kudzu.pp kerneloops.pp execmem.pp openoffice.pp ada.pp tzdata.pp hal.pp hotplug.pp howl.pp java.pp mono.pp moilscanner.pp gamin.pp audio_entropy.pp audioentropy.pp iscsid.pp polkit_auth.pp polkit.pp rtkit_daemon.pp ModemManager.pp telepathysofiasip.pp ethereal.pp passanger.pp qemu.pp qpidd.pp pyzor.pp razor.pp pki-selinux.pp phpfpm.pp consoletype.pp ctdbd.pp fcoemon.pp isnsd.pp rgmanager.pp corosync.pp aisexec.pp pacemaker.pp pkcsslotd.pp smstools.pp ) \
+if [ -e /etc/selinux/%2/.rebuild ]; then \
+   rm /etc/selinux/%2/.rebuild; \
+   /usr/sbin/semodule -B -n -s %2; \
+fi; \
+[ "${SELINUXTYPE}" == "%2" ] && selinuxenabled && load_policy; \
+if [ %1 -eq 1 ]; then \
+   /sbin/restorecon -R /root /var/log /run /etc/passwd* /etc/group* /etc/*shadow* 2> /dev/null; \
+else \
+%relabel %2 \
+fi; \
+echo -n " -F " > /.autorelabel 
+
+
 %package mcs
 Summary: SELinux selinux-policy base policy
 Provides: selinux-policy-base = %{version}-%{release}
@@ -326,27 +349,11 @@ Obsoletes: selinux-policy-targeted, selinux-policy-minimum, selinux-policy-mls
 MCS policy
 
 %pre mcs
-%saveFileContext mcs
+%preInstall mcs
 
 %post mcs
-sed -e 's/^SELINUXTYPE=.*/SELINUXTYPE=mcs/' -i /etc/selinux/config
-# if first time update booleans.local needs to be copied to sandbox
-[ -f /etc/selinux/mcs/booleans.local ] && mv /etc/selinux/mcs/booleans.local /etc/selinux/mcs/active/modules/
-[ -f /etc/selinux/mcs/seusers ] && cp -f /etc/selinux/mcs/seusers /etc/selinux/mcs/active/seusers
-
-#packages=`cat /usr/share/selinux/mcs/modules.lst`
-#if [ $1 -eq 1 ]; then
-   #%loadpolicy mcs $packages
-#   semodule -R
-#   restorecon -R /root /var/log /var/run 2> /dev/null
-#else
-#   semodule -n -s mcs 2>/dev/null
-   #%loadpolicy mcs $packages
-#   %relabel mcs
-#fi
-echo "-F" > /.autorelabel
-rm -f /usr/share/selinux/devel/include
-ln -s /usr/share/selinux/mcs/include /usr/share/selinux/devel
+%postInstall $1 mcs
+sepolgen-ifgen
 exit 0
 
 %files mcs 
@@ -371,32 +378,16 @@ Obsoletes: selinux-policy-targeted, selinux-policy-minimum, selinux-policy-mls
 Stabdard MLS policy
 
 %pre mls 
-%saveFileContext mls
+%preInstall mls
 
 %post mls 
-sed -e 's/^SELINUXTYPE=.*/SELINUXTYPE=mls/' -i /etc/selinux/config
-# if first time update booleans.local needs to be copied to sandbox
-[ -f /etc/selinux/mls/booleans.local ] && mv /etc/selinux/mls/booleans.local /etc/selinux/mls/active/modules/
-[ -f /etc/selinux/mls/seusers ] && cp -f /etc/selinux/mls/seusers /etc/selinux/mls/active/seusers
-#semodule -n -s mls 2>/dev/null
-#packages=`cat /usr/share/selinux/mls/modules.lst`
-#%loadpolicy mls $packages
-semodule -R
-rm -f /usr/share/selinux/devel/include
-ln -s /usr/share/selinux/mls/include /usr/share/selinux/devel
-
-if [ $1 -eq 1 ]; then
-   restorecon -R /root /var/log /var/run 2> /dev/null
-else
-%relabel mls
-fi
+%postInstall $1 mls
+sepolgen-ifgen
 exit 0
 
 %files mls
 %defattr(-,root,root,-)
 %fileList mls
-
 %excludes  mls
-
 
 %changelog
