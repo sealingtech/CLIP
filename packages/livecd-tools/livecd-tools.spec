@@ -19,6 +19,7 @@ URL: http://git.fedorahosted.org/git/livecd
 Source0: http://fedorahosted.org/releases/l/i/livecd/%{name}-%{version}.tar.bz2
 Patch0: relabel-with-restorecon.patch
 Patch1: add-live-sata-mods.patch
+Patch2: disable-mac-iso.patch
 # Drop the requirements for grub2-efi and shim: breaks 32-bit compose
 # and not needed as we have them in comps
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -79,6 +80,7 @@ like live image or appliances.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %build
 make

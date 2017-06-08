@@ -1,0 +1,36 @@
+diff -purN a/imgcreate/live.py b/imgcreate/live.py
+--- a/imgcreate/live.py	2017-06-08 11:27:06.350384155 -0400
++++ b/imgcreate/live.py	2017-06-08 11:28:51.303473391 -0400
+@@ -242,11 +242,12 @@ class LiveImageCreatorBase(LoopImageCrea
+         # XXX-BCL: does this need --label?
+         subprocess.call(["mkefiboot", isodir + "/EFI/BOOT",
+                          isodir + "/isolinux/efiboot.img"])
+-        subprocess.call(["mkefiboot", "-a", isodir + "/EFI/BOOT",
+-                         isodir + "/isolinux/macboot.img", "-l", self.product,
+-                         "-n", "/usr/share/pixmaps/bootloader/fedora-media.vol",
+-                         "-i", "/usr/share/pixmaps/bootloader/fedora.icns",
+-                         "-p", self.product])
++# SRS: hfsplus-tools is not available in RHEL proper, dont gen mac EFI image
++#        subprocess.call(["mkefiboot", "-a", isodir + "/EFI/BOOT",
++#                         isodir + "/isolinux/macboot.img", "-l", self.product,
++#                         "-n", "/usr/share/pixmaps/bootloader/fedora-media.vol",
++#                         "-i", "/usr/share/pixmaps/bootloader/fedora.icns",
++#                         "-p", self.product])
+ 
+     def _create_bootconfig(self):
+         """Configure the image so that it's bootable."""
+@@ -396,10 +397,11 @@ class x86LiveImageCreator(LiveImageCreat
+         if os.path.exists(isodir + "/isolinux/efiboot.img"):
+             options.extend([ "-eltorito-alt-boot",
+                              "-e", "isolinux/efiboot.img",
+-                             "-no-emul-boot",
+-                             "-eltorito-alt-boot",
+-                             "-e", "isolinux/macboot.img",
+                              "-no-emul-boot"])
++# SRS: disable mac boots - hfsplus-tools isnt in RHEL proper
++#                             "-eltorito-alt-boot",
++#                             "-e", "isolinux/macboot.img",
++#                             "-no-emul-boot"])
+         return options
+ 
+     def _get_required_packages(self):

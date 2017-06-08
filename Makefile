@@ -245,14 +245,19 @@ define MAKE_LIVE_TOOLS
 endef
 
 define MAKE_PUNGI
-	$(MAKE) pungi-rpm lorax-rpm; \
+	$(MAKE) pungi-rpm; \
 	mkdir -p $(TOOLS_DIR); \
 	cp $(CLIP_REPO_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm $(TOOLS_DIR); \
-	cp $(CLIP_REPO_DIR)/lorax-$(LORAX_VERSION).noarch.rpm $(TOOLS_DIR); \
 	rpm2cpio $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm > $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm.cpio; \
+	cd $(TOOLS_DIR) && cpio -idv < pungi-$(PUNGI_VERSION).noarch.rpm.cpio
+endef
+
+define MAKE_LORAX
+	$(MAKE) lorax-rpm; \
+	mkdir -p $(TOOLS_DIR); \
+	cp $(CLIP_REPO_DIR)/lorax-$(LORAX_VERSION).noarch.rpm $(TOOLS_DIR); \
 	rpm2cpio $(TOOLS_DIR)/lorax-$(LORAX_VERSION).noarch.rpm > $(TOOLS_DIR)/lorax-$(LORAX_VERSION).noarch.rpm.cpio; \
-	cd $(TOOLS_DIR) && cpio -idv < pungi-$(PUNGI_VERSION).noarch.rpm.cpio \
-	&& cpio -idv < lorax-$(LORAX_VERSION).noarch.rpm.cpio;
+	cd $(TOOLS_DIR); cpio -idv < lorax-$(LORAX_VERSION).noarch.rpm.cpio;
 endef
 
 ######################################################
@@ -469,12 +474,14 @@ PHONIES += $(LIVECDS)
 $(LIVECDS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_LIVE_TOOLS)
+	$(call MAKE_LORAX)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-live-iso/\1/'`" live-iso
 
 PHONIES += $(INSTISOS)
 $(INSTISOS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_PUNGI)
+	$(call MAKE_LORAX)
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
 
 $(EC2_AMI_TOOLS_ZIP):
