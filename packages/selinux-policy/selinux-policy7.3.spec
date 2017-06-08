@@ -330,6 +330,8 @@ if [ %1 -eq 1 ]; then \
 else \
 %relabel %2 \
 fi; \
+rm -f /usr/share/selinux/devel/include \
+ln -s /usr/share/selinux/%2/include /usr/share/selinux/devel \
 echo -n " -F " > /.autorelabel 
 
 
