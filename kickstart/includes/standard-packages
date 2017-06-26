@@ -70,6 +70,7 @@ parted
 passwd
 perl
 plymouth
+plymouth-system-theme
 policycoreutils
 policycoreutils-newrole
 policycoreutils-python
@@ -117,7 +118,7 @@ dosfstools
 -gnome-icon-theme
 -gtk2
 -gtk3
--harfbuzz
+harfbuzz
 -hicolor-icon-theme
 -hunspell
 -libreport
@@ -138,7 +139,7 @@ dosfstools
 -mtr
 -nano
 -ntsysv
--pango
+pango
 -pinfo
 -pm-utils
 -postfix
@@ -147,7 +148,7 @@ dosfstools
 -python-blivet
 -rdate
 -readahead
--rhnsd
+rhnsd
 -selinux-policy-targeted
 -setserial
 -setuptool
@@ -164,7 +165,7 @@ dosfstools
 -yelp
 -yelp-libs
 -yelp-xsl
--yum-rhn-plugin
+yum-rhn-plugin
 
 -aic94xx-firmware
 -alsa-firmware
