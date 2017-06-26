@@ -43,7 +43,11 @@ TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
 # Since the policy structure changes between 7.2 and 7.3, we need to decide which spec to use
 # <3 awk
 ifeq ($(OS_REL),)
-override OS_REL := $(shell rpm -q --provides $$(rpm -q --whatprovides "system-release(releasever)") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}')
+ifneq ($(shell man semodule |grep '\-\-cil'),)
+override OS_REL := 7.3
+else
+override OS_REL := 7.2
+endif
 endif
 
 # Yes, use awk to perform floating point math. Believe it or not, bc is not installed by default and bash only does integer math and make doesn't have a clean way to do it.
