@@ -34,7 +34,7 @@ ARCH ?= noarch
 # Specify the type of policy to build.
 # Currently either mcs or mls.
 # Only supported for CIL builds at the moment (RHEL 7.3 and some later 7.2.x releases).
-TYPE := mcs
+CONFIG_BUILD_SELINUX_POL_TYPE ?= mcs
 
 # Policy modules listed here will be built as separate RPMs.
 # e.g., clip-selinux-policy-apache
@@ -149,7 +149,7 @@ $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm: $(RPM_DEPS)
 	@echo "Building $(PKGNAME) SRPM..."
 	$(call rpm-prep)
 	cp $(TARBALL) $(RPM_TOPDIR)/SOURCES/
-	echo -e "%define type $(TYPE)\n%define enable_modules $(ENABLE_MODULES)\n%define enforcing_mode $(ENFORCING_MODE)\n%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n%define separatePkgs $(SEPARATE_PKGS)\n%define OS_REL $(OS_REL)\n"> $(RPM_SPEC)
+	echo -e "%define type $(CONFIG_BUILD_SELINUX_POL_TYPE)\n%define enable_modules $(ENABLE_MODULES)\n%define enforcing_mode $(ENFORCING_MODE)\n%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n%define separatePkgs $(SEPARATE_PKGS)\n%define OS_REL $(OS_REL)\n"> $(RPM_SPEC)
 	cat $(RPM_V_SPEC) >> $(RPM_SPEC)
 	cd $(RPM_TOPDIR) && rpmbuild $(RPMBUILD_ARGS) -bs $(RPM_SPEC) --nodeps
 	mv  $(RPM_TOPDIR)/SRPMS/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm $(SRPM_OUTPUT_DIR)
