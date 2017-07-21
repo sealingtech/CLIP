@@ -22,9 +22,8 @@ Provides: selinux-policy-devel
 
 %description 
 This package contains the base components common across policy types.  In
-addition to this package, you will want to choose from:
-selinux-policy-mcs (an MCS policy)
-selinux-policy-mls (an MLS policy)
+addition to this package, you will also get %{type}-specific RPMs.
+selinux-policy-%{type}
 
 %files 
 %defattr(-,root,root,-)
@@ -79,9 +78,7 @@ if /usr/sbin/selinuxenabled ; then \
     /usr/sbin/load_policy \
 fi;exit 0
 
-%{expand:%( for f in %{separatePkgs}; do echo "%%genSeparatePolRPM $f mcs"; done)}
-
-%{expand:%( for f in %{separatePkgs}; do echo "%%genSeparatePolRPM $f mls"; done)}
+%{expand:%( for f in %{separatePkgs}; do echo "%%genSeparatePolRPM $f %{type}"; done)}
 
 %define installCmds() \
 make UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} POLY=%4 MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}  %{separatePkgs}" SEMOD_EXP="/usr/bin/semodule_expand" base.pp \
@@ -211,17 +208,17 @@ touch %{buildroot}%{_sysconfdir}/selinux/config
 touch %{buildroot}%{_sysconfdir}/sysconfig/selinux
 
 # Always create policy module package directories
-mkdir -p %{buildroot}%{_usr}/share/selinux/{mcs,mls,modules}/
+mkdir -p %{buildroot}%{_usr}/share/selinux/%{type}/
+mkdir -p %{buildroot}%{_usr}/share/selinux/modules/
 
 # Install devel
 make %{?_smp_mflags} clean
 # installCmds NAME TYPE DIRECT_INITRC POLY UNKNOWN
-%installCmds mcs mcs n y deny
-%installCmds mls mls n y deny
+%installCmds %{type} %{type}  n y deny
 
-make %{?_smp_mflags} UNK_PERMS=deny NAME=mcs TYPE=mcs DISTRO=%{distro} UBAC=y DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name}-%{version} POLY=y MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" install-headers install-docs
+make %{?_smp_mflags} UNK_PERMS=deny NAME=%{type} TYPE=%{type}  DISTRO=%{distro} UBAC=y DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name}-%{version} POLY=y MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" install-headers install-docs
 cp -R  man/* %{buildroot}%{_mandir}
-make UNK_PERMS=allow NAME=mls TYPE=mcs DISTRO=%{distro} UBAC=n DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name} MLS_CATS=1024 MCS_CATS=1024 install-headers
+make UNK_PERMS=allow NAME=%{type} TYPE=%{type} DISTRO=%{distro} UBAC=n DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name} MLS_CATS=1024 MCS_CATS=1024 install-headers
 mkdir %{buildroot}%{_usr}/share/selinux/devel/
 install -m 644 selinux_config/Makefile.devel %{buildroot}%{_usr}/share/selinux/devel/Makefile
 install -m 644 doc/example.* %{buildroot}%{_usr}/share/selinux/devel/
@@ -263,12 +260,12 @@ SELINUX=%{enforcing_mode}
 # SELINUXTYPE= can take one of these two values:
 #     mcs - standard Multi Category security policy,
 #     mls - Multi Level Security security policy.
-SELINUXTYPE=mcs
+SELINUXTYPE=%{type}
 
 " > /etc/selinux/config
 fi
 
-sed -e 's/^SELINUXTYPE=.*/SELINUXTYPE=mcs/' -i /etc/selinux/config
+sed -e 's/^SELINUXTYPE=.*/SELINUXTYPE=%{type}/' -i /etc/selinux/config
 
 ln -sf /etc/selinux/config /etc/sysconfig/selinux 
 restorecon /etc/selinux/config 2> /dev/null || :
@@ -335,7 +332,7 @@ ln -s /usr/share/selinux/%2/include /usr/share/selinux/devel \
 echo -n " -F " > /.autorelabel 
 
 
-%package mcs
+%package %{type}
 Summary: SELinux selinux-policy base policy
 Provides: selinux-policy-base = %{version}-%{release}
 Group: System Environment/Base
@@ -347,49 +344,21 @@ Conflicts:  audispd-plugins <= 1.7.7-1
 Conflicts:  seedit
 Obsoletes: selinux-policy-targeted, selinux-policy-minimum, selinux-policy-mls 
 
-%description mcs 
-MCS policy
+%description %{type}
+SELinux %{type} policy
 
-%pre mcs
-%preInstall mcs
+%pre %{type}
+%preInstall %{type}
 
-%post mcs
-%postInstall $1 mcs
+%post %{type}
+%postInstall $1 %{type}
 sepolgen-ifgen
 exit 0
 
-%files mcs 
+%files %{type} 
 %defattr(-,root,root,-)
-%fileList mcs
+%fileList %{type}
 
-%excludes mcs
-
-%package mls 
-Summary: SELinux mls base policy
-Group: System Environment/Base
-Provides: selinux-policy-base = %{version}-%{release}
-Requires: policycoreutils-newrole >= %{POLICYCOREUTILSVER} setransd
-Requires(pre): policycoreutils >= %{POLICYCOREUTILSVER}
-Requires(pre): coreutils
-Requires(pre): selinux-policy = %{version}-%{release}
-Requires: selinux-policy = %{version}-%{release}
-Conflicts:  seedit
-Obsoletes: selinux-policy-targeted, selinux-policy-minimum, selinux-policy-mls 
-
-%description mls 
-Stabdard MLS policy
-
-%pre mls 
-%preInstall mls
-
-%post mls 
-%postInstall $1 mls
-sepolgen-ifgen
-exit 0
-
-%files mls
-%defattr(-,root,root,-)
-%fileList mls
-%excludes  mls
+%excludes %{type}
 
 %changelog
