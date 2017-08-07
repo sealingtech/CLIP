@@ -90,6 +90,8 @@ REPO_LINES ?= repo --name=centos --baseurl=http://mirror.centos.org/centos/$(CEN
 
 SETUP_DEPS := $(CURDIR)/../Makefile $(KS) $(shell find $(CURDIR)/../includes -type f) $(CURDIR)/variant_pkgs.mk $(shell find $(CLIP_REPO_DIRS) $(CLIP_REPO_DIR) -name repomd.xml)
 
+INSTALL_MNT_PATH := /run/install
+
 all: iso live-iso setup-ks
 
 
@@ -99,7 +101,7 @@ iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) setup-inst-ks check-volume-id
 	$(VERBOSE)cd $(BUILD_DIR); sudo $(RUN_PUNGI) "$(PUNGI_PYTHONPATH)" $(PUNGI_ARGS) -GCB -c "$(INST_KS)"
 	@echo "Fixing the boot menu..."
 	@# THis "hack" is b/c pungi does absolutely nothing to %includes to get the files into the ISO
-	$(VERBOSE)sed -i 's;%include\s\+\(.*\);%include /mnt/install/repo/\1;' $(PUNGI_OS_DIR)$(notdir $(INST_KS))
+	$(VERBOSE)sed -i 's;%include\s\+\(.*\);%include $(INSTALL_MNT_PATH)/repo/\1;' $(PUNGI_OS_DIR)$(notdir $(INST_KS))
 	$(VERBOSE)cp -a $(INC) $(PUNGI_OS_DIR)
 	@echo "Building ISO with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
