@@ -14,7 +14,7 @@ rhn_subscribe() {
 
 
 set_selinux_permissive() {
-	#Make eselinux permissive due to requirements of build tools
+	#Make selinux permissive due to requirements of build tools
 	/usr/sbin/setenforce 0
 	/bin/sed -i -e 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 }
@@ -169,7 +169,8 @@ fi
 
 # install packages that we need but aren't commonly present on default RHEL installs.
 LIVECD_TOOL_DEPS="sssd-client system-config-keyboard"
-for i in createrepo rpm-build make anaconda policycoreutils-python ruby squashfs-tools ${LIVECD_TOOL_DEPS}; do
+INSTALL_ISO_DEPS="python-mako genisoimage syslinux"
+for i in createrepo rpm-build make anaconda policycoreutils-python ruby squashfs-tools ${LIVECD_TOOL_DEPS} ${INSTALL_ISO_DEPS}; do
 	/bin/rpm -q "$i" >/dev/null || /usr/bin/yum install -y $i
 done;
 
