@@ -1,8 +1,7 @@
-diff --git a/share/x86.tmpl b/share/x86.tmpl
-index 5a835d3..c851be6 100644
---- a/share/x86.tmpl
-+++ b/share/x86.tmpl
-@@ -26,7 +26,7 @@ install boot/memtest* ${BOOTDIR}/memtest
+diff -ur orig/share/x86.tmpl new/share/x86.tmpl
+--- orig/share/x86.tmpl	2017-08-09 12:41:55.655606547 -0400
++++ new/share/x86.tmpl	2017-08-09 12:45:52.603042218 -0400
+@@ -26,7 +26,7 @@
  ## configure bootloader
  replace @VERSION@ ${product.version} ${BOOTDIR}/grub.conf ${BOOTDIR}/isolinux.cfg ${BOOTDIR}/*.msg
  replace @PRODUCT@ '${product.name}'  ${BOOTDIR}/grub.conf ${BOOTDIR}/isolinux.cfg ${BOOTDIR}/*.msg
@@ -11,3 +10,12 @@ index 5a835d3..c851be6 100644
  
  ## install kernels
  mkdir ${KERNELDIR}
+@@ -64,7 +64,7 @@
+ ## WHeeeeeeee, EFI.
+ ## We could remove the basearch restriction someday..
+ <% efiargs=""; efigraft=""; efihybrid="" %>
+-%if exists("boot/efi/EFI/*/gcdx64.efi") and basearch != 'i386':
++%if (exists("boot/efi/EFI/*/gcdx64.efi") or exists("boot/efi/EFI/*/grubx64.efi")) and basearch != 'i386':
+     <%
+     efiarch = 'X64' if basearch=='x86_64' else 'IA32'
+     efigraft="EFI/BOOT={0}/EFI/BOOT".format(outroot)
