@@ -149,6 +149,7 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/homedir_template \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/policy.kern \
 %ghost %{_sysconfdir}/selinux/%1/active/*.local \
+%ghost %{_sysconfdir}/selinux/%1/active/*.linked \
 %ghost %{_sysconfdir}/selinux/%1/active/*.bin \
 %ghost %{_sysconfdir}/selinux/%1/active/seusers \
 %dir %{_sysconfdir}/selinux/%1/policy/ \
@@ -223,6 +224,7 @@ mkdir %{buildroot}%{_usr}/share/selinux/devel/
 install -m 644 selinux_config/Makefile.devel %{buildroot}%{_usr}/share/selinux/devel/Makefile
 install -m 644 doc/example.* %{buildroot}%{_usr}/share/selinux/devel/
 install -m 644 doc/policy.* %{buildroot}%{_usr}/share/selinux/devel/
+touch %{buildroot}%{_sysconfdir}/selinux/%{type}/active/seusers.linked
 #echo  "xdg-open file://usr/share/doc/selinux-policy/html/index.html"> %{buildroot}%{_usr}/share/selinux/devel/policyhelp
 #chmod +x %{buildroot}%{_usr}/share/selinux/devel/policyhelp
 # This insanity is b/c libselinux always looks at the host's /etc/selinux/config
