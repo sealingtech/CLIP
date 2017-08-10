@@ -234,30 +234,30 @@ define CHECK_AWS_VARS
 endef
 
 define MAKE_LIVE_TOOLS
-	$(MAKE) livecd-tools-rpm; \
-	mkdir -p $(TOOLS_DIR); \
-	cp $(CLIP_REPO_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR); \
-	cp $(CLIP_REPO_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR); \
-	rpm2cpio $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio; \
-	rpm2cpio $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio; \
+	$(MAKE) livecd-tools-rpm && \
+	mkdir -p $(TOOLS_DIR) && \
+	cp $(CLIP_REPO_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR) && \
+	cp $(CLIP_REPO_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR) && \
+	rpm2cpio $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio&& \
+	rpm2cpio $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio && \
 	cd $(TOOLS_DIR) && cpio -idv < livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio && \
 	cpio -idv < python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio
 endef
 
 define MAKE_PUNGI
-	$(MAKE) pungi-rpm; \
-	mkdir -p $(TOOLS_DIR); \
-	cp $(CLIP_REPO_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm $(TOOLS_DIR); \
-	rpm2cpio $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm > $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm.cpio; \
+	$(MAKE) pungi-rpm && \
+	mkdir -p $(TOOLS_DIR) && \
+	cp $(CLIP_REPO_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm $(TOOLS_DIR) && \
+	rpm2cpio $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm > $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm.cpio && \
 	cd $(TOOLS_DIR) && cpio -idv < pungi-$(PUNGI_VERSION).noarch.rpm.cpio
 endef
 
 define MAKE_LORAX
-	$(MAKE) lorax-rpm; \
-	mkdir -p $(TOOLS_DIR); \
-	cp $(CLIP_REPO_DIR)/lorax-$(LORAX_VERSION).noarch.rpm $(TOOLS_DIR); \
-	rpm2cpio $(TOOLS_DIR)/lorax-$(LORAX_VERSION).noarch.rpm > $(TOOLS_DIR)/lorax-$(LORAX_VERSION).noarch.rpm.cpio; \
-	cd $(TOOLS_DIR); cpio -idv < lorax-$(LORAX_VERSION).noarch.rpm.cpio;
+	$(MAKE) lorax-rpm && \
+	mkdir -p $(TOOLS_DIR) && \
+	cp $(CLIP_REPO_DIR)/lorax-$(LORAX_VERSION).noarch.rpm $(TOOLS_DIR) && \
+	rpm2cpio $(TOOLS_DIR)/lorax-$(LORAX_VERSION).noarch.rpm > $(TOOLS_DIR)/lorax-$(LORAX_VERSION).noarch.rpm.cpio && \
+	cd $(TOOLS_DIR) && cpio -idv < lorax-$(LORAX_VERSION).noarch.rpm.cpio;
 endef
 
 ######################################################
