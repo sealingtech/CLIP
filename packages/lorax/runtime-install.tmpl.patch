@@ -1,0 +1,11 @@
+diff -ur lorax-19.6.66.orig/share/runtime-install.tmpl lorax-19.6.66.new/share/runtime-install.tmpl
+--- lorax-19.6.66.orig/share/runtime-install.tmpl	2015-09-02 20:07:37.000000000 -0400
++++ lorax-19.6.66.new/share/runtime-install.tmpl	2017-08-13 12:59:49.978202004 -0400
+@@ -32,6 +32,7 @@
+ %if basearch in ("i386", "x86_64"):
+     installpkg grub2 grub2-tools biosdevname memtest86+ syslinux
+     installpkg efibootmgr grub2-efi shim shim-unsigned
++    installpkg grub2-efi-x64 grub2-efi-x64-cdboot grub2-efi-x64-modules grub2-tools-efi shim-x64
+ %endif
+ %if basearch in ("ppc", "ppc64", "ppc64le"):
+     installpkg grub2 grub2-tools fbset hfsutils kernel-bootwrapper ppc64-utils
