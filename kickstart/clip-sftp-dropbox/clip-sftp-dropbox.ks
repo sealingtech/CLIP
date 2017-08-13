@@ -162,12 +162,12 @@ sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_co
 #make sure you're using the internal sftp
 sed -i -r -e "s/Subsystem\s*sftp.*//g" /etc/ssh/sshd_config
 
-echo -e "Subsystem sftp internal-sftp\n" >> /etc/ssh/sshd_config
+echo -e "\nSubsystem sftp internal-sftp\n" >> /etc/ssh/sshd_config
 echo -e "Match Group sftp-only" >> /etc/ssh/sshd_config
 echo -e "\tChrootDirectory /home" >> /etc/ssh/sshd_config
 echo -e "\tAllowTCPForwarding no" >> /etc/ssh/sshd_config
 echo -e "\tX11Forwarding no" >> /etc/ssh/sshd_config
-echo -e "\tForceCommand internal-sftp" >> /etc/ssh/sshd_config
+echo -e "\tForceCommand internal-sftp -d %u" >> /etc/ssh/sshd_config
 
 semanage boolean -N -S ${POLNAME} -m --on allow_ssh_keysign
 semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
