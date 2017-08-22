@@ -2,7 +2,7 @@ diff --git a/share/efi.tmpl b/share/efi.tmpl
 index 3e3ca19..43948bc 100644
 --- a/share/efi.tmpl
 +++ b/share/efi.tmpl
-@@ -54,9 +54,9 @@ ${make_efiboot("images/efiboot.img")}
+@@ -47,9 +47,9 @@ ${make_efiboot("images/efiboot.img")}
      replace @INITRDPATH@ /${kdir}/initrd.img ${eficonf}
      replace @ISOLABEL@ '${isolabel}' ${eficonf}
      %if disk:
@@ -12,5 +12,5 @@ index 3e3ca19..43948bc 100644
 -        replace @ROOT@ 'inst.stage2=hd:LABEL=${isolabel|udev}' ${eficonf}
 +        replace @ROOT@ 'ks=hd:LABEL=${isolabel|udev}:/${product.name}.ks inst.stage2=hd:LABEL=${isolabel|udev}' ${eficonf}
      %endif
-     runcmd mkefiboot ${args} ${outroot}/${EFIBOOTDIR} ${outroot}/${img}
-     %if include_kernel:
+     %if efiarch == 'IA32':
+         copy ${eficonf} ${EFIBOOTDIR}/BOOT.conf

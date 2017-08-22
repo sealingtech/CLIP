@@ -10,7 +10,7 @@ PKGNAME := lorax
 
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
-VERSION := 19.6.92
+VERSION := 19.6.66
 
 # Bump this if creating multiple releases from the same
 # version.

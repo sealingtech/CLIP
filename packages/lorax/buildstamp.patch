@@ -21,8 +21,8 @@ diff -purN a/src/pylorax/__init__.py b/src/pylorax/__init__.py
 diff -purN a/src/pylorax/treebuilder.py b/src/pylorax/treebuilder.py
 --- a/src/pylorax/treebuilder.py	2017-05-30 14:18:39.196752749 -0400
 +++ b/src/pylorax/treebuilder.py	2017-05-30 14:31:33.763798507 -0400
-@@ -85,7 +85,7 @@ class RuntimeBuilder(object):
-         self._installpkgs = installpkgs or []
+@@ -83,7 +83,7 @@ class RuntimeBuilder(object):
+         self.add_template_vars = add_template_vars or {}
          self._runner.defaults = self.vars
  
 -    def _install_branding(self):
