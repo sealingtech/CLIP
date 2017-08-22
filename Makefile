@@ -50,7 +50,6 @@ export LIVECD_VERSION ?= $(shell rpm --eval `sed -n -e 's/Release: \(.*\)/\1/p' 
 
 #TODO: Investigate how to handle updates better
 export PUNGI_VERSION ?= 3.12-3.el7*
-export LORAX_VERSION ?= 19.6.66-1.el7
 
 # Config deps
 CONFIG_BUILD_DEPS := $(ROOT_DIR)/CONFIG_BUILD $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
@@ -254,9 +253,9 @@ endef
 define MAKE_LORAX
 	$(MAKE) lorax-rpm && \
 	mkdir -p $(TOOLS_DIR) && \
-	cp $(CLIP_REPO_DIR)/lorax-$(LORAX_VERSION).noarch.rpm $(TOOLS_DIR) && \
-	rpm2cpio $(TOOLS_DIR)/lorax-$(LORAX_VERSION).noarch.rpm > $(TOOLS_DIR)/lorax-$(LORAX_VERSION).noarch.rpm.cpio && \
-	cd $(TOOLS_DIR) && cpio -idv < lorax-$(LORAX_VERSION).noarch.rpm.cpio;
+	cp $(CLIP_REPO_DIR)/$(call RPM_FROM_PKG_NAME,lorax) $(TOOLS_DIR) && \
+	rpm2cpio $(TOOLS_DIR)/$(call RPM_FROM_PKG_NAME,lorax) > $(TOOLS_DIR)/$(call RPM_FROM_PKG_NAME,lorax).cpio && \
+	cd $(TOOLS_DIR) && cpio -idv < $(call RPM_FROM_PKG_NAME,lorax).cpio;
 endef
 
 ######################################################
