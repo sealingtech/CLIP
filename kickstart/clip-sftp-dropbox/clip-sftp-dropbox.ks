@@ -169,9 +169,7 @@ echo -e "\tAllowTCPForwarding no" >> /etc/ssh/sshd_config
 echo -e "\tX11Forwarding no" >> /etc/ssh/sshd_config
 echo -e "\tForceCommand internal-sftp -d %u" >> /etc/ssh/sshd_config
 
-semanage boolean -N -S ${POLNAME} -m --on allow_ssh_keysign
-semanage boolean -N -S ${POLNAME} -m --on ssh_chroot_rw_homedirs
-semanage boolean -N -S ${POLNAME} -m --on ssh_enable_sftp_chroot_dyntrans 
+semanage boolean -N -S ${POLNAME} -m --on selinuxuser_use_ssh_chroot
 # Commented out in our policy
 #semanage boolean -N -m --on ssh_chroot_full_access
 
