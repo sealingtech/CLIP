@@ -168,6 +168,7 @@ echo -e "\tX11Forwarding no" >> /etc/ssh/sshd_config
 echo -e "\tForceCommand internal-sftp -d %u" >> /etc/ssh/sshd_config
 
 semanage boolean -N -S ${POLNAME} -m --on selinuxuser_use_ssh_chroot
+#semanage boolean -N -S ${POLNAME} -m --on ssh_enable_sftp_chroot_dyntrans 
 
 # You can remove this if you'd prefer a
 # more graphical boot that also hides boot-time
