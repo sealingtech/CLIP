@@ -151,19 +151,16 @@ groupadd "sftp-only"
 #modify the ssh config
 
 # tweak auth 
-# NOTE: password auth is left on but after initial login
-# add a key to /home/toor/.ssh/authorized_keys and run this
-# command:
-# sed -i -e 's/.*PasswordAuthentication .*/PasswordAuthentication/' /etc/ssh/sshd_config
+sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
 sed -i -e 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
 sed -i -e 's/#\s*RSAAuthentication .*/RSAAuthentication yes/' /etc/ssh/sshd_config
 sed -i -e 's/#\s*PubkeyAuthentication .*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
 sed -i -e 's;.*AuthorizedKeysFile.*;AuthorizedKeysFile /home/%u/.ssh/authorized_keys;' /etc/ssh/sshd_config
 sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
-#make sure you're using the internal sftp
+# make sure you're using the internal sftp
 sed -i -r -e "s/Subsystem\s*sftp.*//g" /etc/ssh/sshd_config
-
 echo -e "\nSubsystem sftp internal-sftp\n" >> /etc/ssh/sshd_config
+# give users with the sftp-only group into a chroot rooted at /home
 echo -e "Match Group sftp-only" >> /etc/ssh/sshd_config
 echo -e "\tChrootDirectory /home" >> /etc/ssh/sshd_config
 echo -e "\tAllowTCPForwarding no" >> /etc/ssh/sshd_config
@@ -241,9 +238,6 @@ if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
         chattr +i /var/log/{yum.log,boot.log,secure,spooler,btmp,lastlog,utmp,wtmp,dmesg,maillog,messages,cron,audit/audit.log}
         rm -rf /root/* #*/
 
-        # disable password auth
-        sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
-
 	chage -E -1 $USERNAME
 
 cat << EOF > /etc/sysconfig/iptables
@@ -262,9 +256,16 @@ elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
         chage -E -1 $USERNAME
 else
 
+sed -i "s/ChallengeResponseAuthentication no/ChallengeResponseAuthentication yes/" /etc/ssh/sshd_config
+chmod 0644 /etc/ssh/sshd_config
+
 cat << EOF >> /home/${USERNAME}/.bashrc
-if [ -S /home/${USERNAME}/.ssh/authorized_keys ]; then
-	if grep -q "^PasswordAuthentication yes" /etc/ssh/sshd_config; then
+if [ -e /home/${USERNAME}/.ssh/authorized_keys ]; then
+	if grep -q "^ChallengeResponseAuthentication yes" /etc/ssh/sshd_config && grep -q "^PasswordAuthentication yes" /etc/ssh/sshd_config; then
+		echo "Please disable PasswordAuthentication and ChallengeResponseAuthentication in /etc/ssh/sshd_config"
+	elif grep -q "^ChallengeResponseAuthentication yes" /etc/ssh/sshd_config; then
+		echo "Please disable ChallengeResponseAuthentication in /etc/ssh/sshd_config"
+	elif grep -q "^PasswordAuthentication yes" /etc/ssh/sshd_config; then
 		echo "Please disable PasswordAuthentication in /etc/ssh/sshd_config"
 	fi
 else   
