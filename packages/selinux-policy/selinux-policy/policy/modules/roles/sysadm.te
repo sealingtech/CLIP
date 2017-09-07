@@ -509,6 +509,7 @@ optional_policy(`
 
 optional_policy(`
 	usermanage_run_admin_passwd(sysadm_t, sysadm_r)
+	usermanage_run_chage(sysadm_t, sysadm_r)
 	usermanage_run_groupadd(sysadm_t, sysadm_r)
 	usermanage_run_useradd(sysadm_t, sysadm_r)
 ')

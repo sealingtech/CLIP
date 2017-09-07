@@ -112,6 +112,52 @@ interface(`usermanage_run_groupadd',`
 
 ########################################
 ## <summary>
+##	Execute chage in the chage domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition.
+##	</summary>
+## </param>
+#
+interface(`usermanage_domtrans_chage',`
+	gen_require(`
+		type chage_t, chage_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	domtrans_pattern($1, chage_exec_t, chage_t)
+')
+
+########################################
+## <summary>
+##	Execute chage in the chage domain, and
+##	allow the specified role the chage domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`usermanage_run_chage',`
+	gen_require(`
+		type chage_t;
+		attribute_role chage_roles;
+	')
+
+	usermanage_domtrans_chage($1)
+	roleattribute $2 chage_roles;
+')
+
+########################################
+## <summary>
 ##	Execute passwd in the passwd domain.
 ## </summary>
 ## <param name="domain">

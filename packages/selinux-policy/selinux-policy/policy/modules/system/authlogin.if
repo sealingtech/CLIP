@@ -827,6 +827,7 @@ interface(`auth_manage_oshadow',`
 	allow $1 oshadow_t:file manage_file_perms;
 	typeattribute $1 can_read_oshadow_passwords, can_write_oshadow_passwords;
 	files_etc_filetrans($1, oshadow_t, file, "opasswd")
+	files_etc_filetrans($1, oshadow_t, file, "nopasswd")
 ')
 
 #######################################
