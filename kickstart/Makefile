@@ -12,7 +12,15 @@ INC_BASE := $(CURDIR)/..
 
 OS_REL ?= 7.2
 
-TMPL_CONTEXT := OS_REL=$(OS_REL)
+TARGET_ARCH ?= $(shell uname -i)
+
+ISO_VERSION ?= 1
+
+TMPL_CONTEXT := \
+  OS_REL=$(OS_REL) \
+  CONFIG_BUILD_ENABLE_DHCP=$(CONFIG_BUILD_ENABLE_DHCP) \
+  CONFIG_BUILD_AWS=$(CONFIG_BUILD_AWS)
+
 TMPL_ARGS := $(foreach TMPL_VAR,$(TMPL_CONTEXT),--var $(TMPL_VAR))
 
 INSTALL_INCLUDES = \
@@ -29,10 +37,6 @@ INSTALL_INCLUDES = \
       exit 1; \
     fi; \
   done
-
-TARGET_ARCH ?= $(shell uname -i)
-
-ISO_VERSION ?= 1
 
 ifeq ($(CONFIG_BUILD_UNCONFINED_TOOR),y)
 devel_mode := y
