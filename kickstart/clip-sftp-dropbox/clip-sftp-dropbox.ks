@@ -51,6 +51,7 @@ reboot --eject
 
 # DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
 #REPO-REPLACEMENT-PLACEHOLDER
+%include includes/standard-network
 
 %include includes/standard-storage
 
@@ -170,19 +171,6 @@ echo -e "\tX11Forwarding no" >> /etc/ssh/sshd_config
 echo -e "\tForceCommand internal-sftp -d %u" >> /etc/ssh/sshd_config
 
 semanage boolean -N -S ${POLNAME} -m --on selinuxuser_use_ssh_chroot
-# Commented out in our policy
-#semanage boolean -N -m --on ssh_chroot_full_access
-
-if [ x"$CONFIG_BUILD_AWS" == "xy" -o x"$CONFIG_BUILD_ENABLE_DHCP" == "xy" ]; then
-cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
-DEVICE=eth0
-TYPE=Ethernet
-ONBOOT=yes
-NM_CONTROLLED=yes
-BOOTPROTO=dhcp
-IPV6_PRIVACY=rfc3041
-EOF
-fi
 
 # You can remove this if you'd prefer a
 # more graphical boot that also hides boot-time
