@@ -38,7 +38,7 @@ ifeq ($(shell id -u),0)
 $(error Never build CLIP as root! The tools used by CLIP (mock) will break things! Try again as an unprivileged user with sudo access.)
 endif
 
-HOST_RPM_DEPS := rpm-build createrepo mock repoview
+HOST_RPM_DEPS := rpm-build createrepo mock repoview make git sudo python-lockfile libselinux-python python-mako pykickstart GConf2 e2fsprogs squashfs-tools genisoimage syslinux isomd5sum dosfstools
 
 export ROOT_DIR ?= $(CURDIR)
 export OUTPUT_DIR ?= $(ROOT_DIR)
