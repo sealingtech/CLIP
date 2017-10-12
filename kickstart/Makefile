@@ -8,11 +8,35 @@
 
 NAME := $(shell basename $(CURDIR))
 KS := $(CURDIR)/$(NAME).ks
-INC := $(CURDIR)/../includes
+INC_BASE := $(CURDIR)/..
+
+OS_REL ?= 7.2
 
 TARGET_ARCH ?= $(shell uname -i)
 
 ISO_VERSION ?= 1
+
+TMPL_CONTEXT := \
+  OS_REL=$(OS_REL) \
+  CONFIG_BUILD_ENABLE_DHCP=$(CONFIG_BUILD_ENABLE_DHCP) \
+  CONFIG_BUILD_AWS=$(CONFIG_BUILD_AWS)
+
+TMPL_ARGS := $(foreach TMPL_VAR,$(TMPL_CONTEXT),--var $(TMPL_VAR))
+
+INSTALL_INCLUDES = \
+  for i in `sed -n -e 's/^%include\s\+\(.*\)$$/\1/p' $(1)`; do \
+    in_file=$(INC_BASE)/$$i; \
+    out_file=$(2)/$$i; \
+    mkdir -p `dirname $$out_file`; \
+    if [ -f $$in_file ]; then \
+      cp -a $$in_file $$out_file; \
+    elif [ -f $$in_file.tmpl ]; then \
+      mako-render $(TMPL_ARGS) $$in_file.tmpl > $$out_file; \
+    else \
+      echo "missing include file $$i"; \
+      exit 1; \
+    fi; \
+  done
 
 ifeq ($(CONFIG_BUILD_UNCONFINED_TOOR),y)
 devel_mode := y
@@ -90,6 +114,8 @@ REPO_LINES ?= repo --name=centos --baseurl=http://mirror.centos.org/centos/$(CEN
 
 SETUP_DEPS := $(CURDIR)/../Makefile $(KS) $(shell find $(CURDIR)/../includes -type f) $(CURDIR)/variant_pkgs.mk $(shell find $(CLIP_REPO_DIRS) $(CLIP_REPO_DIR) -name repomd.xml)
 
+INSTALL_MNT_PATH := /run/install
+
 all: iso live-iso setup-ks
 
 
@@ -97,10 +123,6 @@ iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) setup-inst-ks check-volume-id
 	@echo "Gathering things with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
 	$(VERBOSE)cd $(BUILD_DIR); sudo $(RUN_PUNGI) "$(PUNGI_PYTHONPATH)" $(PUNGI_ARGS) -GCB -c "$(INST_KS)"
-	@echo "Fixing the boot menu..."
-	@# THis "hack" is b/c pungi does absolutely nothing to %includes to get the files into the ISO
-	$(VERBOSE)sed -i 's;%include\s\+\(.*\);%include /mnt/install/repo/\1;' $(PUNGI_OS_DIR)$(notdir $(INST_KS))
-	$(VERBOSE)cp -a $(INC) $(PUNGI_OS_DIR)
 	@echo "Building ISO with pungi..."
 	@echo "Pungi needs root permissions - please enter your sudo password if prompted."
 	$(VERBOSE)cd $(BUILD_DIR);sudo $(RUN_PUNGI) "$(PUNGI_PYTHONPATH)" $(PUNGI_ARGS) -I -c $(INST_KS)
@@ -137,7 +159,9 @@ setup-inst-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/g');' $(INST_KS)
 	$(FIX_KS_ENFORCING_MODE) $(INST_KS)
 	$(VERBOSE)sed -e 's/^repo/#repo/' $(INST_KS) > $(PUNGI_OS_DIR)/$(notdir $(INST_KS))
-	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
+	$(VERBOSE)$(call INSTALL_INCLUDES,$(INST_KS),$(PUNGI_OS_DIR))
+	$(VERBOSE)$(call INSTALL_INCLUDES,$(INST_KS),$(BUILD_DIR))
+	$(VERBOSE)sed -i 's;%include\s\+\(.*\);%include $(INSTALL_MNT_PATH)/repo/\1;' $(PUNGI_OS_DIR)$(notdir $(INST_KS))
 
 check-volume-id:
 	@echo "Validating Volume ID"
@@ -151,7 +175,7 @@ setup-live-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(LIVE_CONFIG_BUILD_BASH_VARS);' $(LIVE_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/g');' $(LIVE_KS)
 	$(FIX_KS_ENFORCING_MODE) $(LIVE_KS)
-	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
+	$(VERBOSE)$(call INSTALL_INCLUDES,$(LIVE_KS),$(BUILD_DIR))
 
 setup-aws-ks: $(SETUP_DEPS)
 	$(VERBOSE)test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)
@@ -161,7 +185,9 @@ setup-aws-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(AWS_CONFIG_BUILD_BASH_VARS);' $(AWS_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/g');' $(INST_KS)
 	$(FIX_KS_ENFORCING_MODE) $(AWS_KS)
-	$(VERBOSE)cp -a $(INC) $(BUILD_DIR)
+	$(VERBOSE)mkdir -p $(BUILD_DIR)/includes
+	$(VERBOSE)cp -a $(STATIC_INC) $(BUILD_DIR)/includes/
+	$(VERBOSE)$(call TMPL_INST,$(BUILD_DIR)/includes)
 
 clean:
 	$(VERBOSE)sudo rm -rf $(BUILD_DIR)

@@ -36,11 +36,21 @@ filesystem
 firewalld
 glibc
 grub2
+
+% if float(OS_REL) >= 7.4:
+grub2-efi-x64
+grub2-efi-x64-cdboot
+grub2-efi-x64-modules
+grub2-tools-efi
+shim-x64
+% else:
 grub2-efi
 grub2-efi-modules
+shim
+% endif
+
 grub2-tools
 efibootmgr
-shim
 hostname
 initscripts
 iproute
@@ -99,6 +109,10 @@ yum
 -abrt-addon-kerneloops
 -abrt-addon-python
 -abrt-cli
+-abrt-console-notification
+-abrt-dbus
+-abrt-libs
+-abrt-python
 -acpid
 -alsa-utils
 -anaconda
@@ -121,13 +135,19 @@ dosfstools
 harfbuzz
 -hicolor-icon-theme
 -hunspell
+-hunspell-en
+-hunspell-en-GB
+-hunspell-en-US
 -libreport
 -libreport-anaconda
 -libreport-cli
 -libreport-gtk
 -libreport-plugin-bugzilla
+-libreport-plugin-mailx
 -libreport-plugin-rhtsupport
 -libreport-plugin-reportuploader
+-libreport-plugin-ureport
+-libreport-python
 -libreport-rhel-anaconda-bugzilla
 -libreport-rhel-anaconda-uploader
 -libreport-web

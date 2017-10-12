@@ -50,7 +50,6 @@ export LIVECD_VERSION ?= $(shell rpm --eval `sed -n -e 's/Release: \(.*\)/\1/p' 
 
 #TODO: Investigate how to handle updates better
 export PUNGI_VERSION ?= 3.12-3.el7*
-export LORAX_VERSION ?= 19.6.66-1.el7
 
 # Config deps
 CONFIG_BUILD_DEPS := $(ROOT_DIR)/CONFIG_BUILD $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
@@ -175,8 +174,7 @@ SRPM_FROM_RPM = $(patsubst %.$(call PKG_ARCH,$(call PKG_NAME_FROM_RPM,$(1))).rpm
 
 # Multiple kickstart/foo/variants_pkgs.mk can include the same pacakge name, remove dupes
 # to avoid redeclaring recipes for the same target
-# Doing this in make is too ugly even for me...
-PACKAGES := $(shell echo $(PACKAGES)|tr ' ' '\n'|sort|uniq)
+PACKAGES := $(sort $(PACKAGES))
 
 # Create the list of RPMs based on package list.
 RPMS := $(addprefix $(CLIP_REPO_DIR)/,$(foreach PKG,$(PACKAGES),$(call RPM_FROM_PKG_NAME,$(strip $(PKG)))))
@@ -234,30 +232,30 @@ define CHECK_AWS_VARS
 endef
 
 define MAKE_LIVE_TOOLS
-	$(MAKE) livecd-tools-rpm; \
-	mkdir -p $(TOOLS_DIR); \
-	cp $(CLIP_REPO_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR); \
-	cp $(CLIP_REPO_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR); \
-	rpm2cpio $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio; \
-	rpm2cpio $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio; \
+	$(MAKE) livecd-tools-rpm && \
+	mkdir -p $(TOOLS_DIR) && \
+	cp $(CLIP_REPO_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR) && \
+	cp $(CLIP_REPO_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR) && \
+	rpm2cpio $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio&& \
+	rpm2cpio $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio && \
 	cd $(TOOLS_DIR) && cpio -idv < livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio && \
 	cpio -idv < python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio
 endef
 
 define MAKE_PUNGI
-	$(MAKE) pungi-rpm; \
-	mkdir -p $(TOOLS_DIR); \
-	cp $(CLIP_REPO_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm $(TOOLS_DIR); \
-	rpm2cpio $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm > $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm.cpio; \
+	$(MAKE) pungi-rpm && \
+	mkdir -p $(TOOLS_DIR) && \
+	cp $(CLIP_REPO_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm $(TOOLS_DIR) && \
+	rpm2cpio $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm > $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm.cpio && \
 	cd $(TOOLS_DIR) && cpio -idv < pungi-$(PUNGI_VERSION).noarch.rpm.cpio
 endef
 
 define MAKE_LORAX
-	$(MAKE) lorax-rpm; \
-	mkdir -p $(TOOLS_DIR); \
-	cp $(CLIP_REPO_DIR)/lorax-$(LORAX_VERSION).noarch.rpm $(TOOLS_DIR); \
-	rpm2cpio $(TOOLS_DIR)/lorax-$(LORAX_VERSION).noarch.rpm > $(TOOLS_DIR)/lorax-$(LORAX_VERSION).noarch.rpm.cpio; \
-	cd $(TOOLS_DIR); cpio -idv < lorax-$(LORAX_VERSION).noarch.rpm.cpio;
+	$(MAKE) lorax-rpm && \
+	mkdir -p $(TOOLS_DIR) && \
+	cp $(CLIP_REPO_DIR)/$(call RPM_FROM_PKG_NAME,lorax) $(TOOLS_DIR) && \
+	rpm2cpio $(TOOLS_DIR)/$(call RPM_FROM_PKG_NAME,lorax) > $(TOOLS_DIR)/$(call RPM_FROM_PKG_NAME,lorax).cpio && \
+	cd $(TOOLS_DIR) && cpio -idv < $(call RPM_FROM_PKG_NAME,lorax).cpio;
 endef
 
 ######################################################
@@ -475,14 +473,14 @@ $(LIVECDS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_LIVE_TOOLS)
 	$(call MAKE_LORAX)
-	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-live-iso/\1/'`" live-iso
+	$(VERBOSE)OS_REL="$(call OS_REL)" $(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-live-iso/\1/'`" live-iso
 
 PHONIES += $(INSTISOS)
 $(INSTISOS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_PUNGI)
 	$(call MAKE_LORAX)
-	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
+	$(VERBOSE)OS_REL="$(call OS_REL)" $(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
 
 $(EC2_AMI_TOOLS_ZIP):
 	@test -d $(RPM_TMPDIR) || mkdir -p $(RPM_TMPDIR)

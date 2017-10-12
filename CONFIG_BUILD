@@ -13,7 +13,7 @@
 #                                 not remediate.  You can still remediate at run-time after deployment.
 # CONFIG_BUILD_UNCONFINED_TOOR allows the toor user to run the unconfined (read->all powerful) toor_r:toor_t role.
 #                              Normally the toor user is confined in the sysadm_r:sysadm_t role.
-# CONFIG_BUILD_ENABLE_DHCP enable DHCP for eth0                             
+# CONFIG_BUILD_ENABLE_DHCP enable DHCP for all network interfaces
 # CONFIG_BUILD_VPN_INCLUDE_TOOR enable toor user for vpn variant
 # CONFIG_BUILD_ENABLE_SSH_6 enable OpenSSH version 6 with modern crypto and the Secure Secure Shell configuation.
 # 			    This includes support for ED25519 and RSA keys and disables weak algorithms.

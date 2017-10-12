@@ -26,7 +26,7 @@ PACKAGER ?= null
 # Hard code an arch if cross-compiling or going noarch.
 ARCH := noarch
 
-SOURCES := $(PKGNAME)-$(VERSION).tar.gz *.patch
+SOURCES := $(PKGNAME)-$(VERSION).tar.gz $(wildcard *.patch)
 
 # Spec file name
 RPM_SPEC := $(PKGNAME).spec

@@ -47,4 +47,5 @@
 # INSERTED BY BOOTSTRAP.SH
 #rhel7.2-server = /mnt/repos/rhel7.2-server
 # INSERTED BY BOOTSTRAP.SH
-rhel7.3 = /opt/repos/rhel-7.3
+rhel7.4 = /opt/repos/rhel-7.4-server
+rhel7.4-optional = /opt/repos/rhel-7.4-server-optional

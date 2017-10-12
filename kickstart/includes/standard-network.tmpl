@@ -1,0 +1,4 @@
+%if CONFIG_BUILD_ENABLE_DHCP == "y" or CONFIG_BUILD_AWS == "y":
+network --bootproto=dhcp
+%endif
+

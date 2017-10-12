@@ -1,8 +1,26 @@
-diff --git a/share/efi.tmpl b/share/efi.tmpl
-index 3e3ca19..43948bc 100644
---- a/share/efi.tmpl
-+++ b/share/efi.tmpl
-@@ -47,9 +47,9 @@ ${make_efiboot("images/efiboot.img")}
+diff -ur lorax-19.6.66.orig/share/efi.tmpl lorax-19.6.66.new/share/efi.tmpl
+--- lorax-19.6.66.orig/share/efi.tmpl	2015-09-02 20:07:37.000000000 -0400
++++ lorax-19.6.66.new/share/efi.tmpl	2017-08-13 13:42:46.576021743 -0400
+@@ -8,9 +8,18 @@
+ 
+ mkdir ${EFIBOOTDIR}
+ mkdir ${EFIBOOTDIR}/fonts/
++%if exists("boot/efi/EFI/*/shim.efi"):
+ install boot/efi/EFI/*/shim.efi ${EFIBOOTDIR}/BOOT${efiarch}.EFI
++%else:
++install boot/efi/EFI/*/shim${efiarch|lower}.efi ${EFIBOOTDIR}/BOOT${efiarch}.EFI
++%endif
++%if exists("boot/efi/EFI/*/MokManager.efi"):
+ install boot/efi/EFI/*/MokManager.efi ${EFIBOOTDIR}/
++%else:
++install boot/efi/EFI/*/mm${efiarch|lower}.efi ${EFIBOOTDIR}/
++%endif
+ install boot/efi/EFI/*/gcd${efiarch|lower}.efi ${EFIBOOTDIR}/grub${efiarch|lower}.efi
++#install boot/efi/EFI/*/grub${efiarch|lower}.efi ${EFIBOOTDIR}/grub${efiarch|lower}.efi
+ install boot/efi/EFI/*/fonts/unicode.pf2 ${EFIBOOTDIR}/fonts/
+ %if exists("usr/share/shim/lockdown.efi"):
+     install usr/share/shim/lockdown.efi ${EFIBOOTDIR}/
+@@ -47,9 +56,9 @@
      replace @INITRDPATH@ /${kdir}/initrd.img ${eficonf}
      replace @ISOLABEL@ '${isolabel}' ${eficonf}
      %if disk:

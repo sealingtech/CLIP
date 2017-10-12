@@ -270,7 +270,7 @@ optional_policy(`
 # so a tunnel can point to another ssh tunnel
 allow sshd_t self:netlink_route_socket r_netlink_socket_perms;
 allow sshd_t self:key { search link write };
-allow sshd_t self:process setcurrent;
+allow sshd_t self:process { setcurrent setcap };
 
 allow sshd_t sshd_keytab_t:file read_file_perms;
 
@@ -380,6 +380,7 @@ optional_policy(`
 
 optional_policy(`
 	systemd_exec_systemctl(sshd_t)
+	systemd_notify_write_socket(sshd_t)
 ')
 
 optional_policy(`
@@ -513,6 +514,8 @@ init_use_script_ptys(ssh_keygen_t)
 auth_use_nsswitch(ssh_keygen_t)
 
 logging_send_syslog_msg(ssh_keygen_t)
+
+miscfiles_read_generic_certs(ssh_keygen_t)
 
 userdom_home_manager(ssh_keygen_t)
 userdom_dontaudit_use_unpriv_user_fds(ssh_keygen_t)
