@@ -3,14 +3,12 @@
 sed -i -e "s/SELINUXTYPE=${POLNAME}/SELINUXTYPE=targeted/" /etc/selinux/config
 
 oscap xccdf eval --profile $xccdf_profile \
-$tailoring \
 --report /root/scap/post/html/report.html \
 --results /root/scap/post/html/results.xml \
-/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
+/usr/share/xml/scap/ssg/content/ssg-${ds}-ds.xml
 
 oscap xccdf generate fix \
-$tailoring \
---result-id xccdf_org.open-scap_testresult_$xccdf_profile \
+--result-id xccdf_org.open-scap_testresult_${ds}_profile \
 --template urn:xccdf:fix:script:sh \
 /root/scap/post/html/results.xml > /root/scap/post/remediation-script.sh
 chmod +x /root/scap/post/remediation-script.sh

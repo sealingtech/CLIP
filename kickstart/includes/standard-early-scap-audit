@@ -1,27 +1,23 @@
 
-if [ -f /etc/centos-release ]; then
-        xccdf='centos7'
+if [ -f /usr/share/xml/scap/ssg/content/ssg-centos7-ds.xml ]; then
+        ds='centos7'
 else   
-        xccdf='rhel7'
+	ds='rhel7'
 fi
 
-if oscap info /usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml | grep -q stig-rhel7-disa; then
-	xccdf_profile=xccdf_clip_profile_stig-rhel7-disa-server
-	tailoring="--tailoring-file /usr/share/clip-miscfiles/scap-tailoring.xml"
+if [ ${ds} == "centos7" ]; then
+	xccdf_profile=xccdf_org.ssgproject.content_profile_stig-rhel7-server-upstream
 else
-	xccdf_profile=stig-rhel7-server-upstream
-	tailoring=
+	xccdf_profile=xccdf_org.ssgproject.content_profile_stig-rhel7-disa
 fi
 
 mkdir -p /root/scap/{pre,post}/html
 oscap xccdf eval --profile $xccdf_profile \
-$tailoring \
 --report /root/scap/pre/html/report.html \
 --results /root/scap/pre/html/results.xml \
-/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
+/usr/share/xml/scap/ssg/content/ssg-${ds}-ds.xml
 
 oscap xccdf generate fix \
-$tailoring \
 --result-id xccdf_org.open-scap_testresult_$xccdf_profile \
 --template urn:xccdf:fix:script:sh \
 /root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
