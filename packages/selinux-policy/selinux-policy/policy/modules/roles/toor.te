@@ -259,7 +259,8 @@ optional_policy(`
 ')
 
 optional_policy(`
-	rpm_run(toor_t, toor_r)
+	rpm_admin(toor_t, toor_r)
+	rpm_dbus_chat(toor_t, toor_r)
 ')
 
 optional_policy(`
