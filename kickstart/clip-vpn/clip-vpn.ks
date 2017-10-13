@@ -325,14 +325,10 @@ elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
         chage -E -1 $USERNAME
 
 else
-	rpm -e selinux-policy-mcs-ec2ssh
+	rpm -e selinux-policy-mcs-ec2ssh 2>&1 >/dev/null
 fi
 
-sed -i -e 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
-sed -i -e 's/#\s*RSAAuthentication .*/RSAAuthentication yes/' /etc/ssh/sshd_config
-sed -i -e 's/#\s*PubkeyAuthentication .*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
 sed -i -e 's;.*AuthorizedKeysFile.*;AuthorizedKeysFile /home/%u/.ssh/authorized_keys;' /etc/ssh/sshd_config
-sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
 
 #make sure you're using the internal sftp
 sed -i -r -e "s/Subsystem\s*sftp.*//g" /etc/ssh/sshd_config
@@ -367,6 +363,8 @@ echo "UseRoaming no" >> /etc/ssh/ssh_config
 
 kill $TAILPID 2>/dev/null 1>/dev/null
 kill $(jobs -p) 2>/dev/null 1>/dev/null
+
+chvt 6
 
 %end
 

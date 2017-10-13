@@ -275,7 +275,7 @@ else
 fi
 EOF
 
-	rpm -e selinux-policy-mcs-ec2ssh
+	rpm -e selinux-policy-mcs-ec2ssh 2>&1 >/dev/null
 	chage -d 0 "$USERNAME"
 fi
 
@@ -304,6 +304,7 @@ kill $TAILPID 2>/dev/null 1>/dev/null
 kill $(jobs -p) 2>/dev/null 1>/dev/null
 
 echo "Done with post install scripts..."
+chvt 6
 
 %end
 

@@ -214,7 +214,7 @@ EOF
 elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
         chage -E -1 $USERNAME
 else
-	rpm -e selinux-policy-mcs-ec2ssh
+	rpm -e selinux-policy-mcs-ec2ssh 2>&1 > /dev/null
 	chage -d 0 "$USERNAME"
 fi
 
@@ -233,12 +233,6 @@ cat << EOF > /etc/sysconfig/iptables
 :OUTPUT DROP [0:0]
 COMMIT
 EOF
-
-
-sed -i -e 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
-sed -i -e 's/#\s*RSAAuthentication .*/RSAAuthentication yes/' /etc/ssh/sshd_config
-sed -i -e 's/#\s*PubkeyAuthentication .*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
-sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
 
 # This is rather unfortunate, but the remediation content
 # starts services, which need to be killed/shutdown if
@@ -265,6 +259,8 @@ systemctl mask firewalld
 systemctl enable iptables
 
 echo "Done with post install scripts..."
+
+chvt 6
 
 
 %end

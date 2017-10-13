@@ -298,7 +298,7 @@ EOF
 elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
 	chage -E -1 $USERNAME
 else
-        rpm -e selinux-policy-mcs-ec2ssh
+        rpm -e selinux-policy-mcs-ec2ssh 2>&1 >/dev/null
         chage -d 0 "$USERNAME"
 	/sbin/chkconfig sshd off
 fi
@@ -349,6 +349,7 @@ kill $(jobs -p) 2>/dev/null 1>/dev/null
 kill $TAILPID 2>/dev/null 1>/dev/null
 
 echo "Done with post install scripts..."
+chvt 6
 
 %end
 
