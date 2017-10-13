@@ -3164,6 +3164,24 @@ interface(`files_search_etc',`
 
 ########################################
 ## <summary>
+##	Dont audit mounton /etc directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain not to audit.
+##	</summary>
+## </param>
+#
+interface(`files_dontaudit_mounton_etc',`
+	gen_require(`
+		type etc_t;
+	')
+
+	allow $1 etc_t:dir mounton;
+')
+
+########################################
+## <summary>
 ##	Set the attributes of the /etc directories.
 ## </summary>
 ## <param name="domain">

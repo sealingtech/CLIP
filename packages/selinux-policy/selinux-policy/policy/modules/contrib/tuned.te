@@ -33,7 +33,7 @@ files_pid_file(tuned_var_run_t)
 #
 
 allow tuned_t self:capability { net_admin sys_admin sys_nice sys_rawio };
-dontaudit tuned_t self:capability { dac_override sys_tty_config };
+dontaudit tuned_t self:capability { dac_override sys_tty_config sys_ptrace };
 allow tuned_t self:process {  setsched signal };
 allow tuned_t self:fifo_file rw_fifo_file_perms;
 allow tuned_t self:netlink_kobject_uevent_socket create_socket_perms;
@@ -71,6 +71,7 @@ kernel_rw_usermodehelper_state(tuned_t)
 kernel_rw_vm_sysctls(tuned_t)
 kernel_setsched(tuned_t)
 kernel_rw_all_sysctls(tuned_t)
+kernel_dontaudit_getattr_security_state(tuned_t)
 
 corecmd_exec_bin(tuned_t)
 corecmd_exec_shell(tuned_t)
@@ -105,9 +106,16 @@ udev_read_pid_files(tuned_t)
 
 userdom_dontaudit_search_user_home_dirs(tuned_t)
 
+miscfiles_dontaudit_getattr_cert(tuned_t)
+miscfiles_dontaudit_search_cert(tuned_t)
+
 optional_policy(`
 	dbus_system_bus_client(tuned_t)
 	dbus_connect_system_bus(tuned_t)
+')
+
+optional_policy(`
+	policykit_dbus_chat(tuned_t)
 ')
 
 optional_policy(`

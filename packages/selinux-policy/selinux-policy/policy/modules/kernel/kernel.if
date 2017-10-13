@@ -3582,6 +3582,27 @@ interface(`kernel_dontaudit_search_security_state',`
 
 ########################################
 ## <summary>
+##	Do not audit attempts to getattr the security
+##	state.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+##
+#
+interface(`kernel_dontaudit_getattr_security_state',`
+	gen_require(`
+		type proc_security_t;
+	')
+
+	dontaudit $1 proc_security_t:dir { getattr search };
+	dontaudit $1 proc_security_t:file getattr;
+')
+
+########################################
+## <summary>
 ##	Allow searching of security state directory.
 ## </summary>
 ## <param name="domain">

@@ -212,6 +212,43 @@ interface(`miscfiles_dontaudit_access_check_cert',`
     dontaudit $1 cert_t:dir audit_access;
 ')
 
+########################################
+## <summary>
+##	Do not audit attempts to getattr cert dirs/files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`miscfiles_dontaudit_getattr_cert',`
+	gen_require(`
+		type cert_t;
+	')
+
+	dontaudit $1 cert_t:file getattr;
+    dontaudit $1 cert_t:dir getattr;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to search cert dirs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`miscfiles_dontaudit_search_cert',`
+	gen_require(`
+		type cert_t;
+	')
+
+    dontaudit $1 cert_t:dir { getattr search };
+')
+
 
 ########################################
 ## <summary>

@@ -785,7 +785,7 @@ interface(`rpm_transition_script',`
 interface(`rpm_admin',`
     gen_require(`
         type rpm_t, rpm_script_t, rpm_initrc_exec_t;
-        type rpm_var_cache_t, rpm_var_lib_t, rpm_lock_t;
+        type rpm_var_cache_t, rpm_var_run_t, rpm_var_lib_t, rpm_lock_t;
 
         type rpm_log_t, rpm_tmpfs_t, rpm_tmp_t;
         type rpm_script_tmp_t, rpm_script_tmpfs_t, rpm_file_t;

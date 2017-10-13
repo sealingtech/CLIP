@@ -183,6 +183,8 @@ corecmd_exec_bin(augenrules_t)
 
 logging_manage_audit_config(augenrules_t)
 
+auth_read_passwd(augenrules_t)
+
 ########################################
 #
 # Auditd local policy

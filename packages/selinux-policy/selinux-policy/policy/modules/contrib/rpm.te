@@ -16,6 +16,8 @@ domain_role_change_exemption(rpm_t)
 domain_system_change_exemption(rpm_t)
 domain_interactive_fd(rpm_t)
 role rpm_script_roles types rpm_t;
+role system_r types rpm_t;
+
 
 type debuginfo_exec_t;
 domain_entry_file(rpm_t, debuginfo_exec_t)
