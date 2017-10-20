@@ -12,13 +12,13 @@ else
 fi
 
 mkdir -p /root/scap/{pre,post}/html
-oscap xccdf eval --profile $xccdf_profile \
+oscap xccdf eval --profile ${xccdf_profile} \
 --report /root/scap/pre/html/report.html \
 --results /root/scap/pre/html/results.xml \
 /usr/share/xml/scap/ssg/content/ssg-${ds}-ds.xml
 
 oscap xccdf generate fix \
---result-id xccdf_org.open-scap_testresult_$xccdf_profile \
+--result-id xccdf_org.open-scap_testresult_${xccdf_profile} \
 --template urn:xccdf:fix:script:sh \
 /root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
 
