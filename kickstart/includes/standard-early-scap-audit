@@ -39,4 +39,7 @@ fix_audit_watch_rule "auditctl" "/etc/security/opasswd" "wa" "audit_rules_usergr
 fix_audit_watch_rule "augenrules" "/etc/security/opasswd" "wa" "audit_rules_usergroup_modification"
 EOF
 
+sed -i -e '1 i set -x' /root/scap/pre/remediation-script.sh
+
+
 chmod +x /root/scap/pre/remediation-script.sh

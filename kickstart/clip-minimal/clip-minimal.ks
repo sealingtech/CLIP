@@ -79,6 +79,8 @@ clip-miscfiles
 # as they rekly on things defined in this include
 %include includes/standard-prep-post-env
 
+set -x
+
 %include includes/standard-early-scap-audit
 %include includes/standard-scap-remediate
 
