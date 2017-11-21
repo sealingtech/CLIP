@@ -245,7 +245,7 @@ def main(argv):
         sys.exit(1)
 
     if args.output:
-        args.missing.write("# selected packages\n")
+        args.output.write("# selected packages\n")
         if args.with_meta:
             pkg_resolver.write_packages_meta(args.output)
         else:
