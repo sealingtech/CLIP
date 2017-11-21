@@ -15,6 +15,7 @@ mkdir -p /root/scap/{pre,post}/html
 oscap xccdf eval --profile ${xccdf_profile} \
 --report /root/scap/pre/html/report.html \
 --results /root/scap/pre/html/results.xml \
+--oval-results \
 /usr/share/xml/scap/ssg/content/ssg-${ds}-ds.xml
 
 oscap xccdf generate fix \
