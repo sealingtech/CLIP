@@ -1,0 +1,68 @@
+PXE Boot
+--------
+
+# Setup PXE Boot Server
+
+1. Install tftp-server, syslinux, dhcp, nfs-utils
+    yum install tftp-server syslinux dhcp nfs-utils
+
+2. Edit /etc/xinet.d/tftp and change disable from yes to no. Optionally
+update the server args to point to a different root tftp directory.
+
+3. Copy the syslinux files to the root directory used for tftp
+    cp -r /usr/share/syslinux/* /var/lib/tftpboot/
+
+4. Edit /etc/exports to add a nfs file system for some IPs to access some part
+of the file system.
+
+For example the following line would be allow access to /srv/install to all the
+IPs in that /24 range.
+    /srv/install    192.168.226.0/24(ro,async,no_root_squash,no_subtree_check)
+
+5. Edit /etc/dhcp/dhcpd.conf to update the IP information and set the following
+information.
+    # PXE SERVER IP
+    next-server 192.168.226.100;
+    filename "pxelinux.0";
+
+6. Create a sensible directory structure in the tftp root directory for storing
+the init ram disk and the kernel. Also create directories to store the
+installation media on the nfs share.
+    mkdir -p /var/lib/tftpboot/clip/x86_64/v1
+    mkdir -p /srv/install/clip/x86_64/v1/iso
+
+6. Copy the ISO to the PXE Boot server.
+
+7. The ISO contains all the files needed but they need extracted and placed
+into the correct locations.
+    # Create mount dir
+    mkdir /mnt/iso
+    mount -o loop /PATH/TO/ISO /mnt/iso
+    # Init ram disk and kernel should be placed in the tftp root directory
+    cp /mnt/iso/images/pxeboot/initrd.img /var/lib/tftpboot/clip/x86_64/v1/
+    cp /mnt/iso/images/pxeboot/vmlinuz /var/lib/tftpboot/clip/x86_64/v1/
+    # The entire ISO should be placed on the nfs share
+    cp -r /mnt/iso/* /srv/install/clip/x86_64/v1/iso/
+    # NOTE For some reason the kickstart file also needs to placed in a separate dir
+    cp /mnt/iso/KICKSTART_FILE /srv/install/clip/x86_64/v1
+    umount /mnt/iso
+
+8. Create a PXE config file that specifies how to boot.
+    mkdir /var/lib/tftpboot/pxelinux.cfg
+    touch /var/lib/tftpboot/pxelinux.cfg/default
+
+    # Modify /var/lib/tftpboot/pxelinux.cfg/default
+    default menu.c32
+    prompt 0
+    timeout 300 # Wait 30 seconds before picking the first option
+
+    menu title CLIP PXE Menu
+
+    label clip-x86_64
+            menu label CLIP x86_64
+            kernel clip/x86_64/v1/vmlinuz # Path is relative to tftp root dir
+            # NOTE Kickstart file cannot be in the same dir as the inst.repo
+            append inst.repo=nfs:192.168.226.100:/srv/install/clip/x86_64/v1/iso inst.ks=nfs:192.168.226.100:/srv/install/clip/x86_64/v1/KICKSTART_FILE initrd=ENG/x86_64/1/initrd.img
+            text help
+            Install clip version 1 (64-bit)
+            endtext

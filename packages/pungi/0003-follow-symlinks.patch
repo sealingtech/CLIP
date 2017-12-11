@@ -1,0 +1,12 @@
+diff -purN a/src/pypungi/__init__.py b/src/pypungi/__init__.py
+--- a/src/pypungi/__init__.py	2016-06-03 20:06:30.145536951 -0400
++++ b/src/pypungi/__init__.py	2016-06-03 20:08:56.543906086 -0400
+@@ -1566,7 +1566,7 @@ class Pungi(pypungi.PungiBase):
+ 
+         # setup the base command
+         mkisofs = ['/usr/bin/mkisofs']
+-        mkisofs.extend(['-v', '-U', '-J', '-R', '-T', '-m', 'repoview', '-m', 'boot.iso']) # common mkisofs flags
++        mkisofs.extend(['-f', '-v', '-U', '-J', '-R', '-T', '-m', 'repoview', '-m', 'boot.iso']) # common mkisofs flags
+ 
+         x86bootargs = ['-b', 'isolinux/isolinux.bin', '-c', 'isolinux/boot.cat', 
+             '-no-emul-boot', '-boot-load-size', '4', '-boot-info-table']

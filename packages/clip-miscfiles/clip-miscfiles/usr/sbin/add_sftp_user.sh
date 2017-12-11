@@ -19,10 +19,7 @@ add_user() {
         touch /home/$1/.ssh/authorized_keys
         chown -R :sftp-only /home/$1/.ssh/
         chmod 644 /home/$1/.ssh/authorized_keys
-        usermod -d /$1 $1
         usermod -s /sbin/nologin $1
-	semanage fcontext -a -s user_u -t ssh_home_t /home/$1/.ssh
-	semanage fcontext -a -s user_u -t ssh_home_t /home/$1/.ssh/authorized_keys
 	restorecon -RF /home/$1
 }
 

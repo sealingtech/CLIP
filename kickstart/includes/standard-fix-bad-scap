@@ -1,0 +1,24 @@
+# We have three approaches here:
+# 1. don't fix things that are broken - obviously the wrong choice in general
+# 2. fix it by shipping a custom profile that disables the broken stuff
+# which is bad b/c then we're carrying custom profiles
+# 3. fix it for now and wait until the tools make it easier to disable 
+# individual checks and remedidation:
+# https://github.com/OpenSCAP/openscap/issues/633
+# We'll go with #3 and wait for the tools to catch up
+
+systemctl disable kdump
+
+# https://github.com/OpenSCAP/scap-security-guide/issues/1435
+sed -i -e 's/cbcMACs/cbc\nMACS/' /etc/ssh/sshd_config 
+
+# And I have yet to figure out how to use SECMARK with firewalld.
+systemctl mask firewalld
+systemctl enable iptables
+systemctl enable ip6tables
+
+# re-enable USB
+if [ -f /etc/default/grub ]; then
+	sed -i "s/nousb//g" /etc/default/grub
+	grubby --update-kernel=ALL --remove-args=nousb
+fi

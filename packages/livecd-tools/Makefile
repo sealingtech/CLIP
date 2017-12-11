@@ -1,9 +1,10 @@
 # Copyright (C) 2012 Tresys Technology, LLC
 # Copyright (C) 2013 Cubic Corporation
-# Copyright (C) 2015 Quark Security Inc
+# Copyright (C) 2016 Quark Security, Inc.
 #
 # Authors: Spencer Shimko <sshimko@tresys.com>
 #          Spencer Shimko <spencer@quarksecurity.com>
+#          Quentin Swain <quentin@quarksecurity.com>
 #
 
 # The name of the package
@@ -11,17 +12,17 @@ PKGNAME := livecd-tools
 
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
-VERSION := 13.4.7
+VERSION := 21.4
 
 # Bump this if creating multiple releases from the same
 # version.
-RELEASE := 1.el6
+RELEASE := 2.el7.centos
 
 # The name of the Vendor
 VENDOR := null
 
 # The name of the Packager
-PACKAGER ?= null
+PACKAGER := Quark Security, Inc
 
 # Snag the architecture.  Assume host arch.
 # Hard code an arch if cross-compiling or going noarch.
@@ -39,17 +40,17 @@ OUTPUT_DIR ?= $(ROOT_DIR)
 SRPM_OUTPUT_DIR ?= $(OUTPUT_DIR)
 
 # exhaustive list of deps for the RPM, used to determine if RPM needs to be rebuilt
-RPM_DEPS := $(SOURCES) $(RPM_SPEC) Makefile
+RPM_DEPS := $(SOURCES) $(RPM_SPEC) Makefile $(ADDTL_DEPS)
 
 RPM_TMPDIR ?= $(ROOT_DIR)/tmp
 RPM_TOPDIR ?= $(RPM_TMPDIR)/src/redhat
 RPM_BUILDROOT ?= $(RPM_TMPDIR)/rpm-buildroot
 
+RPMQ_DEFS := --query --define 'pkgname $(PKGNAME)' --define '_sysconfdir /etc' --define 'version $(VERSION)' --define 'release $(RELEASE)' --define 'vendor $(VENDOR)' --define 'packager $(PACKAGER)' --qf '%{NAME}\n'
+
 MKDIR = test -d $(1) || mkdir -p $(1)
 
 RPMBUILD_ARGS := --define '_topdir $(RPM_TOPDIR)'  --define '_tmppath $(RPM_TMPDIR)'
-
-RPMQ_DEFS := --query --define 'pkgname $(PKGNAME)' --define '_sysconfdir /etc' --define 'version $(VERSION)' --define 'release $(RELEASE)' --define 'vendor $(VENDOR)' --define 'packager $(PACKAGER)' --qf '%{NAME}\n'
 
 define rpm-prep
 	$(call MKDIR,$(RPM_TOPDIR)/SOURCES)
@@ -73,8 +74,7 @@ $(OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).$(ARCH).rpm: $(SRPM_OUTPUT_DIR)/$
 	@echo "Building $(PKGNAME) RPM..."
 	$(call rpm-prep)
 	cd $(RPM_TOPDIR)/SRPMS && rpmbuild --rebuild --target=$(ARCH) $(RPMBUILD_ARGS) --buildroot $(RPM_BUILDROOT) -bb $<
-	if [ $(ARCH) != "noarch" ]; then cp $(RPM_TOPDIR)/RPMS/noarch/* $(OUTPUT_DIR)/ 2>&1 >/dev/null; exit 0; fi
-	mv  $(RPM_TOPDIR)/RPMS/$(ARCH)/*.rpm $(OUTPUT_DIR)
+	mv  $(RPM_TOPDIR)/RPMS/$(ARCH)/$(PKGNAME)-$(VERSION)-$(RELEASE)*.rpm $(OUTPUT_DIR)
 
 $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm: $(RPM_DEPS)
 	@echo "Building $(PKGNAME) SRPM..."

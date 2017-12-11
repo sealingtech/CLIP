@@ -56,210 +56,29 @@ reboot --eject
 # DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
 #REPO-REPLACEMENT-PLACEHOLDER
 
-zerombr
-clearpart --all --initlabel
-part /boot --size=200 --fstype ext4 --asprimary
-part pv.os --size=1   --grow        --asprimary
-
-volgroup vg00 --pesize=65536 pv.os
-logvol /              --vgname=vg00 --name=root  --fstype=ext4 --size 5500 --maxsize 21000 --grow
-logvol /var           --vgname=vg00 --name=var   --fstype=ext4 --size 4000 --fsoptions=defaults,nosuid --grow
-logvol /home          --vgname=vg00 --name=home  --fstype=ext4 --size=1    --fsoptions=defaults,nosuid,nodev --percent=10 --grow
-logvol swap           --vgname=vg00 --name=swap  --fstype=swap --recommended
-
-logvol /var/log       --vgname=vg00 --name=log   --fstype=ext4 --size 1500 --fsoptions=defaults,nosuid,noexec,nodev --maxsize 25000 --grow
-logvol /var/log/audit --vgname=vg00 --name=audit --fstype=ext4 --size 1500 --fsoptions=defaults,nosuid,noexec,nodev --maxsize 25000 --grow
-#logvol /tmp           --vgname=vg00 --name=tmp   --fstype=ext4 --size 100  --fsoptions=defaults,bind,nosuid,noexec,nodev --maxsize 6000  --grow
-#logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=ext4 --size 100  --fsoptions=defaults,nosuid,noexec,nodev --maxsize 5000  --grow
-logvol /tmp           --vgname=vg00 --name=tmp   --fstype=ext4 --size 500  --maxsize 6000  --grow
-logvol /var/tmp       --vgname=vg00 --name=vtmp  --fstype=ext4 --size 500  --maxsize 5000  --grow
+%include includes/standard-storage
 
 %packages --excludedocs
+%include includes/standard-packages
 #CONFIG-BUILD-ADDTL-PACKAGES
-clip-selinux-policy
-clip-selinux-policy-mcs
-clip-selinux-policy-mcs-apache
-clip-selinux-policy-mcs-mysql
-clip-selinux-policy-mcs-ssh
-clip-selinux-policy-mcs-postfix
-clip-selinux-policy-mcs-ec2ssh
+selinux-policy
+selinux-policy-mcs
+selinux-policy-mcs-apache
+selinux-policy-mcs-mysql
+selinux-policy-mcs-ssh
+selinux-policy-mcs-postfix
+#selinux-policy-mcs-ec2ssh
 clip-miscfiles
-m4
-scap-security-guide
-dracut
 webpageexample
-clip-dracut-module
 mod_ssl
 
-mysql
-mysql-server
-mysql-test
-openssh
-openssh-server
+mariadb
+mariadb-server
 httpd
 php
-php-cli
 php-common
-php-gd
-php-imap
-php-intl
-php-ldap
-php-mbstring
 php-mysql
-php-pdo
-php-pear
-php-pecl-apc
-php-pecl-memcache
-php-pecl-Fileinfo
-php-pgsql
-php-process
-php-pspell
-php-recode
-php-snmp
-php-soap
-php-tidy
-php-xml
-php-xmlrpc
-php-zts
-php-devel
 #####
-
-acl
-aide
-attr
-audit
-authconfig
-basesystem
-bash
-bind-libs
-bind-utils
-chkconfig
-coreutils
-cpio
-cronie
-crontabs
-device-mapper
-e2fsprogs
-filesystem
-glibc
-initscripts
-iproute
-iptables
-iptables-ipv6
-iputils
-kbd
-kernel
-ncurses
-ntp
-ntpdate
-openscap
-openscap-content
-openscap-utils
-openswan
-passwd
-pam_passwdqc
-perl
-policycoreutils
-policycoreutils-newrole
-policycoreutils-python
-procps
-rootfiles
-rpm
-rsyslog
-ruby
--selinux-policy-targeted
-screen
-setup
-setools-console
-shadow-utils
-sudo
-util-linux-ng
-vim-minimal
-vlock
-yum
--Red_Hat_Enterprise_Linux-Release_Notes-6-en-US
--abrt-addon-ccpp
--abrt-addon-kerneloops
--abrt-addon-python
--abrt-cli
--acpid
--alsa-utils
--authconfig
--b43-fwcutter
--b43-openfwwf
--blktrace
--bridge-utils
--cryptsetup-luks
--dbus
-dhclient
--dmraid
--dosfstools
--fprintd
--fprintd-pam
--hicolor-icon-theme
--kexec-tools
--man
--man-pages
--man-pages-overrides
--mdadm
--mlocate
--mtr
--nano
--ntsysv
--pinfo
--postfix
--prelink
--psacct
--pm-utils
--redhat-indexhtml
--rdate
--readahead
--rhnsd
--setserial
--setuptool
--strace
--subscription-manager
--sysstat
--systemtap-runtime
--system-config-firewall-tui
--system-config-network-tui
--tcpdump
--traceroute
--vconfig
--virt-what
--wget
--yum-rhn-plugin
-
--libreport
-
--aic94xx-firmware
--at
--atmel-firmware
--bfa-firmware
--ipw2100-firmware
--ipw2200-firmware
--ivtv-firmware
--iwl100-firmware
--iwl1000-firmware
--iwl3945-firmware
--iwl4965-firmware
--iwl5000-firmware
--iwl5150-firmware
--iwl6000-firmware
--iwl6000g2a-firmware
--iwl6000g2b-firmware
--iwl6050-firmware
--kernel-firmware
--libertas-usb8388-firmware
--ql2100-firmware
--ql2200-firmware
--ql23xx-firmware
--ql2400-firmware
--ql2500-firmware
--rt61pci-firmware
--rt73usb-firmware
--xorg-x11-drv-ati-firmware
--zd1211-firmware
 
 %end
 
@@ -280,39 +99,12 @@ fi
 echo "Installation timestamp: `date`" > /root/clip-info.txt
 echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 
-export POLNAME=$(awk -F= '/^SELINUXTYPE/ { print $2; }' /etc/selinux/config)
+# Do not remove this line unless you remove all the other stanard include files below
+# as they rekly on things defined in this include
+%include includes/standard-prep-post-env
 
-#NOTE: while the following lines allow the SCAP content to be interprested on
-# CentOS, the results might be wrong in a few places, like FIPS compliance and
-# gpgp keys etc.
-if [ -f /etc/centos-release ]; then
-        awk '/o:redhat:enterprise_linux:6/{print "<platform idref=\"cpe:/o:centos:centos:6\"/>"}1' < /usr/share/xml/scap/ssg/content/ssg-rhel6-xccdf.xml > /usr/share/xml/scap/ssg/content/ssg-centos6-xccdf.xml
-        xccdf='centos6'
-else
-        xccdf='rhel6'
-fi
-
-mkdir -p /root/scap/{pre,post}/html
-oscap xccdf eval --profile stig-rhel6-server-upstream \
---report /root/scap/pre/html/report.html \
---results /root/scap/pre/html/results.xml \
-/usr/share/xml/scap/ssg/content/ssg-${xccdf}-xccdf.xml
-
-oscap xccdf generate fix \
---result-id xccdf_org.open-scap_testresult_stig-rhel6-server-upstream \
-/root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
-
-chmod +x /root/scap/pre/remediation-script.sh
-if [ x"$CONFIG_BUILD_REMEDIATE" == "xy" ]; then
-	/root/scap/pre/remediation-script.sh
-	# Un-remediate things SSG broke...
-	sed -i -e "s/targeted/${POLNAME}/" /etc/selinux/config
-
-	cat /etc/issue | sed 's/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g' \
-	| fold -sw 80 > /etc/issue.net
-	cp /etc/issue.net /etc/issue
-fi
-
+%include includes/standard-early-scap-audit
+%include includes/standard-scap-remediate
 
 # FIXME: Change the username and password.
 #        If a hashed password is specified it will be used
@@ -506,7 +298,7 @@ EOF
 elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
 	chage -E -1 $USERNAME
 else
-        rpm -e clip-selinux-policy-mcs-ec2ssh
+        rpm -e selinux-policy-mcs-ec2ssh 2>&1 >/dev/null
         chage -d 0 "$USERNAME"
 	/sbin/chkconfig sshd off
 fi
@@ -526,35 +318,14 @@ sed -i -e 's/#\s*RSAAuthentication .*/RSAAuthentication yes/' /etc/ssh/sshd_conf
 sed -i -e 's/#\s*PubkeyAuthentication .*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
 sed -i -e 's/GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
 
+# You can remove this if you'd prefer a
+# more graphical boot that also hides boot-time
+# messages
+%include includes/disable-graphical-boot
 
-# Disable all that GUI stuff during boot so we can actually see what is going on during boot.
-if [ -f '/boot/grub.conf' -a x"$CONFIG_BUILD_PRODUCTION" != "xy" ]; then
-        # The first users of a CLIP system will be devs. Lets make things a little easier on them.
-        # by getting rid of the framebuffer effects, rhgb, and quiet.
-        grubby --update-kernel=ALL --remove-args="rhgb quiet"
-        sed -i -e 's/^\(splashimage.*\)/#\1/' -e 's/^\(hiddenmenu.*\)/#\1/' /boot/grub/grub.conf
-        # This is ugly but when plymouth re-rolls the initrd it creates a new entry in grub.conf that is redundant.
-        # Actually rather benign but may impact developers using grubby who think there is only one kernel to work with.
-        title="$(sed 's/ release.*$//' < /etc/redhat-release) ($(uname -r))"
-        sed -i -e "s;title.*;title $title;" /boot/grub/grub.conf
-        echo "Modifying splash screen with plymouth..."
-        plymouth-set-default-theme details --rebuild-initrd &> /dev/null
-fi
-
-
-# Set permissive mode
-if [  x"$CONFIG_BUILD_ENFORCING_MODE" != "xy" ]; then
-    echo "Setting permissive mode..."
-    echo -e "#THIS IS A DEBUG BUILD HENCE SELINUX IS IN PERMISSIVE MODE\nSELINUX=permissive\nSELINUXTYPE=$POLNAME\n" > /etc/selinux/config
-	echo "WARNING: This is a debug build in permissive mode.  DO NOT USE IN PRODUCTION!" >> /etc/motd
-	# This line is used to make policy development easier.  It disables the "setfiles" check used by 
-	# semodule/semanage that prevents transactions containing invalid and dupe fc entries from rolling forward.
-	echo -e "module-store = direct\n[setfiles]\npath=/bin/true\n[end]\n" > /etc/selinux/semanage.conf
-	if [ -f /etc/grub.conf ]; then
-		grubby --update-kernel=ALL --remove-args=enforcing
-		grubby --update-kernel=ALL --args=enforcing=0
-	fi
-fi
+%include includes/standard-fix-bad-scap
+%include includes/standard-late-scap-audit
+%include includes/standard-set-enforcement-mode
 
 # starts services, which need to be killed/shutdown if
 # we're rolling Live Media.  First, kill the known
@@ -578,6 +349,7 @@ kill $(jobs -p) 2>/dev/null 1>/dev/null
 kill $TAILPID 2>/dev/null 1>/dev/null
 
 echo "Done with post install scripts..."
+chvt 6
 
 %end
 

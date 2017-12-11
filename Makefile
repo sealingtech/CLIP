@@ -1,7 +1,7 @@
 # Copyright (C) 2011-2012 Tresys Technology, LLC
-# Copyright (C) 2011-2015 Quark Security, Inc
+# Copyright (C) 2011-2016 Quark Security, Inc
 # Copyright (C) 2013 Cubic Corporation
-# 
+#
 # Authors: Spencer Shimko <sshimko@tresys.com>
 #          Spencer Shimko <spencer@quarksecurity.com>
 #	   John Feehley <jfeehley@quarksecurity.com>
@@ -17,7 +17,8 @@ include CONFIG_BUILD
 -include CONFIG_AWS
 
 # This is the RHEL version supported by this release of CLIP.  Do not alter.
-export RHEL_VER := 6
+export RHEL_VER := 7
+export CENTOS_VER := 7
 
 ######################################################
 # BEGIN MAGIC
@@ -25,12 +26,19 @@ ifneq ($(QUIET),y)
 $(info Boot strapping build system...)
 endif
 
+# This lets sub-makes take actions based on the full OS rver+release found in the mock repos instead of on host version
+# E.g., the SELinux policy uses different spec files based on release
+# Make sure $(YUM_CONF_ALL_FILE) is a dep for any recipes that use this feature
+define OS_REL
+$(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery --whatprovides -c $(YUM_CONF_ALL_FILE) "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}'))
+endef
+
 # NOTE: DO NOT REMOVE THIS CHECK. RUNNING MOCK AS ROOT *WILL* BREAK THINGS.
 ifeq ($(shell id -u),0)
 $(error Never build CLIP as root! The tools used by CLIP (mock) will break things! Try again as an unprivileged user with sudo access.)
 endif
 
-HOST_RPM_DEPS := rpm-build createrepo mock repoview
+HOST_RPM_DEPS := rpm-build createrepo mock repoview make git sudo python-lockfile libselinux-python python-mako pykickstart GConf2 e2fsprogs squashfs-tools genisoimage syslinux isomd5sum dosfstools
 
 export ROOT_DIR ?= $(CURDIR)
 export OUTPUT_DIR ?= $(ROOT_DIR)
@@ -40,7 +48,8 @@ export TOOLS_DIR ?= $(ROOT_DIR)/tmp/tools
 export LIVECD_VERSION ?= $(shell rpm --eval `sed -n -e 's/Release: \(.*\)/\1/p' -e 's/Version: \(.*\)/\1/p' \
                  packages/livecd-tools/livecd-tools.spec| sed 'N;s/\n/-/'`)
 
-export PUNGI_VERSION ?= 2.0.22-1
+#TODO: Investigate how to handle updates better
+export PUNGI_VERSION ?= 3.12-3.el7*
 
 # Config deps
 CONFIG_BUILD_DEPS := $(ROOT_DIR)/CONFIG_BUILD $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
@@ -57,9 +66,19 @@ VARIANTS := $(subst -inst-iso,,$(VARIANTS))
 VARIANTS := $(subst -aws-ami,,$(VARIANTS))
 VARIANTS := $(subst -live-iso,,$(VARIANTS))
 ifeq ($(strip $(VARIANTS)),)
-PACKAGES := $(shell ls $(PKG_DIR) | grep -v examples)
+PACKAGES := $(shell ls $(PKG_DIR) | grep -v examples|grep -v strongswan)
 else
 $(foreach VARIANT,$(VARIANTS), $(eval include kickstart/$(VARIANT)/variant_pkgs.mk))
+endif
+
+# FIXME: remove when AWS is supported by CLIP for v7
+ifneq ($(filter %-aws-ami,$(MAKECMDGOALS)),)
+$(error "AWS/EC2 targets not supported for RHEL/CentOS v7 quite yet. Stay tuned.")
+endif
+#
+# FIXME: remove when VPN variants supported by CLIP for v7
+ifneq ($(filter clip-vpn-%,$(MAKECMDGOALS)),)
+$(error "The CLIP VPN variant is not supported for RHEL/CentOS v7 quite yet. Stay tuned.")
 endif
 
 ifeq ($(CONFIG_BUILD_ENABLE_SSH_6),n)
@@ -116,11 +135,11 @@ EC2_API_TOOLS_URL    := http://s3.amazonaws.com/ec2-downloads/ec2-api-tools.zip
 
 export MOCK_YUM_CONF :=
 export setup_all_repos := setup-clip-repo
-CLIP_REPO_DIRS :=
+export CLIP_REPO_DIRS :=
 
 # These are the directories where we will put our custom copies of
 # the yum repos.  These will be removed by "make bare".
-CLIP_REPO_DIR := $(REPO_DIR)/clip-repo
+export CLIP_REPO_DIR := $(REPO_DIR)/clip-repo
 CLIP_SRPM_REPO_DIR := $(REPO_DIR)/clip-srpms
 export REPO_LINES := repo --name=clip-repo --baseurl=file://$(CLIP_REPO_DIR)\n
 
@@ -133,9 +152,9 @@ GREP := /bin/egrep
 MOCK := /usr/bin/mock
 REPO_LINK := /bin/ln -s
 REPO_WGET := /usr/bin/wget
-REPO_CREATE := /usr/bin/createrepo -d --workers $(shell /usr/bin/nproc) -c $(REPO_DIR)/yumcache
+REPO_CREATE := /usr/bin/createrepo -g $(COMPS_FILE) -d --workers $(shell /usr/bin/nproc) --simple-md-filenames -c $(REPO_DIR)/yumcache .
 REPO_QUERY = repoquery -c $(1) --quiet -a --queryformat '%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm'
-MOCK_ARGS += --resultdir=$(CLIP_REPO_DIR) -r $(MOCK_REL) --configdir=$(MOCK_CONF_DIR) --unpriv --rebuild
+MOCK_ARGS += --resultdir=$(CLIP_REPO_DIR) -r $(MOCK_REL) --configdir=$(MOCK_CONF_DIR) --unpriv --rebuild --uniqueext=$(shell echo $$USER)
 
 # This deps list gets propegated down to sub-makefiles
 # Add to this list to pass deps down to SRPM creation
@@ -153,6 +172,10 @@ SRPM_FROM_PKG_NAME = $(1)-$(call PKG_VER,$(1))-$(call PKG_REL,$(1)).src.rpm
 PKG_NAME_FROM_RPM = $(shell echo "$(1)" | $(SED) -r -e 's/^([^-]+[A-Za-z_-]?+)-.*$$/\1/')
 SRPM_FROM_RPM = $(patsubst %.$(call PKG_ARCH,$(call PKG_NAME_FROM_RPM,$(1))).rpm,%.src.rpm,$(1))
 
+# Multiple kickstart/foo/variants_pkgs.mk can include the same pacakge name, remove dupes
+# to avoid redeclaring recipes for the same target
+PACKAGES := $(sort $(PACKAGES))
+
 # Create the list of RPMs based on package list.
 RPMS := $(addprefix $(CLIP_REPO_DIR)/,$(foreach PKG,$(PACKAGES),$(call RPM_FROM_PKG_NAME,$(strip $(PKG)))))
 SRPMS := $(addprefix $(SRPM_OUTPUT_DIR)/,$(foreach RPM,$(RPMS),$(call SRPM_FROM_RPM,$(notdir $(RPM)))))
@@ -163,15 +186,19 @@ endif
 
 MKDIR = $(VERBOSE)test -d $(1) || mkdir -p $(1)
 
-SYSTEMS := $(shell find $(KICKSTART_DIR) -maxdepth 1 ! -name kickstart -type d -printf "%f\n")
+SYSTEMS := $(shell find $(KICKSTART_DIR) -maxdepth 1 ! -name kickstart ! -name includes -type d -printf "%f\n")
 
 # These are targets supported by the kickstart/Makefile that will be used to generate LiveCD images.
-LIVECDS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -live-iso,$(SYSTEM)))
+# FIXME: remove when VPN is supported by CLIP for v7
+#LIVECDS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -live-iso,$(SYSTEM)))
+LIVECDS := $(foreach SYSTEM,$(filter-out clip-vpn,$(SYSTEMS)),$(addsuffix -live-iso,$(SYSTEM)))
 
 # These are targets supported by the kickstart/Makefile that will be used to generate installation ISOs.
-INSTISOS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -inst-iso,$(SYSTEM)))
+# FIXME: remove when AWS is supported by CLIP for v7
+#INSTISOS := $(foreach SYSTEM,$(SYSTEMS)),$(addsuffix -inst-iso,$(SYSTEM)))
+INSTISOS := $(foreach SYSTEM,$(filter-out clip-vpn,$(SYSTEMS)),$(addsuffix -inst-iso,$(SYSTEM)))
 
-# These are targets supported by the kickstart/Makefile that will be used to generate AWS AMI 
+# These are targets supported by the kickstart/Makefile that will be used to generate AWS AMI
 AWSBUNDLES := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -aws-ami,$(SYSTEM)))
 
 # Add a file to a repo by either downloading it (if http/ftp), or symlinking if local.
@@ -187,11 +214,7 @@ endef
 
 define CHECK_DEPS
 	@if ! rpm -q $(HOST_RPM_DEPS) 2>&1 >/dev/null; then echo "Please ensure the following RPMs are installed: $(HOST_RPM_DEPS)."; exit 1; fi
-	@if [ x"`cat /selinux/enforce`" == "x1" ]; then echo -e "This is embarassing but due to a bug (bz #861281) you must do builds in permissive.\nhttps://bugzilla.redhat.com/show_bug.cgi?id=861281" && exit 1; fi
-endef
-
-define CHECK_MOCK
-	@if ps -eo comm= | grep -q mock; then echo "ERROR: Another instance of mock is running.  Please hangup and try your build again later." && exit 1; fi
+	@if [ x"`cat /sys/fs/selinux/enforce`" == "x1" ]; then echo -e "This is embarassing but due to a bug (bz #861281) you must do builds in permissive.\nhttps://bugzilla.redhat.com/show_bug.cgi?id=861281" && exit 1; fi
 endef
 
 AVAIL_ZONES := us-east-1 us-west-1 us-west-2 eu-west-1 eu-central-1 ap-southeast-1 ap-southeast-2 ap-northeast-1 sa-east-1
@@ -209,22 +232,30 @@ define CHECK_AWS_VARS
 endef
 
 define MAKE_LIVE_TOOLS
-	$(MAKE) livecd-tools-rpm; \
-	mkdir -p $(TOOLS_DIR); \
-	cp $(CLIP_REPO_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR); \
-	cp $(CLIP_REPO_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR); \
-	rpm2cpio $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio; \
-	rpm2cpio $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio; \
+	$(MAKE) livecd-tools-rpm && \
+	mkdir -p $(TOOLS_DIR) && \
+	cp $(CLIP_REPO_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR) && \
+	cp $(CLIP_REPO_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR) && \
+	rpm2cpio $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio&& \
+	rpm2cpio $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio && \
 	cd $(TOOLS_DIR) && cpio -idv < livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio && \
-	cpio -idv < python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio;
+	cpio -idv < python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio
 endef
 
 define MAKE_PUNGI
-	$(MAKE) pungi-rpm; \
-	mkdir -p $(TOOLS_DIR); \
-	cp $(CLIP_REPO_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm $(TOOLS_DIR); \
-	rpm2cpio $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm > $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm.cpio; \
+	$(MAKE) pungi-rpm && \
+	mkdir -p $(TOOLS_DIR) && \
+	cp $(CLIP_REPO_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm $(TOOLS_DIR) && \
+	rpm2cpio $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm > $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm.cpio && \
 	cd $(TOOLS_DIR) && cpio -idv < pungi-$(PUNGI_VERSION).noarch.rpm.cpio
+endef
+
+define MAKE_LORAX
+	$(MAKE) lorax-rpm && \
+	mkdir -p $(TOOLS_DIR) && \
+	cp $(CLIP_REPO_DIR)/$(call RPM_FROM_PKG_NAME,lorax) $(TOOLS_DIR) && \
+	rpm2cpio $(TOOLS_DIR)/$(call RPM_FROM_PKG_NAME,lorax) > $(TOOLS_DIR)/$(call RPM_FROM_PKG_NAME,lorax).cpio && \
+	cd $(TOOLS_DIR) && cpio -idv < $(call RPM_FROM_PKG_NAME,lorax).cpio;
 endef
 
 ######################################################
@@ -234,23 +265,27 @@ define RPM_RULE_template
 $(1): $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1))) $(MY_REPO_DEPS) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg $(YUM_CONF_ALL_FILE) $(CLIP_REPO_DIR)/exists
 	$(call CHECK_DEPS)
 	$(call MKDIR,$(CLIP_REPO_DIR))
-	$(call CHECK_MOCK)
 	$(VERBOSE)$(MOCK) $(MOCK_ARGS) $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
-	cd $(CLIP_REPO_DIR) && $(REPO_CREATE) -g $(COMPS_FILE)  .
-	$(VERBOSE)$(call REPO_QUERY,$(YUM_CONF_ALL_FILE)) --repoid=clip-repo |sort 1>$(CONF_DIR)/pkglist.clip-repo
+	cd $(CLIP_REPO_DIR) && $(REPO_CREATE)
+	$(VERBOSE)$(call REPO_QUERY,$(YUM_CONF_ALL_FILE)) --repoid=clip-repo 2>/dev/null|sort 1>$(CONF_DIR)/pkglist.clip-repo
 ifeq ($(ENABLE_SIGNING),y)
 	$(RPM) --addsign $(CLIP_REPO_DIR)/*
 endif
 
 $(eval PHONIES += $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-rpm $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-nomock-rpm)
 $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-rpm:  $(1)
-$(call PKG_NAME_FROM_RPM,$(notdir $(1)))-nomock-rpm:  $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
+# TODO: we do not yet handle deps for nomock as we put the same output RPMs in the same location of mock'd RPMs.
+# In essence, we do not know if the RPM that exists was built inside or outside of mock
+# so for now, clobber the output RPM and rebuild
+$(call PKG_NAME_FROM_RPM,$(notdir $(1)))-nomock-rpm:
 	$(call CHECK_DEPS)
 	$(call MKDIR,$(CLIP_REPO_DIR))
-	$(VERBOSE)OUTPUT_DIR=$(CLIP_REPO_DIR) $(MAKE) -C $(PKG_DIR)/$(call PKG_NAME_FROM_RPM,$(notdir $(1))) rpm
-	cd $(CLIP_REPO_DIR) && $(REPO_CREATE) -g $(COMPS_FILE) .
+	$(RM) $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
+	$(VERBOSE)OUTPUT_DIR=$(CLIP_REPO_DIR) $(MAKE) -C $(PKG_DIR)/$(call PKG_NAME_FROM_RPM,$(notdir $(1))) srpm rpm
+	cd $(CLIP_REPO_DIR) && $(REPO_CREATE)
 
 $(eval PHONIES += $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-srpm $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-clean)
+
 $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-srpm:  $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
 $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-clean:
 	$(call CHECK_DEPS)
@@ -276,19 +311,19 @@ $(eval REPO_ID := $(call GET_REPO_ID, $(1)))
 ifneq ($(strip $(1)),)
 $(eval REPO_PATH := $(call GET_REPO_PATH,$(1)))
 $(eval REPO_URL := $(call GET_REPO_URL,$(call GET_REPO_PATH,$(1))))
+$(eval REPO_FAILED += $(strip $(shell [ -n "$$(/usr/bin/find $(REPO_PATH) -type f -name repomd.xml 2>/dev/null)" ] || echo $(REPO_PATH))))
 $(eval setup_all_repos += setup-$(REPO_ID)-repo)
-
 $(eval YUM_CONF := [$(REPO_ID)]\\nname=$(REPO_ID)\\nbaseurl=$(REPO_URL)\\nenabled=1\\n\\nexclude=$(strip $(PKG_BLACKLIST))\\n)
 $(eval MOCK_YUM_CONF := $(MOCK_YUM_CONF)[$(REPO_ID)]\\nname=$(REPO_ID)\\nbaseurl=file://$(REPO_DIR)/$(REPO_ID)-repo\\nenabled=1\\n\\nexclude=$(strip $(PKG_BLACKLIST))\\n)
 $(eval MY_REPO_DEPS += $(REPO_DIR)/$(REPO_ID)-repo/last-updated)
 $(eval REPO_LINES := $(REPO_LINES)repo --name=$(REPO_ID) --baseurl=file://$(REPO_DIR)/$(REPO_ID)-repo\n)
 
-$(eval CLIP_REPO_DIRS += "$(REPO_DIR)/$(REPO_ID)-repo")
+$(eval export CLIP_REPO_DIRS += "$(REPO_DIR)/$(REPO_ID)-repo")
 $(eval PKG_LISTS += "./$(shell basename $(CONF_DIR))/pkglist.$(REPO_ID)")
 $(eval REPO_DEPS += $(REPO_DIR)/$(REPO_ID)-repo/last-updated)
 
 $(eval PHONIES += setup-$(REPO_ID)-repo)
-setup-$(REPO_ID)-repo:  $(REPO_DIR)/$(REPO_ID)-repo/last-updated $(CONFIG_BUILD_DEPS) 
+setup-$(REPO_ID)-repo:  $(REPO_DIR)/$(REPO_ID)-repo/last-updated $(CONFIG_BUILD_DEPS)
 
 # This is the key target for managing yum repos.  If the pkg list for the repo
 # is more recent then our private repo regen the repo by symlink'ing the packages into our repo.
@@ -304,14 +339,18 @@ $(REPO_DIR)/$(REPO_ID)-repo/last-updated: $(CONF_DIR)/pkglist.$(REPO_ID) $(CONFI
 		elif [ -f "$(REPO_PATH)/Packages/$$$$fil" ]; then \
 			$(REPO_LINK) "$(REPO_PATH)/Packages/$$$$fil" $(REPO_DIR)/$(REPO_ID)-repo/$$$$fil; \
 		else \
-			echo "Can't find $$$$file in repo $(REPO_PATH)!"; exit 1; \
+			echo "Can't find $$$$fil in repo $(REPO_PATH)!"; exit 1; \
 		fi; \
 	done < $(CONF_DIR)/pkglist.$(REPO_ID)
 	@echo "Generating $(REPO_ID) yum repo metadata, this could take a few minutes..."
-	$(VERBOSE)cd $(REPO_DIR)/$(REPO_ID)-repo && $(REPO_CREATE) -g $(COMPS_FILE)  .
+	$(VERBOSE)cd $(REPO_DIR)/$(REPO_ID)-repo && $(REPO_CREATE)
 	test -f $(YUM_CONF_ALL_FILE) || ( cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE);\
-		echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_ALL_FILE)) 
+		echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_ALL_FILE))
 	echo -e $(YUM_CONF) >> $(YUM_CONF_ALL_FILE)
+# This lets sub-makes take actions based on the full OS rver+release found in the mock repos instead of on host version
+# E.g., the SELinux policy uses different spec files based on release
+# Make sure YUM_CONF_ALL_FILE is a dep for any recipes that use this feature
+	$(eval export OS_VER := $(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery --whatprovides -c $(YUM_CONF_ALL_FILE) "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}')))
 	$(VERBOSE)touch $(REPO_DIR)/$(REPO_ID)-repo/last-updated
 
 # If a pkglist is missing then assume we should generate one ourselves.
@@ -338,17 +377,19 @@ endef
 PHONIES += help
 help:
 	$(call CHECK_DEPS)
-	@echo "The following make targets are available for generating installable ISOs:"
+	@echo "The following make target is available for generating all supported installable ISOs and live CDs:"
 	@echo "	all"
+	@echo
+	@echo "The following make targets are available for generating installable ISOs:"
 	@for cd in $(INSTISOS); do echo "	$$cd"; done
 	@echo
 	@echo "The following make targets are available for generating Live CDs:"
-	@echo "	all"
 	@for cd in $(LIVECDS); do echo "	$$cd"; done
 	@echo
-	@echo "The following make targets are available for generating AWS :"
-	@for cd in $(AWSBUNDLES); do echo "	$$cd"; done
-	@echo
+# FIXME: re-enabled when AWS/EC2 support exists for v7
+#	@echo "The following make targets are available for generating AWS :"
+#	@for cd in $(AWSBUNDLES); do echo "	$$cd"; done
+#	@echo
 	@echo "To burn a livecd image to a thumbdrive:"
 	@echo "	iso-to-disk ISO_FILE=<isofilename> USB_DEV=<devname>"
 	@echo "	iso-to-disk ISO_FILE=<isofilename> USB_DEV=<devname> OVERLAY_SIZE=<size in MB>"
@@ -384,6 +425,11 @@ all: $(INSTISOS) $(LIVECDS)
 # Generate custom targets for managing the yum repos.  We have to generate the rules since the user provides the set of repos.
 $(foreach REPO,$(strip $(shell cat CONFIG_REPOS|$(GREP) -E '^[a-zA-Z].*=.*'|$(SED) -e 's/ \?= \?/=/')),$(eval $(call REPO_RULE_template,$(REPO))))
 
+ifneq ($(strip $(REPO_FAILED)),)
+$(info Yum repository paths do not contain a valid repo indicated by a repomd.xml somewhere)
+$(error $(REPO_FAILED))
+endif
+
 # The following line calls our RPM rule template defined above allowing us to build a proper dependency list.
 $(foreach RPM,$(RPMS),$(eval $(call RPM_RULE_template,$(RPM))))
 
@@ -392,13 +438,15 @@ SRPMS := $(SRPMS) $(addprefix $(SRPM_OUTPUT_DIR)/,$(foreach RPM,$(HOST_RPMS),$(c
 
 # This is a slight hack to make sure we have a valid yum repo here.
 # Problem is, the repodata files are re-generated every time an PRM is built.
-# This means depending on something like repo.md causes every package to be 
+# This means depending on something like repo.md causes every package to be
 # built every single time.  So we'll use this to fake it.
-$(CLIP_REPO_DIR)/exists:  
+$(CLIP_REPO_DIR)/exists $(YUM_CONF_ALL_FILE):
 	$(call CHECK_DEPS)
-	$(call MKDIR,$@)
+	test -f $(YUM_CONF_ALL_FILE) || ( cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE);\
+		echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_ALL_FILE))
+	$(call MKDIR,$(basename $@))
 	echo "Generating clip-repo metadata."; \
-	$(VERBOSE)cd $(CLIP_REPO_DIR) && $(REPO_CREATE) -g $(COMPS_FILE) .
+	$(VERBOSE)cd $(CLIP_REPO_DIR) && $(REPO_CREATE)
 
 	@set -e; for pkg in $(PRE_ROLLED_PACKAGES); do \
            [ -f "$$pkg" ] || ( echo "Failed to find pre-rolled package: $$pkg" && exit 1 );\
@@ -406,7 +454,7 @@ $(CLIP_REPO_DIR)/exists:
               $(REPO_LINK) $$pkg $(CLIP_REPO_DIR)|| \
 	      ( echo "Failed to find pre-rolled package $$pkg - check CONFIG_BUILD and make sure you use quotes around paths with spaces." && exit 1 );\
         done
-	$(VERBOSE)cd $(CLIP_REPO_DIR) && $(REPO_CREATE) -g $(COMPS_FILE) .
+	$(VERBOSE)cd $(CLIP_REPO_DIR) && $(REPO_CREATE)
 	touch $@
 
 PHONIES += rpms
@@ -415,22 +463,24 @@ rpms: $(RPMS)
 PHONIES += srpms
 srpms: $(SRPMS)
 
-%.src.rpm:  FORCE
+%.src.rpm: $(MY_REPO_DEPS) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg $(YUM_CONF_ALL_FILE) $(CLIP_REPO_DIR)/exists FORCE
 	$(call CHECK_DEPS)
 	$(call MKDIR,$(SRPM_OUTPUT_DIR))
-	$(MAKE) -C $(PKG_DIR)/$(call PKG_NAME_FROM_RPM,$(notdir $@)) srpm
+	$(VERBOSE)OS_REL="$(call OS_REL)" $(MAKE) -C $(PKG_DIR)/$(call PKG_NAME_FROM_RPM,$(notdir $@)) srpm
 
 PHONIES += $(LIVECDS)
 $(LIVECDS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_LIVE_TOOLS)
-	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-live-iso/\1/'`" live-iso
+	$(call MAKE_LORAX)
+	$(VERBOSE)OS_REL="$(call OS_REL)" $(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-live-iso/\1/'`" live-iso
 
 PHONIES += $(INSTISOS)
 $(INSTISOS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call CHECK_DEPS)
 	$(call MAKE_PUNGI)
-	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
+	$(call MAKE_LORAX)
+	$(VERBOSE)OS_REL="$(call OS_REL)" $(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso/\1/'`" iso
 
 $(EC2_AMI_TOOLS_ZIP):
 	@test -d $(RPM_TMPDIR) || mkdir -p $(RPM_TMPDIR)
@@ -459,12 +509,13 @@ $(AWSBUNDLES): check-vars ec2-tools $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call MAKE_LIVE_TOOLS)
 	# TODO: this awk expression relies heavily on the tool name prefix length, better option?
 	$(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-aws-ami/\1/'`" \
-		EC2_API_TOOLS_VER=$$(unzip -l $(EC2_API_TOOLS_ZIP)|awk '/^.*[0-9]\/$$/ { print substr($$4,15,length($$4)-15); }') aws 
+		EC2_API_TOOLS_VER=$$(unzip -l $(EC2_API_TOOLS_ZIP)|awk '/^.*[0-9]\/$$/ { print substr($$4,15,length($$4)-15); }') aws
 
-$(MOCK_CONF_DIR)/$(MOCK_REL).cfg:  $(MOCK_CONF_DIR)/$(MOCK_REL).cfg.tmpl $(CONF_DIR)/pkglist.blacklist $(CLIP_REPO_DIR)/exists
+$(MOCK_CONF_DIR)/$(MOCK_REL).cfg:  $(MOCK_CONF_DIR)/$(MOCK_REL).cfg.tmpl $(CONF_DIR)/pkglist.blacklist $(CLIP_REPO_DIR)/exists $(ROOT_DIR)/Makefile
 	$(call CHECK_DEPS)
 	$(VERBOSE)cat $(MOCK_CONF_DIR)/$(MOCK_REL).cfg.tmpl > $@
 	$(VERBOSE)echo -e $(MOCK_YUM_CONF) >> $@
+	$(VERBOSE)$(SED) -i -e "s;\(config_opts\['cache_topdir'\] = '\)\(/var/cache/mock\)';\1\2/$(shell echo $$USER)';" $@
 	$(VERBOSE)echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $@
 	$(VERBOSE)echo '"""' >> $@
 
@@ -497,13 +548,14 @@ iso-to-disk:
 
 PHONIES += clean-mock
 clean-mock: $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
-	$(VERBOSE)$(RM) $(YUM_CONF_FILE)
-	$(VERBOSE)$(RM) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg
+	$(VERBOSE)$(RM) -f $(YUM_CONF_ALL_FILE)
+	$(VERBOSE)$(RM) -f $(YUM_CONF_FILE)
+	$(VERBOSE)$(RM) -f $(MOCK_CONF_DIR)/$(MOCK_REL).cfg
 	$(VERBOSE)$(RM) -rf $(REPO_DIR)/yumcache
 
 PHONIES += bare-repos
 bare-repos: clean-mock
-	$(VERBOSE)$(RM) $(YUM_CONF_ALL_FILE)
+	$(VERBOSE)$(RM) -f $(YUM_CONF_ALL_FILE)
 	$(VERBOSE)$(RM) -rf repos/*
 
 PHONIES += clean
@@ -514,8 +566,8 @@ clean:
 PHONIES += bare
 bare: bare-repos clean
 	for pkg in $(PACKAGES); do $(MAKE) -C $(PKG_DIR)/$$pkg $@; done
-	$(VERBOSE)$(RM) $(addprefix $(SRPM_OUTPUT_DIR),$(SRPMS))
-	$(VERBOSE)$(RM) $(addprefix $(OUTPUT_DIR),$(RPMS))
+	$(VERBOSE)$(RM) -f $(addprefix $(SRPM_OUTPUT_DIR),$(SRPMS))
+	$(VERBOSE)$(RM) -f $(addprefix $(OUTPUT_DIR),$(RPMS))
 
 PHONIES += FORCE
 FORCE:
@@ -523,7 +575,7 @@ FORCE:
 # Unfortunately mock isn't exactly "parallel" friendly which sucks since we could roll a bunch of packages in parallel.
 .NOTPARALLEL:
 .SUFFIXES:
-.PHONY: $(PHONIES) $(YUM_CONF_PHONIES) 
+.PHONY: $(PHONIES) $(YUM_CONF_PHONIES)
 
 
 # END RULES

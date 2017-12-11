@@ -1,0 +1,75 @@
+diff -purN a/src/pypungi/__init__.py c/src/pypungi/__init__.py
+--- a/src/pypungi/__init__.py	2017-04-14 12:33:16.446491865 -0400
++++ c/src/pypungi/__init__.py	2017-04-14 12:30:59.649093565 -0400
+@@ -878,9 +878,11 @@ class Pungi(pypungi.PungiBase):
+         """Given a package object, get a package object for the corresponding source rpm."""
+ 
+         # return srpm_po from cache if available
+-        srpm_po = self.sourcerpm_srpmpo_map.get(po.sourcerpm, None)
+-        if srpm_po is not None:
+-            return srpm_po
++        try:
++            srpm_po = self.sourcerpm_srpmpo_map[po.sourcerpm]
++        except KeyError:
++            self.logger.error("Cannot get source RPM '%s' for %s" % (po.sourcerpm, po.nvra))
++            return None
+ 
+         # arch can be "src" or "nosrc"
+         nvr, arch, _ = po.sourcerpm.rsplit(".", 2)
+@@ -923,7 +925,6 @@ class Pungi(pypungi.PungiBase):
+                 pprint.pformat(list(sorted(failed)))))
+             self.logger.info("Couldn't find %i of %i srpms." % (
+                 len(failed), len(self.src_by_bin)))
+-            raise RuntimeError("Could not find all srpms.")
+ 
+     def add_srpms(self, po_list=None):
+         """Cycle through the list of package objects and
+@@ -934,10 +935,14 @@ class Pungi(pypungi.PungiBase):
+         po_list = po_list or self.po_list
+         for po in sorted(po_list):
+             srpm_po = self.sourcerpm_srpmpo_map[po.sourcerpm]
+-            if srpm_po in self.completed_add_srpms:
++            try:
++                srpm_po = self.sourcerpm_srpmpo_map[po.sourcerpm]
++            except KeyError:
++                self.logger.error("Cannot get source RPM '%s' for %s" % (po.sourcerpm, po.nvra))
++                srpm_po = None
++
++            if srpm_po is None:
+                 continue
+-            msg = "Added source package %s.%s (repo: %s)" % (srpm_po.name, srpm_po.arch, srpm_po.repoid)
+-            self.add_source(srpm_po, msg)
+ 
+             # flags
+             if po in self.input_packages:
+@@ -949,6 +954,12 @@ class Pungi(pypungi.PungiBase):
+             if po in self.multilib_packages:
+                 self.multilib_packages.add(srpm_po)
+ 
++            if srpm_po in self.completed_add_srpms:
++                continue
++ 
++            msg = "Added source package %s.%s (repo: %s)" % (srpm_po.name, srpm_po.arch, srpm_po.repoid)
++            self.add_source(srpm_po, msg)
++
+             self.completed_add_srpms.add(srpm_po)
+             srpms.add(srpm_po)
+         return srpms
+@@ -1042,8 +1053,16 @@ class Pungi(pypungi.PungiBase):
+             msg = 'Added debuginfo %s.%s (repo: %s)' % (po.name, po.arch, po.repoid)
+             self.add_debuginfo(po, msg)
+ 
++            try:
++                srpm_po = self.sourcerpm_srpmpo_map[po.sourcerpm]
++            except KeyError:
++                self.logger.error("Cannot get source RPM '%s' for %s" % (po.sourcerpm, po.nvra))
++                srpm_po = None
++
++            if srpm_po is None:
++                continue
++
+             # flags
+-            srpm_po = self.sourcerpm_srpmpo_map[po.sourcerpm]
+             if srpm_po in self.input_packages:
+                 self.input_packages.add(po)
+             if srpm_po in self.fulltree_packages:

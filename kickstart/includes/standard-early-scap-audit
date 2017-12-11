@@ -1,0 +1,42 @@
+
+if [ -f /usr/share/xml/scap/ssg/content/ssg-centos7-ds.xml ]; then
+        ds='centos7'
+else   
+	ds='rhel7'
+fi
+
+if [ ${ds} == "centos7" ]; then
+	xccdf_profile=xccdf_org.ssgproject.content_profile_stig-rhel7-server-upstream
+else
+	xccdf_profile=xccdf_org.ssgproject.content_profile_stig-rhel7-disa
+fi
+
+mkdir -p /root/scap/{pre,post}/html
+oscap xccdf eval --profile ${xccdf_profile} \
+--report /root/scap/pre/html/report.html \
+--results /root/scap/pre/html/results.xml \
+/usr/share/xml/scap/ssg/content/ssg-${ds}-ds.xml
+
+oscap xccdf generate fix \
+--result-id xccdf_org.open-scap_testresult_${xccdf_profile} \
+--template urn:xccdf:fix:script:sh \
+/root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
+
+# fix sed commands in remediation script
+sed -i -e '/existing_rules=.*sed .*/{s|/|;|g}' /root/scap/pre/remediation-script.sh
+
+# update audit config to monitor shadow and passwd files
+cat <<EOF >> /root/scap/pre/remediation-script.sh
+fix_audit_watch_rule "auditctl" "/etc/group" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/group" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "auditctl" "/etc/passwd" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/passwd" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "auditctl" "/etc/gshadow" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/gshadow" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "auditctl" "/etc/shadow" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/shadow" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "auditctl" "/etc/security/opasswd" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/security/opasswd" "wa" "audit_rules_usergroup_modification"
+EOF
+
+chmod +x /root/scap/pre/remediation-script.sh

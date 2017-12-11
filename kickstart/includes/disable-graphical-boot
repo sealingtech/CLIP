@@ -1,0 +1,5 @@
+# Disable all that GUI stuff during boot so we can actually see what is going on during boot.
+# by getting rid of the framebuffer effects, rhgb, and quiet.
+grubby --update-kernel=ALL --remove-args="rhgb quiet"
+echo "Modifying splash screen with plymouth..."
+plymouth-set-default-theme details --rebuild-initrd &> /dev/null

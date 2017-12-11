@@ -39,8 +39,8 @@ OUTPUT_DIR ?= $(ROOT_DIR)
 SRPM_OUTPUT_DIR ?= $(OUTPUT_DIR)
 
 # exhaustive list of deps for the RPM, used to determine if RPM needs to be rebuilt
-TAR_DEPS := $(shell find ./)
-RPM_DEPS := $(TARBALL) $(RPM_SPEC) $(CURDIR)/Makefile
+TAR_DEPS := $(CURDIR)/Makefile $(shell find $(CURDIR)/$(PKGNAME)/* -type f -or -type d | sed -e "s/ /\\\ /g")
+RPM_DEPS := $(TARBALL) $(RPM_SPEC) $(CURDIR)/Makefile $(ADDTL_DEPS)
 
 RPM_TMPDIR ?= $(ROOT_DIR)/tmp
 RPM_TOPDIR ?= $(RPM_TMPDIR)/src/redhat

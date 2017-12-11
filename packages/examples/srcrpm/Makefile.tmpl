@@ -17,7 +17,7 @@ VERSION := 1
 RELEASE := 1
 
 # snag the architecture, hard code an arch if cross-compiling or going noarch
-ARCH := $(uname -p)
+ARCH := $(shell uname -i)
 
 
 PACKAGER := Quark Security, Inc

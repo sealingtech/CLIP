@@ -39,7 +39,7 @@ OUTPUT_DIR ?= $(ROOT_DIR)
 SRPM_OUTPUT_DIR ?= $(OUTPUT_DIR)
 
 # exhaustive list of deps for the RPM, used to determine if RPM needs to be rebuilt
-RPM_DEPS := $(SOURCES) $(RPM_SPEC) Makefile
+RPM_DEPS := $(SOURCES) $(RPM_SPEC) Makefile $(ADDTL_DEPS)
 
 RPM_TMPDIR ?= $(ROOT_DIR)/tmp
 RPM_TOPDIR ?= $(RPM_TMPDIR)/src/redhat

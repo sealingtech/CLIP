@@ -22,8 +22,8 @@
 # Anywho, we're thinking about it, but no timeline yet ;)
 
 # NOTE: this is the right path for Quark Security's build VM
-centos6.7 = /opt/repos/centos6.7
-centos6.7-updates = /opt/repos/centos6.7-updates
+#centos7.0 = /opt/repos/centos7.0-1406/
+#centos7.2 = /opt/repos/centos7.2-1511
 
 # A RHEL/CentOS repo must be available. Must be a local path (we use NFS mounts).
 # rhel = /mnt/repos-6-3/rhel-6-3-x86_64/rhel-x86_64-server-6/getPackage
@@ -42,3 +42,10 @@ centos6.7-updates = /opt/repos/centos6.7-updates
 # WARNING: The CLIP team is no longer testing or supporting RHEL 5 builds from this tree.  
 #          It might work, but probably will not.  
 #buildgroups = /mnt/repos/buildgroups
+# INSERTED BY BOOTSTRAP.SH
+#rhel7.2 = /mnt/repos/rhel7.2-server
+# INSERTED BY BOOTSTRAP.SH
+#rhel7.2-server = /mnt/repos/rhel7.2-server
+# INSERTED BY BOOTSTRAP.SH
+rhel7.4 = /opt/repos/rhel-7.4-server
+rhel7.4-optional = /opt/repos/rhel-7.4-server-optional

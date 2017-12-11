@@ -36,8 +36,8 @@ OUTPUT_DIR ?= $(ROOT_DIR)
 SRPM_OUTPUT_DIR ?= $(OUTPUT_DIR)
 
 # exhaustive list of deps for the RPM, used to determine if RPM needs to be rebuilt
-# TAR_DEPS := $(wildcard $(PKGNAME)/*)
-RPM_DEPS := $(TARBALL) $(RPM_SPEC) $(CURDIR)/Makefile $(CURDIR)/rhel6_pam_sshd
+# TAR_DEPS := $(CURDIR)/Makefile $(shell find $(PKGNAME)/*)
+RPM_DEPS := $(TARBALL) $(RPM_SPEC) $(CURDIR)/Makefile $(CURDIR)/rhel6_pam_sshd $(ADDTL_DEPS)
 
 RPM_TMPDIR ?= $(ROOT_DIR)/tmp
 RPM_TOPDIR ?= $(RPM_TMPDIR)/src/redhat

@@ -1,18 +1,22 @@
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
-Name:           %{pkgname}
-Version:        %{version}
-Release:        %{release}
+Name:           pungi
+Version:        3.12
+Release:        3.el7.1
 Summary:        Distribution compose tool
 
 Group:          Development/Tools
 License:        GPLv2
 URL:            https://fedorahosted.org/pungi
 Source0:        https://fedorahosted.org/pungi/attachment/wiki/%{version}/%{name}-%{version}.tar.bz2
-Patch0:         buildinstall_updates.patch
-Patch1:         symlink_option.patch
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Requires:       anaconda-runtime >= 11.4.1.5, yum => 3.2.19, repoview, createrepo >= 0.4.11
+Patch0:         0001-replace-tabs-with-spaces.patch
+Patch1:         0001-Make-our-OS-iso-bootable-on-aarch64.patch
+Patch2:		0002-fix-absolute-paths.patch
+Patch3:		0003-follow-symlinks.patch
+Patch4:		0004-call-lorax-with-custom-args.patch
+Patch5:		0005-ignore-missing-srpms.patch
+Requires:       yum => 3.4.3-28, repoview, createrepo >= 0.4.11
+Requires:       lorax, python-lockfile
 BuildRequires:  python-devel
 
 BuildArch:      noarch
@@ -25,6 +29,10 @@ A tool to create anaconda based installation trees/isos of a set of rpms.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
+%patch3 -p1
+%patch4 -p1
+%patch5 -p1
 
 %build
 %{__python} setup.py build
@@ -52,19 +60,174 @@ rm -rf $RPM_BUILD_ROOT
   %{python_sitelib}/%{name}-%{version}-py?.?.egg-info
 %endif
 %{_bindir}/pungi
-%{_bindir}/pkgorder
 %{_datadir}/pungi
 %{_mandir}/man8/pungi.8.gz
 /var/cache/pungi
 
 
 %changelog
-* Tue Aug 24 2010 Jesse Keating <jkeating@redhat.com> - 2.0.22-1
-- Backport a yum traceback
+* Fri Feb 26 2016 Dennis Gilmore <dennis@ausil.us> - 3.12-3.1
+- rebuild
 
-* Wed Apr 14 2010 Jesse Keating <jkeating@redhat.com> - 2.0.21-1
-- Grab all kernels
-- Note the type of checksum we use
+* Mon Dec 15 2014 Dennis Gilmore <dennis@ausil.us> - 3.12-3
+- add patch to make the dvd bootable on aarch64
+
+* Tue Sep 30 2014 Dennis Gilmore <dennis@ausil.us> - 3.12-2
+- add patch to fix whitespace errors
+
+* Thu Sep 11 2014 Dennis Gilmore <dennis@ausil.us> - 3.12-1
+- Remove magic parameter to mkisofs (hamzy)
+- Added option for setting release note files (riehecky)
+
+* Thu Jul 31 2014 Dennis Gilmore <dennis@ausil.us> - 3.11-1
+- make sure that the dvd/cd is using the shortened volumeid (dennis)
+
+* Thu Jul 31 2014 Dennis Gilmore <dennis@ausil.us> - 3.10-1
+- fix up volume shortening substituions to actually work (dennis)
+
+* Wed Jul 30 2014 Dennis Gilmore <dennis@ausil.us> - 3.09-1
+- implement nameing scheme from
+  https://fedoraproject.org/wiki/User:Adamwill/Draft_fedora_image_naming_policy
+  (dennis)
+- implement shortening of the volumeid which has a 32 character limit (dennis)
+
+* Wed Jul 23 2014 Dennis Gilmore <dennis@ausil.us> - 3.08-1
+- fix up some issues with --no-dvd and --workbasedir (dennis)
+
+* Sun Jul 20 2014 Dennis Gilmore <dennis@ausil.us> - 3.07-1
+- add option to not make a dvd
+
+* Mon Jul 14 2014 Dennis Gilmore <dennis@ausil.us> - 3.06-1
+- allow the base work directory to be configurable
+
+* Tue Jul 08 2014 Dennis Gilmore <dennis@ausil.us> - 3.05-1
+- Don't emit media labels with spaces in them. (pjones)
+
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.04-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Thu May 01 2014 Dennis Gilmore <dennis@ausil.us> - 3.04-2
+- add missing requires on python-lockfile
+
+* Tue Apr 29 2014 Dennis Gilmore <dennis@ausil.us> - 3.04-1
+- Use a lockfile around things that modify the cachedir. (rbean)
+- Improve logging for missing srpms. (rbean)
+- honour the --nosource option (dennis)
+- support ppc64le in pungi (hamzy)
+- Add configurable compression type to pungi (default to xz) (rbean)
+
+* Thu Oct 31 2013 Dennis Gilmore <dennis@ausil.us> - 3.03-1
+- revert to the old way of doing versioning as the change in 3.01 did not work
+
+* Thu Oct 31 2013 Dennis Gilmore <dennis@ausil.us> - 3.02-1
+- fix typo in call to __version__ (Dennis Gilmore)
+
+* Sun Oct 27 2013 Daniel Mach <dmach@redhat.com> - 3.01-1
+- Add 'make log' command to print changelog for spec. (Daniel Mach)
+- Implement %prepopulate config section as an additional package input. (Daniel Mach)
+- Don't automatically apply fulltree on input multilib packages. (Daniel Mach)
+- Implement %multilib-blacklist and %multilib-whitelist config sections. (Daniel Mach)
+- Turn off fulltree for multilib packages. (Daniel Mach)
+- Return package flags: input, fulltree-exclude, langpack, multilib, fulltree (Daniel Mach)
+- Exclude srpms from conditional deps. (Daniel Mach)
+- Improve greedy methods: none, all, build. (Daniel Mach)
+- Add .gitignore. (Daniel Mach)
+- Add 'yaboot' multilib method. (Daniel Mach)
+- Drop pulseaudio-utils from runtime whitelist (Daniel Mach)
+- Remove packages which are in lookaside repos from regular repos. (Daniel Mach)
+- Print repoid to make clear from which repo a package came. (Daniel Mach)
+- Don't pull conditional deps in when --nodeps is used. (Daniel Mach)
+- Multilib fix - consider only *.so* libs which are also listed in Provides. (Daniel Mach)
+- Fix --nodeps by setting Pungi.is_resolve_deps according to config. (Daniel Mach)
+- Add test_arch.py. (Daniel Mach)
+
+* Tue Aug 20 2013 Dennis Gilmore <dennis@ausil.us> - 3.00-1
+- apply patches from Daniel Mach
+- make sure we only use mac support on x86_64
+- make sure deltarpm is disabled
+
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.13-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.13-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
+* Fri Dec 21 2012 Dennis Gilmore <dennis@ausil.us> - 2.13-1
+- strip groups from comps not listed in the kickstart
+- fix ppc64 runtime installation (#888887)
+- dont make isos on arm
+- include ppc64 checksums (#888517)
+
+* Fri Aug 31 2012 Dennis Gilmore <dennis@ausil.us> - 2.12-1
+- ppc64p7 support
+- update locations for ppc files for image composition bz#849731
+- add 32 bit arm arches
+
+* Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.11-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Thu May 03 2012 Dennis Gilmore <dennis@ausil.us> - 2.11-2
+- add patch for bz#816315
+ 
+* Mon Apr 16 2012 Dennis Gilmore <dennis@ausil.us> - 2.11-1
+- upstream 2.11 release
+
+* Thu Feb 09 2012 Dennis Gilmore <dennis@ausil.us> - 2.10-1
+- drop all the patches merged into upstream 2.10 release
+
+* Thu Feb 09 2012 Dennis Gilmore <dennis@ausil.us> - 2.9-3
+- hash the Packages dir for consistency between Fedora and Everything trees
+
+* Tue Jan 31 2012 Dennis Gilmore <dennis@ausil.us> - 2.9-2
+- add patch from will woods for yaboot on ppc
+
+* Mon Jan 30 2012 Dennis Gilmore <dennis@ausil.us> - 2.9-1
+- pass isfinal rather than is_beta to lorax 
+
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.8-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Thu Oct 27 2011 Will Woods <wwoods@redhat.com> - 2.8-2
+- Fix DVD builds for ppc/ppc64
+- Use a consistent ISO label so the bootloader will work (#732298)
+
+* Mon Jul 18 2011 Jesse Keating <jkeating@redhat.com> - 2.8-1
+- Always re-init the yum object (#717089)
+
+* Mon May 16 2011 Dennis Gilmore <dennis@ausil.us> - 2.7-1
+- add --isfinal for turning off the betanag
+
+* Fri Apr 29 2011 Jesse Keating <jkeating@redhat.com> - 2.6-1
+- Make sure lorax makes use of our gathered repo
+
+* Wed Jan 12 2011 Jesse Keating <jkeating@redhat.com> - 2.5-1
+- Use Lorax instead of buildinstall (mgracik)
+
+* Tue Dec 21 2010 Jesse Keating <jkeating@redhat.com> - 2.4-1
+- Enable EFI booting on x86_64 media
+
+* Mon Nov 15 2010 Jesse Keating <jkeating@redhat.com> - 2.3-1
+- Drop split-media support
+
+* Thu Oct 14 2010 Jesse Keating <jkeating@redhat.com> - 2.1.4-1
+- Further fix the pkgorder issue
+
+* Wed Oct 13 2010 Jesse Keating <jkeating@redhat.com> - 2.1.3-1
+- Fix a pkgorder issue
+
+* Tue Jun 29 2010 Jesse Keating <jkeating@redhat.com> - 2.1.2-1
+- Fix a yumconf traceback (thanks James!)
+
+* Fri Jun 04 2010 Jesse Keating <jkeating@redhat.com> - 2.1.1-1
+- Don't do multilib gathering.
+- fixes --force when compose fails during split-tree process. (npetrov)
+- fix pkgorder (npetrov)
+
+* Wed Apr 14 2010 Jesse Keating <jkeating@redhat.com> - 2.1.0-1
+- Update paths for new anaconda layout
+- Drop hints about checksum type
+- Add proxy support from the repo line in the kickstart file
+- Catch all kernel packages
 
 * Tue Sep 15 2009 Jesse Keating <jkeating@redhat.com> - 2.0.20-1
 - One more upstream pkgorder fix

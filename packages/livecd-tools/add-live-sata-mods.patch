@@ -1,12 +1,12 @@
-diff -purN a/imgcreate/live.py b/imgcreate/live.py
---- a/imgcreate/live.py	2016-02-01 14:33:33.638079939 -0500
-+++ b/imgcreate/live.py	2016-02-01 14:33:48.791088634 -0500
-@@ -232,7 +232,7 @@ class LiveImageCreatorBase(LoopImageCrea
-         return "squashfs ext4 ext3 ext2 vfat msdos ";
+diff -uNr livecd-tools-orig/imgcreate/live.py livecd-tools-21.4/imgcreate/live.py
+--- livecd-tools-orig/imgcreate/live.py	2014-10-27 18:36:09.000000000 +0000
++++ livecd-tools-21.4/imgcreate/live.py	2016-07-26 19:39:54.419787975 +0000
+@@ -265,7 +265,7 @@
+         return "vfat msdos isofs ext4 xfs btrfs";
  
      def __extra_drivers(self):
 -        retval = "sr_mod sd_mod ide-cd cdrom "
-+        retval = "sr_mod sd_mod ide-cd cdrom ata_generic ata_piix sg pata_acpi dm_mod dm_log dm_region_hash dm_mirror mptbase mptscsih mptspi "
++        retval = "sr_mod sd_mod ide-cd cdrom ata-generic ata_piix sg pata_acpi dm_mod dm_log dm_region_hash dm_mirror mptbase mptscsih mptspi "
          for module in self.__modules:
              if module == "=usb":
                  retval = retval + "ehci_hcd uhci_hcd ohci_hcd "

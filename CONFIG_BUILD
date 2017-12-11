@@ -13,11 +13,12 @@
 #                                 not remediate.  You can still remediate at run-time after deployment.
 # CONFIG_BUILD_UNCONFINED_TOOR allows the toor user to run the unconfined (read->all powerful) toor_r:toor_t role.
 #                              Normally the toor user is confined in the sysadm_r:sysadm_t role.
-# CONFIG_BUILD_ENABLE_DHCP enable DHCP for eth0                             
+# CONFIG_BUILD_ENABLE_DHCP enable DHCP for all network interfaces
 # CONFIG_BUILD_VPN_INCLUDE_TOOR enable toor user for vpn variant
 # CONFIG_BUILD_ENABLE_SSH_6 enable OpenSSH version 6 with modern crypto and the Secure Secure Shell configuation.
 # 			    This includes support for ED25519 and RSA keys and disables weak algorithms.
 # 			    See here for info on the configuration: https://stribika.github.io/2015/01/04/secure-secure-shell.html
+# CONFIG_BUILD_SELINUX_POL_TYPE Set this to mcs or mls depending on the policy you need to build
 # Note: these variables and values will be inserted into /root/clip-info.txt for inspection at run-time.
 CONFIG_BUILD_ENFORCING_MODE := y
 CONFIG_BUILD_REMEDIATE := y
@@ -25,6 +26,7 @@ CONFIG_BUILD_UNCONFINED_TOOR := y
 CONFIG_BUILD_ENABLE_DHCP := n
 CONFIG_BUILD_VPN_ENABLE_TOOR := n
 CONFIG_BUILD_ENABLE_SSH_6 := n
+CONFIG_BUILD_SELINUX_POL_TYPE := mcs
 
 # List of RPMs that are pre-rolled.  These will be linked into our custom yum repo during the build process.
 # Once referenced here you can start using them in the kickstart.
@@ -51,7 +53,7 @@ endif
 
 # This variable can be leveraged by sub-makes (eg in the packages/foo/Makefile).
 # if files at this top-level should trigger a rebuild.
-ADDTL_DEPS := $(CURDIR)/CONFIG_REPOS $(CURDIR)/CONFIG_BUILD
+ADDTL_DEPS := $(CURDIR)/CONFIG_REPOS $(CURDIR)/CONFIG_BUILD $(CURDIR)/Makefile
 
 # Translate the CONFIG_BUILD_* flags into BASH vars that we insert into things like a kickstart %post
 CONFIG_BUILD_BASH_VARS := export CONFIG_BUILD_ENFORCING_MODE=$(strip $(CONFIG_BUILD_ENFORCING_MODE)) CONFIG_BUILD_UNCONFINED_TOOR=$(strip $(CONFIG_BUILD_UNCONFINED_TOOR)) CONFIG_BUILD_REMEDIATE=$(strip $(CONFIG_BUILD_REMEDIATE)) ISO_VERSION=$(strip $(ISO_VERSION)) CONFIG_BUILD_ENABLE_DHCP=$(strip $(CONFIG_BUILD_ENABLE_DHCP))
@@ -63,4 +65,4 @@ TARGET_ARCH := $(shell uname -i)
 # Quiet down the build output a bit.
 QUIET := n
 
-export TARGET_ARCH ADDTL_DEPS QUIET CONFIG_BUILD_BASH_VARS CONFIG_BUILD_ENFORCING_MODE CONFIG_BUILD_UNCONFINED_TOOR ISO_VERSION CONFIG_BUILD_REMEDIATE CONFIG_BUILD_ENABLE_DHCP CONFIG_BUILD_VPN_ENABLE_TOOR
+export TARGET_ARCH ADDTL_DEPS QUIET CONFIG_BUILD_BASH_VARS CONFIG_BUILD_ENFORCING_MODE CONFIG_BUILD_UNCONFINED_TOOR ISO_VERSION CONFIG_BUILD_REMEDIATE CONFIG_BUILD_ENABLE_DHCP CONFIG_BUILD_VPN_ENABLE_TOOR CONFIG_BUILD_SELINUX_POL_TYPE

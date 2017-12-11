@@ -1,0 +1,47 @@
+diff -purN a/src/pypungi/multilib.py b/src/pypungi/multilib.py
+--- a/src/pypungi/multilib.py	2016-05-19 03:52:41.441537929 -0400
++++ b/src/pypungi/multilib.py	2016-05-19 04:25:31.638583786 -0400
+@@ -16,6 +16,7 @@
+ # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ 
+ 
++import os
+ import re
+ import fnmatch
+ import pathmatch
+@@ -28,6 +29,11 @@ LINE_PATTERN_RE = re.compile(r"^\s*(?P<l
+ RUNTIME_PATTERN_SPLIT_RE = re.compile(r"^\s*(?P<path>[^\s]+)\s+(?P<pattern>[^\s]+)(:?\s+(?P<comment>#.*))?$")
+ SONAME_PATTERN_RE = re.compile(r"^(.+\.so\.[a-zA-Z0-9_\.]+).*$")
+ 
++PATH = os.getenv('PYTHONPATH', '')
++
++if PATH != "":
++	PATH = PATH + "/../../../../"
++
+ 
+ def read_lines(lines):
+     result = []
+@@ -142,9 +148,9 @@ class RuntimeMultilibMethod(MultilibMeth
+     name = "runtime"
+ 
+     def __init__(self, **kwargs):
+-        self.blacklist = read_lines_from_file("/usr/share/pungi/multilib/runtime-blacklist.conf")
+-        self.whitelist = read_lines_from_file("/usr/share/pungi/multilib/runtime-whitelist.conf")
+-        self.patterns = expand_runtime_patterns(read_runtime_patterns_from_file("/usr/share/pungi/multilib/runtime-patterns.conf"))
++        self.blacklist = read_lines_from_file(PATH + "/usr/share/pungi/multilib/runtime-blacklist.conf")
++        self.whitelist = read_lines_from_file(PATH + "/usr/share/pungi/multilib/runtime-whitelist.conf")
++        self.patterns = expand_runtime_patterns(read_runtime_patterns_from_file(PATH + "/usr/share/pungi/multilib/runtime-patterns.conf"))
+ 
+     def select(self, po):
+         if self.skip(po):
+@@ -238,8 +244,8 @@ class DevelMultilibMethod(MultilibMethod
+     name = "devel"
+ 
+     def __init__(self, **kwargs):
+-        self.blacklist = read_lines_from_file("/usr/share/pungi/multilib/devel-blacklist.conf")
+-        self.whitelist = read_lines_from_file("/usr/share/pungi/multilib/devel-whitelist.conf")
++        self.blacklist = read_lines_from_file(PATH + "/usr/share/pungi/multilib/devel-blacklist.conf")
++        self.whitelist = read_lines_from_file(PATH + "/usr/share/pungi/multilib/devel-whitelist.conf")
+ 
+     def select(self, po):
+         if self.skip(po):
