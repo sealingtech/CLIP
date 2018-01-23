@@ -5,10 +5,10 @@ else
 	ds='rhel7'
 fi
 
-if [ ${ds} == "centos7" ]; then
-	xccdf_profile=xccdf_org.ssgproject.content_profile_stig-rhel7-server-upstream
-else
+if oscap info /usr/share/xml/scap/ssg/content/ssg-${ds}-ds.xml | grep -q 'xccdf_org\.ssgproject\.content_profile_stig-rhel7-disa'; then
 	xccdf_profile=xccdf_org.ssgproject.content_profile_stig-rhel7-disa
+else
+	xccdf_profile=xccdf_org.ssgproject.content_profile_stig-rhel7-server-upstream
 fi
 
 mkdir -p /root/scap/{pre,post}/html
