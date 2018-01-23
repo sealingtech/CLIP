@@ -152,8 +152,8 @@ echo "Turning sshd off"
 # messages
 %include includes/disable-graphical-boot
 
-%include includes/standard-late-scap-audit
 %include includes/standard-fix-bad-scap
+%include includes/standard-late-scap-audit
 %include includes/standard-set-enforcement-mode
 
 # Need to do some additional customizations if we're building for AWS
