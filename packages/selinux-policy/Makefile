@@ -108,9 +108,12 @@ ifneq ($(CONFIG_BUILD_ENFORCING_MODE),n)
 else
 	ENFORCING_MODE := permissive
 endif
-#ifneq ($(CONFIG_BUILD_UNCONFINED_TOOR),n)
-#	ENABLE_MODULES += toor
-#endif
+
+# always build toor as a separate RPM.
+# include or exclude by adding or removing
+# selinux-policy-$(CONFIG_BUILD_SELINUX_POL_TYPE)-toor
+# from the kickstart, or in kickstart/includes/standard-packages.
+SEPARATE_PKGS += toor
 
 ENABLE_MODULES := $(ENABLE_MODULES) $(SEPARATE_PKGS)
 
