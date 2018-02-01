@@ -341,9 +341,10 @@ Group: System Environment/Base
 Requires(pre): policycoreutils >= %{POLICYCOREUTILSVER}
 Requires(pre): coreutils
 Requires(pre): selinux-policy = %{version}-%{release}
-Requires: selinux-policy = %{version}-%{release}
+Requires: selinux-policy = %{version}-%{release} policycoreutils-devel
 Conflicts:  audispd-plugins <= 1.7.7-1
 Conflicts:  seedit
+Provides: selinux-policy-targeted >= 3.13.1-39, selinux-policy-minimum >= 3.13.1-39, selinux-policy-mls >= 3.13.1-39
 Obsoletes: selinux-policy-targeted, selinux-policy-minimum, selinux-policy-mls 
 
 %description %{type}
