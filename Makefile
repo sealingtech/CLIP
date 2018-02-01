@@ -331,13 +331,19 @@ $(REPO_DIR)/$(REPO_ID)-repo/last-updated: $(CONF_DIR)/pkglist.$(REPO_ID) $(CONFI
 	@echo "Cleaning $(REPO_ID) yum repo, this could take a few minutes..."
 	$(VERBOSE)$(RM) -r $(REPO_DIR)/$(REPO_ID)-repo
 	@echo "Populating $(REPO_ID) yum repo, this could take a few minutes..."
+# TODO: This mess needs to be addressed using repoquery's relativepath tag.
 	@if [ ! -d $(REPO_PATH) ]; then echo -e "\nError yum repo path doesn't exist: $(REPO_PATH)\n"; exit 1; fi
 	$(call MKDIR,$(REPO_DIR)/$(REPO_ID)-repo)
 	$(VERBOSE)while read fil; do \
+		c=`tr [:upper:] [:lower:] <<< $$$${fil:0:1}`; \
 		if [ -f "$(REPO_PATH)/$$$$fil" ]; then \
-			 $(REPO_LINK) "$(REPO_PATH)/$$$$fil" $(REPO_DIR)/$(REPO_ID)-repo/$$$$fil; \
+			$(REPO_LINK) "$(REPO_PATH)/$$$$fil" $(REPO_DIR)/$(REPO_ID)-repo/$$$$fil; \
+		elif [ -f "$(REPO_PATH)/$$$${c}/$$$$fil" ]; then \
+			$(REPO_LINK) "$(REPO_PATH)/$$$${c}/$$$$fil" $(REPO_DIR)/$(REPO_ID)-repo/$$$$fil; \
 		elif [ -f "$(REPO_PATH)/Packages/$$$$fil" ]; then \
 			$(REPO_LINK) "$(REPO_PATH)/Packages/$$$$fil" $(REPO_DIR)/$(REPO_ID)-repo/$$$$fil; \
+		elif [ -f "$(REPO_PATH)/Packages/$$$${c}/$$$$fil" ]; then \
+			$(REPO_LINK) "$(REPO_PATH)/Packages/$$$${c}/$$$$fil" $(REPO_DIR)/$(REPO_ID)-repo/$$$$fil; \
 		else \
 			echo "Can't find $$$$fil in repo $(REPO_PATH)!"; exit 1; \
 		fi; \
