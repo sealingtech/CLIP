@@ -8,5 +8,6 @@ gen_require(`
 ')
 
 # temporary hack until labeling on packets is supported
-allow domain unlabeled_t:packet { send recv };
+# SRS: removed for CLIP
+# allow domain unlabeled_t:packet { send recv };
 
