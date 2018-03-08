@@ -87,7 +87,6 @@ template(`sudo_role_template',`
 	    	kerberos_manage_host_rcache($1_sudo_t)
 		kerberos_read_config($1_sudo_t)
 	')
-
 ')
 
 ########################################
@@ -144,4 +143,24 @@ interface(`sudo_manage_db',`
     
     manage_dirs_pattern($1, sudo_db_t, sudo_db_t)
     manage_files_pattern($1, sudo_db_t, sudo_db_t)
+')
+
+######################################
+## <summary>
+##  Allow to manage sudoers files.
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed access.
+##  </summary>
+## </param>
+#
+interface(`sudo_manage_sudoers',`
+    gen_require(`
+        type sudo_sudoers_t;
+    ')
+    
+    manage_dirs_pattern($1, sudo_sudoers_t, sudo_sudoers_t)
+    manage_files_pattern($1, sudo_sudoers_t, sudo_sudoers_t)
+    files_rw_etc_dirs($1)
 ')
