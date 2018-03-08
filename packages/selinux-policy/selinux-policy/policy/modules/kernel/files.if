@@ -1585,9 +1585,10 @@ interface(`files_manage_all_files',`
 interface(`files_search_all',`
 	gen_require(`
 		attribute file_type;
+		type unlabeled_t;
 	')
 
-	allow $1 file_type:dir search_dir_perms;
+	allow $1 { file_type -unlabeled_t }:dir search_dir_perms;
 ')
 
 ########################################
