@@ -71,7 +71,18 @@ kernel_rw_usermodehelper_state(tuned_t)
 kernel_rw_vm_sysctls(tuned_t)
 kernel_setsched(tuned_t)
 kernel_rw_all_sysctls(tuned_t)
+
+# tries to open/write hardllink restriction file...
 kernel_dontaudit_getattr_security_state(tuned_t)
+kernel_dontaudit_rw_security_state(tuned_t)
+
+# runs systemctl is-system-running
+optional_policy(`
+	init_status(tuned_t)
+	systemd_exec_systemctl(tuned_t)
+	init_stream_connect(tuned_t)
+	init_dontaudit_read_state(tuned_t)
+')
 
 corecmd_exec_bin(tuned_t)
 corecmd_exec_shell(tuned_t)

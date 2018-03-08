@@ -41,6 +41,8 @@ allow chronyd_t self:shm create_shm_perms;
 allow chronyd_t self:udp_socket create_socket_perms;
 allow chronyd_t self:unix_dgram_socket create_socket_perms;
 allow chronyd_t self:fifo_file rw_fifo_file_perms;
+# getifaddr ipv6?
+allow chronyd_t self:netlink_route_socket { bind create getattr read write nlmsg_read };
 
 allow chronyd_t chronyd_keys_t:file append_file_perms;
 allow chronyd_t chronyd_keys_t:file setattr_file_perms;
@@ -84,6 +86,7 @@ corenet_udp_bind_chronyd_port(chronyd_t)
 corenet_udp_sendrecv_chronyd_port(chronyd_t)
 
 sysnet_read_config(chronyd_t)
+sysnet_read_dhcpc_state(chronyd_t)
 
 domain_dontaudit_getsession_all_domains(chronyd_t)
 
