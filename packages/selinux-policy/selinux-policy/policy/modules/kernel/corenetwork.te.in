@@ -416,25 +416,25 @@ typealias netif_t alias { lo_netif_t netif_lo_t };
 # Unconfined access to this module
 #
 
-allow corenet_unconfined_type node_type:node *;
-allow corenet_unconfined_type netif_type:netif *;
-allow corenet_unconfined_type packet_type:packet *;
-allow corenet_unconfined_type port_type:dccp_socket { send_msg recv_msg name_connect };
-allow corenet_unconfined_type port_type:tcp_socket { send_msg recv_msg name_connect };
-allow corenet_unconfined_type port_type:udp_socket { send_msg recv_msg };
+#allow corenet_unconfined_type node_type:node *;
+#allow corenet_unconfined_type netif_type:netif *;
+#allow corenet_unconfined_type packet_type:packet *;
+#allow corenet_unconfined_type port_type:dccp_socket { send_msg recv_msg name_connect };
+#allow corenet_unconfined_type port_type:tcp_socket { send_msg recv_msg name_connect };
+#allow corenet_unconfined_type port_type:udp_socket { send_msg recv_msg };
 
 # Bind to any network address.
-allow corenet_unconfined_type port_type:{ dccp_socket tcp_socket udp_socket rawip_socket } name_bind;
-allow corenet_unconfined_type node_type:{ dccp_socket tcp_socket udp_socket rawip_socket } node_bind;
+#allow corenet_unconfined_type port_type:{ dccp_socket tcp_socket udp_socket rawip_socket } name_bind;
+#allow corenet_unconfined_type node_type:{ dccp_socket tcp_socket udp_socket rawip_socket } node_bind;
 
 #
 # Rules coverning the use of unlabeled types
 # 
-kernel_dccp_recvfrom_unlabeled(corenet_unlabeled_type)
-kernel_tcp_recvfrom_unlabeled(corenet_unlabeled_type)
-kernel_udp_recvfrom_unlabeled(corenet_unlabeled_type)
-kernel_raw_recvfrom_unlabeled(corenet_unlabeled_type)
-kernel_recvfrom_unlabeled_peer(corenet_unlabeled_type)
+#kernel_dccp_recvfrom_unlabeled(corenet_unlabeled_type)
+#kernel_tcp_recvfrom_unlabeled(corenet_unlabeled_type)
+#kernel_udp_recvfrom_unlabeled(corenet_unlabeled_type)
+#kernel_raw_recvfrom_unlabeled(corenet_unlabeled_type)
+#kernel_recvfrom_unlabeled_peer(corenet_unlabeled_type)
 
 allow netlabel_peer_type netlabel_peer_t:peer recv;
 allow netlabel_peer_type netlabel_peer_t:{ tcp_socket udp_socket rawip_socket dccp_socket } recvfrom;
