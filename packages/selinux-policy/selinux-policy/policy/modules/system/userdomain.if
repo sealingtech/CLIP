@@ -666,14 +666,15 @@ template(`userdom_common_user_template',`
 		attribute unpriv_userdomain;
 	')
 
-	userdom_basic_networking($1_usertype)
-	corenet_all_recvfrom_netlabel($1_t)
+	# SRS: removed for CLIP - gives access to all client/server packets
+	#userdom_basic_networking($1_usertype)
+	#corenet_all_recvfrom_netlabel($1_t)
 
 	##############################
 	#
 	# User domain Local policy
 	#
-	allow $1_t self:packet_socket create_socket_perms;
+	#allow $1_t self:packet_socket create_socket_perms;
 
 	# evolution and gnome-session try to create a netlink socket
 	dontaudit $1_t self:netlink_socket { create ioctl read getattr write setattr append bind connect getopt setopt shutdown };
@@ -693,8 +694,9 @@ template(`userdom_common_user_template',`
 	kernel_read_device_sysctls($1_usertype)
 	kernel_request_load_module($1_usertype)
 
-	corenet_udp_bind_generic_node($1_usertype)
-	corenet_udp_bind_generic_port($1_usertype)
+	# SRS: removed for CLIP
+	# corenet_udp_bind_generic_node($1_usertype)
+	# corenet_udp_bind_generic_port($1_usertype)
 
 	dev_read_rand($1_usertype)
 	dev_write_sound($1_usertype)
@@ -702,7 +704,8 @@ template(`userdom_common_user_template',`
 	dev_read_sound_mixer($1_usertype)
 	dev_write_sound_mixer($1_usertype)
 
-	files_exec_etc_files($1_usertype)
+	# SRS: removed for CLIP
+	#files_exec_etc_files($1_usertype)
 	files_search_locks($1_usertype)
 	# Check to see if cdrom is mounted
 	files_search_mnt($1_usertype)
@@ -1366,8 +1369,9 @@ template(`userdom_unpriv_user_template', `
 	# port access is audited even if dac would not have allowed it, so dontaudit it here
 #	corenet_dontaudit_tcp_bind_all_reserved_ports($1_t)
 	# Need the following rule to allow users to run vpnc
-	corenet_tcp_bind_xserver_port($1_t)
-	corenet_tcp_bind_generic_node($1_usertype)
+	# SRS: removed for CLIP
+	#corenet_tcp_bind_xserver_port($1_t)
+	#corenet_tcp_bind_generic_node($1_usertype)
 
 	storage_rw_fuse($1_t)
 
@@ -1397,17 +1401,18 @@ template(`userdom_unpriv_user_template', `
 	# the same domain and outside users) disabling this forces FTP passive mode
 	# and may change other protocols
 
-	tunable_policy(`selinuxuser_share_music',`
-		corenet_tcp_bind_daap_port($1_usertype)
-	')
+	# SRS: removed for CLIP
+	#tunable_policy(`selinuxuser_share_music',`
+	#	corenet_tcp_bind_daap_port($1_usertype)
+	#')
 
-	tunable_policy(`selinuxuser_tcp_server',`
-		corenet_tcp_bind_all_unreserved_ports($1_usertype)
-	')
+#	tunable_policy(`selinuxuser_tcp_server',`
+#		corenet_tcp_bind_all_unreserved_ports($1_usertype)
+#	')
 
-	tunable_policy(`selinuxuser_udp_server',`
-		corenet_udp_bind_all_unreserved_ports($1_usertype)
-	')
+#	tunable_policy(`selinuxuser_udp_server',`
+#		corenet_udp_bind_all_unreserved_ports($1_usertype)
+#	')
 	optional_policy(`
 		cdrecord_role($1_r, $1_t)
 	')
@@ -1549,15 +1554,15 @@ template(`userdom_admin_user_template',`
 	# for lsof
 	dev_getattr_mtrr_dev($1_t)
 	# Allow MAKEDEV to work
-	dev_create_all_blk_files($1_t)
-	dev_create_all_chr_files($1_t)
-	dev_delete_all_blk_files($1_t)
-	dev_delete_all_chr_files($1_t)
-	dev_rename_all_blk_files($1_t)
-	dev_rename_all_chr_files($1_t)
+	#dev_create_all_blk_files($1_t)
+	#dev_create_all_chr_files($1_t)
+	#dev_delete_all_blk_files($1_t)
+	#dev_delete_all_chr_files($1_t)
+	#dev_rename_all_blk_files($1_t)
+	#dev_rename_all_chr_files($1_t)
 	dev_create_generic_symlinks($1_t)
-	dev_rw_generic_usb_dev($1_t)
-	dev_rw_usbfs($1_t)
+	#dev_rw_generic_usb_dev($1_t)
+	#dev_rw_usbfs($1_t)
 	dev_read_kmsg($1_t)
 	dev_read_cpuid($1_t)
 
@@ -1585,8 +1590,8 @@ template(`userdom_admin_user_template',`
 	fs_set_all_quotas($1_t)
 	fs_exec_noxattr($1_t)
 
-	storage_raw_read_removable_device($1_t)
-	storage_raw_write_removable_device($1_t)
+	#storage_raw_read_removable_device($1_t)
+	#storage_raw_write_removable_device($1_t)
 	storage_dontaudit_read_fixed_disk($1_t)
 
 	term_use_all_inherited_terms($1_t)
@@ -1597,7 +1602,7 @@ template(`userdom_admin_user_template',`
 	files_manage_non_security_dirs($1_t)
 	files_manage_non_security_files($1_t)
 	# Relabel almost all files
-	files_relabel_non_security_files($1_t)
+	#files_relabel_non_security_files($1_t)
 
     files_mounton_rootfs($1_t)
 
@@ -1616,7 +1621,7 @@ template(`userdom_admin_user_template',`
 	seutil_manage_src_policy($1_t)
 	# Violates the goal of limiting write access to checkpolicy.
 	# But presently necessary for installing the file_contexts file.
-	seutil_manage_bin_policy($1_t)
+	#seutil_manage_bin_policy($1_t)
 
 	systemd_config_all_services($1_t)
 
