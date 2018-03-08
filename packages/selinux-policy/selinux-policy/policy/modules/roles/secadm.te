@@ -24,10 +24,12 @@ kernel_read_system_state(secadm_t)
 
 corecmd_exec_shell(secadm_t)
 
-dev_relabel_all_dev_nodes(secadm_t)
-dev_read_urand(secadm_t)
+# SRS: secadm should run selinux utils
+# for this
+# dev_relabel_all_dev_nodes(secadm_t)
+# dev_read_urand(secadm_t)
 
-domain_obj_id_change_exemption(secadm_t)
+#domain_obj_id_change_exemption(secadm_t)
 
 mls_process_read_up(secadm_t)
 mls_file_read_all_levels(secadm_t)
@@ -36,7 +38,10 @@ mls_file_upgrade(secadm_t)
 mls_file_downgrade(secadm_t)
 
 auth_role(secadm_r, secadm_t)
-files_relabel_all_files(secadm_t)
+
+# SRS: secadm should run selinux utils
+# for this
+#files_relabel_all_files(secadm_t)
 
 init_exec(secadm_t)
 
@@ -48,9 +53,9 @@ optional_policy(`
 	aide_run(secadm_t, secadm_r)
 ')
 
-optional_policy(`
-	auditadm_role_change(secadm_r)
-')
+#optional_policy(`
+#	auditadm_role_change(secadm_r)
+#')
 
 optional_policy(`
 	dmesg_exec(secadm_t)
@@ -70,11 +75,12 @@ optional_policy(`
 
 optional_policy(`
 	sudo_role_template(secadm, secadm_r, secadm_t)
+	sudo_manage_sudoers(secadm_t)
 ')
 
-optional_policy(`
-	sysadm_role_change(secadm_r)
-')
+#optional_policy(`
+#	sysadm_role_change(secadm_r)
+#')
 
 optional_policy(`
 	vlock_run(secadm_t, secadm_r)

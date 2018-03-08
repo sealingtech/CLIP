@@ -21,7 +21,6 @@ corecmd_exec_shell(toor_t)
 
 mls_process_read_up(toor_t)
 
-# SRS: removed for CLIP for RHEL 6.2 since we want ubac on toor too.
 ubac_process_exempt(toor_t)
 ubac_file_exempt(toor_t)
 ubac_fd_exempt(toor_t)
@@ -34,6 +33,18 @@ userdom_home_filetrans_user_home_dir(toor_t)
 
 files_manage_all_files(toor_t)
 domain_unconfined(toor_t)
+
+optional_policy(`
+	seutil_run_setfiles(toor_t, toor_r)
+	seutil_run_runinit(toor_t, toor_r)
+	seutil_run_semanage(toor_t, toor_r)
+	seutil_run_setsebool(toor_t, toor_r)
+	seutil_run_newrole(toor_t, toor_r)
+	seutil_run_loadpolicy(toor_t, toor_r)
+	seutil_exec_checkpolicy(toor_t)
+	seutil_run_newrole(toor_t, toor_r)
+	seutil_run_restorecon(toor_t, toor_r)
+')
 
 ifdef(`direct_toor_daemon',`
 	optional_policy(`
@@ -289,11 +300,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	seutil_run_setfiles(toor_t, toor_r)
-	seutil_run_runinit(toor_t, toor_r)
-')
-
-optional_policy(`
 	spamassassin_role(toor_r, toor_t)
 ')
 
@@ -311,6 +317,7 @@ optional_policy(`
 
 optional_policy(`
 	sudo_role_template(toor, toor_r, toor_t)
+	sudo_manage_sudoers(toor_t)
 ')
 
 optional_policy(`

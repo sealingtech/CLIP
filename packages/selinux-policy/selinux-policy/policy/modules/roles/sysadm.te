@@ -31,9 +31,10 @@ files_status_etc(sysadm_t)
 
 fs_mount_fusefs(sysadm_t)
 
-storage_filetrans_all_named_dev(sysadm_t)
+# SRS: removing for CLIP
+#storage_filetrans_all_named_dev(sysadm_t)
 
-term_filetrans_all_named_dev(sysadm_t)
+#term_filetrans_all_named_dev(sysadm_t)
 
 mls_process_read_up(sysadm_t)
 mls_file_read_all_levels(sysadm_t)
@@ -41,11 +42,13 @@ mls_file_write_all_levels(sysadm_t)
 mls_file_read_to_clearance(sysadm_t)
 mls_process_write_to_clearance(sysadm_t)
 
-storage_setattr_fixed_disk_dev(sysadm_t)
+# SRS: removing for CLIP
+#storage_setattr_fixed_disk_dev(sysadm_t)
 
-ubac_process_exempt(sysadm_t)
-ubac_file_exempt(sysadm_t)
-ubac_fd_exempt(sysadm_t)
+# SRS: removing for CLIP
+#ubac_process_exempt(sysadm_t)
+#ubac_file_exempt(sysadm_t)
+#ubac_fd_exempt(sysadm_t)
 
 application_exec(sysadm_t)
 
@@ -105,9 +108,10 @@ ifdef(`distro_gentoo',`
 	init_exec_rc(sysadm_t)
 ')
 
-tunable_policy(`deny_ptrace',`',`
-	domain_ptrace_all_domains(sysadm_t)
-')
+# SRS: removing for CLIP
+#tunable_policy(`deny_ptrace',`',`
+#	domain_ptrace_all_domains(sysadm_t)
+#')
 
 optional_policy(`
 	amanda_run_recover(sysadm_t, sysadm_r)
@@ -134,9 +138,9 @@ optional_policy(`
 	asterisk_exec(sysadm_t)
 ')
 
-optional_policy(`
-	auditadm_role_change(sysadm_r)
-')
+#optional_policy(`
+#	auditadm_role_change(sysadm_r)
+#')
 
 optional_policy(`
 	backup_run(sysadm_t, sysadm_r)
@@ -462,6 +466,7 @@ optional_policy(`
 
 optional_policy(`
 	sudo_role_template(sysadm, sysadm_r, sysadm_t)
+	sudo_manage_sudoers(sysadm_t)
 ')
 
 optional_policy(`
