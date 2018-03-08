@@ -15,6 +15,10 @@ mls_trusted_object(sudo_db_t)
 manage_dirs_pattern(sudodomain, sudo_db_t, sudo_db_t)
 manage_files_pattern(sudodomain, sudo_db_t, sudo_db_t)
 
+type sudo_sudoers_t;
+files_type(sudo_sudoers_t)
+read_files_pattern(sudodomain, sudo_sudoers_t, sudo_sudoers_t)
+
 ##############################
 #
 # Local Policy
@@ -82,7 +86,7 @@ application_signal(sudodomain)
 
 init_rw_utmp(sudodomain)
 init_dontaudit_getattr_initctl(sudodomain)
-
+init_getpgid(sudodomain)
 
 logging_send_audit_msgs(sudodomain)
 logging_set_audit_parameters(sudodomain)
