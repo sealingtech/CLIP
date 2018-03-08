@@ -4,4 +4,4 @@
 /var/db/sudo(/.*)?		gen_context(system_u:object_r:sudo_db_t,s0)
 
 /etc/sudoers		--	gen_context(system_u:object_r:sudo_sudoers_t,s0)
-/etc/sudoers\.d/.*	--	gen_context(system_u:object_r:sudo_sudoers_t,s0)
+/etc/sudoers\.d(/.*)?		gen_context(system_u:object_r:sudo_sudoers_t,s0)
