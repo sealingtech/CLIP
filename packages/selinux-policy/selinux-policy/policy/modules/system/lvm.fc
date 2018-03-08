@@ -98,7 +98,7 @@ ifdef(`distro_gentoo',`
 /usr/lib/systemd/generator/lvm.*   gen_context(system_u:object_r:lvm_unit_file_t,s0)
 /usr/lib/systemd/system/lvm2.*\.service      gen_context(system_u:object_r:lvm_unit_file_t,s0)
 
-/usr/sbin/clvmd			--	gen_context(system_u:object_r:clvmd_exec_t,s0)
+#/usr/sbin/clvmd			--	gen_context(system_u:object_r:clvmd_exec_t,s0)
 /usr/sbin/cryptsetup		--	gen_context(system_u:object_r:lvm_exec_t,s0)
 /usr/sbin/dmeventd		--	gen_context(system_u:object_r:lvm_exec_t,s0)
 /usr/sbin/dmraid		--	gen_context(system_u:object_r:lvm_exec_t,s0)
@@ -174,5 +174,5 @@ ifdef(`distro_gentoo',`
 /var/run/lvm(/.*)?     gen_context(system_u:object_r:lvm_var_run_t,s0)
 /var/run/multipathd(/.*)?   gen_context(system_u:object_r:lvm_var_run_t,s0)
 /var/run/multipathd\.sock -s	gen_context(system_u:object_r:lvm_var_run_t,s0)
-/var/run/clvmd\.pid --  gen_context(system_u:object_r:clvmd_var_run_t,s0)
+#/var/run/clvmd\.pid --  gen_context(system_u:object_r:clvmd_var_run_t,s0)
 /var/run/dmevent.*		gen_context(system_u:object_r:lvm_var_run_t,s0)
