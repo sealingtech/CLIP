@@ -387,7 +387,8 @@ allow init_t self:unix_stream_socket { create_stream_socket_perms connectto };
 allow init_t self:netlink_kobject_uevent_socket create_socket_perms; 
 allow init_t self:netlink_selinux_socket create_socket_perms;
 # Until systemd is fixed
-allow daemon init_t:socket_class_set { getopt read getattr ioctl setopt write };
+# SRS: removed for CLIP
+#allow daemon init_t:socket_class_set { getopt read getattr ioctl setopt write };
 allow init_t self:udp_socket create_socket_perms;
 allow init_t self:netlink_route_socket create_netlink_socket_perms;
 
@@ -507,6 +508,15 @@ auth_domtrans_chk_passwd(init_t)
 
 # Needed to delete /.autorelabel
 files_delete_boot_flag(init_t)
+
+optional_policy(`
+	# SRS: this is very weird, but when chronyd and its helpers start
+	# they trigger this, but it occurs in the init_t domain evne though
+	# it has transitions correctly.
+	require { type chronyd_t; }
+	files_dontaudit_mounton_etc(init_t)
+')
+
 
 optional_policy(`
 	iptables_read_config(init_t)
@@ -678,6 +688,7 @@ manage_files_pattern(initrc_t, initrc_var_log_t, initrc_var_log_t)
 logging_log_filetrans(initrc_t, initrc_var_log_t, dir)
 
 init_write_initctl(initrc_t)
+init_status(initrc_t)
 
 kernel_read_system_state(initrc_t)
 kernel_read_software_raid_state(initrc_t)
