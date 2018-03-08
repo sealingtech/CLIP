@@ -2934,7 +2934,8 @@ interface(`corenet_dccp_recvfrom_unlabeled',`
 	# XXX - at some point the oubound/send access check will be removed
 	# but for right now we need to keep this in place so as not to break
 	# older systems
-	kernel_sendrecv_unlabeled_association($1)
+# SRS: removed for CLIP
+#	kernel_sendrecv_unlabeled_association($1)
 ')
 
 ########################################
@@ -3086,7 +3087,8 @@ interface(`corenet_udp_recvfrom_unlabeled',`
 	# XXX - at some point the oubound/send access check will be removed
 	# but for right now we need to keep this in place so as not to break
 	# older systems
-	kernel_sendrecv_unlabeled_association($1)
+# SRS: removed for CLIP
+#	kernel_sendrecv_unlabeled_association($1)
 ')
 
 ########################################
@@ -3197,7 +3199,8 @@ interface(`corenet_raw_recvfrom_unlabeled',`
 	# XXX - at some point the oubound/send access check will be removed
 	# but for right now we need to keep this in place so as not to break
 	# older systems
-	kernel_sendrecv_unlabeled_association($1)
+# SRS: removed for CLIP
+#	kernel_sendrecv_unlabeled_association($1)
 ')
 
 ########################################
