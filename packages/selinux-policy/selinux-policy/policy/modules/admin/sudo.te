@@ -18,6 +18,7 @@ manage_files_pattern(sudodomain, sudo_db_t, sudo_db_t)
 type sudo_sudoers_t;
 files_type(sudo_sudoers_t)
 read_files_pattern(sudodomain, sudo_sudoers_t, sudo_sudoers_t)
+list_dirs_pattern(sudodomain, sudo_sudoers_t, sudo_sudoers_t)
 
 ##############################
 #
