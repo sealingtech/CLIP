@@ -77,7 +77,7 @@ interface(`domain_type',`
 	domain_base_type($1)
 
 	# Only way to get corenet_unlabeled packets disabled to work
-	corenet_all_recvfrom_unlabeled($1)
+	#corenet_all_recvfrom_unlabeled($1)
 ')
 
 ########################################
