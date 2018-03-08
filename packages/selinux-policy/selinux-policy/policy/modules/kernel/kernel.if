@@ -2435,6 +2435,24 @@ interface(`kernel_list_unlabeled',`
 
 ########################################
 ## <summary>
+##	Search unlabeled directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_search_unlabeled',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	allow $1 unlabeled_t:dir search;
+')
+
+########################################
+## <summary>
 ##	Delete unlabeled files
 ## </summary>
 ## <param name="domain">
@@ -3713,6 +3731,25 @@ interface(`kernel_rw_security_state',`
 	rw_files_pattern($1, { proc_t proc_security_t }, proc_security_t)
 
 	list_dirs_pattern($1, proc_t, proc_security_t)
+')
+
+########################################
+## <summary>
+##	Dontaudit caller rw the security state symbolic links.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_dontaudit_rw_security_state',`
+	gen_require(`
+		type proc_t, proc_security_t;
+	')
+
+	dontaudit $1 proc_security_t:dir search;
+	dontaudit $1 proc_security_t:file { open read write };
 ')
 
 ########################################
