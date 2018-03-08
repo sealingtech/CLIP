@@ -5,18 +5,18 @@ policy_module(lvm, 1.15.2)
 # Declarations
 #
 
-type clvmd_t;
-type clvmd_exec_t;
-init_daemon_domain(clvmd_t, clvmd_exec_t)
+#type clvmd_t;
+#type clvmd_exec_t;
+#init_daemon_domain(clvmd_t, clvmd_exec_t)
 
-type clvmd_initrc_exec_t;
-init_script_file(clvmd_initrc_exec_t)
+#type clvmd_initrc_exec_t;
+#init_script_file(clvmd_initrc_exec_t)
 
-type clvmd_tmpfs_t alias clmvd_tmpfs_t;
-files_tmpfs_file(clvmd_tmpfs_t)
+#type clvmd_tmpfs_t alias clmvd_tmpfs_t;
+#files_tmpfs_file(clvmd_tmpfs_t)
 
-type clvmd_var_run_t;
-files_pid_file(clvmd_var_run_t)
+#type clvmd_var_run_t;
+#files_pid_file(clvmd_var_run_t)
 
 type lvm_t;
 type lvm_exec_t;
@@ -52,121 +52,121 @@ systemd_unit_file(lvm_unit_file_t)
 # Cluster LVM daemon local policy
 #
 
-allow clvmd_t self:capability { sys_nice chown ipc_lock sys_admin mknod };
-dontaudit clvmd_t self:capability sys_tty_config;
-allow clvmd_t self:process { signal_perms setsched };
-allow clvmd_t self:socket create_socket_perms;
-allow clvmd_t self:fifo_file rw_fifo_file_perms;
-allow clvmd_t self:unix_stream_socket { connectto create_stream_socket_perms };
-allow clvmd_t self:tcp_socket create_stream_socket_perms;
-allow clvmd_t self:udp_socket create_socket_perms;
+#allow clvmd_t self:capability { sys_nice chown ipc_lock sys_admin mknod };
+#dontaudit clvmd_t self:capability sys_tty_config;
+#allow clvmd_t self:process { signal_perms setsched };
+#allow clvmd_t self:socket create_socket_perms;
+#allow clvmd_t self:fifo_file rw_fifo_file_perms;
+#allow clvmd_t self:unix_stream_socket { connectto create_stream_socket_perms };
+#allow clvmd_t self:tcp_socket create_stream_socket_perms;
+#allow clvmd_t self:udp_socket create_socket_perms;
 
-manage_dirs_pattern(clvmd_t, clvmd_tmpfs_t, clvmd_tmpfs_t)
-manage_files_pattern(clvmd_t, clvmd_tmpfs_t,clvmd_tmpfs_t)
-fs_tmpfs_filetrans(clvmd_t, clvmd_tmpfs_t, { dir file })
+#manage_dirs_pattern(clvmd_t, clvmd_tmpfs_t, clvmd_tmpfs_t)
+#manage_files_pattern(clvmd_t, clvmd_tmpfs_t,clvmd_tmpfs_t)
+#fs_tmpfs_filetrans(clvmd_t, clvmd_tmpfs_t, { dir file })
 
-manage_dirs_pattern(clvmd_t, clvmd_var_run_t, clvmd_var_run_t)
-manage_files_pattern(clvmd_t, clvmd_var_run_t, clvmd_var_run_t)
-files_pid_filetrans(clvmd_t, clvmd_var_run_t, { file dir })
+#manage_dirs_pattern(clvmd_t, clvmd_var_run_t, clvmd_var_run_t)
+#manage_files_pattern(clvmd_t, clvmd_var_run_t, clvmd_var_run_t)
+#files_pid_filetrans(clvmd_t, clvmd_var_run_t, { file dir })
 
-read_files_pattern(clvmd_t, lvm_metadata_t, lvm_metadata_t)
+#read_files_pattern(clvmd_t, lvm_metadata_t, lvm_metadata_t)
 
-kernel_read_kernel_sysctls(clvmd_t)
-kernel_read_system_state(clvmd_t)
-kernel_list_proc(clvmd_t)
-kernel_read_proc_symlinks(clvmd_t)
-kernel_search_debugfs(clvmd_t)
-kernel_dontaudit_getattr_core_if(clvmd_t)
+#kernel_read_kernel_sysctls(clvmd_t)
+#kernel_read_system_state(clvmd_t)
+#kernel_list_proc(clvmd_t)
+#kernel_read_proc_symlinks(clvmd_t)
+#kernel_search_debugfs(clvmd_t)
+#kernel_dontaudit_getattr_core_if(clvmd_t)
 
-corecmd_exec_shell(clvmd_t)
-corecmd_getattr_bin_files(clvmd_t)
+#corecmd_exec_shell(clvmd_t)
+#corecmd_getattr_bin_files(clvmd_t)
 
-corenet_all_recvfrom_netlabel(clvmd_t)
-corenet_tcp_sendrecv_generic_if(clvmd_t)
-corenet_udp_sendrecv_generic_if(clvmd_t)
-corenet_raw_sendrecv_generic_if(clvmd_t)
-corenet_tcp_sendrecv_generic_node(clvmd_t)
-corenet_udp_sendrecv_generic_node(clvmd_t)
-corenet_raw_sendrecv_generic_node(clvmd_t)
-corenet_tcp_sendrecv_all_ports(clvmd_t)
-corenet_udp_sendrecv_all_ports(clvmd_t)
-corenet_tcp_bind_generic_node(clvmd_t)
-corenet_tcp_bind_reserved_port(clvmd_t)
-corenet_dontaudit_tcp_bind_all_reserved_ports(clvmd_t)
-corenet_sendrecv_generic_server_packets(clvmd_t)
+#corenet_all_recvfrom_netlabel(clvmd_t)
+#corenet_tcp_sendrecv_generic_if(clvmd_t)
+#corenet_udp_sendrecv_generic_if(clvmd_t)
+#corenet_raw_sendrecv_generic_if(clvmd_t)
+#corenet_tcp_sendrecv_generic_node(clvmd_t)
+#corenet_udp_sendrecv_generic_node(clvmd_t)
+#corenet_raw_sendrecv_generic_node(clvmd_t)
+#corenet_tcp_sendrecv_all_ports(clvmd_t)
+#corenet_udp_sendrecv_all_ports(clvmd_t)
+#corenet_tcp_bind_generic_node(clvmd_t)
+#corenet_tcp_bind_reserved_port(clvmd_t)
+#corenet_dontaudit_tcp_bind_all_reserved_ports(clvmd_t)
+#corenet_sendrecv_generic_server_packets(clvmd_t)
 
-dev_read_sysfs(clvmd_t)
-dev_manage_generic_symlinks(clvmd_t)
-dev_relabel_generic_dev_dirs(clvmd_t)
-dev_manage_generic_blk_files(clvmd_t)
-dev_manage_generic_chr_files(clvmd_t)
-dev_rw_lvm_control(clvmd_t)
-dev_dontaudit_getattr_all_blk_files(clvmd_t)
-dev_dontaudit_getattr_all_chr_files(clvmd_t)
-dev_create_generic_dirs(clvmd_t)
-dev_delete_generic_dirs(clvmd_t)
+#dev_read_sysfs(clvmd_t)
+#dev_manage_generic_symlinks(clvmd_t)
+#dev_relabel_generic_dev_dirs(clvmd_t)
+#dev_manage_generic_blk_files(clvmd_t)
+#dev_manage_generic_chr_files(clvmd_t)
+#dev_rw_lvm_control(clvmd_t)
+#dev_dontaudit_getattr_all_blk_files(clvmd_t)
+#dev_dontaudit_getattr_all_chr_files(clvmd_t)
+#dev_create_generic_dirs(clvmd_t)
+#dev_delete_generic_dirs(clvmd_t)
 
-files_read_etc_files(clvmd_t)
-files_list_usr(clvmd_t)
+#files_read_etc_files(clvmd_t)
+#files_list_usr(clvmd_t)
 
-fs_getattr_all_fs(clvmd_t)
-fs_search_auto_mountpoints(clvmd_t)
-fs_dontaudit_list_tmpfs(clvmd_t)
-fs_dontaudit_read_removable_files(clvmd_t)
-fs_rw_anon_inodefs_files(clvmd_t)
+#fs_getattr_all_fs(clvmd_t)
+#fs_search_auto_mountpoints(clvmd_t)
+#fs_dontaudit_list_tmpfs(clvmd_t)
+#fs_dontaudit_read_removable_files(clvmd_t)
+#fs_rw_anon_inodefs_files(clvmd_t)
 
-storage_dontaudit_getattr_removable_dev(clvmd_t)
-storage_manage_fixed_disk(clvmd_t)
-storage_dev_filetrans_fixed_disk(clvmd_t)
-storage_relabel_fixed_disk(clvmd_t)
-storage_raw_read_fixed_disk(clvmd_t)
+#storage_dontaudit_getattr_removable_dev(clvmd_t)
+#storage_manage_fixed_disk(clvmd_t)
+#storage_dev_filetrans_fixed_disk(clvmd_t)
+#storage_relabel_fixed_disk(clvmd_t)
+#storage_raw_read_fixed_disk(clvmd_t)
 
-domain_use_interactive_fds(clvmd_t)
+#domain_use_interactive_fds(clvmd_t)
 
-auth_use_nsswitch(clvmd_t)
+#auth_use_nsswitch(clvmd_t)
 
-init_dontaudit_getattr_initctl(clvmd_t)
+#init_dontaudit_getattr_initctl(clvmd_t)
 
-logging_send_syslog_msg(clvmd_t)
+#logging_send_syslog_msg(clvmd_t)
 
-seutil_sigchld_newrole(clvmd_t)
-seutil_read_config(clvmd_t)
-seutil_read_file_contexts(clvmd_t)
-seutil_search_default_contexts(clvmd_t)
+#seutil_sigchld_newrole(clvmd_t)
+#seutil_read_config(clvmd_t)
+#seutil_read_file_contexts(clvmd_t)
+#seutil_search_default_contexts(clvmd_t)
 
-userdom_dontaudit_use_unpriv_user_fds(clvmd_t)
-userdom_dontaudit_search_user_home_dirs(clvmd_t)
+#userdom_dontaudit_use_unpriv_user_fds(clvmd_t)
+#userdom_dontaudit_search_user_home_dirs(clvmd_t)
 
-lvm_domtrans(clvmd_t)
-lvm_read_config(clvmd_t)
+#lvm_domtrans(clvmd_t)
+#lvm_read_config(clvmd_t)
 
-ifdef(`distro_redhat',`
-	optional_policy(`
-		unconfined_domain(clvmd_t)
-	')
-')
+#ifdef(`distro_redhat',`
+#	optional_policy(`
+#		unconfined_domain(clvmd_t)
+#	')
+#')
 
-optional_policy(`
-	aisexec_stream_connect(clvmd_t)
-	corosync_stream_connect(clvmd_t)
-')
+#optional_policy(`
+#	aisexec_stream_connect(clvmd_t)
+#	corosync_stream_connect(clvmd_t)
+#')
 
-optional_policy(`
-	ccs_stream_connect(clvmd_t)
-')
+#optional_policy(`
+#	ccs_stream_connect(clvmd_t)
+#')
 
-optional_policy(`
-	gpm_dontaudit_getattr_gpmctl(clvmd_t)
-')
+#optional_policy(`
+#	gpm_dontaudit_getattr_gpmctl(clvmd_t)
+#')
 
-optional_policy(`
-	ricci_dontaudit_rw_modcluster_pipes(clvmd_t)
-	ricci_dontaudit_use_modcluster_fds(clvmd_t)
-')
+#optional_policy(`
+#	ricci_dontaudit_rw_modcluster_pipes(clvmd_t)
+#	ricci_dontaudit_use_modcluster_fds(clvmd_t)
+#')
 
-optional_policy(`
-	udev_read_db(clvmd_t)
-')
+#optional_policy(`
+#	udev_read_db(clvmd_t)
+#')
 
 ########################################
 #
@@ -190,7 +190,7 @@ allow lvm_t self:netlink_kobject_uevent_socket create_socket_perms;
 allow lvm_t self:sem create_sem_perms;
 
 allow lvm_t self:unix_stream_socket { connectto create_stream_socket_perms };
-allow lvm_t clvmd_t:unix_stream_socket { connectto rw_socket_perms };
+#allow lvm_t clvmd_t:unix_stream_socket { connectto rw_socket_perms };
 
 allow lvm_t lvm_unit_file_t:file manage_file_perms;
 systemd_unit_file_filetrans(lvm_t, lvm_unit_file_t, file)
