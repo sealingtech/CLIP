@@ -1,7 +1,6 @@
 %define distro redhat 
 %define polyinstatiate n
 %define monolithic n
-%define POLICYVER 30 
 %define POLICYCOREUTILSVER 2.5
 %define CHECKPOLICYVER 2.5
 %define LIBSEMANAGEVER 2.5
@@ -110,6 +109,7 @@ touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.homedir
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/active/seusers \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/active/file_contexts.local \
+touch %{buildroot}%{_sysconfdir}/selinux/%1/active/file_contexts.homedirs \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/active/nodes.local \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/active/users_extra.local \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/active/users.local \
@@ -123,10 +123,10 @@ for f in ${SORTED_PKGS}; do grep $f\.pp\ %{buildroot}/%{_usr}/share/selinux/%1/m
 mkdir -p %{buildroot}/%{_sysconfdir}/selinux/%1/active/modules/100 \
 mkdir -p %{buildroot}/%{_sysconfdir}/selinux/%1/active/modules/disabled \
 /sbin/semodule -s %1 -p %{buildroot} -X 100 -r %{separatePkgs} \
-/usr/bin/sha512sum %{buildroot}%{_sysconfdir}/selinux/%1/policy/policy.%{POLICYVER} | cut -d' ' -f 1 > %{buildroot}%{_sysconfdir}/selinux/%1/.policy.sha512; \
+/usr/bin/sha512sum %{buildroot}%{_sysconfdir}/selinux/%1/policy/policy.`/bin/checkpolicy --version|awk ' { print $1; } '` | cut -d' ' -f 1 > %{buildroot}%{_sysconfdir}/selinux/%1/.policy.sha512; \
 rm -rf %{buildroot}%{_sysconfdir}/selinux/%1/contexts/netfilter_contexts  \
 rm -rf %{buildroot}%{_sysconfdir}/selinux/%1/active/policy.kern \
-ln -sf /etc/selinux/%1/policy/policy.%{POLICYVER}  %{buildroot}%{_sysconfdir}/selinux/%1/active/policy.kern \
+ln -sf /etc/selinux/%1/policy/policy.`/bin/checkpolicy --version|awk ' { print $1; } '`  %{buildroot}%{_sysconfdir}/selinux/%1/active/policy.kern \
 rm -rf %{buildroot}/usr/share/selinux/devel/include
 %nil
 
@@ -153,7 +153,7 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %ghost %{_sysconfdir}/selinux/%1/active/*.bin \
 %ghost %{_sysconfdir}/selinux/%1/active/seusers \
 %dir %{_sysconfdir}/selinux/%1/policy/ \
-%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/policy/policy.%{POLICYVER} \
+%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/policy/policy.* \
 %{_sysconfdir}/selinux/%1/.policy.sha512 \
 %dir %{_sysconfdir}/selinux/%1/contexts \
 %config %{_sysconfdir}/selinux/%1/contexts/customizable_types \
@@ -176,6 +176,7 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/file_contexts \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts.homedirs \
+%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/file_contexts.homedirs \
 %ghost %{_sysconfdir}/selinux/%1/contexts/files/*.bin \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts.local \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs \
