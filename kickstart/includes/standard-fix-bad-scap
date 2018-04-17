@@ -31,6 +31,20 @@ cat <<EOF >>/etc/audit/rules.d/failed-file-mod.rules
 -a always,exit -F arch=b64 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -F key=access
 EOF
 
+# SSG that ships in RHEL 7.5 for auditd had loose regexs and was catching more than it should.
+# which led to space_left <= admin_space_left which prevents auditd from starting.
+# content was producing dupe
+# space_left entries and failed to set action vars
+sed -i '/^admin_space_left.*=.*$/d' /etc/audit/auditd.conf
+sed -i '/^space_left.*=.*$/d' /etc/audit/auditd.conf
+
+cat <<EOF >> /etc/audit/auditd.conf
+space_left = 75
+space_left_action = email
+admin_space_left = 50
+admin_space_left_action = single
+EOF
+
 if [ -f /etc/default/grub ]; then
 	# re-enable USB
 	sed -i "s/nousb//g" /etc/default/grub
@@ -39,14 +53,14 @@ if [ -f /etc/default/grub ]; then
 
 	# SSG content fails to snag the right device hosting /boot
 	# which causes panics on boot when fips is enabled
-	BOOT_DEV=$(df /boot/ | tail -1 | awk '{print $1}')
+	BOOT_DEV=$(df --output=source /boot/ | tail -1)
 	BOOT_DEV=$(lsblk -no UUID ${BOOT_DEV})
 
 	/sbin/grubby --update-kernel=ALL --remove-args="boot"
 	/sbin/grubby --update-kernel=ALL --args="boot=UUID=${BOOT_DEV}"
-	if grep -q "^GRUB_CMDLINE_LINUX=\".*boot=.*\"" /etc/default/grub; then
-		sed -i "s/\(GRUB_CMDLINE_LINUX=\)\"\(.*\)boot=[^s]*\(.*\)\"/\1\"\2 boot=UUID=${BOOT_DEV} \3\"/" /etc/default/grub
+	if grep -q '^GRUB_CMDLINE_LINUX=".*boot=.*"' /etc/default/grub; then
+		sed -i 's|\(^GRUB_CMDLINE_LINUX=.*\)boot=[^[:space:]]*\(.*\)"|\1 boot=UUID='"${BOOT_DEV}"' \2|' /etc/default/grub
 	else
-		sed -i "s/\(GRUB_CMDLINE_LINUX=.*\)\"/\1 boot=UUID=${BOOT_DEV}\"/" /etc/default/grub
+		sed -i 's|\(^GRUB_CMDLINE_LINUX=.*\)"|\1 boot=UUID='"${BOOT_DEV}"'"|' /etc/default/grub
 	fi
 fi
