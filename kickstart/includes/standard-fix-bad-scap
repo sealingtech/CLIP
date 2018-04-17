@@ -31,8 +31,22 @@ cat <<EOF >>/etc/audit/rules.d/failed-file-mod.rules
 -a always,exit -F arch=b64 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -F key=access
 EOF
 
-# re-enable USB
 if [ -f /etc/default/grub ]; then
+	# re-enable USB
 	sed -i "s/nousb//g" /etc/default/grub
 	grubby --update-kernel=ALL --remove-args=nousb
+
+
+	# SSG content fails to snag the right device hosting /boot
+	# which causes panics on boot when fips is enabled
+	BOOT_DEV=$(df /boot/ | tail -1 | awk '{print $1}')
+	BOOT_DEV=$(lsblk -no UUID ${BOOT_DEV})
+
+	/sbin/grubby --update-kernel=ALL --remove-args="boot"
+	/sbin/grubby --update-kernel=ALL --args="boot=UUID=${BOOT_DEV}"
+	if grep -q "^GRUB_CMDLINE_LINUX=\".*boot=.*\"" /etc/default/grub; then
+		sed -i "s/\(GRUB_CMDLINE_LINUX=\)\"\(.*\)boot=[^s]*\(.*\)\"/\1\"\2 boot=UUID=${BOOT_DEV} \3\"/" /etc/default/grub
+	else
+		sed -i "s/\(GRUB_CMDLINE_LINUX=.*\)\"/\1 boot=UUID=${BOOT_DEV}\"/" /etc/default/grub
+	fi
 fi
