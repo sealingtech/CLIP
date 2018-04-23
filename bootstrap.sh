@@ -6,10 +6,34 @@
 set -e
 
 rhn_subscribe() {
-	#If we are building on a redhat machine register with rhn
-	#TODO: Update to the new method for rhel 7
-	arch=`rpm --eval %_host_cpu`
-	rhn-channel --add --channel=rhel-$arch-server-optional-`/bin/awk '{ print $7; }' /etc/redhat-release`.z
+	# If we are building on a redhat machine register with subscription manager
+
+	# Ask the user to set their hostname since it shows up in the user's rhel subscription
+	read -r -p "Your current hostname is \"$(hostname)\", would you like to change it before subscribing? [y/N] " confirmation
+	case "$confirmation" in
+		[yY][eE][sS]|[yY])
+			/bin/echo -e "Enter a new hostname for the system.\n"
+			read hostname
+			/bin/hostnamectl set-hostname "$hostname"
+			;;
+	esac
+
+	# Check to see if the host is subscripted, if not subscribe them
+	if /bin/subscription-manager status | /bin/grep -q "Overall Status: Unknown"; then
+		/bin/subscription-manager register
+	fi
+
+	# Check to see if the host is attached to a license, if not attach them
+	if /bin/subscription-manager list --consumed | /bin/grep -q "No consumed subscription pools"; then
+		/bin/echo -e "This host requires a license. Please select from the following list of pools which one you want to attach to.\n"
+		/bin/subscription-manager list --available | /bin/grep -e "Subscription Name:" -e "Pool ID:" -e "Available:" -e "System Type:"  --color=never
+		/bin/echo -e "\nWhich pool ID would you like to attach to?"
+		read pool_id
+		/bin/subscription-manager attach --pool="$pool_id"
+	fi
+
+	# Enable the required optional repo
+	/bin/subscription-manager repos --enable=rhel-7-server-optional-rpms
 }
 
 
@@ -140,7 +164,7 @@ If you are using CentOS 'c'."
 		chown ${SUDO_USER}:${SUDO_USER} CONFIG_REPOS
 	fi
 
-# if we're on RHEL add the Opt channel
+	# if we're on RHEL add the Opt channel
 	if [ "$distro" == "r" ]; then
 		/bin/echo "We're going to try to subscribe to the RHEL Optional channel for your distro.
 This might not work if you don't have credentials or you're out of entitlements.
@@ -170,7 +194,7 @@ fi
 # install packages that we need but aren't commonly present on default RHEL installs.
 LIVECD_TOOL_DEPS="sssd-client system-config-keyboard"
 INSTALL_ISO_DEPS="python-mako genisoimage syslinux"
-for i in createrepo rpm-build make anaconda policycoreutils-python ruby squashfs-tools ${LIVECD_TOOL_DEPS} ${INSTALL_ISO_DEPS}; do
+for i in createrepo rpm-build make anaconda policycoreutils-python ruby squashfs-tools git sudo libselinux-python pykickstart GConf2 e2fsprogs isomd5sum dosfstools ${LIVECD_TOOL_DEPS} ${INSTALL_ISO_DEPS}; do
 	/bin/rpm -q "$i" >/dev/null || /usr/bin/yum install -y $i
 done;
 
