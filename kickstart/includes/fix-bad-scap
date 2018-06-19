@@ -7,7 +7,9 @@
 # https://github.com/OpenSCAP/openscap/issues/633
 # We'll go with #3 and wait for the tools to catch up
 
-systemctl disable kdump
+systemctl stop kdump.service
+systemctl disable kdump.service
+systemctl mask kdump.service
 
 # And I have yet to figure out how to use SECMARK with firewalld.
 systemctl disable firewalld
@@ -46,6 +48,44 @@ admin_space_left = 50
 admin_space_left_action = single
 EOF
 
+sed -i -e 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i -e 's/#\s*RSAAuthentication .*/RSAAuthentication yes/' /etc/ssh/sshd_config
+sed -i -e 's/#\s*PubkeyAuthentication .*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+
+sed -i -e 's/^[\s#]*StrictModes.*/StrictModes yes/' /etc/ssh/sshd_config
+sed -i -e 's/^[\s#]*GSSAPIAuthentication .*/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
+
+# CCE-80221-5
+sed -i -e 's/^[\s#]*KerberosAuthentication.*/KerberosAuthentication no/g' /etc/ssh/sshd_config
+
+# CCE-80224-9
+sed -i -e 's/^[\s#]*Compression.*/Compression no/g' /etc/ssh/sshd_config
+
+/usr/sbin/sshd-keygen
+
+# CCE-27311-0
+chmod 0644 /etc/ssh/*.pub
+
+# disable default public snmp community
+# CCE-27386-2
+sed -i -e 's/^\([\s#]*com2sec notConfigUser default public\)/# CCE-27386-2 \n# \1/' /etc/snmp/snmpd.conf
+
+# sudo chmod 0600 /etc/ssh/*_key
+chmod 0600 /etc/ssh/*_key
+
+echo "# CCE-80179-5" >> /etc/sysctl.conf
+echo "net.ipv6.conf.all.accept_source_route = 0" >> /etc/sysctl.conf
+
+# CCE-27557-8
+echo "TMOUT=600" > /etc/profile.d/tmout.sh
+chmod 755 /etc/profile.d/tmout.sh
+
+# CCE-27309-4
+# dont use root/admin/administrator as bootloader PW
+# anaconda always
+# FIXME: set a agreed upone default grub superuser name.
+sed -Eie 's/"root"| root /toor/g' /etc/grub.d/01_users
+
 if [ -f /etc/default/grub ]; then
 	# re-enable USB
 	sed -i "s/nousb//g" /etc/default/grub
@@ -65,3 +105,25 @@ if [ -f /etc/default/grub ]; then
 		sed -i 's|\(^GRUB_CMDLINE_LINUX=.*\)"|\1 boot=UUID='"${BOOT_DEV}"'"|' /etc/default/grub
 	fi
 fi
+
+# relocate faillock from non-persistent /var/run
+mkdir -p /var/log/faillock
+for f in /etc/pam.d/*; do
+        if [ -f ${f} ]; then
+                sed -i -e 's;\(.*pam_faillock\.so\)\(.*\);\1 \2 dir=/var/log/faillock;' ${f}
+        fi
+done
+
+# STIG apparently wants 8 but SSG says 5
+sed -i -e 's/^difok.*/difok = 8/' /etc/security/pwquality.conf
+
+# relocate faillock from non-persistent /var/run
+mkdir -p /var/log/faillock
+for f in /etc/pam.d/*; do
+	if [ -f ${f} ]; then
+		sed -i -e 's;\(.*pam_faillock\.so\)\(.*\);\1 \2 dir=/var/log/faillock;' ${f}
+	fi
+done
+
+# CCE-27277-3
+echo "install usb-storage /bin/true" > /etc/modprobe.d/usb-storage.conf
