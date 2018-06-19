@@ -55,10 +55,10 @@ reboot --eject
 # DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
 #REPO-REPLACEMENT-PLACEHOLDER
 
-%include includes/standard-storage
+%include includes/storage
 
 %packages --excludedocs
-%include includes/standard-packages
+%include includes/packages
 #CONFIG-BUILD-ADDTL-PACKAGES
 selinux-policy
 selinux-policy-mcs
@@ -77,12 +77,12 @@ clip-miscfiles
 
 # Do not remove this line unless you remove all the other stanard include files below
 # as they rekly on things defined in this include
-%include includes/standard-prep-post-env
+%include includes/prep-post-env
 
 set -x
 
-%include includes/standard-early-scap-audit
-%include includes/standard-scap-remediate
+%include includes/early-scap-audit
+%include includes/scap-remediate
 
 # FIXME: Change the username and password.
 #        If a hashed password is specified it will be used
@@ -152,9 +152,9 @@ echo "Turning sshd off"
 # messages
 %include includes/disable-graphical-boot
 
-%include includes/standard-fix-bad-scap
-%include includes/standard-late-scap-audit
-%include includes/standard-set-enforcement-mode
+%include includes/fix-bad-scap
+%include includes/late-scap-audit
+%include includes/set-enforcement-mode
 
 # Need to do some additional customizations if we're building for AWS
 if [ x"$CONFIG_BUILD_AWS" == "xy" ]; then
@@ -256,9 +256,6 @@ echo "UseRoaming no" >> /etc/ssh/ssh_config
 
 kill $(jobs -p) 2>/dev/null 1>/dev/null
 kill $TAILPID 2>/dev/null 1>/dev/null
-
-systemctl mask firewalld
-systemctl enable iptables
 
 echo "Done with post install scripts..."
 

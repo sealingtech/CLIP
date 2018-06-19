@@ -52,10 +52,10 @@ reboot --eject
 # DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
 #REPO-REPLACEMENT-PLACEHOLDER
 
-%include includes/standard-storage
+%include includes/storage
 
 %packages --excludedocs
-%include includes/standard-packages
+%include includes/packages
 #CONFIG-BUILD-ADDTL-PACKAGES
 @Base
 selinux-policy
@@ -75,12 +75,12 @@ clip-miscfiles
 # DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
 #CONFIG-BUILD-PLACEHOLDER
 export PATH="/sbin:/usr/sbin:/usr/bin:/bin:/usr/local/bin"
-exec >/root/clip_post_install.log 2>&1
+exec >/root/clip-post-install.log.log 2>&1
 if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "xy" ] \
         && [ x"$CONFIG_BUILD_AWS" != "xy" ];
 then
         # Print the log to tty7 so that the user know what's going on
-        tail -f /root/clip_post_install.log >/dev/tty7 &
+        tail -f /root/clip-post-install.log.log >/dev/tty7 &
         TAILPID=$!
         chvt 7
 fi
@@ -91,10 +91,10 @@ echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 
 # Do not remove this line unless you remove all the other stanard include files below
 # as they rekly on things defined in this include
-%include includes/standard-prep-post-env
+%include includes/prep-post-env
 
-%include includes/standard-early-scap-audit
-%include includes/standard-scap-remediate
+%include includes/early-scap-audit
+%include includes/scap-remediate
 
 if [ x"$CONFIG_BUILD_AWS" != "xy" -o x"$CONFIG_BUILD_VPN_ENABLE_TOOR" == "xy" ]; then
 	# FIXME: Change the username and password.
@@ -165,9 +165,9 @@ fi
 # messages
 %include includes/disable-graphical-boot
 
-%include includes/standard-fix-bad-scap
-%include includes/standard-late-scap-audit
-%include includes/standard-set-enforcement-mode
+%include includes/fix-bad-scap
+%include includes/late-scap-audit
+%include includes/set-enforcement-mode
 
 echo "session optional pam_umask.so umask=0077" >> /etc/pam.d/sshd
 
