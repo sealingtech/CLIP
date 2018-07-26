@@ -20,19 +20,66 @@ systemctl enable ip6tables
 # https://github.com/OpenSCAP/scap-security-guide/issues/1435
 sed -i -e 's/cbcMACs/cbc\nMACS/' /etc/ssh/sshd_config 
 
-# add missing audit rules
-cat <<EOF >>/etc/audit/audit.rules
--a always,exit -F arch=b32 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -F key=access
--a always,exit -F arch=b32 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -F key=access
--a always,exit -F arch=b64 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -F key=access
--a always,exit -F arch=b64 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -F key=access
+# use right UID for auid range
+UID_MIN=$(awk '/^[\s]*UID_MIN/{ print $2; }' /etc/login.defs)
+
+# This *appears* to be fixed now and the following results in a vad audit.rules with dupes.
+#cat <<EOF >>/etc/audit/rules.d/failed-file-mod.rules
+#-a always,exit -F arch=b32 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EACCES -F auid>=${UID_MIN} -F auid!=4294967295 -F key=access
+#-a always,exit -F arch=b32 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EPERM -F auid>=${UID_MIN} -F auid!=4294967295 -F key=access
+#-a always,exit -F arch=b64 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EACCES -F auid>=${UID_MIN} -F auid!=4294967295 -F key=access
+#-a always,exit -F arch=b64 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EPERM -F auid>=${UID_MIN} -F auid!=4294967295 -F key=access
+#EOF
+
+# CCE-80393-2
+# CCI-000172 (NIST SP 800-53: AU-12 c; NIST SP 800-53A: AU-12.1 (iv); NIST SP 800-53 Rev 4: AU-12 c)
+# CCI-002884 (NIST SP 800-53 Rev 4: MA-4 (1) (a))
+cat <<EOF >>/etc/audit/rules.d/seutil.rules
+-a always,exit -F path=/usr/sbin/semanage -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -F key=privileged-priv_change
+-a always,exit -F path=/usr/sbin/setsebool -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -F key=privileged-priv_change
+-a always,exit -F path=/usr/bin/chcon -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -F key=privileged-priv_change
+-a always,exit -F path=/usr/sbin/setfiles -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -F key=privileged-priv_change
 EOF
-cat <<EOF >>/etc/audit/rules.d/failed-file-mod.rules
--a always,exit -F arch=b32 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -F key=access
--a always,exit -F arch=b32 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -F key=access
--a always,exit -F arch=b64 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -F key=access
--a always,exit -F arch=b64 -S creat,open,openat,open_by_handle_at,truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -F key=access
+
+# CCE-80399-9
+# CCI-000135 (NIST SP 800-53: AU-3 (1); NIST SP 800-53A: AU-3 (1).1 (ii); NIST SP 800-53 Rev 4: AU-3 (1))
+# CCI-000172 (NIST SP 800-53: AU-12 c; NIST SP 800-53A: AU-12.1 (iv); NIST SP 800-53 Rev 4: AU-12 c)
+# CCI-002884 (NIST SP 800-53 Rev 4: MA-4 (1) (a))
+echo "-a always,exit -F path=/usr/sbin/userhelper -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -k privileged-passwd" >> /etc/audit/rules.d/userhelper.rules
+
+# CCE-27461-3
+# CCI-000130 (NIST SP 800-53: AU-3; NIST SP 800-53A: AU-3.1; NIST SP 800-53 Rev 4: AU-3)
+# CCI-000135 (NIST SP 800-53: AU-3 (1); NIST SP 800-53A: AU-3 (1).1 (ii); NIST SP 800-53 Rev 4: AU-3 (1))
+# CCI-000172 (NIST SP 800-53: AU-12 c; NIST SP 800-53A: AU-12.1 (iv); NIST SP 800-53 Rev 4: AU-12 c)
+# CCI-002884 (NIST SP 800-53 Rev 4: MA-4 (1) (a))
+cat <<EOF >>/etc/audit/rules.d/sudoer.rules
+-w /etc/sudoers -p wa -k privileged-actions
+-w /etc/sudoers.d/ -p wa -k privileged-actions
 EOF
+
+cat <<EOF > /etc/audit/rules.d/postfix.rules
+# CCE-80406-2
+# CCI-000135 (NIST SP 800-53: AU-3 (1); NIST SP 800-53A: AU-3 (1).1 (ii); NIST SP 800-53 Rev 4: AU-3 (1))
+# CCI-002884 (NIST SP 800-53 Rev 4: MA-4 (1) (a))
+-a always,exit -F path=/usr/sbin/postdrop -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -k privileged-postfix"
+# CCE-80407-0
+# CCI-000135 (NIST SP 800-53: AU-3 (1); NIST SP 800-53A: AU-3 (1).1 (ii); NIST SP 800-53 Rev 4: AU-3 (1))
+# CCI-002884 (NIST SP 800-53 Rev 4: MA-4 (1) (a))
+-a always,exit -F path=/usr/sbin/postqueue -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -k privileged-postfix"
+EOF
+
+cat <<EOF > /etc/audit/rules.d/module.rules
+# CCE-80414-6
+# CCI-000172 (NIST SP 800-53: AU-12 c; NIST SP 800-53A: AU-12.1 (iv); NIST SP 800-53 Rev 4: AU-12 c)
+-a always,exit -F arch=b32 -S init_module -k module-change
+-a always,exit -F arch=b64 -S init_module -k module-change
+
+# CCE-80415-3
+# CCI-000172 (NIST SP 800-53: AU-12 c; NIST SP 800-53A: AU-12.1 (iv); NIST SP 800-53 Rev 4: AU-12 c)
+-a always,exit -F arch=b32 -S delete_module -k module-change
+-a always,exit -F arch=b64 -S delete_module -k module-change
+EOF
+
 
 # SSG that ships in RHEL 7.5 for auditd had loose regexs and was catching more than it should.
 # which led to space_left <= admin_space_left which prevents auditd from starting.
@@ -47,6 +94,11 @@ space_left_action = email
 admin_space_left = 50
 admin_space_left_action = single
 EOF
+
+# fix-up all hard-coded references to auid 1000
+for f in /etc/audit/rules.d/*.rules; do
+        sed -i "s/auid>=1000/auid>=${UID_MIN}/g" ${f}
+done
 
 sed -i -e 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
 sed -i -e 's/#\s*RSAAuthentication .*/RSAAuthentication yes/' /etc/ssh/sshd_config
@@ -76,6 +128,9 @@ chmod 0600 /etc/ssh/*_key
 echo "# CCE-80179-5" >> /etc/sysctl.conf
 echo "net.ipv6.conf.all.accept_source_route = 0" >> /etc/sysctl.conf
 
+# disable magic sysrq for good measure
+echo "kernel.sysrq = 0" > /etc/sysctl.d/00-sysrq.conf
+
 # CCE-27557-8
 echo "TMOUT=600" > /etc/profile.d/tmout.sh
 chmod 755 /etc/profile.d/tmout.sh
@@ -87,10 +142,19 @@ chmod 755 /etc/profile.d/tmout.sh
 sed -Eie 's/"root"| root /toor/g' /etc/grub.d/01_users
 
 if [ -f /etc/default/grub ]; then
-	# re-enable USB
-	sed -i "s/nousb//g" /etc/default/grub
-	grubby --update-kernel=ALL --remove-args=nousb
+        /sbin/grubby --update-kernel=ALL --remove-args="fips"
+        /sbin/grubby --update-kernel=ALL --args="fips=1"
+        if grep -q '^GRUB_CMDLINE_LINUX=.*fips=.*"'  /etc/default/grub; then
+                # modify the GRUB command-line if a fips= arg already exists
+                sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)fips=[^[:space:]]*\(.*"\)/\1 fips=1 \2/'  /etc/default/grub
+        else
+                # no existing fips=arg is present, append it
+                sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 fips=1"/'  /etc/default/grub
+        fi
 
+	# re-enable USB
+	grubby --update-kernel=ALL --remove-args=nousb
+	sed -i "s/nousb//g" /etc/default/grub
 
 	# SSG content fails to snag the right device hosting /boot
 	# which causes panics on boot when fips is enabled
@@ -109,21 +173,79 @@ fi
 # relocate faillock from non-persistent /var/run
 mkdir -p /var/log/faillock
 for f in /etc/pam.d/*; do
-        if [ -f ${f} ]; then
-                sed -i -e 's;\(.*pam_faillock\.so\)\(.*\);\1 \2 dir=/var/log/faillock;' ${f}
-        fi
+	if [ -f ${f} ]; then
+		sed -i -e 's;\(.*pam_faillock\.so\)\(.*\);\1 \2 dir=/var/log/faillock;' ${f}
+	fi
 done
 
 # STIG apparently wants 8 but SSG says 5
 sed -i -e 's/^difok.*/difok = 8/' /etc/security/pwquality.conf
 
-# relocate faillock from non-persistent /var/run
-mkdir -p /var/log/faillock
-for f in /etc/pam.d/*; do
-	if [ -f ${f} ]; then
-		sed -i -e 's;\(.*pam_faillock\.so\)\(.*\);\1 \2 dir=/var/log/faillock;' ${f}
-	fi
+# STIG says 4, SSG said 2 
+if ! grep -q '^maxclassrepeat[\s]*=[\s]*(-?\d+)(?:[\s]|$)' /etc/security/pwquality.conf; then
+        echo -e "\nmaxclassrepeat = 4" >> /etc/security/pwquality.conf
+else
+        sed -i -e 's/^maxclassrepeat.*/maxclassrepeat = 4/' /etc/security/pwquality.conf
+fi
+
+# STIG says 4, SSG said 2 (fixed in v0.1.40(
+if ! grep -q '^maxrepeat[\s]*=[\s]*(-?\d+)(?:[\s]|$)' /etc/security/pwquality.conf; then
+        echo -e "\nmaxrepeat = 3" >> /etc/security/pwquality.conf
+else
+        sed -i -e 's/^maxrepeat.*/maxrepeat = 3/' /etc/security/pwquality.conf
+fi
+
+# FIXME: this would squash a failure, but pwhistory isn't even present in our pam conf
+# SSG content doesn't do system-auth-ac, only system-auth
+#if grep -q '^\s*password\s+(?:(?:requisite)|(?:required))\s+pam_pwhistory\.so[^#\n\r]*remember=([0-9]*).*$' /etc/pam.d/system-auth-ac; then
+#       sed -i -e 's/\(\s*password\s+(?:(?:requisite)|(?:required))\s+pam_pwhistory\.so[^#\n\r]*\)remember=\(.*\)/\1 remember=5 \2/' /etc/pam.d/system-auth-ac
+#else
+#       sed -i -e 's/\(\s*password\s+(?:(?:requisite)|(?:required))\s+pam_pwhistory\.so[^#\n\r]*\)/\1 remember=5/' /etc/pam.d/system-auth-ac
+#fi
+
+if grep -E -q 'password.*pam_pwquality\.so.*retry=([0-9]*).*$' /etc/pam.d/system-auth-ac; then
+       sed -i -e 's/\(\s*password.*pam_pwquality\.so.*\)retry=.?\(.*\)/\1 retry=1 \2/' /etc/pam.d/system-auth-ac
+else
+       sed -i -e 's/\(\s*password.*pam_pwquality\.so.*\)/\1 retry=1/' /etc/pam.d/system-auth-ac
+fi
+
+#CCE-80347-8
+#CCI-001749 (NIST SP 800-53 Rev 4: CM-5 (3))
+## FIXME: wrap in proper grep -q checks + sed
+echo "localpkg_gpgcheck=1" >> /etc/yum.conf
+#CCE-80348-6
+#CCI-001749 (NIST SP 800-53 Rev 4: CM-5 (3))
+echo -e "\nrepo_gpgcheck=1" >> /etc/yum.conf
+# CCE-80346-0
+# CCI-002617 (NIST SP 800-53 Rev 4: SI-2 (6))
+echo "clean_requirements_on_remove=1" >> /etc/yum.conf
+
+# panic on audit failures
+# CCE-80381-7
+# CCI-000139 (NIST SP 800-53: AU-5 a; NIST SP 800-53A: AU-5.1 (ii); NIST SP 800-53 Rev 4: AU-5 a)
+echo -e '\n-f 2' >> /etc/audit/rules.d/audit.rules
+
+echo \-D >> /etc/audit/rules.d/audit.rules
+
+# fix rule file perms
+chmod 600 /etc/audit/rules.d/*
+
+# strip dupes caused by broken SSG
+#
+for f in /etc/audit/rules.d/*; do
+        awk '!seen[$0]++' "${f}" > "/tmp/$(basename ${f})"; mv -f /tmp/"$(basename ${f})" /etc/audit/rules.d/
 done
+
+# now that the audit rules are ready, pre-gen audit.rules and switch to loading them with auditctl
+# this avoids writes to audit.rules at boot. also, strip dash in unit to cause failures on error.
+rm -f /etc/audit/audit.rules
+augenrules
+
+sed -i 's/\(^ExecStartPost=.*augenrules.*\)/#\1/' /usr/lib/systemd/system/auditd.service
+sed -i 's/^#\(ExecStartPost=\)-\(.*auditctl.*\)/\1\2/' /usr/lib/systemd/system/auditd.service
+
+# there is a race on boot when rules can't be loaded and audit comes down so restart it always
+sed -i '/^\[Service\]/aRestart=always' /usr/lib/systemd/system/auditd.service
 
 # CCE-27277-3
 echo "install usb-storage /bin/true" > /etc/modprobe.d/usb-storage.conf
