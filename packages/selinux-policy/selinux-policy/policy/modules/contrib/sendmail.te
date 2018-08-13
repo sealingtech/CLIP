@@ -26,14 +26,15 @@ type sendmail_var_run_t;
 files_pid_file(sendmail_var_run_t)
 
 type sendmail_t;
-mta_sendmail_mailserver(sendmail_t)
+domain_type(sendmail_t)
+#mta_sendmail_mailserver(sendmail_t)
 mta_mailserver_delivery(sendmail_t)
 mta_mailserver_sender(sendmail_t)
 role sendmail_roles types sendmail_t;
 
-type unconfined_sendmail_t;
-application_domain(unconfined_sendmail_t, sendmail_exec_t)
-role sendmail_unconfined_roles types unconfined_sendmail_t;
+#type unconfined_sendmail_t;
+#application_domain(unconfined_sendmail_t, sendmail_exec_t)
+#role sendmail_unconfined_roles types unconfined_sendmail_t;
 
 ########################################
 #
@@ -226,9 +227,9 @@ optional_policy(`
 # Unconfined local policy
 #
 
-optional_policy(`
-    mta_etc_filetrans_aliases(unconfined_sendmail_t, "aliases")
-    mta_etc_filetrans_aliases(unconfined_sendmail_t, "aliases.db")
-    mta_etc_filetrans_aliases(unconfined_sendmail_t, "aliasesdb-stamp")
-    unconfined_domain(unconfined_sendmail_t)
-')
+#optional_policy(`
+#    mta_etc_filetrans_aliases(unconfined_sendmail_t, "aliases")
+#    mta_etc_filetrans_aliases(unconfined_sendmail_t, "aliases.db")
+#    mta_etc_filetrans_aliases(unconfined_sendmail_t, "aliasesdb-stamp")
+#    unconfined_domain(unconfined_sendmail_t)
+#')

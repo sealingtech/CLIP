@@ -69,6 +69,8 @@ logging_send_syslog_msg(rpcbind_t)
 
 sysnet_dns_name_resolve(rpcbind_t)
 
+dev_read_urand(rpcbind_t)
+
 optional_policy(`
 	nis_use_ypbind(rpcbind_t)
 ')
