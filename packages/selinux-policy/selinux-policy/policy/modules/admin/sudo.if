@@ -87,6 +87,10 @@ template(`sudo_role_template',`
 	    	kerberos_manage_host_rcache($1_sudo_t)
 		kerberos_read_config($1_sudo_t)
 	')
+	
+	optional_policy(`
+		sssd_read_config($1_sudo_t)
+	')
 ')
 
 ########################################

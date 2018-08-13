@@ -35,6 +35,8 @@ allow snmpd_t self:unix_dgram_socket create_socket_perms;
 allow snmpd_t self:unix_stream_socket { create_stream_socket_perms connectto };
 allow snmpd_t self:tcp_socket create_stream_socket_perms;
 allow snmpd_t self:udp_socket connected_stream_socket_perms;
+# needed for ipv6
+allow snmpd_t self:netlink_route_socket { bind create getattr read write nlmsg_read setopt };
 
 manage_files_pattern(snmpd_t, snmpd_log_t, snmpd_log_t)
 logging_log_filetrans(snmpd_t, snmpd_log_t, file)
@@ -117,8 +119,10 @@ init_read_utmp(snmpd_t)
 init_dontaudit_write_utmp(snmpd_t)
 # need write to /var/run/systemd/notify
 init_write_pid_socket(snmpd_t)
+systemd_notify_write_socket(snmpd_t)
 
 logging_send_syslog_msg(snmpd_t)
+logging_read_generic_logs(snmpd_t)
 
 sysnet_read_config(snmpd_t)
 
@@ -126,6 +130,9 @@ seutil_dontaudit_search_config(snmpd_t)
 
 userdom_dontaudit_use_unpriv_user_fds(snmpd_t)
 userdom_dontaudit_search_user_home_dirs(snmpd_t)
+
+# encrypted comms?
+miscfiles_read_certs(snmpd_t)
 
 optional_policy(`
 	amanda_dontaudit_read_dumpdates(snmpd_t)

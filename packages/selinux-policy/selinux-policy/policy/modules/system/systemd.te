@@ -461,6 +461,8 @@ miscfiles_filetrans_named_content(systemd_tmpfiles_t)
 #miscfiles_relabel_man_pages(systemd_tmpfiles_t)
 #miscfiles_delete_man_pages(systemd_tmpfiles_t)
 
+files_setattr_all_tmp_dirs(systemd_tmpfiles_t)
+
 ifdef(`distro_redhat',`
 	optional_policy(`
 		userdom_list_user_home_content(systemd_tmpfiles_t)

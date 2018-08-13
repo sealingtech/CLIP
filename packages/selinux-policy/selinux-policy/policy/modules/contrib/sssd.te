@@ -43,7 +43,7 @@ role system_r types sssd_selinux_manager_t;
 
 allow sssd_t self:capability { chown dac_read_search dac_override kill net_admin sys_nice fowner setgid setuid sys_admin sys_resource };
 allow sssd_t self:capability2 block_suspend;
-allow sssd_t self:process { setfscreate setsched sigkill signal getsched setrlimit };
+allow sssd_t self:process { setfscreate setsched sigkill signal getsched setrlimit setpgid };
 allow sssd_t self:fifo_file rw_fifo_file_perms;
 allow sssd_t self:key manage_key_perms;
 allow sssd_t self:unix_stream_socket { create_stream_socket_perms connectto };
@@ -70,9 +70,12 @@ kernel_read_network_state(sssd_t)
 kernel_read_system_state(sssd_t)
 kernel_request_load_module(sssd_t)
 
+systemd_notify_write_socket(sssd_t)
+
 corenet_udp_bind_generic_port(sssd_t)
 corenet_dontaudit_udp_bind_all_ports(sssd_t)
 corenet_tcp_connect_kerberos_password_port(sssd_t)
+corenet_tcp_connect_kerberos_port(sssd_t)
 corenet_tcp_connect_smbd_port(sssd_t)
 
 corecmd_exec_bin(sssd_t)
@@ -130,6 +133,8 @@ userdom_manage_all_users_keys(sssd_t)
 userdom_dbus_send_all_users(sssd_t)
 userdom_home_reader(sssd_t)
 
+sssd_read_config(sssd_t)
+
 optional_policy(`
 	dbus_system_bus_client(sssd_t)
 	dbus_connect_system_bus(sssd_t)
@@ -175,3 +180,4 @@ seutil_manage_default_contexts(sssd_selinux_manager_t)
 seutil_exec_setfiles(sssd_selinux_manager_t)
 logging_dontaudit_search_audit_logs(sssd_selinux_manager_t)
 
+allow sssd_selinux_manager_t sssd_var_log_t:file append;
