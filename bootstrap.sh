@@ -33,7 +33,7 @@ rhn_subscribe() {
 	fi
 
 	# Enable the required optional repo
-	/bin/subscription-manager repos --enable=rhel-7-server-optional-rpms
+	/bin/subscription-manager repos --enable=rhel-7-*-optional-rpms
 }
 
 
