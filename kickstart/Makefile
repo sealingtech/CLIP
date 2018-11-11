@@ -60,6 +60,9 @@ BUILD_DIR ?= $(TMP_DIR)/$(NAME)
 SUPPORT_DIR ?= $(ROOT_DIR)/support
 OUTPUT_DIR ?= $(ROOT_DIR)
 
+DEFAULT_DONOR_ISO := $(ROOT_DIR)/shell.iso
+DONOR_ISO ?= $(DEFAULT_DONOR_ISO)
+
 INST_KS := $(BUILD_DIR)/$(NAME).ks
 LIVE_KS := $(BUILD_DIR)/$(NAME)-live.ks
 AWS_KS  := $(BUILD_DIR)/$(NAME)-aws.ks
@@ -130,6 +133,16 @@ iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) setup-inst-ks check-volume-id
 	$(VERBOSE)sudo rm --force $(PUNGI_ISO_DIR)/$(NAME)-netinst-$(TARGET_ARCH)-$(ISO_VERSION).iso
 	$(VERBOSE)sudo mv --force $(PUNGI_ISO_DIR)/$(NAME)-*$(TARGET_ARCH)-$(ISO_VERSION).iso $(OUTPUT_DIR)/
 
+iso-fast: setup-inst-ks
+	@if [ ! -e "$(DONOR_ISO)" ]; then \
+		echo "error: DONOR_ISO $(DONOR_ISO) does not exist.  set DONOR_ISO to the path of an existing install iso or copy an existing iso to $(DEFAULT_DONOR_ISO)"; \
+		exit 1; \
+	fi
+	@echo "Repacking iso.  Do not use in production"
+	$(VERBOSE)rm -f $(ROOT_DIR)/$(NAME)-DVD-$(TARGET_ARCH)-$(ISO_VERSION)-fast.iso
+	$(VERBOSE)$(SUPPORT_DIR)/repack-iso.py $(DONOR_ISO) $(ROOT_DIR)/$(NAME)-DVD-$(TARGET_ARCH)-$(ISO_VERSION)-fast.iso \
+		$(SUPPORT_DIR)/update-inst-iso.sh $(INST_KS) $(PUNGI_OS_DIR)$(notdir $(INST_KS)) %ISO_ROOT
+
 live-iso: $(DEPS) $(ADDTL_DEPS) setup-live-ks
 	@echo "Live CD Creator needs root permissions - please enter your sudo password if prompted."
 	$(VERBOSE)cd $(BUILD_DIR);sudo $(RUN_LIVECD) $(LIVECD_PYTHONPATH) $(LIVECD_ARGS) --config="$(LIVE_KS)"
@@ -184,7 +197,7 @@ setup-aws-ks: $(SETUP_DEPS)
 	@echo "Modifying kickstart with build variables..."
 	$(VERBOSE)sed -i -e 's;#REPO-REPLACEMENT-PLACEHOLDER;$(REPO_LINES);' $(AWS_KS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-PLACEHOLDER;$(AWS_CONFIG_BUILD_BASH_VARS);' $(AWS_KS)
-	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/g');' $(INST_KS)
+	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/g');' $(AWS_KS)
 	$(FIX_KS_ENFORCING_MODE) $(AWS_KS)
 	$(VERBOSE)mkdir -p $(BUILD_DIR)/includes
 	$(VERBOSE)cp -a $(STATIC_INC) $(BUILD_DIR)/includes/

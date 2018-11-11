@@ -61,7 +61,8 @@ MOCK_REL := rhel-$(RHEL_VER)-$(TARGET_ARCH)
 PKG_DIR += $(CURDIR)/packages
 
 #determine which variants we're building
-VARIANTS := $(filter %-inst-iso %-live-iso %-aws-ami,$(MAKECMDGOALS))
+VARIANTS := $(filter %-inst-iso %-inst-iso-fast %-live-iso %-aws-ami,$(MAKECMDGOALS))
+VARIANTS := $(subst -inst-iso-fast,,$(VARIANTS))
 VARIANTS := $(subst -inst-iso,,$(VARIANTS))
 VARIANTS := $(subst -aws-ami,,$(VARIANTS))
 VARIANTS := $(subst -live-iso,,$(VARIANTS))
@@ -197,6 +198,11 @@ SYSTEMS := $(shell find $(KICKSTART_DIR) -maxdepth 1 ! -name kickstart ! -name i
 # FIXME: remove when VPN is supported by CLIP for v7
 #LIVECDS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -live-iso,$(SYSTEM)))
 LIVECDS := $(foreach SYSTEM,$(filter-out clip-vpn,$(SYSTEMS)),$(addsuffix -live-iso,$(SYSTEM)))
+
+# These are targets supported by the kickstart/Makefile that will be used to generate installation ISOs.
+# FIXME: remove when AWS is supported by CLIP for v7
+#FASTINSTISOS := $(foreach SYSTEM,$(SYSTEMS)),$(addsuffix -inst-iso-fast,$(SYSTEM)))
+FASTINSTISOS := $(foreach SYSTEM,$(filter-out clip-vpn,$(SYSTEMS)),$(addsuffix -inst-iso-fast,$(SYSTEM)))
 
 # These are targets supported by the kickstart/Makefile that will be used to generate installation ISOs.
 # FIXME: remove when AWS is supported by CLIP for v7
@@ -485,6 +491,11 @@ $(LIVECDS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call MAKE_LIVE_TOOLS)
 	$(call MAKE_LORAX)
 	$(VERBOSE)OS_REL="$(call OS_REL)" $(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-live-iso/\1/'`" live-iso
+
+PHONIES += $(FASTINSTISOS)
+$(FASTINSTISOS):  $(CONFIG_BUILD_DEPS) $(RPMS)
+	$(call CHECK_DEPS)
+	$(VERBOSE)OS_REL="$(call OS_REL)" $(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso-fast/\1/'`" iso-fast
 
 PHONIES += $(INSTISOS)
 $(INSTISOS):  $(CONFIG_BUILD_DEPS) $(RPMS)
