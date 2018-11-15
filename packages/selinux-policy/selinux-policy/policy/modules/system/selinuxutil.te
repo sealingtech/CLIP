@@ -178,8 +178,8 @@ init_use_fds(checkpolicy_t)
 init_use_script_ptys(checkpolicy_t)
 
 optional_policy(`
-userdom_use_inherited_user_terminals(checkpolicy_t)
-userdom_use_all_users_fds(checkpolicy_t)
+	userdom_use_inherited_user_terminals(checkpolicy_t)
+	userdom_use_all_users_fds(checkpolicy_t)
 ')
 
 ifdef(`distro_ubuntu',`
@@ -409,7 +409,7 @@ logging_send_syslog_msg(restorecond_t)
 seutil_libselinux_linked(restorecond_t)
 
 optional_policy(`
-userdom_read_user_home_content_symlinks(restorecond_t)
+	userdom_read_user_home_content_symlinks(restorecond_t)
 ')
 
 ifdef(`distro_ubuntu',`

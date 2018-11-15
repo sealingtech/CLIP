@@ -408,10 +408,6 @@ files_setattr_lock_dirs(systemd_tmpfiles_t)
 files_relabel_var_lib_dirs(systemd_tmpfiles_t)
 files_manage_var_lib_files(systemd_tmpfiles_t)
 
-setrans_manage_pid_files(systemd_tmpfiles_t)
-setrans_manage_pid_dirs(systemd_tmpfiles_t)
-setrans_relabel_pids(systemd_tmpfiles_t)
-
 logging_relabel_syslog_pid_files(systemd_tmpfiles_t)
 
 init_read_var_lib(systemd_tmpfiles_t)
@@ -432,6 +428,8 @@ optional_policy(`
 
 optional_policy(`
 	setrans_manage_pid_files(systemd_tmpfiles_t)
+	setrans_manage_pid_dirs(systemd_tmpfiles_t)
+	setrans_relabel_pids(systemd_tmpfiles_t)
 ')
 
 selinux_get_enforce_mode(systemd_tmpfiles_t)

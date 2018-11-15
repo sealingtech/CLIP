@@ -106,8 +106,10 @@ logging_send_syslog_msg(dhcpd_t)
 sysnet_read_config(dhcpd_t)
 sysnet_read_dhcp_config(dhcpd_t)
 
-userdom_dontaudit_use_unpriv_user_fds(dhcpd_t)
-userdom_dontaudit_search_user_home_dirs(dhcpd_t)
+optional_policy(`
+	userdom_dontaudit_use_unpriv_user_fds(dhcpd_t)
+	userdom_dontaudit_search_user_home_dirs(dhcpd_t)
+')
 
 tunable_policy(`dhcpd_use_ldap',`
     allow dhcpd_t self:tcp_socket create_socket_perms;

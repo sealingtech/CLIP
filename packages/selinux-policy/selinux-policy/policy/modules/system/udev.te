@@ -200,7 +200,9 @@ systemd_login_read_pid_files(udev_t)
 systemd_getattr_unit_files(udev_t)
 systemd_notify_write_socket(udev_t)
 
-userdom_dontaudit_search_user_home_content(udev_t)
+optional_policy(`
+	userdom_dontaudit_search_user_home_content(udev_t)
+')
 
 ifdef(`distro_debian',`
 	files_pid_filetrans(udev_t, udev_var_run_t, dir, "xen-hotplug")

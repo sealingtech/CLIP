@@ -21,10 +21,14 @@ type etc_mail_t;
 files_config_file(etc_mail_t)
 
 type mail_home_t alias mail_forward_t;
-userdom_user_home_content(mail_home_t)
+optional_policy(`
+	userdom_user_home_content(mail_home_t)
+')
 
 type mail_home_rw_t;
-userdom_user_home_content(mail_home_rw_t)
+optional_policy(`
+	userdom_user_home_content(mail_home_rw_t)
+')
 
 type mqueue_spool_t;
 files_mountpoint(mqueue_spool_t)
@@ -45,8 +49,10 @@ typealias user_mail_t alias { staff_mail_t sysadm_mail_t };
 typealias user_mail_t alias { auditadm_mail_t secadm_mail_t };
 typealias user_mail_tmp_t alias { staff_mail_tmp_t sysadm_mail_tmp_t };
 typealias user_mail_tmp_t alias { auditadm_mail_tmp_t secadm_mail_tmp_t };
-userdom_user_application_type(user_mail_t)
-userdom_user_tmp_file(user_mail_tmp_t)
+optional_policy(`
+	userdom_user_application_type(user_mail_t)
+	userdom_user_tmp_file(user_mail_tmp_t)
+')
 
 ########################################
 #
@@ -203,16 +209,20 @@ init_dontaudit_rw_stream_socket(system_mail_t)
 
 init_daemon_domain(system_mail_t,sendmail_exec_t)
 
-userdom_use_inherited_user_terminals(system_mail_t)
-userdom_dontaudit_list_user_home_dirs(system_mail_t)
-userdom_dontaudit_list_admin_dir(system_mail_t)
-userdom_dontaudit_list_user_tmp(system_mail_t)
+optional_policy(`
+	userdom_use_inherited_user_terminals(system_mail_t)
+	userdom_dontaudit_list_user_home_dirs(system_mail_t)
+	userdom_dontaudit_list_admin_dir(system_mail_t)
+	userdom_dontaudit_list_user_tmp(system_mail_t)
+')
 
 manage_dirs_pattern(system_mail_t, mail_home_rw_t, mail_home_rw_t)
 manage_files_pattern(system_mail_t, mail_home_rw_t, mail_home_rw_t)
 
 allow system_mail_t mail_home_t:file manage_file_perms;
-userdom_admin_home_dir_filetrans(system_mail_t, mail_home_t, file)
+optional_policy(`
+	userdom_admin_home_dir_filetrans(system_mail_t, mail_home_t, file)
+')
 
 logging_rw_all_logs(system_mail_t)
 
@@ -386,7 +396,9 @@ append_files_pattern(mailserver_delivery, mail_spool_t, mail_spool_t)
 create_lnk_files_pattern(mailserver_delivery, mail_spool_t, mail_spool_t)
 read_lnk_files_pattern(mailserver_delivery, mail_spool_t, mail_spool_t)
 
-userdom_search_admin_dir(mailserver_delivery)
+optional_policy(`
+	userdom_search_admin_dir(mailserver_delivery)
+')
 read_files_pattern(mailserver_delivery, mail_home_t, mail_home_t)
 
 manage_dirs_pattern(mailserver_delivery, mail_home_rw_t, mail_home_rw_t)
@@ -449,27 +461,29 @@ allow user_mail_t self:tcp_socket {accept create_socket_perms };
 
 domain_use_interactive_fds(user_mail_t)
 
-userdom_use_inherited_user_terminals(user_mail_t)
-# Write to the user domain tty. cjp: why?
-userdom_use_inherited_user_terminals(mta_user_agent)
-# Create dead.letter in user home directories.
-userdom_manage_user_home_content_files(user_mail_t)
-userdom_filetrans_home_content(user_mail_t)
-# for reading .forward - maybe we need a new type for it?
-# also for delivering mail to maildir
-userdom_manage_user_home_content_dirs(mailserver_delivery)
-userdom_manage_user_home_content_files(mailserver_delivery)
-userdom_manage_user_home_content_symlinks(mailserver_delivery)
-userdom_manage_user_home_content_pipes(mailserver_delivery)
-userdom_manage_user_home_content_sockets(mailserver_delivery)
-allow mailserver_delivery mailserver_delivery:fifo_file rw_inherited_fifo_file_perms;
+optional_policy(`
+	userdom_use_inherited_user_terminals(user_mail_t)
+	# Write to the user domain tty. cjp: why?
+	userdom_use_inherited_user_terminals(mta_user_agent)
+	# Create dead.letter in user home directories.
+	userdom_manage_user_home_content_files(user_mail_t)
+	userdom_filetrans_home_content(user_mail_t)
+	# for reading .forward - maybe we need a new type for it?
+	# also for delivering mail to maildir
+	userdom_manage_user_home_content_dirs(mailserver_delivery)
+	userdom_manage_user_home_content_files(mailserver_delivery)
+	userdom_manage_user_home_content_symlinks(mailserver_delivery)
+	userdom_manage_user_home_content_pipes(mailserver_delivery)
+	userdom_manage_user_home_content_sockets(mailserver_delivery)
+	allow mailserver_delivery mailserver_delivery:fifo_file rw_inherited_fifo_file_perms;
 
-# Read user temporary files.
-userdom_read_user_tmp_files(user_mail_t)
-userdom_dontaudit_append_user_tmp_files(user_mail_t)
-# cjp: this should probably be read all user tmp
-# files in an appropriate place for mta_user_agent
-userdom_read_user_tmp_files(mta_user_agent)
+	# Read user temporary files.
+	userdom_read_user_tmp_files(user_mail_t)
+	userdom_dontaudit_append_user_tmp_files(user_mail_t)
+	# cjp: this should probably be read all user tmp
+	# files in an appropriate place for mta_user_agent
+	userdom_read_user_tmp_files(mta_user_agent)
+')
 
 dev_read_sysfs(user_mail_t)
 

@@ -268,11 +268,13 @@ seutil_read_default_contexts(crond_t)
 seutil_sigchld_newrole(crond_t)
 
 
-userdom_use_unpriv_users_fds(crond_t)
-# Not sure why this is needed
-userdom_list_user_home_dirs(crond_t)
-userdom_list_admin_dir(crond_t)
-userdom_manage_all_users_keys(crond_t)
+optional_policy(`
+	userdom_use_unpriv_users_fds(crond_t)
+	# Not sure why this is needed
+	userdom_list_user_home_dirs(crond_t)
+	userdom_list_admin_dir(crond_t)
+	userdom_manage_all_users_keys(crond_t)
+')
 
 mta_send_mail(crond_t)
 mta_system_content(cron_spool_t)
@@ -520,8 +522,10 @@ logging_send_syslog_msg(system_cronjob_t)
 
 seutil_read_config(system_cronjob_t)
 
-userdom_manage_tmpfs_files(system_cronjob_t, file)
-userdom_tmpfs_filetrans(system_cronjob_t, file)
+optional_policy(`
+	userdom_manage_tmpfs_files(system_cronjob_t, file)
+	userdom_tmpfs_filetrans(system_cronjob_t, file)
+')
 
 ifdef(`distro_redhat',`
 	# Run the rpm program in the rpm_t domain. Allow creation of RPM log files
@@ -743,17 +747,19 @@ logging_search_logs(cronjob_t)
 seutil_read_config(cronjob_t)
 
 
-userdom_manage_user_tmp_files(cronjob_t)
-userdom_manage_user_tmp_symlinks(cronjob_t)
-userdom_manage_user_tmp_pipes(cronjob_t)
-userdom_manage_user_tmp_sockets(cronjob_t)
-# Run scripts in user home directory and access shared libs.
-userdom_exec_user_home_content_files(cronjob_t)
-# Access user files and dirs.
-userdom_manage_user_home_content_files(cronjob_t)
-userdom_manage_user_home_content_symlinks(cronjob_t)
-userdom_manage_user_home_content_pipes(cronjob_t)
-userdom_manage_user_home_content_sockets(cronjob_t)
+optional_policy(`
+	userdom_manage_user_tmp_files(cronjob_t)
+	userdom_manage_user_tmp_symlinks(cronjob_t)
+	userdom_manage_user_tmp_pipes(cronjob_t)
+	userdom_manage_user_tmp_sockets(cronjob_t)
+	# Run scripts in user home directory and access shared libs.
+	userdom_exec_user_home_content_files(cronjob_t)
+	# Access user files and dirs.
+	userdom_manage_user_home_content_files(cronjob_t)
+	userdom_manage_user_home_content_symlinks(cronjob_t)
+	userdom_manage_user_home_content_pipes(cronjob_t)
+	userdom_manage_user_home_content_sockets(cronjob_t)
+')
 
 list_dirs_pattern(crond_t, user_cron_spool_t, user_cron_spool_t)
 rw_dirs_pattern(crond_t, user_cron_spool_t, user_cron_spool_t)
@@ -823,13 +829,15 @@ init_read_state(crontab_domain)
 
 seutil_read_config(crontab_domain)
 
-userdom_manage_user_tmp_dirs(crontab_domain)
-userdom_manage_user_tmp_files(crontab_domain)
-# Access terminals.
-userdom_use_inherited_user_terminals(crontab_domain)
-# Read user crontabs
-userdom_read_user_home_content_files(crontab_domain)
-userdom_read_user_home_content_symlinks(crontab_domain)
+optional_policy(`
+	userdom_manage_user_tmp_dirs(crontab_domain)
+	userdom_manage_user_tmp_files(crontab_domain)
+	# Access terminals.
+	userdom_use_inherited_user_terminals(crontab_domain)
+	# Read user crontabs
+	userdom_read_user_home_content_files(crontab_domain)
+	userdom_read_user_home_content_symlinks(crontab_domain)
+')
 
 tunable_policy(`fcron_crond',`
 	# fcron wants an instant update of a crontab change for the administrator

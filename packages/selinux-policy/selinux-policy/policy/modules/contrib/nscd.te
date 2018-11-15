@@ -118,9 +118,11 @@ seutil_sigchld_newrole(nscd_t)
 
 sysnet_read_config(nscd_t)
 
-userdom_dontaudit_use_user_terminals(nscd_t)
-userdom_dontaudit_use_unpriv_user_fds(nscd_t)
-userdom_dontaudit_search_user_home_dirs(nscd_t)
+optional_policy(`
+	userdom_dontaudit_use_user_terminals(nscd_t)
+	userdom_dontaudit_use_unpriv_user_fds(nscd_t)
+	userdom_dontaudit_search_user_home_dirs(nscd_t)
+')
 
 optional_policy(`
 	accountsd_dontaudit_rw_fifo_file(nscd_t)
