@@ -1,0 +1,12 @@
+diff -purN a/src/pylorax/__init__.py b/src/pylorax/__init__.py
+--- a/src/pylorax/__init__.py	2018-05-04 11:47:46.777098095 -0400
++++ b/src/pylorax/__init__.py	2018-05-04 11:55:55.081146817 -0400
+@@ -142,7 +142,7 @@ class Lorax(BaseLoraxClass):
+ 
+     def run(self, ybo, product, version, release, variant="", bugurl="",
+             isfinal=False, workdir=None, outputdir=None, buildarch=None, volid=None,
+-            domacboot=False, doupgrade=True, remove_temp=False,
++            domacboot=False, doupgrade=False, remove_temp=False,
+             size=2,
+             add_templates=None,
+             add_template_vars=None,
