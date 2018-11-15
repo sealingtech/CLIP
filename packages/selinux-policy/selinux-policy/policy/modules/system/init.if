@@ -2892,7 +2892,7 @@ interface(`init_undefined',`
 
 ########################################
 ## <summary>
-##	Tell init to do an unknown access.
+##	Tell init to start transient services.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -2910,7 +2910,7 @@ interface(`init_start_transient_unit',`
 
 ########################################
 ## <summary>
-##	Tell init to do an unknown access.
+##	Tell init to stop a transient service.
 ## </summary>
 ## <param name="domain">
 ##	<summary>

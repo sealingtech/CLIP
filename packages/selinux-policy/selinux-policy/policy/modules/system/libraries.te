@@ -101,8 +101,10 @@ init_read_script_tmp_files(ldconfig_t)
 logging_send_syslog_msg(ldconfig_t)
 
 term_use_console(ldconfig_t)
-userdom_use_inherited_user_terminals(ldconfig_t)
-userdom_use_all_users_fds(ldconfig_t)
+optional_policy(`
+	userdom_use_inherited_user_terminals(ldconfig_t)
+	userdom_use_all_users_fds(ldconfig_t)
+')
 
 ifdef(`distro_ubuntu',`
 	optional_policy(`
@@ -110,12 +112,14 @@ ifdef(`distro_ubuntu',`
 	')
 ')
 
-userdom_dontaudit_list_admin_dir(ldconfig_t)
-userdom_list_user_home_dirs(ldconfig_t)
-userdom_manage_user_home_content_files(ldconfig_t)
-userdom_manage_user_tmp_files(ldconfig_t)
-userdom_manage_user_tmp_symlinks(ldconfig_t)
-userdom_rw_inherited_user_tmp_pipes(ldconfig_t)
+optional_policy(`
+	userdom_dontaudit_list_admin_dir(ldconfig_t)
+	userdom_list_user_home_dirs(ldconfig_t)
+	userdom_manage_user_home_content_files(ldconfig_t)
+	userdom_manage_user_tmp_files(ldconfig_t)
+	userdom_manage_user_tmp_symlinks(ldconfig_t)
+	userdom_rw_inherited_user_tmp_pipes(ldconfig_t)
+')
 
 ifdef(`hide_broken_symptoms',`
 	ifdef(`distro_gentoo',`

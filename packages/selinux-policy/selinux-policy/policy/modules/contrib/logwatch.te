@@ -86,16 +86,20 @@ files_read_system_conf_files(logwatch_t)
 
 fs_getattr_all_dirs(logwatch_t)
 fs_getattr_all_fs(logwatch_t)
-fs_getattr_all_dirs(logwatch_t)
 fs_dontaudit_list_auto_mountpoints(logwatch_t)
 fs_list_inotifyfs(logwatch_t)
-
-storage_dontaudit_getattr_fixed_disk_dev(logwatch_t)
 
 mls_file_read_to_clearance(logwatch_t)
 
 term_dontaudit_getattr_pty_dirs(logwatch_t)
 term_dontaudit_list_ptys(logwatch_t)
+dev_dontaudit_getattr_all_chr_files(logwatch_t)
+dev_dontaudit_getattr_all_blk_files(logwatch_t)
+fs_dontaudit_getattr_hugetlbfs(logwatch_t)
+kernel_dontaudit_getattr_core_if(logwatch_t)
+storage_dontaudit_getattr_removable_dev(logwatch_t)
+storage_dontaudit_getattr_fixed_disk_dev(logwatch_t)
+term_dontaudit_use_generic_ptys(logwatch_t)
 
 auth_use_nsswitch(logwatch_t)
 auth_dontaudit_read_shadow(logwatch_t)
@@ -113,6 +117,7 @@ miscfiles_read_hwdata(logwatch_t)
 selinux_dontaudit_getattr_dir(logwatch_t)
 
 sysnet_exec_ifconfig(logwatch_t)
+sysnet_read_config(logwatch_mail_t)
 
 mta_sendmail_domtrans(logwatch_t, logwatch_mail_t)
 mta_getattr_spool(logwatch_t)

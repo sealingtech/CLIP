@@ -36,6 +36,7 @@ allow mrtg_t self:capability { setgid setuid chown };
 dontaudit mrtg_t self:capability sys_tty_config;
 allow mrtg_t self:process signal_perms;
 allow mrtg_t self:fifo_file rw_fifo_file_perms;
+allow mrtg_t self:udp_socket { create ioctl };
 
 allow mrtg_t mrtg_etc_t:dir list_dir_perms;
 allow mrtg_t mrtg_etc_t:file read_file_perms;

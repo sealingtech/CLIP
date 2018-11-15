@@ -31,10 +31,12 @@ files_tmp_file(vmtools_tmp_t)
 # vmtools local policy
 #
 
-allow vmtools_t self:capability { sys_time sys_rawio };
+allow vmtools_t self:capability { sys_time sys_rawio net_bind_service setuid };
 allow vmtools_t self:fifo_file rw_fifo_file_perms;
 allow vmtools_t self:unix_stream_socket create_stream_socket_perms;
 allow vmtools_t self:unix_dgram_socket create_socket_perms;
+allow vmtools_t self:udp_socket { create ioctl };
+allow vmtools_t self:socket { bind connect create getattr getopt };
 
 manage_dirs_pattern(vmtools_t, vmtools_tmp_t, vmtools_tmp_t)
 manage_files_pattern(vmtools_t, vmtools_tmp_t, vmtools_tmp_t)
@@ -44,13 +46,18 @@ files_tmp_filetrans(vmtools_t, vmtools_tmp_t, { file dir })
 kernel_read_system_state(vmtools_t)
 kernel_read_network_state(vmtools_t)
 
+files_search_kernel_modules(vmtools_t)
+kernel_request_load_module(vmtools_t)
+
 corecmd_exec_bin(vmtools_t)
 corecmd_exec_shell(vmtools_t)
 
 dev_read_urand(vmtools_t)
 dev_getattr_all_blk_files(vmtools_t)
+dev_read_generic_chr_files(vmtools_t)
 
 fs_getattr_all_fs(vmtools_t)
+
 
 auth_use_nsswitch(vmtools_t)
 
@@ -58,15 +65,29 @@ auth_use_nsswitch(vmtools_t)
 init_rw_utmp(vmtools_t)
 init_stream_connect(vmtools_t)
 init_telinit(vmtools_t)
+init_exec_script_files(vmtools_t)
+init_manage_transient_unit(vmtools_t)
 
 logging_send_syslog_msg(vmtools_t)
 
 systemd_exec_systemctl(vmtools_t)
 
 sysnet_domtrans_ifconfig(vmtools_t)
+sysnet_read_config(vmtools_t)
 
-xserver_stream_connect_xdm(vmtools_t)
-xserver_stream_connect(vmtools_t)
+logging_write_generic_logs(vmtools_t)
+
+miscfiles_read_certs(vmtools_t)
+
+optional_policy(`
+	dbus_send_system_bus(vmtools_t)
+	dbus_system_bus_client(vmtools_t)
+')
+
+optional_policy(`
+	xserver_stream_connect_xdm(vmtools_t)
+	xserver_stream_connect(vmtools_t)
+')
 
 optional_policy(`
     networkmanager_dbus_chat(vmtools_t)
