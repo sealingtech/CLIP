@@ -345,7 +345,7 @@ Requires(pre): selinux-policy = %{version}-%{release}
 Requires: selinux-policy = %{version}-%{release} policycoreutils-devel
 Conflicts:  audispd-plugins <= 1.7.7-1
 Conflicts:  seedit
-Provides: selinux-policy-targeted >= 3.13.1-39, selinux-policy-minimum >= 3.13.1-39, selinux-policy-mls >= 3.13.1-39
+Provides: selinux-policy-targeted >= %{version}-%{release}, selinux-policy-minimum >= %{version}-%{release}, selinux-policy-mls >= %{version}-%{release}
 Obsoletes: selinux-policy-targeted, selinux-policy-minimum, selinux-policy-mls 
 
 %description %{type}
