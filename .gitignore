@@ -15,3 +15,4 @@ conf/yum/yum_all.conf
 CONFIG_AWS
 *.pyc
 *.pyo
+packages/selinux-policy/selinux-policy/support/pyplate.pyc

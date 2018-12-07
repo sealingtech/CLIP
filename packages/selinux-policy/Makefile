@@ -20,7 +20,7 @@ VERSION := 3.13.1
 
 # bump this if creating multiple releases from the same
 # version (think about this... why are you doing this?)
-RELEASE := 999.el7
+RELEASE := 999.el7_6.5
 
 # The name of the Vendor
 VENDOR := Quark Security, Inc
@@ -40,7 +40,7 @@ CONFIG_BUILD_SELINUX_POL_TYPE ?= mcs
 # e.g., clip-selinux-policy-apache
 # Listing a module here will also cause it to be enabled even if it
 # disabled in modules.conf.
-SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser ec2ssh cyrus snmp ntp bind sasl amavis denyhosts postgresql rhsmcertd logwatch raid sssd openvpn rpcbind gssproxy rpc kerberos sendmail oddjob certmonger
+SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser ec2ssh cyrus snmp ntp bind sasl amavis denyhosts postgresql rhsmcertd logwatch raid sssd openvpn rpcbind gssproxy rpc kerberos sendmail oddjob certmonger freeipmi vmtools apcupsd nagios nut mrtg
 
 # the filename of the tarball
 TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
@@ -56,7 +56,7 @@ endif
 endif
 
 # Yes, use awk to perform floating point math. Believe it or not, bc is not installed by default and bash only does integer math and make doesn't have a clean way to do it.
-SPEC_VER := $(strip $(shell awk 'BEGIN { print ($(OS_REL) >= 7.3) ? 7.3 : 7.2; }'))
+SPEC_VER := $(strip $(shell awk 'BEGIN { print ($(OS_REL) >= 7.3) ? "-cil" : "-nocil"; }'))
 # version-specific spec file name
 RPM_V_SPEC = $(CURDIR)/$(PKGNAME)$(SPEC_VER).spec
 RPM_SPEC = $(RPM_TOPDIR)/SPECS/$(PKGNAME).spec
