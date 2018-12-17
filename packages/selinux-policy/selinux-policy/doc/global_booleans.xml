@@ -7,3 +7,10 @@ user domains.
 </p>
 </desc>
 </bool>
+<bool name="aide_enable_write_db" dftval="true">
+<desc>
+<p>
+Allow programs from updating the AIDE DB.
+</p>
+</desc>
+</bool>

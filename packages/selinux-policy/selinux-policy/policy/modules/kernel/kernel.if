@@ -3882,3 +3882,67 @@ interface(`kernel_relabelto_usermodehelper',`
 
 	allow $1 usermodehelper_t:file relabelto;
 ')
+
+########################################
+## <summary>
+##      Execute an unlabeled file in the specified domain.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed to transition.
+##      </summary>
+## </param>
+## <param name="target_domain">
+##      <summary>
+##      The type of the new process.
+##      </summary>
+## </param>
+#
+interface(`kernel_unlabeled_domtrans',`
+	gen_require(`
+		type unlabeled_t;
+        ')
+
+	read_lnk_files_pattern($1, unlabeled_t, unlabeled_t)
+	domain_transition_pattern($1, unlabeled_t, $2)
+	type_transition $1 unlabeled_t:process $2;
+')
+
+
+
+########################################
+## <summary>
+##      Make general progams without labeles an entrypoint for
+##      the specified domain.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      The domain for which unlabeled_t is an entrypoint.
+##      </summary>
+## </param>
+#
+interface(`kernel_unlabeled_entry_type',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	domain_entry_file($1, unlabeled_t)
+')
+
+########################################
+## <summary>
+##      Allow view the kernel key ring.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`kernel_view_key',`
+        gen_require(`
+		type kernel_t;
+	')
+
+	allow $1 kernel_t:key view;
+')

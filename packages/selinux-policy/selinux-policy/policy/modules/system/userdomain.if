@@ -350,6 +350,26 @@ interface(`userdom_manage_tmp_sockets',`
 	manage_sock_files_pattern($1, user_tmp_t, user_tmp_t)
 ')
 
+
+#######################################
+## <summary>
+##      Mmap user temporary files
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <rolebase/>
+#
+interface(`userdom_map_tmp_files',`
+        gen_require(`
+                type user_tmp_t;
+        ')
+
+        allow $1 user_tmp_t:file map;
+')
+
 #######################################
 ## <summary>
 ##	Manage user temporary directories
@@ -4022,6 +4042,26 @@ interface(`userdom_manage_unpriv_user_shared_mem',`
 	')
 
 	allow $1 unpriv_userdomain:shm create_shm_perms;
+')
+
+
+########################################
+## <summary>
+##      Destroy unpriviledged user SysV shared
+##      memory segments.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`userdom_destroy_unpriv_user_shared_mem',`
+	gen_require(`
+		attribute unpriv_userdomain;
+	')
+
+	allow $1 unpriv_userdomain:shm destroy;
 ')
 
 ########################################

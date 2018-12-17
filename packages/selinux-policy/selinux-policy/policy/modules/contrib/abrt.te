@@ -67,6 +67,7 @@ files_pid_file(abrt_var_run_t)
 
 abrt_basic_types_template(abrt_dump_oops)
 init_system_domain(abrt_dump_oops_t, abrt_dump_oops_exec_t)
+domain_obj_id_change_exemption(abrt_dump_oops_t)
 
 abrt_basic_types_template(abrt_handle_event)
 application_domain(abrt_handle_event_t, abrt_handle_event_exec_t)
@@ -113,7 +114,7 @@ ifdef(`enable_mcs',`
 # abrt local policy
 #
 
-allow abrt_t self:capability { chown dac_override fowner fsetid ipc_lock kill setgid setuid sys_nice sys_ptrace };
+allow abrt_t self:capability { chown dac_read_search dac_override fowner fsetid ipc_lock kill setgid setuid sys_nice sys_ptrace };
 dontaudit abrt_t self:capability { net_admin sys_rawio sys_ptrace };
 allow abrt_t self:process { setpgid sigkill signal signull setsched getsched };
 
@@ -144,6 +145,7 @@ manage_lnk_files_pattern(abrt_t, abrt_var_cache_t, abrt_var_cache_t)
 files_var_filetrans(abrt_t, abrt_var_cache_t, { file dir })
 files_spool_filetrans(abrt_t, abrt_var_cache_t, dir)
 files_tmp_filetrans(abrt_t, abrt_var_cache_t, dir, "abrt")
+allow abrt_t abrt_var_cache_t:file map;
 
 # abrt pid files
 manage_files_pattern(abrt_t, abrt_var_run_t, abrt_var_run_t)
@@ -156,12 +158,15 @@ manage_files_pattern(abrt_t, abrt_upload_watch_tmp_t, abrt_upload_watch_tmp_t)
 manage_dirs_pattern(abrt_t, abrt_upload_watch_tmp_t, abrt_upload_watch_tmp_t)
 manage_lnk_files_pattern(abrt_t, abrt_upload_watch_tmp_t, abrt_upload_watch_tmp_t)
 
+kernel_read_all_proc(abrt_t)
 kernel_read_ring_buffer(abrt_t)
 kernel_read_network_state(abrt_t)
 kernel_read_software_raid_state(abrt_t)
 kernel_request_load_module(abrt_t)
 kernel_rw_usermodehelper_state(abrt_t)
 kernel_rw_kernel_sysctl(abrt_t)
+# needed by docker BZ #1194280
+kernel_read_net_sysctls(abrt_t)
 kernel_rw_usermodehelper_state(abrt_t)
 
 corecmd_exec_bin(abrt_t)
@@ -184,6 +189,7 @@ dev_read_rand(abrt_t)
 dev_read_urand(abrt_t)
 dev_rw_sysfs(abrt_t)
 dev_read_raw_memory(abrt_t)
+dev_write_kmsg(abrt_t)
 
 domain_getattr_all_domains(abrt_t)
 domain_read_all_domains_state(abrt_t)
@@ -215,11 +221,13 @@ fs_search_all(abrt_t)
 storage_dontaudit_read_fixed_disk(abrt_t)
 
 logging_read_generic_logs(abrt_t)
+logging_mmap_journal(abrt_t)
 logging_send_syslog_msg(abrt_t)
 logging_stream_connect_syslog(abrt_t)
 logging_read_syslog_pid(abrt_t)
 
 auth_use_nsswitch(abrt_t)
+auth_map_passwd(abrt_t)
 
 init_read_utmp(abrt_t)
 
@@ -249,7 +257,11 @@ optional_policy(`
 ')
 
 optional_policy(`
-	kdump_read_crash(abrt_t)
+	container_stream_connect(abrt_t)
+')
+
+optional_policy(`
+	kdump_manage_crash(abrt_t)
 ')
 
 optional_policy(`
@@ -259,6 +271,10 @@ optional_policy(`
 optional_policy(`
 	mozilla_plugin_dontaudit_rw_tmp_files(abrt_t)
 	mozilla_plugin_read_rw_files(abrt_t)
+')
+
+optional_policy(`
+    pcp_read_lib_files(abrt_t)
 ')
 
 optional_policy(`
@@ -287,6 +303,13 @@ optional_policy(`
 	rpm_manage_pid_files(abrt_t)
 	rpm_read_db(abrt_t)
 	rpm_signull(abrt_t)
+')
+
+optional_policy(`
+    rhsmcertd_manage_pid_files(abrt_t)
+    rhsmcertd_read_log(abrt_t)
+    rhsmcertd_read_lib_files(abrt_t)
+
 ')
 
 # to run mailx plugin
@@ -466,7 +489,8 @@ optional_policy(`
 # abrt_dump_oops local policy
 #
 
-allow abrt_dump_oops_t self:capability dac_override;
+allow abrt_dump_oops_t self:capability { kill net_admin sys_ptrace ipc_lock fowner chown fsetid dac_read_search dac_override setuid setgid };
+allow abrt_dump_oops_t self:process setfscreate;
 allow abrt_dump_oops_t self:fifo_file rw_fifo_file_perms;
 allow abrt_dump_oops_t self:unix_stream_socket create_stream_socket_perms;
 
@@ -488,19 +512,45 @@ read_files_pattern(abrt_dump_oops_t, abrt_etc_t, abrt_etc_t)
 kernel_read_debugfs(abrt_dump_oops_t)
 kernel_read_kernel_sysctls(abrt_dump_oops_t)
 kernel_read_ring_buffer(abrt_dump_oops_t)
+kernel_read_security_state(abrt_dump_oops_t)
+
+auth_read_passwd(abrt_dump_oops_t)
+
+corecmd_getattr_all_executables(abrt_dump_oops_t)
 
 dev_read_urand(abrt_dump_oops_t)
 dev_read_rand(abrt_dump_oops_t)
 
 domain_use_interactive_fds(abrt_dump_oops_t)
+domain_signull_all_domains(abrt_dump_oops_t)
+domain_read_all_domains_state(abrt_dump_oops_t)
+domain_getattr_all_domains(abrt_dump_oops_t)
+
+tunable_policy(`deny_ptrace',`',`
+    domain_ptrace_all_domains(abrt_dump_oops_t)
+')
+
+files_manage_non_security_dirs(abrt_dump_oops_t)
+files_manage_non_security_files(abrt_dump_oops_t)
+files_map_non_security_files(abrt_dump_oops_t)
 
 fs_getattr_all_fs(abrt_dump_oops_t)
 fs_list_inotifyfs(abrt_dump_oops_t)
 fs_list_pstorefs(abrt_dump_oops_t)
 
+selinux_compute_create_context(abrt_dump_oops_t)
+
 logging_read_generic_logs(abrt_dump_oops_t)
 logging_read_syslog_pid(abrt_dump_oops_t)
 logging_send_syslog_msg(abrt_dump_oops_t)
+logging_mmap_generic_logs(abrt_dump_oops_t)
+logging_mmap_journal(abrt_dump_oops_t)
+
+init_read_var_lib_files(abrt_dump_oops_t)
+
+optional_policy(`
+    nscd_dontaudit_write_sock_file(abrt_dump_oops_t)
+')
 
 #######################################
 #
@@ -512,12 +562,20 @@ allow abrt_watch_log_t self:unix_stream_socket create_stream_socket_perms;
 
 read_files_pattern(abrt_watch_log_t, abrt_etc_t, abrt_etc_t)
 
+auth_read_passwd(abrt_watch_log_t)
+auth_use_nsswitch(abrt_watch_log_t)
+
 domtrans_pattern(abrt_watch_log_t, abrt_dump_oops_exec_t, abrt_dump_oops_t)
+allow abrt_watch_log_t abrt_dump_oops_exec_t:file map;
 
 corecmd_exec_bin(abrt_watch_log_t)
 
 logging_read_all_logs(abrt_watch_log_t)
 logging_send_syslog_msg(abrt_watch_log_t)
+
+optional_policy(`
+    gnome_list_home_config(abrt_watch_log_t)
+')
 
 tunable_policy(`abrt_upload_watch_anon_write',`
 	miscfiles_manage_public_files(abrt_upload_watch_t)
@@ -528,7 +586,7 @@ tunable_policy(`abrt_upload_watch_anon_write',`
 # Upload watch local policy
 #
 
-allow abrt_upload_watch_t self:capability { dac_override chown };
+allow abrt_upload_watch_t self:capability { dac_read_search dac_override chown fsetid };
 
 manage_files_pattern(abrt_upload_watch_t, abrt_upload_watch_tmp_t, abrt_upload_watch_tmp_t)
 manage_dirs_pattern(abrt_upload_watch_t, abrt_upload_watch_tmp_t, abrt_upload_watch_tmp_t)
@@ -539,6 +597,8 @@ read_files_pattern(abrt_upload_watch_t, abrt_etc_t, abrt_etc_t)
 
 manage_dirs_pattern(abrt_upload_watch_t, abrt_var_cache_t, abrt_var_cache_t)
 
+abrt_dbus_chat(abrt_upload_watch_t)
+
 corecmd_exec_bin(abrt_upload_watch_t)
 
 dev_read_urand(abrt_upload_watch_t)
@@ -546,6 +606,8 @@ dev_read_urand(abrt_upload_watch_t)
 files_search_spool(abrt_upload_watch_t)
 
 auth_read_passwd(abrt_upload_watch_t)
+
+miscfiles_read_certs(abrt_upload_watch_t)
 
 tunable_policy(`abrt_upload_watch_anon_write',`
     miscfiles_manage_public_files(abrt_upload_watch_t)

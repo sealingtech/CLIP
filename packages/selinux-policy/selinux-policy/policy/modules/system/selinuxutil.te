@@ -84,7 +84,7 @@ gen_require(`
 typealias semanage_store_t alias policy_config_t;
 
 neverallow ~can_relabelto_binary_policy policy_config_t:file relabelto;
-#neverallow ~can_write_binary_policy policy_config_t:file { write append };
+neverallow ~can_write_binary_policy policy_config_t:file { write append };
 
 #
 # policy_src_t is the type of the policy source
@@ -197,6 +197,7 @@ allow load_policy_t self:capability dac_override;
 
 # only allow read of policy config files
 read_files_pattern(load_policy_t, { policy_src_t policy_config_t }, policy_config_t)
+allow load_policy_t policy_config_t:file map;
 
 domain_use_interactive_fds(load_policy_t)
 
@@ -557,6 +558,7 @@ optional_policy(`
 	userdom_read_user_home_content_files(semanage_t)
 	userdom_read_user_tmp_files(semanage_t)
 	userdom_home_reader(semanage_t)
+	userdom_map_tmp_files(semanage_t)
 ')
 
 ifdef(`distro_debian',`
@@ -622,6 +624,7 @@ term_use_generic_ptys(setfiles_t)
 
 # needs to be able to read symlinks to make restorecon on symlink working
 files_read_all_symlinks(setfiles_t)
+allow setfiles_t file_context_t:file map;
 
 logging_send_audit_msgs(setfiles_t)
 logging_send_syslog_msg(setfiles_t)

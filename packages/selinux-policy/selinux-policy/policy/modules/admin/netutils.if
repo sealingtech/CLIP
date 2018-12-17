@@ -100,6 +100,7 @@ interface(`netutils_domtrans_ping',`
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, ping_exec_t, ping_t)
+    allow $1 ping_exec_t:file map;
 ')
 
 ########################################

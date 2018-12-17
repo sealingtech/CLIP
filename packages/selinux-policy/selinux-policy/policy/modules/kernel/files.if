@@ -950,6 +950,25 @@ interface(`files_read_non_security_files',`
 
 ########################################
 ## <summary>
+##      Map all non-security files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <rolecap/>
+#
+interface(`files_map_non_security_files',`
+	gen_require(`
+		attribute non_security_file_type;
+	')
+
+	allow $1 non_security_file_type:file map;
+')
+
+########################################
+## <summary>
 ##	Read/Write all inherited non-security files.
 ## </summary>
 ## <param name="domain">
@@ -2713,6 +2732,42 @@ interface(`files_read_boot_files',`
 	')
 
 	read_files_pattern($1, boot_t, boot_t)
+')
+
+######################################
+## <summary>
+##  Map files in the /boot.
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed access.
+##  </summary>
+## </param>
+#
+interface(`files_map_boot_files',`
+     gen_require(`
+         type boot_t;
+    ')
+    allow $1 boot_t:file map;
+')
+
+########################################
+## <summary>
+##      Mmap kernel module files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`files_map_kernel_modules',`
+	gen_require(`
+		type modules_object_t;
+	')
+
+	allow $1 modules_object_t:file map;
+
 ')
 
 ########################################
@@ -5257,6 +5312,23 @@ interface(`files_manage_system_db_files',`
      files_filetrans_system_db_named_files($1)
 ')
 
+######################################
+## <summary>
+##  Map manageable system db files in /var/lib.
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed access.
+##  </summary>
+## </param>
+#
+interface(`files_map_system_db_files',`
+     gen_require(`
+	type system_db_t;
+    ')
+    allow $1 system_db_t:file map;
+')
+
 #####################################
 ## <summary>
 ##  File name transition for system db files in /var/lib.
@@ -6096,6 +6168,25 @@ interface(`files_delete_usr_files',`
 	')
 
 	delete_files_pattern($1, usr_t, usr_t)
+')
+
+
+########################################
+## <summary>
+##      Map files in /usr in the caller domain.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`files_mmap_usr_files',`
+	gen_require(`
+		type usr_t;
+	')
+
+	allow $1 usr_t:file map;
 ')
 
 ########################################
