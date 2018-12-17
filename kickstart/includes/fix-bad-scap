@@ -34,11 +34,11 @@ UID_MIN=$(awk '/^[\s]*UID_MIN/{ print $2; }' /etc/login.defs)
 # CCE-80393-2
 # CCI-000172 (NIST SP 800-53: AU-12 c; NIST SP 800-53A: AU-12.1 (iv); NIST SP 800-53 Rev 4: AU-12 c)
 # CCI-002884 (NIST SP 800-53 Rev 4: MA-4 (1) (a))
-cat <<EOF >>/etc/audit/rules.d/seutil.rules
--a always,exit -F path=/usr/sbin/semanage -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -F key=privileged-priv_change
--a always,exit -F path=/usr/sbin/setsebool -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -F key=privileged-priv_change
--a always,exit -F path=/usr/bin/chcon -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -F key=privileged-priv_change
--a always,exit -F path=/usr/sbin/setfiles -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -F key=privileged-priv_change
+cat <<-EOF >>/etc/audit/rules.d/seutil.rules
+	-a always,exit -F path=/usr/sbin/semanage -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -F key=privileged-priv_change
+	-a always,exit -F path=/usr/sbin/setsebool -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -F key=privileged-priv_change
+	-a always,exit -F path=/usr/bin/chcon -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -F key=privileged-priv_change
+	-a always,exit -F path=/usr/sbin/setfiles -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -F key=privileged-priv_change
 EOF
 
 # CCE-80399-9
@@ -52,32 +52,32 @@ echo "-a always,exit -F path=/usr/sbin/userhelper -F perm=x -F auid>=${UID_MIN} 
 # CCI-000135 (NIST SP 800-53: AU-3 (1); NIST SP 800-53A: AU-3 (1).1 (ii); NIST SP 800-53 Rev 4: AU-3 (1))
 # CCI-000172 (NIST SP 800-53: AU-12 c; NIST SP 800-53A: AU-12.1 (iv); NIST SP 800-53 Rev 4: AU-12 c)
 # CCI-002884 (NIST SP 800-53 Rev 4: MA-4 (1) (a))
-cat <<EOF >>/etc/audit/rules.d/sudoer.rules
--w /etc/sudoers -p wa -k privileged-actions
--w /etc/sudoers.d/ -p wa -k privileged-actions
+cat <<-EOF >>/etc/audit/rules.d/sudoer.rules
+	-w /etc/sudoers -p wa -k privileged-actions
+	-w /etc/sudoers.d/ -p wa -k privileged-actions
 EOF
 
-cat <<EOF > /etc/audit/rules.d/postfix.rules
-# CCE-80406-2
-# CCI-000135 (NIST SP 800-53: AU-3 (1); NIST SP 800-53A: AU-3 (1).1 (ii); NIST SP 800-53 Rev 4: AU-3 (1))
-# CCI-002884 (NIST SP 800-53 Rev 4: MA-4 (1) (a))
--a always,exit -F path=/usr/sbin/postdrop -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -k privileged-postfix"
-# CCE-80407-0
-# CCI-000135 (NIST SP 800-53: AU-3 (1); NIST SP 800-53A: AU-3 (1).1 (ii); NIST SP 800-53 Rev 4: AU-3 (1))
-# CCI-002884 (NIST SP 800-53 Rev 4: MA-4 (1) (a))
--a always,exit -F path=/usr/sbin/postqueue -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -k privileged-postfix"
+cat <<-EOF > /etc/audit/rules.d/postfix.rules
+	# CCE-80406-2
+	# CCI-000135 (NIST SP 800-53: AU-3 (1); NIST SP 800-53A: AU-3 (1).1 (ii); NIST SP 800-53 Rev 4: AU-3 (1))
+	# CCI-002884 (NIST SP 800-53 Rev 4: MA-4 (1) (a))
+	-a always,exit -F path=/usr/sbin/postdrop -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -k privileged-postfix"
+	# CCE-80407-0
+	# CCI-000135 (NIST SP 800-53: AU-3 (1); NIST SP 800-53A: AU-3 (1).1 (ii); NIST SP 800-53 Rev 4: AU-3 (1))
+	# CCI-002884 (NIST SP 800-53 Rev 4: MA-4 (1) (a))
+	-a always,exit -F path=/usr/sbin/postqueue -F perm=x -F auid>=${UID_MIN} -F auid!=4294967295 -k privileged-postfix"
 EOF
 
-cat <<EOF > /etc/audit/rules.d/module.rules
-# CCE-80414-6
-# CCI-000172 (NIST SP 800-53: AU-12 c; NIST SP 800-53A: AU-12.1 (iv); NIST SP 800-53 Rev 4: AU-12 c)
--a always,exit -F arch=b32 -S init_module -k module-change
--a always,exit -F arch=b64 -S init_module -k module-change
+cat <<-EOF > /etc/audit/rules.d/module.rules
+	# CCE-80414-6
+	# CCI-000172 (NIST SP 800-53: AU-12 c; NIST SP 800-53A: AU-12.1 (iv); NIST SP 800-53 Rev 4: AU-12 c)
+	-a always,exit -F arch=b32 -S init_module -k module-change
+	-a always,exit -F arch=b64 -S init_module -k module-change
 
-# CCE-80415-3
-# CCI-000172 (NIST SP 800-53: AU-12 c; NIST SP 800-53A: AU-12.1 (iv); NIST SP 800-53 Rev 4: AU-12 c)
--a always,exit -F arch=b32 -S delete_module -k module-change
--a always,exit -F arch=b64 -S delete_module -k module-change
+	# CCE-80415-3
+	# CCI-000172 (NIST SP 800-53: AU-12 c; NIST SP 800-53A: AU-12.1 (iv); NIST SP 800-53 Rev 4: AU-12 c)
+	-a always,exit -F arch=b32 -S delete_module -k module-change
+	-a always,exit -F arch=b64 -S delete_module -k module-change
 EOF
 
 
@@ -88,11 +88,11 @@ EOF
 sed -i '/^admin_space_left.*=.*$/d' /etc/audit/auditd.conf
 sed -i '/^space_left.*=.*$/d' /etc/audit/auditd.conf
 
-cat <<EOF >> /etc/audit/auditd.conf
-space_left = 75
-space_left_action = email
-admin_space_left = 50
-admin_space_left_action = single
+cat <<-EOF >> /etc/audit/auditd.conf
+	space_left = 75
+	space_left_action = email
+	admin_space_left = 50
+	admin_space_left_action = single
 EOF
 
 # fix-up all hard-coded references to auid 1000
