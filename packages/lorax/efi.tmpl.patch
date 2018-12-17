@@ -1,7 +1,7 @@
 diff -purN a/share/efi.tmpl b/share/efi.tmpl
---- a/share/efi.tmpl	2018-07-30 14:11:18.153626633 -0400
-+++ b/share/efi.tmpl	2018-07-30 14:12:44.864939525 -0400
-@@ -8,9 +8,20 @@ APPLE_EFI_DISKNAME=inroot+"/usr/share/pi
+--- a/share/efi.tmpl	2018-12-07 13:18:52.677753417 -0500
++++ b/share/efi.tmpl	2018-12-07 13:23:01.835309042 -0500
+@@ -8,9 +8,21 @@ APPLE_EFI_DISKNAME=inroot+"/usr/share/pi
  
  mkdir ${EFIBOOTDIR}
  mkdir ${EFIBOOTDIR}/fonts/
@@ -15,14 +15,15 @@ diff -purN a/share/efi.tmpl b/share/efi.tmpl
 +%else:
 +install boot/efi/EFI/*/mm${efiarch|lower}.efi ${EFIBOOTDIR}/
 +%endif
-+%if exists("boot/efi/EFI/*/gcd${efiarch|lower}.efi"):
++%if exists("boot/efi/EFI/*/gcd" + efiarch.lower() + ".efi"):
  install boot/efi/EFI/*/gcd${efiarch|lower}.efi ${EFIBOOTDIR}/grub${efiarch|lower}.efi
++%else:
++install boot/efi/EFI/*/grub${efiarch|lower}.efi ${EFIBOOTDIR}/grub${efiarch|lower}.efi
 +%endif
-+#install boot/efi/EFI/*/grub${efiarch|lower}.efi ${EFIBOOTDIR}/grub${efiarch|lower}.efi
  install boot/efi/EFI/*/fonts/unicode.pf2 ${EFIBOOTDIR}/fonts/
  %if exists("usr/share/shim/lockdown.efi"):
      install usr/share/shim/lockdown.efi ${EFIBOOTDIR}/
-@@ -47,9 +58,9 @@ ${make_efiboot("images/efiboot.img")}
+@@ -47,9 +59,9 @@ ${make_efiboot("images/efiboot.img")}
      replace @INITRDPATH@ /${kdir}/initrd.img ${eficonf}
      replace @ISOLABEL@ '${isolabel}' ${eficonf}
      %if disk:
