@@ -236,16 +236,44 @@ for f in /etc/audit/rules.d/*; do
         awk '!seen[$0]++' "${f}" > "/tmp/$(basename ${f})"; mv -f /tmp/"$(basename ${f})" /etc/audit/rules.d/
 done
 
+# fix dupe priv rules since SSG isn't collapsing things like auid!=unset with the existing auid!=4294967295 rules
+fix_audit_priv_rule() {
+        # FIXME: i can't get delete to work properly. sed dies with unterminated address regex errors.
+        sed -i -e "s;-a always,exit -F path=$1 -F perm=x -F auid>=1000 -F auid!=unset -k privileged;;" /etc/audit/rules.d/privileged.rules
+        sed -i -e "s;\(-a always,exit -F path=$1 -F perm=x -F auid>=1000 -F auid!=4294967295\) \(-F key=privileged\);\1 -F auid!=unset \2;" /etc/audit/rules.d/privileged.rules
+}
+
+fix_audit_priv_rule /usr/bin/passwd
+fix_audit_priv_rule /usr/bin/gpasswd
+fix_audit_priv_rule /usr/bin/chage
+fix_audit_priv_rule /usr/bin/chsh
+fix_audit_priv_rule /usr/bin/chage
+fix_audit_priv_rule /usr/bin/crontab
+fix_audit_priv_rule /usr/bin/umount
+fix_audit_priv_rule /usr/bin/sudo
+fix_audit_priv_rule /usr/bin/su
+fix_audit_priv_rule /usr/bin/newgrp
+fix_audit_priv_rule /usr/sbin/pam_timestamp_check
+fix_audit_priv_rule /usr/sbin/unix_chkpwd
+fix_audit_priv_rule /usr/sbin/userhelper
+fix_audit_priv_rule /usr/libexec/openssh/ssh-keysign
+
 # now that the audit rules are ready, pre-gen audit.rules and switch to loading them with auditctl
 # this avoids writes to audit.rules at boot. also, strip dash in unit to cause failures on error.
 rm -f /etc/audit/audit.rules
 augenrules
+mv /etc/audit/rules.d{,.archived.since.clip.uses.auditctl.not.augenrules.ftw}
 
-sed -i 's/\(^ExecStartPost=.*augenrules.*\)/#\1/' /usr/lib/systemd/system/auditd.service
-sed -i 's/^#\(ExecStartPost=\)-\(.*auditctl.*\)/\1\2/' /usr/lib/systemd/system/auditd.service
-
-# there is a race on boot when rules can't be loaded and audit comes down so restart it always
-sed -i '/^\[Service\]/aRestart=always' /usr/lib/systemd/system/auditd.service
+# override the use of augenrules in the audit unit in facor of auditctl
+mkdir -p /etc/systemd/system/auditd.service.d
+cat <<-EOF > /etc/systemd/system/auditd.service.d/override.conf
+	[Service]
+	ExecStartPost=
+	ExecStartPost=/sbin/auditctl -R /etc/audit/audit.rules
+	# there is a race on boot when rules can't be loaded and audit comes down so restart it always
+	# this is only an issue in CLIP since we convert a non-fatal ExecStartPost=- to a fatal ExecStartPost= (intentionally)
+	Restart=always
+EOF
 
 # CCE-27277-3
 echo "install usb-storage /bin/true" > /etc/modprobe.d/usb-storage.conf
