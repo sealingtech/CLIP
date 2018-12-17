@@ -249,6 +249,7 @@ interface(`auth_domtrans_login_program',`
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, login_exec_t, $2)
+    allow $1 login_exec_t:file map;
 ')
 
 ########################################
@@ -396,6 +397,7 @@ interface(`auth_manage_cache',`
 
 	manage_dirs_pattern($1, auth_cache_t, auth_cache_t)
 	manage_files_pattern($1, auth_cache_t, auth_cache_t)
+	allow $1 auth_cache_t:file map;
 ')
 
 #######################################
@@ -418,51 +420,52 @@ interface(`auth_var_filetrans_cache',`
 
 ########################################
 ## <summary>
-##	Run unix_chkpwd to check a password.
+##      Run unix_chkpwd to check a password.
 ## </summary>
 ## <param name="domain">
-##	<summary>
-##	Domain allowed to transition.
-##	</summary>
+##      <summary>
+##      Domain allowed to transition.
+##      </summary>
 ## </param>
 #
 interface(`auth_domtrans_chk_passwd',`
-	gen_require(`
-		type chkpwd_t, chkpwd_exec_t, shadow_t;
-		type auth_cache_t;
-	')
+        gen_require(`
+                type chkpwd_t, chkpwd_exec_t, shadow_t;
+                type auth_cache_t;
+        ')
 
-	allow $1 auth_cache_t:dir search_dir_perms;
+        allow $1 auth_cache_t:dir search_dir_perms;
 
-	corecmd_search_bin($1)
-	domtrans_pattern($1, chkpwd_exec_t, chkpwd_t)
+        corecmd_search_bin($1)
+        domtrans_pattern($1, chkpwd_exec_t, chkpwd_t)
+    allow $1 chkpwd_exec_t:file map;
 
-	dontaudit $1 shadow_t:file read_file_perms;
+        dontaudit $1 shadow_t:file read_file_perms;
 
-	dev_read_rand($1)
-	dev_read_urand($1)
+        dev_read_rand($1)
+        dev_read_urand($1)
 
-	auth_use_nsswitch($1)
-	auth_rw_faillog($1)
+        auth_use_nsswitch($1)
+        auth_rw_faillog($1)
 
-	logging_send_audit_msgs($1)
+        logging_send_audit_msgs($1)
 
-	miscfiles_read_generic_certs($1)
+        miscfiles_read_generic_certs($1)
 
-	optional_policy(`
-		kerberos_read_keytab($1)
-	')
+        optional_policy(`
+                kerberos_read_keytab($1)
+        ')
 
-	optional_policy(`
-		pcscd_read_pid_files($1)
-		pcscd_stream_connect($1)
-	')
+        optional_policy(`
+                pcscd_read_pid_files($1)
+                pcscd_stream_connect($1)
+        ')
 
-	optional_policy(`
-		samba_stream_connect_winbind($1)
-	')
+        optional_policy(`
+                samba_stream_connect_winbind($1)
+        ')
 
-	auth_domtrans_upd_passwd($1)
+        auth_domtrans_upd_passwd($1)
 ')
 
 ########################################
@@ -2444,4 +2447,40 @@ interface(`auth_login_manage_key',`
 	')
 
 	allow $1 login_pgm:key manage_key_perms;
+')
+
+########################################
+## <summary>
+## Mmap the shadow passwords file.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`auth_map_shadow',`
+        gen_require(`
+                type shadow_t;
+        ')
+
+        allow $1 shadow_t:file map;
+')
+
+########################################
+## <summary>
+##      Mmap the passwd passwords file (/etc/passwd)
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`auth_map_passwd',`
+        gen_require(`
+                type passwd_file_t;
+        ')
+
+        allow $1 passwd_file_t:file map;
 ')

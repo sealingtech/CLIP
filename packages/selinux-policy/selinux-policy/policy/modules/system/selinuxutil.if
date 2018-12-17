@@ -85,6 +85,7 @@ interface(`seutil_domtrans_loadpolicy',`
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, load_policy_exec_t, load_policy_t)
+	allow $1 load_policy_exec_t:file map;
 ')
 
 ########################################
@@ -131,6 +132,7 @@ interface(`seutil_exec_loadpolicy',`
 
 	corecmd_search_bin($1)
 	can_exec($1, load_policy_exec_t)
+	allow $1 load_policy_exec_t:file map;
 ')
 
 ########################################
@@ -589,6 +591,7 @@ interface(`seutil_domtrans_setfiles',`
 	files_search_usr($1)
 	corecmd_search_bin($1)
 	domtrans_pattern($1, setfiles_exec_t, setfiles_t)
+	allow $1 setfiles_exec_t:file map;
 ')
 
 ########################################
@@ -1130,6 +1133,7 @@ interface(`seutil_read_file_contexts',`
 	list_dirs_pattern($1, file_context_t, file_context_t)
 	read_files_pattern($1, file_context_t, file_context_t)
 	read_lnk_files_pattern($1, file_context_t, file_context_t)
+	allow $1 file_context_t:file map;
 ')
 
 ########################################
@@ -1150,6 +1154,7 @@ interface(`seutil_dontaudit_read_file_contexts',`
 
 	dontaudit $1 { selinux_config_t default_context_t file_context_t }:dir search_dir_perms;
 	dontaudit $1 file_context_t:file read_file_perms;
+	dontaudit $1 file_context_t:file map;
 ')
 
 ########################################
@@ -1170,6 +1175,7 @@ interface(`seutil_rw_file_contexts',`
 	files_search_etc($1)
 	allow $1 { selinux_config_t default_context_t }:dir search_dir_perms;
 	rw_files_pattern($1, file_context_t, file_context_t)
+        allow $1 file_context_t:file map;
 ')
 
 ########################################
@@ -1191,6 +1197,7 @@ interface(`seutil_manage_file_contexts',`
 	files_search_etc($1)
 	allow $1 { selinux_config_t default_context_t }:dir search_dir_perms;
 	manage_files_pattern($1, file_context_t, file_context_t)
+	allow $1 file_context_t:file map;
 ')
 
 ########################################
@@ -1225,7 +1232,7 @@ interface(`seutil_read_bin_policy',`
 #
 interface(`seutil_create_bin_policy',`
 	gen_require(`
-#		attribute can_write_binary_policy;
+		attribute can_write_binary_policy;
 		type selinux_config_t, policy_config_t;
 	')
 
@@ -1233,7 +1240,7 @@ interface(`seutil_create_bin_policy',`
 	allow $1 selinux_config_t:dir search_dir_perms;
 	create_files_pattern($1, policy_config_t, policy_config_t)
 	write_files_pattern($1, policy_config_t, policy_config_t)
-#	typeattribute $1 can_write_binary_policy;
+	typeattribute $1 can_write_binary_policy;
 ')
 
 ########################################
@@ -1297,6 +1304,7 @@ interface(`seutil_read_src_policy',`
 	files_search_etc($1)
 	list_dirs_pattern($1, selinux_config_t, policy_src_t)
 	read_files_pattern($1, policy_src_t, policy_src_t)
+	allow $1 file_context_t:file map;
 ')
 
 ########################################

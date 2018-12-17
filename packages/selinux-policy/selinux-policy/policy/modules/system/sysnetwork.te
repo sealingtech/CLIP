@@ -81,7 +81,7 @@ allow dhcpc_t dhcp_state_t:file relabel_file_perms;
 
 manage_files_pattern(dhcpc_t, dhcpc_state_t, dhcpc_state_t)
 filetrans_pattern(dhcpc_t, dhcp_state_t, dhcpc_state_t, file)
-allow dhcpc_t dhcpc_state_t:file relabel_file_perms;
+allow dhcpc_t dhcpc_state_t:file { map relabel_file_perms };
 
 # create pid file
 manage_files_pattern(dhcpc_t, dhcpc_var_run_t, dhcpc_var_run_t)
@@ -170,6 +170,7 @@ miscfiles_read_generic_certs(dhcpc_t)
 modutils_run_insmod(dhcpc_t, dhcpc_roles)
 
 sysnet_run_ifconfig(dhcpc_t, dhcpc_roles)
+allow dhcpc_t ifconfig_exec_t:file map;
 
 optional_policy(`
 	userdom_use_user_terminals(dhcpc_t)
@@ -209,6 +210,7 @@ optional_policy(`
 
 optional_policy(`
 	hostname_run(dhcpc_t, dhcpc_roles)
+	allow dhcpc_t hostname_exec_t:file map;
 ')
 
 optional_policy(`
@@ -226,6 +228,7 @@ optional_policy(`
 	netutils_run(dhcpc_t, dhcpc_roles)
 	netutils_domtrans_ping(dhcpc_t)
 	netutils_domtrans(dhcpc_t)
+	    allow dhcpc_t netutils_exec_t:file map;
 ',`
 	allow dhcpc_t self:capability setuid;
 	allow dhcpc_t self:rawip_socket create_socket_perms;

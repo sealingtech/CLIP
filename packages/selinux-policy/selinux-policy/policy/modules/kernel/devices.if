@@ -2101,6 +2101,7 @@ interface(`dev_rw_dri',`
 	')
 
 	rw_chr_files_pattern($1, device_t, dri_device_t)
+        allow $1 dri_device_t:chr_file map;
 ')
 
 ########################################
@@ -2347,6 +2348,7 @@ interface(`dev_rw_infiniband_dev',`
 
 	rw_chr_files_pattern($1, device_t, infiniband_device_t)
     rw_blk_files_pattern($1, device_t, infiniband_device_t)
+	        allow $1 infiniband_device_t:chr_file map;
 ')
 
 ########################################
@@ -2949,6 +2951,7 @@ interface(`dev_read_raw_memory',`
 	')
 
 	read_chr_files_pattern($1, device_t, memory_device_t)
+	allow $1 memory_device_t:chr_file map;
 
 	allow $1 self:capability sys_rawio;
 	typeattribute $1 memory_raw_read;
@@ -3011,7 +3014,7 @@ interface(`dev_rx_raw_memory',`
 	')
 
 	dev_read_raw_memory($1)
-	allow $1 memory_device_t:chr_file execute;
+	allow $1 memory_device_t:chr_file { map execute };
 ')
 
 ########################################
@@ -3030,7 +3033,7 @@ interface(`dev_wx_raw_memory',`
 	')
 
 	dev_write_raw_memory($1)
-	allow $1 memory_device_t:chr_file execute;
+	allow $1 memory_device_t:chr_file { map execute };
 ')
 
 ########################################
@@ -4193,6 +4196,7 @@ interface(`dev_read_sound',`
 	')
 
 	read_chr_files_pattern($1, device_t, sound_device_t)
+        allow $1 sound_device_t:chr_file map;
 ')
 
 ########################################
@@ -4229,6 +4233,7 @@ interface(`dev_read_sound_mixer',`
 	')
 
 	read_chr_files_pattern($1, device_t, sound_device_t)
+	        allow $1 sound_device_t:chr_file map;
 ')
 
 ########################################
@@ -5487,7 +5492,7 @@ interface(`dev_rwx_vmware',`
 	')
 
 	dev_rw_vmware($1)
-	allow $1 vmware_device_t:chr_file execute;
+	allow $1 vmware_device_t:chr_file { map execute };
 ')
 
 ########################################
@@ -5656,6 +5661,7 @@ interface(`dev_rw_xserver_misc',`
 	')
 
 	rw_chr_files_pattern($1, device_t, xserver_misc_device_t)
+	        allow $1 xserver_misc_device_t:chr_file map;
 ')
 
 ########################################
@@ -5731,6 +5737,7 @@ interface(`dev_rwx_zero',`
 
 	dev_rw_zero($1)
 	allow $1 zero_device_t:chr_file execute;
+	        allow $1 zero_device_t:chr_file { map execute };
 ')
 
 ########################################
@@ -6749,4 +6756,113 @@ interface(`dev_filetrans_xserver_named_dev',`
 	filetrans_pattern($1, device_t, xserver_misc_device_t, chr_file, "card7")
 	filetrans_pattern($1, device_t, xserver_misc_device_t, chr_file, "card8")
 	filetrans_pattern($1, device_t, xserver_misc_device_t, chr_file, "card9")
+')
+
+########################################
+## <summary>
+##      Mmap the dri devices.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`dev_map_dri',`
+        gen_require(`
+                type device_t, dri_device_t;
+        ')
+
+        allow $1 dri_device_t:chr_file map;
+')
+
+########################################
+## <summary>
+##      Mmap the framebuffer.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`dev_map_framebuffer',`
+        gen_require(`
+                type framebuf_device_t;
+        ')
+
+        allow $1 framebuf_device_t:file map;
+')
+
+########################################
+## <summary>
+##      Mmap the sysfs.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`dev_map_sysfs',`
+        gen_require(`
+                type sysfs_t;
+        ')
+
+        allow $1 sysfs_t:file map;
+')
+
+########################################
+## <summary>
+##      Mmap USB monitor devices.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`dev_map_usbmon_dev',`
+        gen_require(`
+                type usbmon_device_t;
+        ')
+
+        allow $1 usbmon_device_t:chr_file map;
+')
+
+########################################
+## <summary>
+##      Mmap the userio devices.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`dev_map_userio_dev',`
+        gen_require(`
+                type device_t, userio_device_t;
+        ')
+
+        allow $1 userio_device_t:chr_file map;
+')
+
+########################################
+## <summary>
+##      Mmap the video4linux devices.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`dev_map_video_dev',`
+        gen_require(`
+                type device_t, v4l_device_t;
+        ')
+
+        allow $1 v4l_device_t:chr_file map;
+
 ')

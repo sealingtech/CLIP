@@ -137,6 +137,7 @@ allow auditctl_t self:process getcap;
 
 read_files_pattern(auditctl_t, auditd_etc_t, auditd_etc_t)
 allow auditctl_t auditd_etc_t:dir list_dir_perms;
+allow auditctl_t auditd_etc_t:file map;
 
 # Needed for adding watches
 files_getattr_all_dirs(auditctl_t)
@@ -199,7 +200,7 @@ allow auditd_t self:fifo_file rw_fifo_file_perms;
 allow auditd_t self:tcp_socket create_stream_socket_perms;
 
 allow auditd_t auditd_etc_t:dir list_dir_perms;
-allow auditd_t auditd_etc_t:file read_file_perms;
+allow auditd_t auditd_etc_t:file { map read_file_perms };
 
 manage_dirs_pattern(auditd_t, auditd_log_t, auditd_log_t)
 manage_files_pattern(auditd_t, auditd_log_t, auditd_log_t)
@@ -291,6 +292,8 @@ allow audisp_t self:unix_stream_socket create_stream_socket_perms;
 allow audisp_t self:unix_dgram_socket create_socket_perms;
 
 allow audisp_t auditd_t:unix_stream_socket rw_socket_perms;
+
+allow audisp_t audisp_exec_t:file map;
 
 manage_sock_files_pattern(audisp_t, audisp_var_run_t, audisp_var_run_t)
 files_pid_filetrans(audisp_t, audisp_var_run_t, sock_file)
@@ -417,6 +420,7 @@ files_pid_filetrans(syslogd_t, devlog_t, sock_file)
 manage_files_pattern(syslogd_t, var_log_t, var_log_t)
 rw_fifo_files_pattern(syslogd_t, var_log_t, var_log_t)
 files_search_spool(syslogd_t)
+allow syslogd_t var_log_t:file map;
 
 systemd_notify_write_socket(syslogd_t)
 
@@ -433,8 +437,10 @@ manage_files_pattern(syslogd_t, syslogd_tmpfs_t, syslogd_tmpfs_t)
 fs_tmpfs_filetrans(syslogd_t, syslogd_tmpfs_t, { dir file })
 
 manage_sock_files_pattern(syslogd_t, syslogd_var_lib_t, syslogd_var_lib_t)
+mmap_files_pattern(syslogd_t, syslogd_var_run_t, syslogd_var_run_t)
 manage_files_pattern(syslogd_t, syslogd_var_lib_t, syslogd_var_lib_t)
 files_search_var_lib(syslogd_t)
+allow syslogd_t syslogd_var_lib_t:file map;
 
 manage_dirs_pattern(syslogd_t, syslogd_var_run_t, syslogd_var_run_t)
 manage_files_pattern(syslogd_t, syslogd_var_run_t, syslogd_var_run_t)

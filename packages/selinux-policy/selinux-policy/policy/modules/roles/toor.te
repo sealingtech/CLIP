@@ -35,6 +35,31 @@ files_manage_all_files(toor_t)
 domain_unconfined(toor_t)
 
 optional_policy(`
+	logging_admin(toor_t, toor_r)
+')
+
+optional_policy(`
+	journalctl_role(toor_r, toor_t)
+')
+
+optional_policy(`
+	systemd_dbus_chat_timedated(toor_t)
+	systemd_dbus_chat_hostnamed(toor_t)
+	systemd_dbus_chat_localed(toor_t)
+	systemd_hwdb_mmap_config(toor_t)
+        systemd_passwd_agent_run(toor_t, toor_r)
+        systemd_config_all_services(toor_t)
+        systemd_manage_all_unit_files(toor_t)
+        systemd_manage_all_unit_lnk_files(toor_t)
+        systemd_login_status(toor_t)
+        systemd_login_reboot(toor_t)
+        systemd_login_halt(toor_t)
+        systemd_login_undefined(toor_t)
+        systemd_tmpfiles_run(toor_t, toor_r)
+	systemd_exec_sysctl(toor_t)
+')
+
+optional_policy(`
 	seutil_run_setfiles(toor_t, toor_r)
 	seutil_run_runinit(toor_t, toor_r)
 	seutil_run_semanage(toor_t, toor_r)

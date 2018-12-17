@@ -135,7 +135,7 @@ tunable_policy(`login_console_enabled',`
 ')
 
 allow userdomain userdomain:process signull;
-allow userdomain userdomain:fifo_file rw_inherited_fifo_file_perms;
+allow userdomain userdomain:fifo_file { map rw_inherited_fifo_file_perms };
 dontaudit unpriv_userdomain self:rawip_socket create_socket_perms;
 
 # Nautilus causes this avc
@@ -185,6 +185,7 @@ allow userdom_home_reader_certs_type home_cert_t:dir list_dir_perms;
 read_files_pattern(userdom_home_reader_certs_type, home_cert_t, home_cert_t)
 read_lnk_files_pattern(userdom_home_reader_certs_type, home_cert_t, home_cert_t)
 userdom_search_user_home_content(userdom_home_reader_certs_type)
+allow userdom_home_reader_certs_type home_cert_t:file map;
 
 tunable_policy(`use_ecryptfs_home_dirs',`
     fs_read_ecryptfs_files(userdom_home_reader_certs_type)
@@ -214,18 +215,21 @@ tunable_policy(`use_nfs_home_dirs',`
     fs_manage_nfs_dirs(userdom_home_manager_type)
     fs_manage_nfs_files(userdom_home_manager_type)
     fs_manage_nfs_symlinks(userdom_home_manager_type)
+    fs_mmap_nfs_files(userdom_home_manager_type)
 ')
 
 tunable_policy(`use_samba_home_dirs',`
     fs_manage_cifs_dirs(userdom_home_manager_type)
     fs_manage_cifs_files(userdom_home_manager_type)
     fs_manage_cifs_symlinks(userdom_home_manager_type)
+	    fs_map_cifs_files(userdom_home_manager_type)
 ')
 
 tunable_policy(`use_fusefs_home_dirs',`
     fs_manage_fusefs_dirs(userdom_home_manager_type)
     fs_manage_fusefs_files(userdom_home_manager_type)
     fs_manage_fusefs_symlinks(userdom_home_manager_type)
+	    fs_mmap_fusefs_files(userdom_home_manager_type)
 ')
 
 tunable_policy(`use_ecryptfs_home_dirs',`

@@ -1,9 +1,10 @@
 %define distro redhat 
 %define polyinstatiate n
 %define monolithic n
-%define POLICYCOREUTILSVER 2.5
-%define CHECKPOLICYVER 2.5
-%define LIBSEMANAGEVER 2.5
+%define POLICYVER 31
+%define POLICYCOREUTILSVER 2.5-24
+%define CHECKPOLICYVER 2.5-8
+%define LIBSEMANAGEVER 2.5-13
 Name:   %{pkgname}
 Version: %{version}
 Release: %{release}

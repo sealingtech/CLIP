@@ -39,6 +39,26 @@ interface(`abrt_domtrans',`
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, abrt_exec_t, abrt_t)
+    allow $1 abrt_exec_t:file map;
+')
+
+######################################
+## <summary>
+##	Execute abrt_dump_oops in the abrt_dump_oops_t domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition.
+##	</summary>
+## </param>
+#
+interface(`abrt_dump_oops_domtrans',`
+	gen_require(`
+		type abrt_dump_oops_t, abrt_dump_oops_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	domtrans_pattern($1, abrt_dump_oops_exec_t, abrt_dump_oops_t)
 ')
 
 ######################################
@@ -58,6 +78,7 @@ interface(`abrt_exec',`
 
 	corecmd_search_bin($1)
 	can_exec($1, abrt_exec_t)
+    allow $1 abrt_exec_t:file map;
 ')
 
 ########################################
@@ -571,7 +592,7 @@ interface(`abrt_filetrans_named_content',`
 		type abrt_var_run_t;
 	')
 
-	files_tmp_filetrans($1, abrt_tmp_t, dir, "abrt")
+	files_tmp_filetrans($1, abrt_var_cache_t, dir, "abrt")
 	files_etc_filetrans($1, abrt_etc_t, dir, "abrt")
 	files_var_filetrans($1, abrt_var_cache_t, dir, "abrt")
 	files_var_filetrans($1, abrt_var_cache_t, dir, "abrt-dix")

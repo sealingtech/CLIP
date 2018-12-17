@@ -146,6 +146,25 @@ interface(`logging_read_audit_log',`
 
 ########################################
 ## <summary>
+##      Map the audit log.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <rolecap/>
+#
+interface(`logging_map_audit_log',`
+        gen_require(`
+                type auditd_log_t;
+        ')
+
+        allow $1 auditd_log_t:file map;
+')
+
+########################################
+## <summary>
 ##	Execute auditctl in the auditctl domain.
 ## </summary>
 ## <param name="domain">
@@ -262,6 +281,7 @@ interface(`logging_domtrans_dispatcher',`
 	')
 
 	domtrans_pattern($1, audisp_exec_t, audisp_t)
+    allow $1 audisp_exec_t:file map;
 ')
 
 #########################################
@@ -616,6 +636,7 @@ interface(`logging_create_devlog_dev',`
 	allow $1 devlog_t:sock_file manage_sock_file_perms;
 	dev_filetrans($1, devlog_t, sock_file)
 	init_pid_filetrans($1, devlog_t, sock_file, "syslog")
+	logging_syslogd_pid_filetrans($1, devlog_t, sock_file, "dev-log")
 ')
 
 ########################################
@@ -730,6 +751,25 @@ interface(`logging_read_audit_config',`
 	files_search_etc($1)
 	read_files_pattern($1, auditd_etc_t, auditd_etc_t)
 	allow $1 auditd_etc_t:dir list_dir_perms;
+')
+
+########################################
+## <summary>
+##      Map the auditd configuration files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <rolecap/>
+#
+interface(`logging_map_audit_config',`
+        gen_require(`
+                type auditd_etc_t;
+        ')
+
+        allow $1 auditd_etc_t:file map;
 ')
 
 ########################################
@@ -1054,6 +1094,7 @@ interface(`logging_read_all_logs',`
 	')
 
 	files_search_var($1)
+        allow $1 logfile:file map;
 	allow $1 logfile:dir list_dir_perms;
 	read_files_pattern($1, logfile, logfile)
 ')
@@ -1137,6 +1178,7 @@ interface(`logging_manage_all_logs',`
 
 	files_search_var($1)
 	manage_files_pattern($1, logfile, logfile)
+	allow $1 logfile:file map;
 	manage_lnk_files_pattern($1, logfile, logfile)
 ')
 
@@ -1158,6 +1200,7 @@ interface(`logging_read_generic_logs',`
 
 	files_search_var($1)
 	allow $1 var_log_t:dir list_dir_perms;
+	allow $1 var_log_t:file map;
 	read_files_pattern($1, var_log_t, var_log_t)
 ')
 
@@ -1197,6 +1240,25 @@ interface(`logging_delete_generic_logs',`
 	')
 
 	allow $1 var_log_t:file unlink;
+')
+
+########################################
+## <summary>
+##      Map generic log files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <rolecap/>
+#
+interface(`logging_mmap_generic_logs',`
+        gen_require(`
+                type var_log_t;
+        ')
+
+        allow $1 var_log_t:file map;
 ')
 
 ########################################
@@ -1478,6 +1540,7 @@ interface(`logging_admin_syslog',`
 interface(`logging_admin',`
 	logging_admin_audit($1, $2)
 	logging_admin_syslog($1, $2)
+	journalctl_run($1, $2)
 ')
 
 ########################################
@@ -1529,4 +1592,58 @@ interface(`logging_filetrans_named_content',`
 	init_named_pid_filetrans($1, syslogd_var_run_t, dir, "journal")
 
     logging_log_filetrans($1, var_log_t, dir, "anaconda")
+')
+
+#######################################
+## <summary>
+##      Create objects in /run/systemd/journal/ directory
+##      with an automatic type transition to
+##      a specified private type.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <param name="private_type">
+##      <summary>
+##      The type of the object to create.
+##      </summary>
+## </param>
+## <param name="object_class">
+##      <summary>
+##      The class of the object to be created.
+##      </summary>
+## </param>
+## <param name="name" optional="true">
+##      <summary>
+##      The name of the object being created.
+##      </summary>
+## </param>
+#
+interface(`logging_syslogd_pid_filetrans',`
+	gen_require(`
+		type syslogd_var_run_t;
+	')
+
+	files_search_pids($1)
+	filetrans_pattern($1, syslogd_var_run_t, $2, $3, $4)
+')
+
+#######################################
+## <summary>
+##      Map files in /run/log/journal/ directory.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`logging_mmap_journal',`
+	gen_require(`
+		type syslogd_var_run_t;
+	')
+
+	allow $1 syslogd_var_run_t:file map;
 ')
