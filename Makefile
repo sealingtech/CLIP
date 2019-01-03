@@ -77,8 +77,13 @@ $(error "AWS/EC2 targets not supported for RHEL/CentOS v7 quite yet. Stay tuned.
 endif
 #
 # FIXME: remove when VPN variants supported by CLIP for v7
-ifneq ($(filter clip-vpn-%,$(MAKECMDGOALS)),)
-$(error "The CLIP VPN variant is not supported for RHEL/CentOS v7 quite yet. Stay tuned.")
+ifneq ($(filter wip-clip-vpn-%,$(MAKECMDGOALS)),)
+$(warning The CLIP VPN variant is not supported for RHEL v7 quite yet. You've been warned.)
+$(shell sleep 5)
+endif
+ifneq ($(filter wip-clip-kubernetes-%,$(MAKECMDGOALS)),)
+$(warning The CLIP Kubernetes variant has not been well-tested quite yet. You've been warned.)
+$(shell sleep 5)
 endif
 
 ifeq ($(CONFIG_BUILD_ENABLE_SSH_6),n)
