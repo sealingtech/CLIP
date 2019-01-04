@@ -135,12 +135,12 @@ iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) setup-inst-ks check-volume-id
 
 iso-fast: setup-inst-ks
 	@if [ ! -e "$(DONOR_ISO)" ]; then \
-		echo "error: DONOR_ISO $(DONOR_ISO) does not exist.  set DONOR_ISO to the path of an existing install iso or copy an existing iso to $(DEFAULT_DONOR_ISO)"; \
+		echo "error: DONOR_ISO $(DONOR_ISO) does not exist.  Set DONOR_ISO to the path of an existing install iso (ala make DONOR_ISO=foo.iso clip-minimal-inst-iso-fast) or copy an existing iso to $(DEFAULT_DONOR_ISO)"; \
 		exit 1; \
 	fi
 	@echo "Repacking iso.  Do not use in production"
 	$(VERBOSE)rm -f $(ROOT_DIR)/$(NAME)-DVD-$(TARGET_ARCH)-$(ISO_VERSION)-fast.iso
-	$(VERBOSE)$(SUPPORT_DIR)/repack-iso.py $(DONOR_ISO) $(ROOT_DIR)/$(NAME)-DVD-$(TARGET_ARCH)-$(ISO_VERSION)-fast.iso \
+	$(VERBOSE)sudo $(SUPPORT_DIR)/repack-iso.py $(DONOR_ISO) $(ROOT_DIR)/$(NAME)-DVD-$(TARGET_ARCH)-$(ISO_VERSION)-fast.iso \
 		$(SUPPORT_DIR)/update-inst-iso.sh $(INST_KS) $(PUNGI_OS_DIR)$(notdir $(INST_KS)) %ISO_ROOT
 
 live-iso: $(DEPS) $(ADDTL_DEPS) setup-live-ks
