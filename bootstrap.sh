@@ -194,7 +194,7 @@ fi
 # install packages that we need but aren't commonly present on default RHEL installs.
 LIVECD_TOOL_DEPS="sssd-client system-config-keyboard"
 INSTALL_ISO_DEPS="python-mako genisoimage syslinux"
-for i in createrepo rpm-build make anaconda policycoreutils-python ruby squashfs-tools git sudo libselinux-python pykickstart GConf2 e2fsprogs isomd5sum dosfstools ${LIVECD_TOOL_DEPS} ${INSTALL_ISO_DEPS}; do
+for i in createrepo rpm-build make anaconda policycoreutils-python ruby squashfs-tools git sudo libselinux-python pykickstart GConf2 e2fsprogs isomd5sum libcdio dosfstools ${LIVECD_TOOL_DEPS} ${INSTALL_ISO_DEPS}; do
 	/bin/rpm -q "$i" >/dev/null || /usr/bin/yum install -y $i
 done;
 
