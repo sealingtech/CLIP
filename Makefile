@@ -79,9 +79,10 @@ endif
 #
 # FIXME: remove when VPN variants supported by CLIP for v7
 ifneq ($(filter wip-clip-vpn-%,$(MAKECMDGOALS)),)
-$(warning The CLIP VPN variant is not supported for RHEL v7 quite yet. You've been warned.)
+$(warning The CLIP VPN variant is not functional for RHEL v7 quite yet due to a switch to libreswan from strongswan. You've been warned.)
 $(shell sleep 5)
 endif
+# FIXME: remove when Kubes variants supported by CLIP for v7
 ifneq ($(filter wip-clip-kubernetes-%,$(MAKECMDGOALS)),)
 $(warning The CLIP Kubernetes variant has not been well-tested quite yet. You've been warned.)
 $(shell sleep 5)
@@ -195,21 +196,15 @@ MKDIR = $(VERBOSE)test -d $(1) || mkdir -p $(1)
 SYSTEMS := $(shell find $(KICKSTART_DIR) -maxdepth 1 ! -name kickstart ! -name includes -type d -printf "%f\n")
 
 # These are targets supported by the kickstart/Makefile that will be used to generate LiveCD images.
-# FIXME: remove when VPN is supported by CLIP for v7
-#LIVECDS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -live-iso,$(SYSTEM)))
-LIVECDS := $(foreach SYSTEM,$(filter-out clip-vpn,$(SYSTEMS)),$(addsuffix -live-iso,$(SYSTEM)))
+LIVECDS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -live-iso,$(SYSTEM)))
+
+# Targets for fast gen'd dev ISOs
+FASTINSTISOS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -inst-iso-fast,$(SYSTEM)))
 
 # These are targets supported by the kickstart/Makefile that will be used to generate installation ISOs.
-# FIXME: remove when AWS is supported by CLIP for v7
-#FASTINSTISOS := $(foreach SYSTEM,$(SYSTEMS)),$(addsuffix -inst-iso-fast,$(SYSTEM)))
-FASTINSTISOS := $(foreach SYSTEM,$(filter-out clip-vpn,$(SYSTEMS)),$(addsuffix -inst-iso-fast,$(SYSTEM)))
+INSTISOS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -inst-iso,$(SYSTEM)))
 
-# These are targets supported by the kickstart/Makefile that will be used to generate installation ISOs.
-# FIXME: remove when AWS is supported by CLIP for v7
-#INSTISOS := $(foreach SYSTEM,$(SYSTEMS)),$(addsuffix -inst-iso,$(SYSTEM)))
-INSTISOS := $(foreach SYSTEM,$(filter-out clip-vpn,$(SYSTEMS)),$(addsuffix -inst-iso,$(SYSTEM)))
-
-# These are targets supported by the kickstart/Makefile that will be used to generate AWS AMI
+# Targets for gen'ing images suitable for uploading to AWS
 AWSBUNDLES := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -aws-ami,$(SYSTEM)))
 
 # Add a file to a repo by either downloading it (if http/ftp), or symlinking if local.
@@ -399,6 +394,9 @@ help:
 	@echo
 	@echo "The following make targets are available for generating installable ISOs:"
 	@for cd in $(INSTISOS); do echo "	$$cd"; done
+	@echo
+	@echo "The following make targets are available for quickly generating installable ISOs without rebuilding all of Anaconda's cruft (only use this for developer builds):"
+	@for cd in $(FASTINSTISOS); do echo "	$$cd"; done
 	@echo
 	@echo "The following make targets are available for generating Live CDs:"
 	@for cd in $(LIVECDS); do echo "	$$cd"; done
