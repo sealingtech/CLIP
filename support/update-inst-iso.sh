@@ -1,7 +1,7 @@
 #!/bin/sh
 # Copyright (c) 2018 Quark Security, Inc. All rights reserved.
 #Author: Marshall Miller <marshall@quarksecurity.com>
-set -x
+#set -x
 
 usage() {
 	echo "usage: $0 BUILDTIME_KS INSTALLTIME_KS ISO_ROOT"
@@ -64,6 +64,7 @@ cp "$INCLUDES"/* "$ISO_ROOT"/includes/
 
 # update the yum repo
 cd "$ISO_ROOT"
+rm -rf .olddata
 # TODO: generate a new comps file rather than reusing the existing one
 COMPS_FILE=$(find repodata -name '*comps*.xml')
 createrepo -g $COMPS_FILE .
