@@ -138,7 +138,7 @@ chmod 755 /etc/profile.d/tmout.sh
 # CCE-27309-4
 # dont use root/admin/administrator as bootloader PW
 # anaconda always
-# FIXME: set a agreed upone default grub superuser name.
+# FIXME: set a agreed upon default grub superuser name.
 sed -Eie 's/"root"| root /toor/g' /etc/grub.d/01_users
 
 if [ -f /etc/default/grub ]; then
@@ -164,7 +164,7 @@ if [ -f /etc/default/grub ]; then
 	/sbin/grubby --update-kernel=ALL --remove-args="boot"
 	/sbin/grubby --update-kernel=ALL --args="boot=UUID=${BOOT_DEV}"
 	if grep -q '^GRUB_CMDLINE_LINUX=".*boot=.*"' /etc/default/grub; then
-		sed -i 's|\(^GRUB_CMDLINE_LINUX=.*\)boot=[^[:space:]]*\(.*\)"|\1 boot=UUID='"${BOOT_DEV}"' \2|' /etc/default/grub
+		sed -i 's|\(^GRUB_CMDLINE_LINUX=.*\)boot=[^[:space:]]*\(.*"\)|\1 boot=UUID='"${BOOT_DEV}"' \2|' /etc/default/grub
 	else
 		sed -i 's|\(^GRUB_CMDLINE_LINUX=.*\)"|\1 boot=UUID='"${BOOT_DEV}"'"|' /etc/default/grub
 	fi
@@ -236,6 +236,7 @@ for f in /etc/audit/rules.d/*; do
 done
 
 # fix dupe priv rules since SSG isn't collapsing things like auid!=unset with the existing auid!=4294967295 rules
+# Without these fixes the audit rulesets will fail to load into auditd
 fix_audit_priv_rule() {
         # FIXME: i can't get delete to work properly. sed dies with unterminated address regex errors.
         sed -i -e "s;-a always,exit -F path=$1 -F perm=x -F auid>=1000 -F auid!=unset -k privileged;;" /etc/audit/rules.d/privileged.rules
@@ -261,7 +262,6 @@ fix_audit_priv_rule /usr/libexec/openssh/ssh-keysign
 # this avoids writes to audit.rules at boot. also, strip dash in unit to cause failures on error.
 rm -f /etc/audit/audit.rules
 augenrules
-mv /etc/audit/rules.d{,.archived.since.clip.uses.auditctl.not.augenrules.ftw}
 
 # override the use of augenrules in the audit unit in facor of auditctl
 mkdir -p /etc/systemd/system/auditd.service.d
@@ -276,3 +276,9 @@ EOF
 
 # CCE-27277-3
 echo "install usb-storage /bin/true" > /etc/modprobe.d/usb-storage.conf
+
+# FIX content_rule_set_firewalld_default_zone that doesn't have SSG fix yet
+if grep -q '^.*DefaultZone=.*'  /etc/firewalld/firewalld.conf; then
+       # modify the DefaultZone
+       sed -i 's/\(^.*\)DefaultZone=[^[:space:]]*\(.*\)/\1DefaultZone=drop\2/' /etc/firewalld/firewalld.conf
+fi
