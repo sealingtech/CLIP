@@ -78,6 +78,14 @@ allow NetworkManager_t self:socket create_socket_perms;
 
 allow NetworkManager_t wpa_cli_t:unix_dgram_socket sendto;
 
+optional_policy(`
+    gen_require(`
+        class dbus acquire_svc;
+    ')
+    # Allow NewtorkManager to listen on org.freedesktop.NetworkManager, org.freedesktop.nm_dispatcher, and com.redhat.ifcfgrh1
+    allow NetworkManager_t self:dbus acquire_svc;
+')
+
 can_exec(NetworkManager_t, NetworkManager_exec_t)
 #wicd
 can_exec(NetworkManager_t, wpa_cli_exec_t)

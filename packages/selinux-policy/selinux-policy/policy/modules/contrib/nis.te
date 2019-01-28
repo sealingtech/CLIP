@@ -123,7 +123,8 @@ userdom_dontaudit_search_user_home_dirs(ypbind_t)
 
 optional_policy(`
 	dbus_system_bus_client(ypbind_t)
-	dbus_connect_system_bus(ypbind_t)
+# BMW removed for CLIP
+#	dbus_connect_system_bus(ypbind_t)
 	init_dbus_chat_script(ypbind_t)
 
 	optional_policy(`

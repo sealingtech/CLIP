@@ -79,7 +79,8 @@ optional_policy(`
 
 optional_policy(`
     dbus_system_bus_client(rhev_agentd_t)
-    dbus_connect_system_bus(rhev_agentd_t)
+# BMW removed for CLIP
+#    dbus_connect_system_bus(rhev_agentd_t)
 	dbus_session_bus_client(rhev_agentd_t)
 
     optional_policy(`

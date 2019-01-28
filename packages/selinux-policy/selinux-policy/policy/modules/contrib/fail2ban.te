@@ -107,7 +107,8 @@ optional_policy(`
 
 optional_policy(`
 	dbus_system_bus_client(fail2ban_t)
-	dbus_connect_system_bus(fail2ban_t)
+# BMW removed for CLIP
+#	dbus_connect_system_bus(fail2ban_t)
 
 	optional_policy(`
 		firewalld_dbus_chat(fail2ban_t)

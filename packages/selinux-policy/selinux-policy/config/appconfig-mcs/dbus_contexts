@@ -2,5 +2,32 @@
  "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
 <busconfig>
   <selinux>
+        <associate
+        own="org.freedesktop.DBus"
+        context="system_u:object_r:system_dbusd_t:s0"/>
+        <associate
+        own="org.freedesktop.login1"
+        context="system_u:object_r:systemd_logind_t:s0"/>
+        <associate
+        own="org.freedesktop.systemd1"
+        context="system_u:object_r:system_dbusd_t:s0"/>
+        <associate
+        own="com.redhat.tuned"
+        context="system_u:object_r:tuned_t:s0"/>
+        <associate
+        own="org.freedesktop.PolicyKit1"
+        context="system_u:object_r:policykit_t:s0"/>
+        <associate
+        own="org.freedesktop.NetworkManager"
+        context="system_u:object_r:NetworkManager_t:s0"/>
+        <associate
+        own="org.freedesktop.nm_dispatcher"
+        context="system_u:object_r:NetworkManager_t:s0"/>
+        <associate
+        own="com.redhat.ifcfgrh1"
+        context="system_u:object_r:NetworkManager_t:s0"/>
+        <associate
+        own="org.freedesktop.hostname1"
+        context="system_u:object_r:systemd_hostnamed_t:s0"/>
   </selinux>
 </busconfig>

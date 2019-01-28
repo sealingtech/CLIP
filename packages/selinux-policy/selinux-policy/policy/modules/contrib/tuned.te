@@ -41,6 +41,14 @@ allow tuned_t self:netlink_socket create_socket_perms;
 allow tuned_t self:udp_socket create_socket_perms;
 allow tuned_t self:socket create_socket_perms;
 
+optional_policy(`
+    gen_require(`
+        class dbus acquire_svc;
+    ')
+    # Allow tuned to listen on com.redhat.tuned
+    allow tuned_t self:dbus acquire_svc; 
+')
+
 read_files_pattern(tuned_t, tuned_etc_t, tuned_etc_t)
 exec_files_pattern(tuned_t, tuned_etc_t, tuned_etc_t)
 
@@ -123,7 +131,8 @@ miscfiles_dontaudit_search_cert(tuned_t)
 
 optional_policy(`
 	dbus_system_bus_client(tuned_t)
-	dbus_connect_system_bus(tuned_t)
+# BMW removed for CLIP
+#	dbus_connect_system_bus(tuned_t)
 ')
 
 optional_policy(`

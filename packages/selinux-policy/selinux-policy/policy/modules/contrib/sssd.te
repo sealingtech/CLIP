@@ -137,7 +137,8 @@ sssd_read_config(sssd_t)
 
 optional_policy(`
 	dbus_system_bus_client(sssd_t)
-	dbus_connect_system_bus(sssd_t)
+# BMW removed for CLIP
+#	dbus_connect_system_bus(sssd_t)
 ')
 
 optional_policy(`
