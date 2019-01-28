@@ -443,7 +443,8 @@ optional_policy(`
 
 optional_policy(`
     dbus_system_bus_client(pegasus_t)
-    dbus_connect_system_bus(pegasus_t)
+# BMW removed for CLIP
+#    dbus_connect_system_bus(pegasus_t)
 
     optional_policy(`
 	networkmanager_dbus_chat(pegasus_t)

@@ -109,7 +109,8 @@ optional_policy(`
 ')
 
 optional_policy(`
-	dbus_connect_system_bus(dnsmasq_t)
+# BMW removed for CLIP
+#	dbus_connect_system_bus(dnsmasq_t)
 	dbus_system_bus_client(dnsmasq_t)
 ')
 

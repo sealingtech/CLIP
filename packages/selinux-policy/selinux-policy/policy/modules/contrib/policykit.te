@@ -55,6 +55,14 @@ allow policykit_t self:process { getsched setsched signal };
 allow policykit_t self:unix_dgram_socket create_socket_perms;
 allow policykit_t self:unix_stream_socket { create_stream_socket_perms connectto };
 
+optional_policy(`
+    gen_require(`
+        class dbus acquire_svc;
+    ')
+    # Allow policykit_t to listen on org.freedesktop.PolicyKit1
+    allow policykit_t self:dbus acquire_svc;
+')
+
 policykit_domtrans_auth(policykit_t)
 allow policykit_t policykit_auth_t:process signal;
 

@@ -1268,7 +1268,9 @@ template(`userdom_restricted_xwindows_user_template',`
 	')
 
 	optional_policy(`
-		dbus_role_template($1, $1_r, $1_usertype)
+
+                # BMW Not clear that all users should have unfettered dbus access
+#		dbus_role_template($1, $1_r, $1_usertype)
 		dbus_system_bus_client($1_usertype)
 		allow $1_usertype $1_usertype:dbus send_msg;
 

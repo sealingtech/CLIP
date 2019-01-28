@@ -62,7 +62,8 @@ optional_policy(`
 
 optional_policy(`
 	dbus_system_bus_client(shutdown_t)
-	dbus_connect_system_bus(shutdown_t)
+# BMW removed for CLIP
+#	dbus_connect_system_bus(shutdown_t)
 ')
 
 optional_policy(`

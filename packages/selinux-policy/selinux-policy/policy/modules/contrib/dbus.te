@@ -65,6 +65,10 @@ allow system_dbusd_t self:unix_dgram_socket create_socket_perms;
 # Receive notifications of policy reloads and enforcing status changes.
 allow system_dbusd_t self:netlink_selinux_socket { create bind read };
 
+
+# Allow system_dbusd_t to listen on org.freedesktop.DBus and org.freedesktop.systemd1
+allow system_dbusd_t self:dbus acquire_svc;
+
 can_exec(system_dbusd_t, dbusd_exec_t)
 
 allow system_dbusd_t dbusd_etc_t:dir list_dir_perms;
@@ -230,7 +234,7 @@ allow system_bus_type system_dbusd_t:unix_stream_socket rw_socket_perms;
 fs_search_all(system_bus_type)
 
 dbus_system_bus_client(system_bus_type)
-dbus_connect_system_bus(system_bus_type)
+#dbus_connect_system_bus(system_bus_type)
 
 init_status(system_bus_type)
 init_stream_connect(system_bus_type)

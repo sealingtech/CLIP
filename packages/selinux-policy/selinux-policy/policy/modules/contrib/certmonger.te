@@ -104,7 +104,8 @@ optional_policy(`
 ')
 
 optional_policy(`
-	dbus_connect_system_bus(certmonger_t)
+# BMW removed for CLIP
+#	dbus_connect_system_bus(certmonger_t)
 	dbus_system_bus_client(certmonger_t)
 ')
 

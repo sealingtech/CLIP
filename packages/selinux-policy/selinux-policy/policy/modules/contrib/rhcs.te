@@ -526,9 +526,10 @@ dev_read_urand(foghorn_t)
 
 logging_send_syslog_msg(foghorn_t)
 
-optional_policy(`
-	dbus_connect_system_bus(foghorn_t)
-')
+#optional_policy(`
+# BMW removed for CLIP
+#	dbus_connect_system_bus(foghorn_t)
+#')
 
 optional_policy(`
     snmp_manage_var_lib_files(foghorn_t)

@@ -152,6 +152,9 @@ allow systemd_logind_t self:process getcap;
 allow systemd_logind_t self:netlink_kobject_uevent_socket create_socket_perms;
 allow systemd_logind_t self:unix_dgram_socket create_socket_perms;
 
+# Allow systemd_logind_t to listen on org.freedesktop.login1
+allow systemd_logind_t self:dbus acquire_svc;
+
 mls_file_read_all_levels(systemd_logind_t)
 mls_file_write_all_levels(systemd_logind_t)
 mls_dbus_send_all_levels(systemd_logind_t)
@@ -286,7 +289,8 @@ optional_policy(`
 ')
 
 optional_policy(`
-	dbus_connect_system_bus(systemd_logind_t)
+# BMW removed for CLIP
+#	dbus_connect_system_bus(systemd_logind_t)
 	dbus_system_bus_client(systemd_logind_t)
 ')
 
@@ -347,7 +351,8 @@ userdom_dbus_send_all_users(systemd_machined_t)
 term_use_ptmx(systemd_machined_t)
 
 optional_policy(`
-	dbus_connect_system_bus(systemd_machined_t)
+# BMW removed for CLIP
+#	dbus_connect_system_bus(systemd_machined_t)
 	dbus_system_bus_client(systemd_machined_t)
 ')
 
@@ -413,7 +418,8 @@ init_named_pid_filetrans(systemd_logind_t, systemd_networkd_var_run_t, dir, "net
 
 optional_policy(`
     dbus_system_bus_client(systemd_networkd_t)
-    dbus_connect_system_bus(systemd_networkd_t)
+# BMW removed for CLIP
+#    dbus_connect_system_bus(systemd_networkd_t)
 ')
 
 optional_policy(`
@@ -783,7 +789,8 @@ optional_policy(`
 ')
 
 optional_policy(`
-	dbus_connect_system_bus(systemd_localed_t)
+# BMW removed for CLIP
+#	dbus_connect_system_bus(systemd_localed_t)
 	dbus_system_bus_client(systemd_localed_t)
 ')
 
@@ -799,6 +806,14 @@ allow systemd_hostnamed_t self:unix_stream_socket create_stream_socket_perms;
 allow systemd_hostnamed_t self:unix_dgram_socket create_socket_perms;
 
 allow systemd_hostnamed_t systemd_notify_var_run_t:sock_file write;
+
+optional_policy(`
+    gen_require(`
+        class dbus acquire_svc;
+    ')
+    # Allow hostname to listen on org.freedesktop.hostname1
+    allow systemd_hostnamed_t self:dbus acquire_svc;
+')
 
 manage_files_pattern(systemd_hostnamed_t, hostname_etc_t, hostname_etc_t)
 manage_lnk_files_pattern(systemd_hostnamed_t, hostname_etc_t, hostname_etc_t)
@@ -824,7 +839,8 @@ optional_policy(`
 
 optional_policy(`
         dbus_system_bus_client(systemd_hostnamed_t)
-        dbus_connect_system_bus(systemd_hostnamed_t)
+# BMW removed for CLIP
+#        dbus_connect_system_bus(systemd_hostnamed_t)
 ')
 
 #######################################
@@ -886,7 +902,8 @@ optional_policy(`
 
 optional_policy(`
         dbus_system_bus_client(systemd_timedated_t)
-        dbus_connect_system_bus(systemd_timedated_t)
+# BMW removed for CLIP
+#        dbus_connect_system_bus(systemd_timedated_t)
 ')
 
 optional_policy(`
@@ -982,7 +999,8 @@ optional_policy(`
 
 optional_policy(`
 	dbus_system_bus_client(systemd_resolved_t)
-	dbus_connect_system_bus(systemd_resolved_t)
+# BMW removed for CLIP
+#	dbus_connect_system_bus(systemd_resolved_t)
 ')
 
 ########################################
