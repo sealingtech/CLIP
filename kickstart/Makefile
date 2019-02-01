@@ -176,6 +176,13 @@ setup-inst-ks: $(SETUP_DEPS)
 	$(VERBOSE)$(call INSTALL_INCLUDES,$(INST_KS),$(PUNGI_OS_DIR))
 	$(VERBOSE)$(call INSTALL_INCLUDES,$(INST_KS),$(BUILD_DIR))
 	$(VERBOSE)sed -i 's;%include\s\+\(.*\);%include $(INSTALL_MNT_PATH)/repo/\1;' $(PUNGI_OS_DIR)$(notdir $(INST_KS))
+ifeq ($(strip $(CONFIG_BUILD_CHECK_KICKSTART)),y)
+	@echo "Validating kickstart. Any identified errors are the same that Anaconda would identify at install time."
+	$(VERBOSE)$(SUPPORT_DIR)/kickstart-parser.py $(INST_KS)
+else
+	@echo "Build parameter CONFIG_BUILD_CHECK_KICKSTART is disabled. Skipping kickstart verification."
+	@echo "Open CONFIG_BUILD and set 'CONFIG_BUILD_CHECK_KICKSTART := y' to enable this verification."
+endif
 
 check-volume-id:
 	@echo "Validating Volume ID"
@@ -190,6 +197,13 @@ setup-live-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -i -e 's;#CONFIG-BUILD-ADDTL-PACKAGES;$(shell echo "$(CONFIG_BUILD_ADDTL_PACKAGES)" | sed -e 's/ /\\n/g');' $(LIVE_KS)
 	$(FIX_KS_ENFORCING_MODE) $(LIVE_KS)
 	$(VERBOSE)$(call INSTALL_INCLUDES,$(LIVE_KS),$(BUILD_DIR))
+ifeq ($(strip $(CONFIG_BUILD_CHECK_KICKSTART)),y)
+	@echo "Validating kickstart. Any identified errors are the same that Anaconda would identify at install time."
+	$(VERBOSE)$(SUPPORT_DIR)/kickstart-parser.py $(LIVE_KS)
+else
+	@echo "Build parameter CONFIG_BUILD_CHECK_KICKSTART is disabled. Skipping kickstart verification."
+	@echo "Open CONFIG_BUILD and set 'CONFIG_BUILD_CHECK_KICKSTART := y' to enable this verification."
+endif
 
 setup-aws-ks: $(SETUP_DEPS)
 	$(VERBOSE)test -d $(BUILD_DIR) || mkdir -p $(BUILD_DIR)
@@ -202,6 +216,13 @@ setup-aws-ks: $(SETUP_DEPS)
 	$(VERBOSE)mkdir -p $(BUILD_DIR)/includes
 	$(VERBOSE)cp -a $(STATIC_INC) $(BUILD_DIR)/includes/
 	$(VERBOSE)$(call TMPL_INST,$(BUILD_DIR)/includes)
+ifeq ($(strip $(CONFIG_BUILD_CHECK_KICKSTART)),y)
+	@echo "Validating kickstart. Any identified errors are the same that Anaconda would identify at install time."
+	$(VERBOSE)$(SUPPORT_DIR)/kickstart-parser.py $(AWS_KS)
+else
+	@echo "Build parameter CONFIG_BUILD_CHECK_KICKSTART is disabled. Skipping kickstart verification."
+	@echo "Open CONFIG_BUILD and set 'CONFIG_BUILD_CHECK_KICKSTART := y' to enable this verification."
+endif
 
 clean:
 	$(VERBOSE)sudo rm -rf $(BUILD_DIR)
