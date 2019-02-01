@@ -29,7 +29,7 @@ VENDOR := Quark Security, Inc
 PACKAGER ?= Quark Security, Inc
 
 # snag the architecture, hard code an arch if cross-compiling or going noarch
-ARCH ?= noarch
+ARCH := noarch
 
 # Specify the type of policy to build.
 # Currently either mcs or mls.
