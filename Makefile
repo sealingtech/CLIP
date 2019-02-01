@@ -159,7 +159,8 @@ GREP := /bin/egrep
 MOCK := /usr/bin/mock
 REPO_LINK := /bin/ln -s
 REPO_WGET := /usr/bin/wget
-REPO_CREATE := /usr/bin/createrepo -g $(COMPS_FILE) -d --workers $(shell /usr/bin/nproc) --simple-md-filenames -c $(REPO_DIR)/yumcache .
+REPO_CREATE := /usr/bin/createrepo -d --workers $(shell /usr/bin/nproc) --simple-md-filenames -c $(REPO_DIR)/yumcache
+FIND_COMPS = $(shell find "$(1)" -name comps.xml||echo "$(COMPS_FILE)")
 REPO_QUERY = repoquery -c $(1) --quiet -a --queryformat '%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm'
 MOCK_ARGS += --resultdir=$(CLIP_REPO_DIR) -r $(MOCK_REL) --configdir=$(MOCK_CONF_DIR) --unpriv --rebuild --uniqueext=$(shell echo $$USER)
 
@@ -206,6 +207,9 @@ INSTISOS := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -inst-iso,$(SYSTEM)))
 
 # Targets for gen'ing images suitable for uploading to AWS
 AWSBUNDLES := $(foreach SYSTEM,$(SYSTEMS),$(addsuffix -aws-ami,$(SYSTEM)))
+
+# macro used to gather interdependencies between packages built from source
+PKG_DEPS = $(strip $(eval $(shell $(GREP) ^DEPS $(PKG_DIR)/$(1)/Makefile || echo "DEPS :="))$(DEPS))
 
 # Add a file to a repo by either downloading it (if http/ftp), or symlinking if local.
 # TODO: add support for wget (problem with code below, running echo/GREP for each file instead of once for the whole repo
@@ -269,10 +273,11 @@ endef
 # This define directive is used to generate build rules.
 define RPM_RULE_template
 $(1): $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1))) $(MY_REPO_DEPS) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg $(YUM_CONF_ALL_FILE) $(CLIP_REPO_DIR)/exists
+$(1): $(addprefix $(CLIP_REPO_DIR)/,$(foreach DEP,$(call PKG_DEPS,$(call PKG_NAME_FROM_RPM,$(notdir $(1)))),$(call RPM_FROM_PKG_NAME,$(DEP))))
 	$(call CHECK_DEPS)
 	$(call MKDIR,$(CLIP_REPO_DIR))
 	$(VERBOSE)$(MOCK) $(MOCK_ARGS) $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
-	cd $(CLIP_REPO_DIR) && $(REPO_CREATE)
+	cd $(CLIP_REPO_DIR) && $(REPO_CREATE) -g $(call FIND_COMPS,$(REPO_PATH)) .
 	$(VERBOSE)$(call REPO_QUERY,$(YUM_CONF_ALL_FILE)) --repoid=clip-repo 2>/dev/null|sort 1>$(CONF_DIR)/pkglist.clip-repo
 ifeq ($(ENABLE_SIGNING),y)
 	$(RPM) --addsign $(CLIP_REPO_DIR)/*
@@ -288,7 +293,7 @@ $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-nomock-rpm:
 	$(call MKDIR,$(CLIP_REPO_DIR))
 	$(RM) $(SRPM_OUTPUT_DIR)/$(call SRPM_FROM_RPM,$(notdir $(1)))
 	$(VERBOSE)OUTPUT_DIR=$(CLIP_REPO_DIR) $(MAKE) -C $(PKG_DIR)/$(call PKG_NAME_FROM_RPM,$(notdir $(1))) srpm rpm
-	cd $(CLIP_REPO_DIR) && $(REPO_CREATE)
+	cd $(CLIP_REPO_DIR) && $(REPO_CREATE) -g $(call FIND_COMPS,$(REPO_PATH)) .
 
 $(eval PHONIES += $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-srpm $(call PKG_NAME_FROM_RPM,$(notdir $(1)))-clean)
 
@@ -355,7 +360,7 @@ $(REPO_DIR)/$(REPO_ID)-repo/last-updated: $(CONF_DIR)/pkglist.$(REPO_ID) $(CONFI
 		fi; \
 	done < $(CONF_DIR)/pkglist.$(REPO_ID)
 	@echo "Generating $(REPO_ID) yum repo metadata, this could take a few minutes..."
-	$(VERBOSE)cd $(REPO_DIR)/$(REPO_ID)-repo && $(REPO_CREATE)
+	$(VERBOSE)cd $(REPO_DIR)/$(REPO_ID)-repo && $(REPO_CREATE) -g $(call FIND_COMPS,$(REPO_PATH)) .
 	test -f $(YUM_CONF_ALL_FILE) || ( cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE);\
 		echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_ALL_FILE))
 	echo -e $(YUM_CONF) >> $(YUM_CONF_ALL_FILE)
@@ -461,7 +466,7 @@ $(CLIP_REPO_DIR)/exists $(YUM_CONF_ALL_FILE):
 		echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_ALL_FILE))
 	$(call MKDIR,$(basename $@))
 	echo "Generating clip-repo metadata."; \
-	$(VERBOSE)cd $(CLIP_REPO_DIR) && $(REPO_CREATE)
+	$(VERBOSE)cd $(CLIP_REPO_DIR) && $(REPO_CREATE) -g $(call FIND_COMPS,$(REPO_PATH)) .
 
 	@set -e; for pkg in $(PRE_ROLLED_PACKAGES); do \
            [ -f "$$pkg" ] || ( echo "Failed to find pre-rolled package: $$pkg" && exit 1 );\
@@ -469,7 +474,7 @@ $(CLIP_REPO_DIR)/exists $(YUM_CONF_ALL_FILE):
               $(REPO_LINK) $$pkg $(CLIP_REPO_DIR)|| \
 	      ( echo "Failed to find pre-rolled package $$pkg - check CONFIG_BUILD and make sure you use quotes around paths with spaces." && exit 1 );\
         done
-	$(VERBOSE)cd $(CLIP_REPO_DIR) && $(REPO_CREATE)
+	$(VERBOSE)cd $(CLIP_REPO_DIR) && $(REPO_CREATE) -g $(call FIND_COMPS,$(REPO_PATH)) .
 	touch $@
 
 PHONIES += rpms
