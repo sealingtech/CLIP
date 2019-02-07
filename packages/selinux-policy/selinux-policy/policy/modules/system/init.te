@@ -528,6 +528,11 @@ optional_policy(`
 	dmidecode_domtrans(init_t)
 ')
 
+# Allow init to run firewall-cmd
+optional_policy(`
+	firewalld_dbus_chat(init_t)
+')
+
 optional_policy(`
 	rhsmcertd_manage_lib_files(init_t)
 	rhsmcertd_manage_lib_dirs(init_t)
