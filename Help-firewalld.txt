@@ -1,0 +1,76 @@
+===========================================================================
+Description
+
+This document will describe how to switch from iptables to firewalld. As
+with everything in CLIP, this is just the bare minimum to get things
+working and to be as secure as possible. You should expect to need to make 
+modifications for your needs.
+
+===========================================================================
+Why switch?
+
+At present it is completely fine to stick with using iptables. Long term, 
+iptables is going to be replaced and switching to firewalld might help
+abstract away that change and make the conversion easier. 
+
+NetworkManager can communicate with firewalld to allow the system to switch 
+the security posture of the firewall based on networking.
+
+Firewalld has built in authorization controls based on SELinux context, 
+command, and UID.
+
+Firewalld plugs into the audit framework to get verbose auditing of changes
+to the firewall. 
+
+===========================================================================
+What does CLIP do? 
+
+    We configure firewalld - Check out kickstart/includes/fix-firewalld         
+    to see exactly what we do.
+
+    Lockdown Whitelisting 
+        We use this to only allow certain SELinux domains to modify the 
+        firewall. This is done be turning lockdowns on in 
+        /etc/firewalld/firewalld.conf and by modifying
+        /etc/firewalld/lockdown-whitelist.xml.
+
+    Switch to the block zone
+        This blocks all incoming packets but allows all outbound packets
+        and packets sent over loopback.
+
+    Remove rules that allow packets sent over loopback
+        We add an override file for the firewalld unit that removes the 
+        rules that ACCEPT all traffic over loopback. These rules are 
+        hard coded into the firewalld source and cannot be removed using
+        the firewalld configuration files.
+
+    Set up a core set of direct rules
+        Use SECMark to label server and client ping and SSH packets
+
+        Allow server and client ping and SSH packets 
+
+        Add a rule to the bottom of the OUTPUT chain in the filter table 
+        to DROP outbound packets by default.
+
+    Update the SELinux policy
+        We now use labels for all D-Bus services so we label the service
+        org.fedoraproject.FirewallD1 that is used by firewalld.
+
+
+===========================================================================
+How do you switch? 
+    This _should_ be pretty painless. You need to update the kickstart file,
+    kickstart/clip-WHATEVER/clip-WHATEVER.ks, to add in the file that 
+    configures firewalld and remove where CLIP disables the service in 
+    kickstart/includes/fix-bad-scap.
+
+    Add "%include includes/fix-firewalld" to the kickstart where all the 
+    the other includes are. 
+
+    Remove where CLIP disables firewalld and enables iptables. Find
+    the lines below in the kickstart/includes/fix-bad-scap and delete them 
+    or comment them out.
+        systemctl disable firewalld
+        systemctl mask firewalld
+        systemctl enable iptables
+        systemctl enable ip6tables

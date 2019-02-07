@@ -1,0 +1,60 @@
+# Overwrite the default firewalld whitelist configuration
+#  that lets root and virtd modify the firewall
+# We need to add in init_t so that we can remove the 
+#  loopback rules later on
+cat <<-EOF >/etc/firewalld/lockdown-whitelist.xml
+<?xml version="1.0" encoding="utf-8"?>
+<whitelist>
+  <selinux context="system_u:system_r:init_t:s0"/>
+  <selinux context="system_u:system_r:NetworkManager_t:s0"/>
+  <selinux context="toor_u:toor_r:toor_t:s0"/>
+  <selinux context="sysadm_u:sysadm_r:sysadm_t:s0"/>
+</whitelist>
+EOF
+
+# Enable whitelisting 
+sed -i 's/Lockdown=no/Lockdown=yes/'  /etc/firewalld/firewalld.conf
+
+# Switch from public zone to block. 
+sed -i 's/\(DefaultZone=\).*/\1block/'  /etc/firewalld/firewalld.conf
+
+# Set up the direct rules
+#  NEVER get rid of all SECMark rules. You do that, you are not using SELinux
+#   for packet enforcement and that is not good
+#  Add SECMark labels for ICMP rules 
+#  Add SECMark labels for SSH client and server packets
+#  Allow inbound/outbound ICMP
+#  Aloow SSH client and server
+#  By default firewalld lets all outbound packets go out, add a direct rule to drop them instead 
+cat <<-EOF >/etc/firewalld/direct.xml
+<?xml version="1.0" encoding="utf-8"?>
+<direct>
+  <rule priority="0" table="security" ipv="ipv4" chain="INPUT">-p icmp --icmp-type 8 -j SECMARK --selctx system_u:object_r:pingd_server_packet_t:s0</rule>
+  <rule priority="0" table="security" ipv="ipv4" chain="INPUT">-p icmp --icmp-type 0 -j SECMARK --selctx system_u:object_r:pingd_client_packet_t:s0</rule>
+  <rule priority="0" table="security" ipv="ipv4" chain="OUTPUT">-p icmp --icmp-type 0 -j SECMARK --selctx system_u:object_r:pingd_client_packet_t:s0</rule>
+  <rule priority="0" table="security" ipv="ipv4" chain="OUTPUT">-p icmp --icmp-type 8 -j SECMARK --selctx system_u:object_r:pingd_server_packet_t:s0</rule>
+  <rule priority="0" table="security" ipv="ipv4" chain="INPUT">-p tcp -m tcp --dport 22 -j SECMARK --selctx system_u:object_r:ssh_server_packet_t:s0</rule>
+  <rule priority="0" table="security" ipv="ipv4" chain="OUTPUT">-p tcp -m tcp --sport 22 -j SECMARK --selctx system_u:object_r:ssh_server_packet_t:s0</rule>
+  <rule priority="0" table="security" ipv="ipv4" chain="INPUT">-p tcp -m tcp --sport 22 -j SECMARK --selctx system_u:object_r:ssh_client_packet_t:s0</rule>
+  <rule priority="0" table="security" ipv="ipv4" chain="OUTPUT">-p tcp -m tcp --dport 22 -j SECMARK --selctx system_u:object_r:ssh_client_packet_t:s0</rule>
+  <rule priority="0" table="filter" ipv="ipv4" chain="INPUT">-p icmp --icmp-type 8 -j ACCEPT</rule>
+  <rule priority="0" table="filter" ipv="ipv4" chain="INPUT">-p icmp --icmp-type 0 -j ACCEPT</rule>
+  <rule priority="0" table="filter" ipv="ipv4" chain="INPUT">-p tcp -m tcp --dport 22 -j ACCEPT</rule>
+  <rule priority="0" table="filter" ipv="ipv4" chain="OUTPUT">-p icmp --icmp-type 8 -j ACCEPT</rule>
+  <rule priority="0" table="filter" ipv="ipv4" chain="OUTPUT">-p icmp --icmp-type 0 -j ACCEPT</rule>
+  <rule priority="0" table="filter" ipv="ipv4" chain="OUTPUT">-p tcp -m tcp --sport 22 -j ACCEPT</rule>
+  <rule priority="0" table="filter" ipv="ipv4" chain="OUTPUT">-j DROP</rule>
+</direct>
+EOF
+
+# Remove firewalld rules that we cannot remove using
+#  config files
+# Create an override file that calls our simple script
+mkdir -p /etc/systemd/system/firewalld.service.d/
+cat <<-EOF >/etc/systemd/system/firewalld.service.d/override.conf
+[Service]
+ExecStartPost=-/bin/firewall-cmd --direct --passthrough ipv4 -t filter -D INPUT -i lo -j ACCEPT
+ExecStartPost=-/bin/firewall-cmd --direct --passthrough ipv4 -t filter -D FORWARD -i lo -j ACCEPT
+EOF
+
+#systemctl daemon-reload

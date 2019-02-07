@@ -26,6 +26,7 @@ files_tmpfs_file(firewalld_tmpfs_t)
 
 type firewalld_var_run_t;
 files_pid_file(firewalld_var_run_t)
+files_pid_filetrans(firewalld_t, firewalld_var_run_t, dir)
 
 type firewalld_unit_file_t;
 systemd_unit_file(firewalld_unit_file_t)
@@ -40,6 +41,15 @@ dontaudit firewalld_t self:capability sys_tty_config;
 allow firewalld_t self:fifo_file rw_fifo_file_perms;
 allow firewalld_t self:unix_stream_socket { accept listen };
 allow firewalld_t self:udp_socket create_socket_perms;
+
+optional_policy(`
+    gen_require(`
+        class dbus acquire_svc;
+    ')
+    # Allow firewalld to listen on org.fedoraproject.FirewallD1
+    allow firewalld_t self:dbus acquire_svc;
+')
+
 
 manage_dirs_pattern(firewalld_t, firewalld_etc_rw_t, firewalld_etc_rw_t)
 manage_files_pattern(firewalld_t, firewalld_etc_rw_t, firewalld_etc_rw_t)
@@ -60,6 +70,7 @@ fs_tmpfs_filetrans(firewalld_t, firewalld_tmpfs_t, file)
 allow firewalld_t firewalld_tmpfs_t:file mmap_file_perms;
 
 manage_files_pattern(firewalld_t, firewalld_var_run_t, firewalld_var_run_t)
+manage_dirs_pattern(firewalld_t, firewalld_var_run_t, firewalld_var_run_t)
 files_pid_filetrans(firewalld_t, firewalld_var_run_t, file)
 can_exec(firewalld_t, firewalld_var_run_t)
 

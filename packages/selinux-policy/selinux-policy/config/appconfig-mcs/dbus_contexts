@@ -29,5 +29,8 @@
         <associate
         own="org.freedesktop.hostname1"
         context="system_u:object_r:systemd_hostnamed_t:s0"/>
+        <associate
+        own="org.fedoraproject.FirewallD1"
+        context="system_u:object_r:firewalld_t:s0"/>
   </selinux>
 </busconfig>
