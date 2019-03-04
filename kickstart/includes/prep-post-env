@@ -11,6 +11,8 @@ then
 fi
 
 echo "Installation timestamp: `date`" > /root/clip-info.txt
-echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
+cat <<EOF >>/root/clip-info.txt
+#CONFIG-BUILD-PLACEHOLDER
+EOF
 
 export POLNAME=$(awk -F= '/^SELINUXTYPE/ { print $2; }' /etc/selinux/config)

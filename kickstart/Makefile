@@ -33,8 +33,12 @@ INSTALL_INCLUDES = \
     mkdir -p `dirname $$out_file`; \
     if [ -f $$in_file ]; then \
       cp -a $$in_file $$out_file; \
+      $(VERBOSE)sed -i -e 's;\#CONFIG-BUILD-PLACEHOLDER;$(CONFIG_BUILD_BASH_VARS);' $$out_file; \
     elif [ -f $$in_file.tmpl ]; then \
       mako-render $(TMPL_ARGS) $$in_file.tmpl > $$out_file; \
+      $(VERBOSE)sed -i -e 's;\#CONFIG-BUILD-PLACEHOLDER;$(CONFIG_BUILD_BASH_VARS);' $$out_file; \
+    elif [[ x"`dirname $$i`" == "x/include-at-runtime" ]]; then \
+      echo "ignoring runtime include file $$i"; \
     else \
       echo "missing include file $$i"; \
       exit 1; \
@@ -179,7 +183,7 @@ setup-inst-ks: $(SETUP_DEPS)
 	$(VERBOSE)sed -e 's/^repo/#repo/' $(INST_KS) > $(PUNGI_OS_DIR)/$(notdir $(INST_KS))
 	$(VERBOSE)$(call INSTALL_INCLUDES,$(INST_KS),$(PUNGI_OS_DIR))
 	$(VERBOSE)$(call INSTALL_INCLUDES,$(INST_KS),$(BUILD_DIR))
-	$(VERBOSE)sed -i 's;%include\s\+\(.*\);%include $(INSTALL_MNT_PATH)/repo/\1;' $(PUNGI_OS_DIR)$(notdir $(INST_KS))
+	$(VERBOSE)sed -i 's;%include\s\+\(includes/.*\);%include $(INSTALL_MNT_PATH)/repo/\1;' $(PUNGI_OS_DIR)$(notdir $(INST_KS))
 ifeq ($(strip $(CONFIG_BUILD_CHECK_KICKSTART)),y)
 	@echo "Validating kickstart. Any identified errors are the same that Anaconda would identify at install time."
 	$(VERBOSE)$(SUPPORT_DIR)/kickstart-parser.py $(INST_KS)
