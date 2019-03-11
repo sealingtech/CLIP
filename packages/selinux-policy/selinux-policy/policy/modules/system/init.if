@@ -710,6 +710,24 @@ interface(`init_read_var_lib',`
 
 ########################################
 ## <summary>
+##	Search inits var_run dirs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`init_search_var_run',`
+	gen_require(`
+		type init_var_run_t;
+	')
+	
+	allow $1 init_var_run_t:dir search;
+')
+
+########################################
+## <summary>
 ##	Relabel inits var_lib files.
 ## </summary>
 ## <param name="domain">
