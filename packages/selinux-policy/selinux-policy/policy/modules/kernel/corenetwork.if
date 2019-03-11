@@ -2938,7 +2938,8 @@ interface(`corenet_dccp_recvfrom_unlabeled',`
 	# XXX - at some point the oubound/send access check will be removed
 	# but for right now we need to keep this in place so as not to break
 	# older systems
-	kernel_sendrecv_unlabeled_association($1)
+# SRS: removed for CLIP
+#	kernel_sendrecv_unlabeled_association($1)
 ')
 
 ########################################
@@ -3090,7 +3091,8 @@ interface(`corenet_udp_recvfrom_unlabeled',`
 	# XXX - at some point the oubound/send access check will be removed
 	# but for right now we need to keep this in place so as not to break
 	# older systems
-	kernel_sendrecv_unlabeled_association($1)
+# SRS: removed for CLIP
+#	kernel_sendrecv_unlabeled_association($1)
 ')
 
 ########################################
@@ -3201,7 +3203,8 @@ interface(`corenet_raw_recvfrom_unlabeled',`
 	# XXX - at some point the oubound/send access check will be removed
 	# but for right now we need to keep this in place so as not to break
 	# older systems
-	kernel_sendrecv_unlabeled_association($1)
+# SRS: removed for CLIP
+#	kernel_sendrecv_unlabeled_association($1)
 ')
 
 ########################################
@@ -58105,6 +58108,1008 @@ interface(`corenet_relabelto_kubernetes_server_packets',`
 	')
 
 	allow $1 kubernetes_server_packet_t:packet relabelto;
+')
+
+
+
+
+########################################
+## <summary>
+##	Send and receive TCP traffic on the llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="both" weight="10"/>
+#
+interface(`corenet_tcp_sendrecv_llmnr_port',`
+	gen_require(`
+		type llmnr_port_t;
+	')
+
+	allow $1 llmnr_port_t:tcp_socket { send_msg recv_msg };
+')
+
+########################################
+## <summary>
+##	Send UDP traffic on the llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="write" weight="10"/>
+#
+interface(`corenet_udp_send_llmnr_port',`
+	gen_require(`
+		type llmnr_port_t;
+	')
+
+	allow $1 llmnr_port_t:udp_socket send_msg;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to send UDP traffic on the llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_udp_send_llmnr_port',`
+	gen_require(`
+		type llmnr_port_t;
+	')
+
+	dontaudit $1 llmnr_port_t:udp_socket send_msg;
+')
+
+########################################
+## <summary>
+##	Receive UDP traffic on the llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="read" weight="10"/>
+#
+interface(`corenet_udp_receive_llmnr_port',`
+	gen_require(`
+		type llmnr_port_t;
+	')
+
+	allow $1 llmnr_port_t:udp_socket recv_msg;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to receive UDP traffic on the llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_udp_receive_llmnr_port',`
+	gen_require(`
+		type llmnr_port_t;
+	')
+
+	dontaudit $1 llmnr_port_t:udp_socket recv_msg;
+')
+
+########################################
+## <summary>
+##	Send and receive UDP traffic on the llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="both" weight="10"/>
+#
+interface(`corenet_udp_sendrecv_llmnr_port',`
+	corenet_udp_send_llmnr_port($1)
+	corenet_udp_receive_llmnr_port($1)
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to send and receive
+##	UDP traffic on the llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_udp_sendrecv_llmnr_port',`
+	corenet_dontaudit_udp_send_llmnr_port($1)
+	corenet_dontaudit_udp_receive_llmnr_port($1)
+')
+
+########################################
+## <summary>
+##	Bind TCP sockets to the llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_tcp_bind_llmnr_port',`
+	gen_require(`
+		type llmnr_port_t;
+	')
+
+	allow $1 llmnr_port_t:tcp_socket name_bind;
+	
+')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_llmnr_port',`
+	gen_require(`
+		type llmnr_port_t;
+	')
+
+	dontaudit $1 llmnr_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
+##	Bind UDP sockets to the llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_udp_bind_llmnr_port',`
+	gen_require(`
+		type llmnr_port_t;
+	')
+
+	allow $1 llmnr_port_t:udp_socket name_bind;
+	
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to sbind to llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_udp_bind_llmnr_port',`
+	gen_require(`
+		type llmnr_port_t;
+	')
+
+	dontaudit $1 llmnr_port_t:udp_socket name_bind;
+	
+')
+
+########################################
+## <summary>
+##	Make a TCP connection to the llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`corenet_tcp_connect_llmnr_port',`
+	gen_require(`
+		type llmnr_port_t;
+	')
+
+	allow $1 llmnr_port_t:tcp_socket name_connect;
+')
+########################################
+## <summary>
+##	Do not audit attempts to make a TCP connection to llmnr port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`corenet_dontaudit_tcp_connect_llmnr_port',`
+	gen_require(`
+		type llmnr_port_t;
+	')
+
+	dontaudit $1 llmnr_port_t:tcp_socket name_connect;
+')
+
+
+########################################
+## <summary>
+##	Send llmnr_client packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="write" weight="10"/>
+#
+interface(`corenet_send_llmnr_client_packets',`
+	gen_require(`
+		type llmnr_client_packet_t;
+	')
+
+	allow $1 llmnr_client_packet_t:packet send;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to send llmnr_client packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_send_llmnr_client_packets',`
+	gen_require(`
+		type llmnr_client_packet_t;
+	')
+
+	dontaudit $1 llmnr_client_packet_t:packet send;
+')
+
+########################################
+## <summary>
+##	Receive llmnr_client packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="read" weight="10"/>
+#
+interface(`corenet_receive_llmnr_client_packets',`
+	gen_require(`
+		type llmnr_client_packet_t;
+	')
+
+	allow $1 llmnr_client_packet_t:packet recv;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to receive llmnr_client packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_receive_llmnr_client_packets',`
+	gen_require(`
+		type llmnr_client_packet_t;
+	')
+
+	dontaudit $1 llmnr_client_packet_t:packet recv;
+')
+
+########################################
+## <summary>
+##	Send and receive llmnr_client packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="both" weight="10"/>
+#
+interface(`corenet_sendrecv_llmnr_client_packets',`
+	corenet_send_llmnr_client_packets($1)
+	corenet_receive_llmnr_client_packets($1)
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to send and receive llmnr_client packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_sendrecv_llmnr_client_packets',`
+	corenet_dontaudit_send_llmnr_client_packets($1)
+	corenet_dontaudit_receive_llmnr_client_packets($1)
+')
+
+########################################
+## <summary>
+##	Relabel packets to llmnr_client the packet type.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`corenet_relabelto_llmnr_client_packets',`
+	gen_require(`
+		type llmnr_client_packet_t;
+	')
+
+	allow $1 llmnr_client_packet_t:packet relabelto;
+')
+
+
+########################################
+## <summary>
+##	Send llmnr_server packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="write" weight="10"/>
+#
+interface(`corenet_send_llmnr_server_packets',`
+	gen_require(`
+		type llmnr_server_packet_t;
+	')
+
+	allow $1 llmnr_server_packet_t:packet send;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to send llmnr_server packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_send_llmnr_server_packets',`
+	gen_require(`
+		type llmnr_server_packet_t;
+	')
+
+	dontaudit $1 llmnr_server_packet_t:packet send;
+')
+
+########################################
+## <summary>
+##	Receive llmnr_server packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="read" weight="10"/>
+#
+interface(`corenet_receive_llmnr_server_packets',`
+	gen_require(`
+		type llmnr_server_packet_t;
+	')
+
+	allow $1 llmnr_server_packet_t:packet recv;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to receive llmnr_server packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_receive_llmnr_server_packets',`
+	gen_require(`
+		type llmnr_server_packet_t;
+	')
+
+	dontaudit $1 llmnr_server_packet_t:packet recv;
+')
+
+########################################
+## <summary>
+##	Send and receive llmnr_server packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="both" weight="10"/>
+#
+interface(`corenet_sendrecv_llmnr_server_packets',`
+	corenet_send_llmnr_server_packets($1)
+	corenet_receive_llmnr_server_packets($1)
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to send and receive llmnr_server packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_sendrecv_llmnr_server_packets',`
+	corenet_dontaudit_send_llmnr_server_packets($1)
+	corenet_dontaudit_receive_llmnr_server_packets($1)
+')
+
+########################################
+## <summary>
+##	Relabel packets to llmnr_server the packet type.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`corenet_relabelto_llmnr_server_packets',`
+	gen_require(`
+		type llmnr_server_packet_t;
+	')
+
+	allow $1 llmnr_server_packet_t:packet relabelto;
+')
+
+
+
+
+########################################
+## <summary>
+##	Send and receive TCP traffic on the lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="both" weight="10"/>
+#
+interface(`corenet_tcp_sendrecv_lltng_port',`
+	gen_require(`
+		type lltng_port_t;
+	')
+
+	allow $1 lltng_port_t:tcp_socket { send_msg recv_msg };
+')
+
+########################################
+## <summary>
+##	Send UDP traffic on the lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="write" weight="10"/>
+#
+interface(`corenet_udp_send_lltng_port',`
+	gen_require(`
+		type lltng_port_t;
+	')
+
+	allow $1 lltng_port_t:udp_socket send_msg;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to send UDP traffic on the lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_udp_send_lltng_port',`
+	gen_require(`
+		type lltng_port_t;
+	')
+
+	dontaudit $1 lltng_port_t:udp_socket send_msg;
+')
+
+########################################
+## <summary>
+##	Receive UDP traffic on the lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="read" weight="10"/>
+#
+interface(`corenet_udp_receive_lltng_port',`
+	gen_require(`
+		type lltng_port_t;
+	')
+
+	allow $1 lltng_port_t:udp_socket recv_msg;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to receive UDP traffic on the lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_udp_receive_lltng_port',`
+	gen_require(`
+		type lltng_port_t;
+	')
+
+	dontaudit $1 lltng_port_t:udp_socket recv_msg;
+')
+
+########################################
+## <summary>
+##	Send and receive UDP traffic on the lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="both" weight="10"/>
+#
+interface(`corenet_udp_sendrecv_lltng_port',`
+	corenet_udp_send_lltng_port($1)
+	corenet_udp_receive_lltng_port($1)
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to send and receive
+##	UDP traffic on the lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_udp_sendrecv_lltng_port',`
+	corenet_dontaudit_udp_send_lltng_port($1)
+	corenet_dontaudit_udp_receive_lltng_port($1)
+')
+
+########################################
+## <summary>
+##	Bind TCP sockets to the lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_tcp_bind_lltng_port',`
+	gen_require(`
+		type lltng_port_t;
+	')
+
+	allow $1 lltng_port_t:tcp_socket name_bind;
+	
+')
+
+########################################
+## <summary>
+##	Dont audit bind TCP sockets to the lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain dont audited.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_tcp_bind_lltng_port',`
+	gen_require(`
+		type lltng_port_t;
+	')
+
+	dontaudit $1 lltng_port_t:tcp_socket name_bind;
+	
+')
+
+
+########################################
+## <summary>
+##	Bind UDP sockets to the lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_udp_bind_lltng_port',`
+	gen_require(`
+		type lltng_port_t;
+	')
+
+	allow $1 lltng_port_t:udp_socket name_bind;
+	
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to sbind to lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_udp_bind_lltng_port',`
+	gen_require(`
+		type lltng_port_t;
+	')
+
+	dontaudit $1 lltng_port_t:udp_socket name_bind;
+	
+')
+
+########################################
+## <summary>
+##	Make a TCP connection to the lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`corenet_tcp_connect_lltng_port',`
+	gen_require(`
+		type lltng_port_t;
+	')
+
+	allow $1 lltng_port_t:tcp_socket name_connect;
+')
+########################################
+## <summary>
+##	Do not audit attempts to make a TCP connection to lltng port.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`corenet_dontaudit_tcp_connect_lltng_port',`
+	gen_require(`
+		type lltng_port_t;
+	')
+
+	dontaudit $1 lltng_port_t:tcp_socket name_connect;
+')
+
+
+########################################
+## <summary>
+##	Send lltng_client packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="write" weight="10"/>
+#
+interface(`corenet_send_lltng_client_packets',`
+	gen_require(`
+		type lltng_client_packet_t;
+	')
+
+	allow $1 lltng_client_packet_t:packet send;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to send lltng_client packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_send_lltng_client_packets',`
+	gen_require(`
+		type lltng_client_packet_t;
+	')
+
+	dontaudit $1 lltng_client_packet_t:packet send;
+')
+
+########################################
+## <summary>
+##	Receive lltng_client packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="read" weight="10"/>
+#
+interface(`corenet_receive_lltng_client_packets',`
+	gen_require(`
+		type lltng_client_packet_t;
+	')
+
+	allow $1 lltng_client_packet_t:packet recv;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to receive lltng_client packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_receive_lltng_client_packets',`
+	gen_require(`
+		type lltng_client_packet_t;
+	')
+
+	dontaudit $1 lltng_client_packet_t:packet recv;
+')
+
+########################################
+## <summary>
+##	Send and receive lltng_client packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="both" weight="10"/>
+#
+interface(`corenet_sendrecv_lltng_client_packets',`
+	corenet_send_lltng_client_packets($1)
+	corenet_receive_lltng_client_packets($1)
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to send and receive lltng_client packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_sendrecv_lltng_client_packets',`
+	corenet_dontaudit_send_lltng_client_packets($1)
+	corenet_dontaudit_receive_lltng_client_packets($1)
+')
+
+########################################
+## <summary>
+##	Relabel packets to lltng_client the packet type.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`corenet_relabelto_lltng_client_packets',`
+	gen_require(`
+		type lltng_client_packet_t;
+	')
+
+	allow $1 lltng_client_packet_t:packet relabelto;
+')
+
+
+########################################
+## <summary>
+##	Send lltng_server packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="write" weight="10"/>
+#
+interface(`corenet_send_lltng_server_packets',`
+	gen_require(`
+		type lltng_server_packet_t;
+	')
+
+	allow $1 lltng_server_packet_t:packet send;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to send lltng_server packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_send_lltng_server_packets',`
+	gen_require(`
+		type lltng_server_packet_t;
+	')
+
+	dontaudit $1 lltng_server_packet_t:packet send;
+')
+
+########################################
+## <summary>
+##	Receive lltng_server packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="read" weight="10"/>
+#
+interface(`corenet_receive_lltng_server_packets',`
+	gen_require(`
+		type lltng_server_packet_t;
+	')
+
+	allow $1 lltng_server_packet_t:packet recv;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to receive lltng_server packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_receive_lltng_server_packets',`
+	gen_require(`
+		type lltng_server_packet_t;
+	')
+
+	dontaudit $1 lltng_server_packet_t:packet recv;
+')
+
+########################################
+## <summary>
+##	Send and receive lltng_server packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="both" weight="10"/>
+#
+interface(`corenet_sendrecv_lltng_server_packets',`
+	corenet_send_lltng_server_packets($1)
+	corenet_receive_lltng_server_packets($1)
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to send and receive lltng_server packets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+## <infoflow type="none"/>
+#
+interface(`corenet_dontaudit_sendrecv_lltng_server_packets',`
+	corenet_dontaudit_send_lltng_server_packets($1)
+	corenet_dontaudit_receive_lltng_server_packets($1)
+')
+
+########################################
+## <summary>
+##	Relabel packets to lltng_server the packet type.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`corenet_relabelto_lltng_server_packets',`
+	gen_require(`
+		type lltng_server_packet_t;
+	')
+
+	allow $1 lltng_server_packet_t:packet relabelto;
 ')
 
 
