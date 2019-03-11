@@ -11,15 +11,48 @@ else
 	xccdf_profile=xccdf_org.ssgproject.content_profile_stig-rhel7-server-upstream
 fi
 
+# Disable SCAP content that removes X iff we want a GUI. Do this using SCAP's tailoring support.
+if [ x"$CONFIG_BUILD_ENABLE_GUI" == "xy" ]; then
+	# suffix for tailor profile
+	tailor_suffix="_clip"
+	cat <<-EOF>/usr/share/xml/scap/ssg/content/tailoring.xml
+		<?xml version="1.0" encoding="UTF-8"?>
+		<xccdf:Tailoring xmlns:xccdf="http://checklists.nist.gov/xccdf/1.2" id="xccdf_scap-workbench_tailoring_default">
+		  <xccdf:benchmark href="/usr/share/xml/scap/ssg/content/ssg-${ds}-ds.xml"/>
+		  <xccdf:version time="2019-01-25T15:54:11">1</xccdf:version>
+		  <xccdf:Profile id="${xccdf_profile}${tailor_suffix}" extends="${xccdf_profile}">
+		    <xccdf:title xmlns:xhtml="http://www.w3.org/1999/xhtml" xml:lang="en-US" override="true">DISA STIG for Red Hat Enterprise Linux 7 [CUSTOMIZED]</xccdf:title>
+		    <xccdf:description xmlns:xhtml="http://www.w3.org/1999/xhtml" xml:lang="en-US" override="true">This profile contains configuration checks that align to the
+		  DISA STIG for Red Hat Enterprise Linux V1R4.
+
+		  In addition to being applicable to RHEL7, DISA recognizes this
+		  configuration baseline as applicable to the operating system tier of
+		  Red Hat technologies that are based off RHEL7, such as:
+		  - Red Hat Enterprise Linux Server
+		  - Red Hat Enterprise Linux Workstation and Desktop
+		  - Red Hat Virtualization Hypervisor (RHV-H)
+		  - Red Hat Enterprise Linux for HPC
+		  - Red Hat Storage</xccdf:description>
+		    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_xorg-x11-server-common_removed" selected="false"/>
+		    <xccdf:select idref="xccdf_org.ssgproject.content_group_disabling_xwindows" selected="false"/>
+		    <xccdf:select idref="xccdf_org.ssgproject.content_group_xwindows" selected="false"/>
+		  </xccdf:Profile>
+		</xccdf:Tailoring>
+	EOF
+	tailor_arg="--tailoring-file=/usr/share/xml/scap/ssg/content/tailoring.xml"
+fi
+
 mkdir -p /root/scap/{pre,post}/html
-oscap xccdf eval --profile ${xccdf_profile} \
+
+oscap xccdf eval ${tailor_arg} \
+--profile ${xccdf_profile}${tailor_suffix} \
 --report /root/scap/pre/html/report.html \
 --results /root/scap/pre/html/results.xml \
 --oval-results \
 /usr/share/xml/scap/ssg/content/ssg-${ds}-ds.xml
 
-oscap xccdf generate fix \
---result-id xccdf_org.open-scap_testresult_${xccdf_profile} \
+oscap xccdf generate fix ${tailor_arg} \
+--result-id xccdf_org.open-scap_testresult_${xccdf_profile}${tailor_suffix} \
 --template urn:xccdf:fix:script:sh \
 /root/scap/pre/html/results.xml > /root/scap/pre/remediation-script.sh
 
