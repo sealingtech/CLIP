@@ -40,7 +40,7 @@ CONFIG_BUILD_SELINUX_POL_TYPE ?= mcs
 # e.g., selinux-policy-apache
 # Listing a module here will also cause it to be enabled even if it
 # disabled in modules.conf.
-SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser ec2ssh cyrus snmp ntp bind sasl amavis denyhosts postgresql rhsmcertd logwatch raid sssd openvpn rpcbind gssproxy rpc kerberos sendmail oddjob certmonger freeipmi vmtools apcupsd nagios nut mrtg rhnsd
+SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser ec2ssh cyrus snmp ntp bind sasl amavis denyhosts postgresql rhsmcertd logwatch raid sssd openvpn rpcbind gssproxy rpc kerberos sendmail oddjob certmonger freeipmi vmtools apcupsd nagios nut mrtg rhnsd xserver devicekit rtkit accountsd colord
 
 # the filename of the tarball
 TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz

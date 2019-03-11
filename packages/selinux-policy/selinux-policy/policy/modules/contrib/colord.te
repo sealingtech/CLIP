@@ -38,6 +38,14 @@ allow colord_t self:shm create_shm_perms;
 allow colord_t self:udp_socket create_socket_perms;
 allow colord_t self:unix_dgram_socket create_socket_perms;
 
+optional_policy(`
+    gen_require(`
+        class dbus acquire_svc;
+    ')
+    # Allow colord to listen on org.freedesktop.ColorManager
+    allow colord_t self:dbus acquire_svc;
+')
+
 manage_dirs_pattern(colord_t, colord_tmp_t, colord_tmp_t)
 manage_files_pattern(colord_t, colord_tmp_t, colord_tmp_t)
 files_tmp_filetrans(colord_t, colord_tmp_t, { file dir })

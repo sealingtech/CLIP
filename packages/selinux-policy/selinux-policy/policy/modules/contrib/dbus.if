@@ -69,7 +69,9 @@ template(`dbus_role_template',`
 	#
 
 	type $1_dbusd_t, session_bus_type;
-	application_domain($1_dbusd_t, dbusd_exec_t)
+#	application_domain($1_dbusd_t, dbusd_exec_t)
+	domain_type($1_dbusd_t)
+	domain_entry_file($1_dbusd_t, dbusd_exec_t)
 	ubac_constrained($1_dbusd_t)
 	role $2 types $1_dbusd_t;
 
@@ -77,7 +79,7 @@ template(`dbus_role_template',`
 
 	selinux_get_fs_mount($1_dbusd_t)
 
-	userdom_home_manager($1_dbusd_t)
+#	userdom_home_manager($1_dbusd_t)
 
 	##############################
 	#
@@ -86,10 +88,11 @@ template(`dbus_role_template',`
 
 	# For connecting to the bus
 	allow $3 $1_dbusd_t:unix_stream_socket { connectto rw_socket_perms };
+	allow $1_dbusd_t self:unix_stream_socket { connectto rw_socket_perms };
 
 	# SE-DBus specific permissions
 	allow { dbusd_unconfined $3 } $1_dbusd_t:dbus { send_msg acquire_svc };
-	allow $3 system_dbusd_t:dbus { send_msg acquire_svc };
+	#allow $3 system_dbusd_t:dbus { send_msg acquire_svc };
 
 	domtrans_pattern($3, dbusd_exec_t, $1_dbusd_t)
 
@@ -101,13 +104,20 @@ template(`dbus_role_template',`
 	')
 
 	# cjp: this seems very broken
+	# SRS: i agree chris, but verified even on RH this is required to even login to X 
 	corecmd_bin_domtrans($1_dbusd_t, $1_t)
+	# SRS: this one is not required for login, but what the heck it already got bin_t
 	corecmd_shell_domtrans($1_dbusd_t, $1_t)
-	allow $1_dbusd_t $3:process sigkill;
+	#allow $1_dbusd_t $3:process sigkill;
 	allow $3 $1_dbusd_t:fd use;
 	allow $3 $1_dbusd_t:fifo_file rw_fifo_file_perms;
 
-	auth_use_nsswitch($1_dbusd_t)
+	# dbus needs to read /etc/passwd to lookup uid?
+	auth_read_passwd($1_dbusd_t)
+
+	#auth_use_nsswitch($1_dbusd_t)
+
+	init_search_var_run($1_dbusd_t)
 
 	logging_send_syslog_msg($1_dbusd_t)
 
