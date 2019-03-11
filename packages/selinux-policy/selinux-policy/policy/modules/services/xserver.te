@@ -57,9 +57,11 @@ gen_tunable(xdm_sysadm_login, false)
 ## <desc>
 ##  <p>
 ##  Allow the graphical login program to create files in HOME dirs as xdm_home_t.
+##  If you don't enable this xdm_t will be granted write access to user_home_t,
+##  which is likely less desirable than giving it access to xdm_home_t.
 ##  </p>
 ## </desc>
-gen_tunable(xdm_write_home, false)
+gen_tunable(xdm_write_home, true)
 
 ## <desc>
 ##	<p>
@@ -420,7 +422,7 @@ tunable_policy(`deny_ptrace',`',`
 	allow xdm_t self:process ptrace;
 ')
 
-allow xdm_t self:process { setexec setpgid getattr getcap setcap getsched getsession setsched setrlimit signal_perms setkeycreate transition };
+allow xdm_t self:process { setexec setpgid getattr getcap setcap getsched getsession setsched setrlimit signal_perms setfscreate setkeycreate transition };
 allow xdm_t self:fifo_file rw_fifo_file_perms;
 allow xdm_t self:shm create_shm_perms;
 allow xdm_t self:sem create_sem_perms;
@@ -464,7 +466,7 @@ read_files_pattern(xdm_t, xdm_etc_t, xdm_etc_t)
 # this is ugly, daemons should not create files under /etc!
 manage_files_pattern(xdm_t, xdm_rw_etc_t, xdm_rw_etc_t)
 
-userdom_manage_all_user_tmp_content(xdm_t)
+#userdom_manage_all_user_tmp_content(xdm_t)
 userdom_exec_user_tmp_files(xdm_t)
 
 manage_dirs_pattern(xdm_t, xdm_tmpfs_t, xdm_tmpfs_t)
@@ -485,6 +487,11 @@ manage_files_pattern(xdm_t, xdm_var_lib_t, xdm_var_lib_t)
 manage_lnk_files_pattern(xdm_t, xdm_var_lib_t, xdm_var_lib_t)
 manage_sock_files_pattern(xdm_t, xdm_var_lib_t, xdm_var_lib_t)
 files_var_lib_filetrans(xdm_t, xdm_var_lib_t, { file dir })
+# SRS: this is suspect. i dont see it on v7.5 but see it on v7.6 and you can't login without it.
+# it appears to be coming from files in /var/lib/gdm/.local/share/gnome-shell
+# and the source process is indeed gnome-shell
+# FIXME: try to figure out if we can label whatever this is uniquely.
+allow xdm_t xdm_var_lib_t:file execute;
 # Read machine-id
 files_read_var_lib_files(xdm_t)
 
@@ -542,21 +549,21 @@ corecmd_exec_shell(xdm_t)
 corecmd_exec_bin(xdm_t)
 corecmd_dontaudit_access_all_executables(xdm_t)
 
-corenet_all_recvfrom_netlabel(xdm_t)
-corenet_tcp_sendrecv_generic_if(xdm_t)
-corenet_udp_sendrecv_generic_if(xdm_t)
-corenet_tcp_sendrecv_generic_node(xdm_t)
-corenet_udp_sendrecv_generic_node(xdm_t)
-corenet_tcp_sendrecv_all_ports(xdm_t)
-corenet_udp_sendrecv_all_ports(xdm_t)
-corenet_tcp_bind_generic_node(xdm_t)
-corenet_udp_bind_generic_node(xdm_t)
-corenet_udp_bind_ipp_port(xdm_t)
-corenet_udp_bind_xdmcp_port(xdm_t)
-corenet_tcp_connect_all_ports(xdm_t)
-corenet_sendrecv_all_client_packets(xdm_t)
+#corenet_all_recvfrom_netlabel(xdm_t)
+#corenet_tcp_sendrecv_generic_if(xdm_t)
+#corenet_udp_sendrecv_generic_if(xdm_t)
+#corenet_tcp_sendrecv_generic_node(xdm_t)
+#corenet_udp_sendrecv_generic_node(xdm_t)
+#corenet_tcp_sendrecv_all_ports(xdm_t)
+#corenet_udp_sendrecv_all_ports(xdm_t)
+#corenet_tcp_bind_generic_node(xdm_t)
+#corenet_udp_bind_generic_node(xdm_t)
+#corenet_udp_bind_ipp_port(xdm_t)
+#corenet_udp_bind_xdmcp_port(xdm_t)
+#corenet_tcp_connect_all_ports(xdm_t)
+#corenet_sendrecv_all_client_packets(xdm_t)
 # xdm tries to bind to biff_port_t
-corenet_dontaudit_tcp_bind_all_ports(xdm_t)
+#corenet_dontaudit_tcp_bind_all_ports(xdm_t)
 
 dev_rwx_zero(xdm_t)
 dev_read_rand(xdm_t)
@@ -570,7 +577,7 @@ dev_rw_input_dev(xdm_t)
 dev_setattr_apm_bios_dev(xdm_t)
 dev_rw_dri(xdm_t)
 dev_rw_agp(xdm_t)
-dev_rw_wireless(xdm_t)
+#dev_rw_wireless(xdm_t)
 dev_getattr_xserver_misc_dev(xdm_t)
 dev_setattr_xserver_misc_dev(xdm_t)
 dev_rw_xserver_misc(xdm_t)
@@ -650,6 +657,7 @@ auth_manage_pam_console_data(xdm_t)
 auth_signal_pam(xdm_t)
 auth_rw_faillog(xdm_t)
 auth_write_login_records(xdm_t)
+auth_read_oshadow(xdm_t)
 
 # Run telinit->init to shutdown.
 init_telinit(xdm_t)
@@ -657,10 +665,12 @@ init_dbus_chat(xdm_t)
 init_pid_filetrans(xdm_t, xdm_var_run_t, dir, "multi-session-x")
 init_status(xdm_t)
 
-application_exec(xdm_t)
+#application_exec(xdm_t)
 
 libs_exec_lib_files(xdm_t)
 libs_exec_ldconfig(xdm_t)
+
+systemd_dbus_chat_hostnamed(xdm_t)
 
 logging_read_generic_logs(xdm_t)
 
@@ -689,8 +699,8 @@ userdom_manage_tmp_role(system_r, xdm_t)
 
 #userdom_home_manager(xdm_t)
 tunable_policy(`xdm_write_home',`
-    userdom_user_home_dir_filetrans(xdm_t, xdm_home_t, { file lnk_file })
-    userdom_admin_home_dir_filetrans(xdm_t, xdm_home_t, { file lnk_file })
+    userdom_user_home_dir_filetrans(xdm_t, xdm_home_t, { dir file lnk_file sock_file })
+    userdom_admin_home_dir_filetrans(xdm_t, xdm_home_t, { dir file lnk_file sock_file })
 ',`
     userdom_user_home_dir_filetrans_user_home_content(xdm_t, { dir file lnk_file fifo_file sock_file })
 ')
@@ -723,6 +733,10 @@ tunable_policy(`use_ecryptfs_home_dirs',`
 
 ### filename transitions ###
 userdom_filetrans_generic_home_content(xdm_t)
+
+optional_policy(`
+	dbus_exec_dbusd(xdm_t)
+')
 
 optional_policy(`
 	gnome_config_filetrans(xdm_t, home_cert_t, dir, "certificates")
@@ -800,7 +814,7 @@ optional_policy(`
 
 ### end of filename transitions ###
 
-application_signal(xdm_t)
+#application_signal(xdm_t)
 
 xserver_rw_session(xdm_t, xdm_tmpfs_t)
 xserver_unconfined(xdm_t)
@@ -1064,7 +1078,7 @@ allow xserver_t self:capability { sys_ptrace dac_override fowner fsetid setgid s
 dontaudit xserver_t self:capability chown;
 allow xserver_t self:capability2 compromise_kernel;
 
-allow xserver_t self:process ~{ ptrace setcurrent setexec setfscreate setrlimit execmem execstack execheap };
+allow xserver_t self:process ~{ ptrace setcurrent setexec  setrlimit execmem execstack execheap };
 allow xserver_t self:fd use;
 allow xserver_t self:fifo_file rw_fifo_file_perms;
 allow xserver_t self:sock_file read_sock_file_perms;
@@ -1078,6 +1092,7 @@ allow xserver_t self:tcp_socket create_stream_socket_perms;
 allow xserver_t self:udp_socket create_socket_perms;
 allow xserver_t self:netlink_selinux_socket create_socket_perms;
 allow xserver_t self:netlink_kobject_uevent_socket create_socket_perms;
+allow xserver_t self:netlink_route_socket { bind create getattr read write nlmsg_read };
 
 allow xserver_t { input_xevent_t input_xevent_type }:x_event send;
 
@@ -1133,18 +1148,18 @@ kernel_request_load_module(xserver_t)
 corecmd_exec_bin(xserver_t)
 corecmd_exec_shell(xserver_t)
 
-corenet_all_recvfrom_netlabel(xserver_t)
-corenet_tcp_sendrecv_generic_if(xserver_t)
-corenet_udp_sendrecv_generic_if(xserver_t)
-corenet_tcp_sendrecv_generic_node(xserver_t)
-corenet_udp_sendrecv_generic_node(xserver_t)
-corenet_tcp_sendrecv_all_ports(xserver_t)
-corenet_udp_sendrecv_all_ports(xserver_t)
+#corenet_all_recvfrom_netlabel(xserver_t)
+#corenet_tcp_sendrecv_generic_if(xserver_t)
+#corenet_udp_sendrecv_generic_if(xserver_t)
+#corenet_tcp_sendrecv_generic_node(xserver_t)
+#corenet_udp_sendrecv_generic_node(xserver_t)
+#corenet_tcp_sendrecv_all_ports(xserver_t)
+#corenet_udp_sendrecv_all_ports(xserver_t)
 corenet_tcp_bind_generic_node(xserver_t)
 corenet_tcp_bind_xserver_port(xserver_t)
-corenet_tcp_connect_all_ports(xserver_t)
-corenet_sendrecv_xserver_server_packets(xserver_t)
-corenet_sendrecv_all_client_packets(xserver_t)
+#corenet_tcp_connect_all_ports(xserver_t)
+#corenet_sendrecv_xserver_server_packets(xserver_t)
+#corenet_sendrecv_all_client_packets(xserver_t)
 
 dev_rw_sysfs(xserver_t)
 dev_rw_mouse(xserver_t)
@@ -1153,11 +1168,12 @@ dev_rw_apm_bios(xserver_t)
 dev_rw_agp(xserver_t)
 dev_rw_framebuffer(xserver_t)
 dev_manage_dri_dev(xserver_t)
+dev_map_dri(xserver_t)
 dev_create_generic_dirs(xserver_t)
 dev_setattr_generic_dirs(xserver_t)
 # raw memory access is needed if not using the frame buffer
-dev_read_raw_memory(xserver_t)
-dev_wx_raw_memory(xserver_t)
+#dev_read_raw_memory(xserver_t)
+#dev_wx_raw_memory(xserver_t)
 dev_read_urand(xserver_t)
 # for other device nodes such as the NVidia binary-only driver
 dev_manage_xserver_misc(xserver_t)
@@ -1165,7 +1181,7 @@ dev_filetrans_xserver_misc(xserver_t)
 
 # read events - the synaptics touchpad driver reads raw events
 dev_rw_input_dev(xserver_t)
-dev_write_raw_memory(xserver_t)
+#dev_write_raw_memory(xserver_t)
 dev_rwx_zero(xserver_t)
 
 domain_dontaudit_read_all_domains_state(xserver_t)
@@ -1174,7 +1190,7 @@ domain_signal_all_domains(xserver_t)
 files_read_etc_files(xserver_t)
 files_read_etc_runtime_files(xserver_t)
 files_read_usr_files(xserver_t)
-files_rw_tmpfs_files(xserver_t)
+#files_rw_tmpfs_files(xserver_t)
 
 # brought on by rhgb
 files_search_mnt(xserver_t)
