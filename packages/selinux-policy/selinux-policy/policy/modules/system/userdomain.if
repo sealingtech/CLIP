@@ -719,10 +719,11 @@ template(`userdom_common_user_template',`
 	# corenet_udp_bind_generic_port($1_usertype)
 
 	dev_read_rand($1_usertype)
-	dev_write_sound($1_usertype)
-	dev_read_sound($1_usertype)
-	dev_read_sound_mixer($1_usertype)
-	dev_write_sound_mixer($1_usertype)
+	# SRS removed for CLIP
+	#dev_write_sound($1_usertype)
+	#dev_read_sound($1_usertype)
+	#dev_read_sound_mixer($1_usertype)
+	#dev_write_sound_mixer($1_usertype)
 
 	# SRS: removed for CLIP
 	#files_exec_etc_files($1_usertype)
@@ -830,17 +831,17 @@ template(`userdom_common_user_template',`
 			evolution_alarm_dbus_chat($1_usertype)
 		')
 
-        optional_policy(`
-            firewalld_dbus_chat($1_usertype)
-        ')
+#        optional_policy(`
+#            firewalld_dbus_chat($1_usertype)
+#        ')
 
 		optional_policy(`
 			geoclue_dbus_chat($1_usertype)
 		')
 
-		optional_policy(`
-			gnome_dbus_chat_gconfdefault($1_usertype)
-		')
+#		optional_policy(`
+#			gnome_dbus_chat_gconfdefault($1_usertype)
+#		')
 
 		optional_policy(`
 			hal_dbus_chat($1_usertype)
@@ -858,10 +859,10 @@ template(`userdom_common_user_template',`
 			modemmanager_dbus_chat($1_usertype)
 		')
 
-		optional_policy(`
-			networkmanager_dbus_chat($1_usertype)
-			networkmanager_read_lib_files($1_usertype)
-		')
+#		optional_policy(`
+#			networkmanager_dbus_chat($1_usertype)
+#			networkmanager_read_lib_files($1_usertype)
+#		')
 
 		optional_policy(`
 			policykit_dbus_chat($1_usertype)
@@ -902,9 +903,9 @@ template(`userdom_common_user_template',`
 	')
 
 	# for running depmod as part of the kernel packaging process
-	optional_policy(`
-		modutils_read_module_config($1_usertype)
-	')
+	#optional_policy(`
+	#	modutils_read_module_config($1_usertype)
+	#')
 
 	optional_policy(`
 		mta_rw_spool($1_usertype)
@@ -966,9 +967,9 @@ template(`userdom_common_user_template',`
 		sandbox_transition($1_usertype, $1_r)
 	')
 
-	optional_policy(`
-		seunshare_role_template($1, $1_r, $1_t)
-	')
+	#optional_policy(`
+	#	seunshare_role_template($1, $1_r, $1_t)
+	#')
 
 	optional_policy(`
 		slrnpull_search_spool($1_usertype)

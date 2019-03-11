@@ -419,6 +419,10 @@ optional_policy(`
 	yam_run(toor_t, toor_r)
 ')
 
+optional_policy(`
+	dbus_role_template(toor, toor_r, toor_t)
+')
+
 ifndef(`distro_redhat',`
 	optional_policy(`
 		auth_role(toor_r, toor_t)
@@ -434,10 +438,6 @@ ifndef(`distro_redhat',`
 
 	optional_policy(`
 		cron_admin_role(toor_r, toor_t)
-	')
-
-	optional_policy(`
-		dbus_role_template(toor, toor_r, toor_t)
 	')
 
 	optional_policy(`

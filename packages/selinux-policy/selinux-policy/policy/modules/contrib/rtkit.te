@@ -20,6 +20,14 @@ init_script_file(rtkit_daemon_initrc_exec_t)
 allow rtkit_daemon_t self:capability { dac_read_search setuid sys_chroot setgid sys_nice sys_ptrace };
 allow rtkit_daemon_t self:process { setsched getcap setcap setrlimit };
 
+optional_policy(`
+	gen_require(`
+		class dbus acquire_svc;
+	')
+	# listen on org.freedesktop.RealtimeKit1
+	allow rtkit_daemon_t self:dbus acquire_svc;
+')
+
 kernel_read_system_state(rtkit_daemon_t)
 
 domain_getsched_all_domains(rtkit_daemon_t)

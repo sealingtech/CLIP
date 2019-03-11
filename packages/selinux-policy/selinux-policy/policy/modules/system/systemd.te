@@ -467,6 +467,7 @@ logging_send_syslog_msg(systemd_passwd_agent_t)
 
 optional_policy(`
 	userdom_use_user_ttys(systemd_passwd_agent_t)
+	userdom_use_user_ptys(systemd_passwd_agent_t)
 ')
 
 optional_policy(`
@@ -768,6 +769,14 @@ allow systemd_localed_t self:process setfscreate;
 allow systemd_localed_t self:fifo_file rw_fifo_file_perms;
 allow systemd_localed_t self:unix_stream_socket create_stream_socket_perms;
 allow systemd_localed_t self:unix_dgram_socket create_socket_perms;
+
+optional_policy(`
+    gen_require(`
+        class dbus acquire_svc;
+    ')
+    # Allow localed to listen on org.freedesktop.locale1.
+    allow systemd_localed_t self:dbus acquire_svc;
+')
 
 dev_write_kmsg(systemd_localed_t)
 

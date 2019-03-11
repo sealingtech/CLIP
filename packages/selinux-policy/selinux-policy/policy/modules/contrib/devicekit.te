@@ -218,6 +218,14 @@ allow devicekit_power_t self:unix_dgram_socket create_socket_perms;
 allow devicekit_power_t self:unix_stream_socket create_socket_perms;
 allow devicekit_power_t self:netlink_kobject_uevent_socket create_socket_perms;
 
+optional_policy(`
+        gen_require(`
+                class dbus acquire_svc;
+        ')
+        # listen on org.freedesktop.UPower
+        allow devicekit_power_t self:dbus acquire_svc;
+')
+
 manage_dirs_pattern(devicekit_power_t, devicekit_tmp_t, devicekit_tmp_t)
 manage_files_pattern(devicekit_power_t, devicekit_tmp_t, devicekit_tmp_t)
 files_tmp_filetrans(devicekit_power_t, devicekit_tmp_t, { file dir })
@@ -276,6 +284,10 @@ sysnet_domtrans_ifconfig(devicekit_power_t)
 sysnet_domtrans_dhcpc(devicekit_power_t)
 
 userdom_read_all_users_state(devicekit_power_t)
+
+optional_policy(`
+	systemd_write_inhibit_pipes(devicekit_power_t)
+')
 
 optional_policy(`
 	bootloader_domtrans(devicekit_power_t)
