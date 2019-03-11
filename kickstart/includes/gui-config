@@ -1,0 +1,22 @@
+# this file performs all the tweaks that are
+# typically only necessary when a gui is present
+if [ x"$CONFIG_BUILD_ENABLE_GUI" == "xy" ]; then
+
+	# there are a few things we can't remove due to deep dep issues
+	# e.g. bolt and wpa_supplicant are requried and the deps go all the
+	# way back to gdm and gnome-shell
+	if rpm -q bolt > /dev/null; then
+		systemctl disable bolt
+		systemctl mask bolt
+	fi 
+	if rpm -q wpa_supplicant > /dev/null; then
+		systemctl disable wpa_supplicant
+		systemctl mask wpa_supplicant
+	fi
+
+	# this causes both gdm and a user's gnome session
+	# to name_connect to printer ports.
+	# this might very well be a bad idea
+	# so we definitely should do it.
+	chmod 000 /usr/libexec/gsd-print-notifications
+fi

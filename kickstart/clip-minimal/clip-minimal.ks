@@ -153,6 +153,7 @@ echo "Turning sshd off"
 %include includes/disable-graphical-boot
 
 %include includes/fix-bad-scap
+%include includes/gui-config
 %include includes/late-scap-audit
 %include includes/set-enforcement-mode
 
@@ -216,7 +217,7 @@ EOF
 elif [ x"$CONFIG_BUILD_LIVE_MEDIA" == "xy" ]; then
         chage -E -1 $USERNAME
 else
-	rpm -e selinux-policy-mcs-ec2ssh 2>&1 > /dev/null
+	rpm -q selinux-policy-mcs-ec2ssh >/dev/null && rpm -e selinux-policy-mcs-ec2ssh 2>&1 > /dev/null
 	chage -d 0 "$USERNAME"
 fi
 
