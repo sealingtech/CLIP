@@ -24,6 +24,9 @@
 # 			       just to discover dep problems. This is mostly useful when adjusting the packages/groups to be installed
 #			       or requirements have changed within packages. I.e., you might not need this if those are changing. 
 # CONFIG_BUILD_ENABLE_GUI Enables X11 + GNOME
+# CONFIG_BUILD_BREAK_GUI Clobber X/GNOME conf and package set to tighten down the environment. This might very well break you GUI environment
+#			 as it does rude things like ignoring deps when removing packages and manually removing .desktop files for things like the
+#			 control center. Checkout kickstart/includes/gnome-
 #			        
 # Note: these variables and values will be inserted into /root/clip-info.txt for inspection at run-time.
 CONFIG_BUILD_ENFORCING_MODE := y
@@ -33,8 +36,15 @@ CONFIG_BUILD_ENABLE_DHCP := n
 CONFIG_BUILD_VPN_ENABLE_TOOR := n
 CONFIG_BUILD_ENABLE_SSH_6 := n
 CONFIG_BUILD_SELINUX_POL_TYPE := mcs
-CONFIG_BUILD_CHECK_KICKSTART := n
-CONFIG_BUILD_ENABLE_GUI := n
+CONFIG_BUILD_CHECK_KICKSTART := y
+CONFIG_BUILD_ENABLE_GUI := y
+CONFIG_BUILD_BREAK_GUI := y
+
+# This is the default ISO to use as a starting point for fast builds.
+# It should be a valid RHEL/CLIP installation image. You can also
+# change it at build time via something like:
+# 	make clip-minimal-inst-iso-fast DONOR_ISO=clip-minimal-DVD-x86_64-7e8135f.iso
+DONOR_ISO := $(CURDIR)/shell.iso
 
 # List of RPMs that are pre-rolled.  These will be linked into our custom yum repo during the build process.
 # Once referenced here you can start using them in the kickstart.
@@ -53,7 +63,6 @@ ifeq ($(strip $(ISO_VERSION)),)
   ISO_VERSION := 0.1
 endif
 
-
 ################################################
 ### STOP USER CONFIG 
 ################################################
@@ -64,7 +73,13 @@ endif
 ADDTL_DEPS := $(CURDIR)/CONFIG_REPOS $(CURDIR)/CONFIG_BUILD $(CURDIR)/Makefile
 
 # Translate the CONFIG_BUILD_* flags into BASH vars that we insert into things like a kickstart %post
-CONFIG_BUILD_BASH_VARS := export CONFIG_BUILD_ENFORCING_MODE=$(strip $(CONFIG_BUILD_ENFORCING_MODE)) CONFIG_BUILD_UNCONFINED_TOOR=$(strip $(CONFIG_BUILD_UNCONFINED_TOOR)) CONFIG_BUILD_REMEDIATE=$(strip $(CONFIG_BUILD_REMEDIATE)) ISO_VERSION=$(strip $(ISO_VERSION)) CONFIG_BUILD_ENABLE_DHCP=$(strip $(CONFIG_BUILD_ENABLE_DHCP)) CONFIG_BUILD_ENABLE_GUI=$(strip $(CONFIG_BUILD_ENABLE_GUI))
+CONFIG_BUILD_BASH_VARS := export CONFIG_BUILD_ENFORCING_MODE=$(strip $(CONFIG_BUILD_ENFORCING_MODE)) 
+CONFIG_BUILD_BASH_VARS += CONFIG_BUILD_UNCONFINED_TOOR=$(strip $(CONFIG_BUILD_UNCONFINED_TOOR)) 
+CONFIG_BUILD_BASH_VARS += CONFIG_BUILD_REMEDIATE=$(strip $(CONFIG_BUILD_REMEDIATE)) 
+CONFIG_BUILD_BASH_VARS += ISO_VERSION=$(strip $(ISO_VERSION)) 
+CONFIG_BUILD_BASH_VARS += CONFIG_BUILD_ENABLE_DHCP=$(strip $(CONFIG_BUILD_ENABLE_DHCP)) 
+CONFIG_BUILD_BASH_VARS += CONFIG_BUILD_ENABLE_GUI=$(strip $(CONFIG_BUILD_ENABLE_GUI)) 
+CONFIG_BUILD_BASH_VARS += CONFIG_BUILD_BREAK_GUI=$(strip $(CONFIG_BUILD_BREAK_GUI))
 
 # Typically we are rolling builds on the target arch.  Changing this may have dire consequences.
 # (read -> hasn't be tested at all and may result in broken builds and ultimately the end of the universe as we know it).
@@ -73,4 +88,4 @@ TARGET_ARCH := $(shell uname -i)
 # Quiet down the build output a bit.
 QUIET := n
 
-export TARGET_ARCH ADDTL_DEPS QUIET CONFIG_BUILD_BASH_VARS CONFIG_BUILD_ENFORCING_MODE CONFIG_BUILD_UNCONFINED_TOOR ISO_VERSION CONFIG_BUILD_REMEDIATE CONFIG_BUILD_ENABLE_DHCP CONFIG_BUILD_VPN_ENABLE_TOOR CONFIG_BUILD_SELINUX_POL_TYPE CONFIG_BUILD_CHECK_KICKSTART CONFIG_BUILD_ENABLE_GUI
+export TARGET_ARCH ADDTL_DEPS QUIET CONFIG_BUILD_BASH_VARS CONFIG_BUILD_ENFORCING_MODE CONFIG_BUILD_UNCONFINED_TOOR ISO_VERSION CONFIG_BUILD_REMEDIATE CONFIG_BUILD_ENABLE_DHCP CONFIG_BUILD_VPN_ENABLE_TOOR CONFIG_BUILD_SELINUX_POL_TYPE CONFIG_BUILD_CHECK_KICKSTART CONFIG_BUILD_ENABLE_GUI CONFIG_BUILD_BREAK_GUI
