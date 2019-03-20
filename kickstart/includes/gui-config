@@ -1,22 +1,199 @@
 # this file performs all the tweaks that are
 # typically only necessary when a gui is present
+
+DCONF_LOCKS="/etc/dconf/db/local.d/locks/settings"
+
+# apply both gsettings, system-wide dconf settings, and dconf locks
+# $1 = path to key in gsettings-style (i.e. dots instead of slashes)
+# $2 = key
+# $3 = value for key
+function gnome_lock() {
+	# convert gsettings-formatted str to dconf-formatted str
+	local dconf_str=$(echo "$1" | sed -e 's;\.;/;g')
+
+	/usr/bin/gsettings set "$1" "$2" "$3"
+	/usr/bin/sudo -u ${USERNAME} gsettings set "$1" "$2" "$3"
+	
+	# make them system-wide as well
+	test -f /etc/dconf/db/local.d/${1} || echo "[${dconf_str}]" > /etc/dconf/db/local.d/${1}
+	local val="'$3'"
+	if [[ $3 =~ (^[0-9]+$) ]]; then
+		val="uint32 $3"
+	elif [[ $3 =~ (true|false) ]]; then
+		val=$3
+	fi
+	/usr/bin/echo "$2=$val" >> /etc/dconf/db/local.d/${1}
+
+	/usr/bin/echo "/${dconf_str}/$2" >> "$DCONF_LOCKS"
+}
+
+# NOTE 1: some gsetting/dconf lock-downs are accompanied by things
+# like removing panel desktop entries for control center. look for the
+# conditional block belofre for CONFIG_BUILD_BREAK_GUI for those as removing
+# those panels could cause breakage and definitely causes error messages in logs.
+# NOTE 2: don't muck with the filenames here, some of them are specific to address SCAP checks
 if [ x"$CONFIG_BUILD_ENABLE_GUI" == "xy" ]; then
+
+	# prep for gsettings + dconf locks + go ahead and add .cache so it exists before gdm comes up to avoid a write to user_home_t in policy
+	/usr/bin/mkdir -p /home/${USERNAME}/{.config,.cache}
+	/usr/bin/chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/{.config,.cache}
+	/usr/bin/mkdir -p "$(dirname $DCONF_LOCKS)"
+
+	# BAD SCAP!
+	# SCAP breaks the login banner and every single other use of dconf
+	# since it inserts newlines instead of \n into the login banner field
+	/usr/bin/mkdir -p /etc/dconf/db/gdm.d
+	# don't show users
+	/usr/bin/echo -e "[org/gnome/login-screen]\ndisable-user-list=true" > /etc/dconf/db/gdm.d/00-security-settings
+	# fixup displaying of banner
+	/usr/bin/echo "banner-message-enable=true" >> /etc/dconf/db/gdm.d/00-security-settings
+	/usr/bin/echo "banner-message-text='$(sed -e 's/^$/\\n/g' /etc/issue|tr '\n' ' ')'" >> /etc/dconf/db/gdm.d/00-security-settings
+	# make scap happy while making me sad
+	/usr/bin/echo "enable-smartcard-authentication=true" >> /etc/dconf/db/gdm.d/00-security-settings	
+
+	# SSG in v7.6 applies a few screensaver/display lockdowns correctly so skip those
+	#gnome_lock org.gnome.desktop.session idle-delay 300
+	#gnome_lock org.gnome.desktop.screensaver lock-delay 0
+	#gnome_lock org.gnome.desktop.screensaver lock-enabled true
+
+	# FIXME: if our system-wide settings in gnome_lock are working, the manual echo commands here can be removed
+	# this doesn't seem to work via just gsettings. the dconf lock is applied, but the value is true even after the commands complete successfully
+	# so manually apply a default value in the dconf db.
+	gnome_lock org.gnome.desktop.screensaver user-switch-enabled false	
+	#echo "[org/gnome/desktop/screensaver]" > /etc/dconf/db/local.d/01-screensaver
+	#echo "user-switch-enabled=false" >> /etc/dconf/db/local.d/01-screensaver
+
+	# i am not sure of the security benefit or functional impact these laptop-specific controls ultimately have
+	# but just incase these aren't related to the screensaver timeouts go ahead and set and lock
+	gnome_lock org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 900
+	gnome_lock org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type interactive
+	gnome_lock org.gnome.settings-daemon.plugins.power sleep-inactive-battery-timeout 900
+	gnome_lock org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type interactive
+
+	# privacy panel in control center
+	gnome_lock org.gnome.system.location enabled false
+	gnome_lock org.gnome.desktop.privacy remember-recent-files false
+
+	gnome_lock org.gnome.desktop.notifications show-in-lock-screen false
+
+	# currently i don't plan on giving user->NM dbus comms via SELinux, 
+	# but still apply the locks in case that changes
+	gnome_lock org.gnome.nm-applet disable-vpn-notifications true
+	gnome_lock org.gnome.nm-applet disable-wifi-create true
+
+	# systemd's timedated is nasty. any dbus comms with it cant change things like
+	# timezone, ntpd/chronyd, and maybe others. this doesn't fix all of that, but it does prevent time zone toggling
+	gnome_lock org.gnome.desktop.datetime automatic-timezone false
+
+	gnome_lock org.gnome.desktop.interface clock-show-date true
+
+	gnome_lock org.gnome.desktop.media-handling autorun-never true
+	gnome_lock org.gnome.desktop.media-handling automount false
+
+	gnome_lock org.gnome.desktop.lockdown disable-application-handlers true
+	gnome_lock org.gnome.desktop.lockdown disable-command-line true
+	gnome_lock org.gnome.desktop.lockdown disable-print-setup true
+	gnome_lock org.gnome.desktop.lockdown disable-printing true
+	gnome_lock org.gnome.desktop.lockdown disable-user-switching true
+	gnome_lock org.gnome.desktop.lockdown user-administration-disabled true
+
+	# omg you can install extensions via a web browser.
+	gnome_lock org.gnome.shell disable-user-extensions true
+
+	# these up a developer menu via hot key or similar magic
+	gnome_lock org.gnome.shell development-tools false
+	gnome_lock org.gnome.desktop.wm.keybindings panel-run-dialog "[]"
+	gnome_lock org.gnome.desktop.wm.keybindings panel-main-menu "[]"	
+
+	/usr/bin/dconf update
+fi
+
+### START Breaking X 
+# this chunk may break X/GNOME as it manually
+# does things you wouldn't typically do in an effort
+# to further lock-down the GUI environment.
+#
+# NOTE: please document every tweak so we know why
+# when breakage occurs (and it will).
+if [ x"$CONFIG_BUILD_BREAK_GUI" == "xy" ] && [ x"$CONFIG_BUILD_ENABLE_GUI" == "xy" ]; then
 
 	# there are a few things we can't remove due to deep dep issues
 	# e.g. bolt and wpa_supplicant are requried and the deps go all the
 	# way back to gdm and gnome-shell
-	if rpm -q bolt > /dev/null; then
-		systemctl disable bolt
-		systemctl mask bolt
+	if /usr/bin/rpm -q bolt > /dev/null; then
+		/usr/bin/systemctl disable bolt
+		/usr/bin/systemctl mask bolt
 	fi 
-	if rpm -q wpa_supplicant > /dev/null; then
-		systemctl disable wpa_supplicant
-		systemctl mask wpa_supplicant
+
+	if /usr/bin/rpm -q wpa_supplicant > /dev/null; then
+		/usr/bin/systemctl disable wpa_supplicant
+		/usr/bin/systemctl mask wpa_supplicant
 	fi
 
 	# this causes both gdm and a user's gnome session
 	# to name_connect to printer ports.
 	# this might very well be a bad idea
 	# so we definitely should do it.
-	chmod 000 /usr/libexec/gsd-print-notifications
+	/usr/bin/chmod 000 /usr/libexec/gsd-print-notifications
+
+	# when we make boltd unit, selecting the thundrebolt panel
+	# causes gsettings to crash. )devices->thunderbolt panel)
+	/usr/bin/rm -f /usr/share/applications/gnome-thunderbolt-panel.desktop
+
+	# general clenliness (things we expect to never
+	# be useful on most security-focused solutions
+	# disable devices->wacom panel
+	/usr/bin/rm -f /usr/share/applications/gnome-wacom-panel.desktop
+
+	# disables sharing panel which provides the ability to
+	# toggle screen sharing in our default config (sharing panel)
+	/usr/bin/rm -f /usr/share/applications/gnome-sharing-panel.desktop
+
+	# disable panel that lets users select how to handle removable media
+	# when it is inserted (devices->removable media panel)
+	/usr/bin/rm -f /usr/share/applications/gnome-removable-media-panel.desktop
+
+	# gnome online accounts panel that let's you add accounts like google, flickr, etc
+	# (online accounts panel)
+	/usr/bin/rm -f /usr/share/applications/gnome-online-accounts-panel.desktop
+
+	# disable bluetooth panel. the functionality is disabled elsewhere (masking the bluez unit
+	# probably does it) so remove the panel too (bluetooth panel)
+	/usr/bin/rm -f /usr/share/applications/gnome-bluetooth.desktop
+
+	# disable printers panel. if present and clicked, it causes gnome control center (e.g. staff_t)
+	# to try to connect to the IPP port. i think it is only connecting to localhost,
+	# but still don't do that (devices->printers panel)
+	/usr/bin/rm -f /usr/share/applications/gnome-printers-panel.desktop
+
+	# disable panel for contolling user accounts such as enable auto-login,
+	# changing a user to an admin, see who is logged in, etc. 
+	# (details->users panel)
+	/usr/bin/rm -f /usr/share/applications/gnome-user-accounts-panel.desktop
+
+	# disable panel for controlling what is indexed for searching
+	# (search panel)
+	/usr/bin/rm -f /usr/share/applications/gnome-search-panel.desktop
+
+	# no need for wifis and i think it needs to send_msg to NetworkManager_t from e.g. staff_t
+	# which we're trying to avoid
+	# (wifi panel)
+	/usr/bin/rm -f /usr/share/applications/gnome-wifi-panel.desktop
+
+	# privacy panel contains things like toggling location services, tracking app usage and history, etc.
+	# (privacy panel)
+	/usr/bin/rm -f /usr/share/applications/gnome-privacy-panel.desktop
+
+	# notification panel controls the apps that can send notifications
+	# (notifications panel)
+	/usr/bin/rm -f /usr/share/applications/gnome-notifications-panel.desktop
+
+	# disable panel allowing users to control which apps to open for various file types
+	# (details->default applications)
+	/usr/bin/rm -f /usr/share/applications/gnome-default-apps-panel.desktop
+
+	# for some reason you can't simply remove support for VNC as this package is a dep
+	# so force removal
+	rpm -e --nodeps vino
 fi
+### STOP Breaking X 
