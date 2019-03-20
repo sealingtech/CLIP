@@ -59,5 +59,8 @@
         <associate
         own="org.freedesktop.ColorManager"
         context="system_u:object_r:colord_t:s0"/>
+        <associate
+        own="org.freedesktop.timedate1"
+        context="system_u:object_r:systemd_timedated_t:s0"/>
   </selinux>
 </busconfig>

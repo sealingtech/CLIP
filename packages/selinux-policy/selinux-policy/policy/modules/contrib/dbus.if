@@ -121,6 +121,9 @@ template(`dbus_role_template',`
 
 	logging_send_syslog_msg($1_dbusd_t)
 
+	# srs: looking for user slice unit files in /run/systemd/system?
+	systemd_list_unit_dirs($1_dbusd_t)
+
 	optional_policy(`
 		mozilla_domtrans_spec($1_dbusd_t, $1_t)
 	')
