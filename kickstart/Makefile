@@ -21,7 +21,8 @@ TMPL_CONTEXT := \
   CONFIG_BUILD_ENABLE_DHCP=$(CONFIG_BUILD_ENABLE_DHCP) \
   CONFIG_BUILD_AWS=$(CONFIG_BUILD_AWS) \
   CONFIG_BUILD_UNCONFINED_TOOR=$(CONFIG_BUILD_UNCONFINED_TOOR) \
-  CONFIG_BUILD_ENABLE_GUI=$(CONFIG_BUILD_ENABLE_GUI)
+  CONFIG_BUILD_ENABLE_GUI=$(CONFIG_BUILD_ENABLE_GUI) \
+  CONFIG_BUILD_BREAK_GUI=$(CONFIG_BUILD_BREAK_GUI)
 
 TMPL_ARGS := $(foreach TMPL_VAR,$(TMPL_CONTEXT),--var $(TMPL_VAR))
 
@@ -60,9 +61,6 @@ TMP_DIR ?= $(ROOT_DIR)/tmp
 BUILD_DIR ?= $(TMP_DIR)/$(NAME)
 SUPPORT_DIR ?= $(ROOT_DIR)/support
 OUTPUT_DIR ?= $(ROOT_DIR)
-
-DEFAULT_DONOR_ISO := $(ROOT_DIR)/shell.iso
-DONOR_ISO ?= $(DEFAULT_DONOR_ISO)
 
 INST_KS := $(BUILD_DIR)/$(NAME).ks
 LIVE_KS := $(BUILD_DIR)/$(NAME)-live.ks
@@ -136,10 +134,15 @@ iso: $(DEPS) $(PUNGI) $(ADDTL_DEPS) setup-inst-ks check-volume-id
 
 iso-fast: setup-inst-ks
 	@if [ ! -e "$(DONOR_ISO)" ]; then \
-		echo "error: DONOR_ISO $(DONOR_ISO) does not exist.  Set DONOR_ISO to the path of an existing install iso (ala make DONOR_ISO=foo.iso clip-minimal-inst-iso-fast) or copy an existing iso to $(DEFAULT_DONOR_ISO)"; \
+		echo "Error: DONOR_ISO $(DONOR_ISO) does not exist.  Set DONOR_ISO to the path of an existing install iso, e.g. make DONOR_ISO=foo.iso clip-minimal-inst-iso-fast."; \
 		exit 1; \
 	fi
-	@echo "Repacking iso.  Do not use in production"
+	@# basic sanity check to ensure we're not going to harvest the soul of the same ISO we're building.
+	@#at this point DONOR_ISO should be a full qualified path resolved in top-level makefile
+	@if [ "$(ROOT_DIR)/$(NAME)-DVD-$(TARGET_ARCH)-$(ISO_VERSION)-fast.iso"  == "$(DONOR_ISO)" ]; then \
+		echo "Error: DONOR_ISO and ouput ISO are the same. This doesn't make sense. Either copy the DONOR_ISO to a different filename or use a different ISO for DONOR_ISO."; \
+	fi
+	@echo "Creating a new ISO based on the DONOR_ISO.  Do not use in production"
 	$(VERBOSE)rm -f $(ROOT_DIR)/$(NAME)-DVD-$(TARGET_ARCH)-$(ISO_VERSION)-fast.iso
 	$(VERBOSE)sudo $(SUPPORT_DIR)/repack-iso.py $(DONOR_ISO) $(ROOT_DIR)/$(NAME)-DVD-$(TARGET_ARCH)-$(ISO_VERSION)-fast.iso \
 		$(SUPPORT_DIR)/update-inst-iso.sh $(INST_KS) $(PUNGI_OS_DIR)$(notdir $(INST_KS)) %ISO_ROOT

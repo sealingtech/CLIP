@@ -88,6 +88,45 @@ $(warning The CLIP Kubernetes variant has not been well-tested quite yet. You've
 $(shell sleep 5)
 endif
 
+# if trying to build a fast ISO, check for DONOR_ISO before we waste time trying to build everything
+ifneq ($(filter %-inst-iso-fast,$(MAKECMDGOALS)),)
+ifeq ($(DONOR_ISO),)
+$(info           )
+$(info I've detected a problem with your fast ISO configuration.)
+$(info When building *-inst-iso-fast targets DONOR_ISO must be set on the command line and be a path to a valid RHEL/CLIP ISO to use as a starting point.)
+$(error No DONOR_ISO specification)
+endif
+ifeq ($(wildcard $(DONOR_ISO) $(CURDIR)/$(DONOR_ISO)),)
+$(info           )
+$(info I've detected a problem with your fast-iso configuration.)
+$(info If you are building *-inst-iso-fast targets, DONOR_ISO must point to a valid RHEL/CLIP ISO.)
+$(info The ISO will be used as a starting point when building the new image.)
+$(info           )
+$(info DONOR_ISO is currently set to:)
+$(info $(shell echo -e "\tDONOR_ISO =" $(DONOR_ISO)))
+$(info Because I love you, I also tried:)
+$(info $(shell echo -e "\tDONOR_ISO =" $(CURDIR)/$(DONOR_ISO) in case you gave me a relative path.))
+$(error Bad DONOR_ISO specification)
+else ifneq ($(wildcard $(CURDIR)/$(DONOR_ISO)),)
+$(info           )
+$(info Looks like the DONOR_ISO is a relative path.)
+$(info Assuming current directory. If this is not your intention, ctrl-c and update the DONOR_ISO variable on the command-line.)
+$(shell sleep 3)
+override DONOR_ISO := $(CURDIR)/$(DONOR_ISO)
+endif
+endif
+
+ifneq ($(DONOR_ISO),)
+ifneq ($(filter %-inst-iso-fast,$(MAKECMDGOALS)),)
+$(info           )
+$(info Building a fast ISO using this as a starting point:)
+$(info $(shell echo -e "\tDONOR_ISO =" $(DONOR_ISO)))
+$(info This will save *a lot* of time, but the ISO should not be used in production as the full contents of the image will not be captured in the CLIP repo.)
+$(info           )
+$(shell sleep 3)
+endif
+endif
+
 ifeq ($(CONFIG_BUILD_ENABLE_SSH_6),n)
 PACKAGES := $(filter-out openssh-six,$(PACKAGES))
 endif
@@ -402,6 +441,7 @@ help:
 	@echo
 	@echo "The following make targets are available for quickly generating installable ISOs without rebuilding all of Anaconda's cruft (only use this for developer builds):"
 	@for cd in $(FASTINSTISOS); do echo "	$$cd"; done
+	@echo "For *-inst-iso-fast targets, you must specify a valid RHEL/CLIP ISO to use via DONOR_ISO=/home/foo/bar.iso on the command-line."
 	@echo
 	@echo "The following make targets are available for generating Live CDs:"
 	@for cd in $(LIVECDS); do echo "	$$cd"; done
@@ -498,7 +538,8 @@ $(LIVECDS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 PHONIES += $(FASTINSTISOS)
 $(FASTINSTISOS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call CHECK_DEPS)
-	$(VERBOSE)OS_REL="$(call OS_REL)" $(MAKE) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso-fast/\1/'`" iso-fast
+# FIXME: i can *not* get passing DONOR_ISO down via the normal routes to work - export, export -e, override, etc. $(MAKE) isn't doing it. am i missing something wrt command-line vars in recuszrive make?
+	$(VERBOSE)OS_REL="$(call OS_REL)" $(MAKE) DONOR_ISO=$(DONOR_ISO) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso-fast/\1/'`" iso-fast
 
 PHONIES += $(INSTISOS)
 $(INSTISOS):  $(CONFIG_BUILD_DEPS) $(RPMS)
