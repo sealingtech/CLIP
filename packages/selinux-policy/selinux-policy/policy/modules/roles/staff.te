@@ -172,6 +172,10 @@ optional_policy(`
 ')
 
 optional_policy(`
+	networkmanager_dbus_chat(staff_t)
+')
+
+optional_policy(`
 	oident_manage_user_content(staff_t)
 	oident_relabel_user_content(staff_t)
 ')

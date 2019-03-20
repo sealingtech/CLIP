@@ -862,6 +862,7 @@ allow systemd_timedated_t self:process { getattr getsched setfscreate };
 allow systemd_timedated_t self:fifo_file rw_fifo_file_perms;
 allow systemd_timedated_t self:unix_stream_socket create_stream_socket_perms;
 allow systemd_timedated_t self:unix_dgram_socket create_socket_perms;
+allow systemd_timedated_t self:dbus acquire_svc;
 
 allow systemd_timedated_t systemd_timedated_unit_file_t:service manage_service_perms;
 
