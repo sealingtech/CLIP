@@ -697,10 +697,13 @@ userdom_manage_user_tmp_files(xdm_t)
 userdom_manage_user_tmp_sockets(xdm_t)
 userdom_manage_tmp_role(system_r, xdm_t)
 
-#userdom_home_manager(xdm_t)
 tunable_policy(`xdm_write_home',`
     userdom_user_home_dir_filetrans(xdm_t, xdm_home_t, { dir file lnk_file sock_file })
     userdom_admin_home_dir_filetrans(xdm_t, xdm_home_t, { dir file lnk_file sock_file })
+    userdom_user_home_content_filetrans(xdm_t, xdm_home_t, { dir file lnk_file sock_file })
+    userdom_manage_user_home_content_dirs(xdm_t)
+
+    allow xdm_t xdm_home_t:sock_file manage_sock_file_perms;
 ',`
     userdom_user_home_dir_filetrans_user_home_content(xdm_t, { dir file lnk_file fifo_file sock_file })
 ')
