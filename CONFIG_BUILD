@@ -14,10 +14,6 @@
 # CONFIG_BUILD_UNCONFINED_TOOR allows the toor user to run the unconfined (read->all powerful) toor_r:toor_t role.
 #                              Normally the toor user is confined in the sysadm_r:sysadm_t role.
 # CONFIG_BUILD_ENABLE_DHCP enable DHCP for all network interfaces
-# CONFIG_BUILD_VPN_INCLUDE_TOOR enable toor user for vpn variant
-# CONFIG_BUILD_ENABLE_SSH_6 enable OpenSSH version 6 with modern crypto and the Secure Secure Shell configuation.
-# 			    This includes support for ED25519 and RSA keys and disables weak algorithms.
-# 			    See here for info on the configuration: https://stribika.github.io/2015/01/04/secure-secure-shell.html
 # CONFIG_BUILD_SELINUX_POL_TYPE Set this to mcs or mls depending on the policy you need to build
 # CONFIG_BUILD_CHECK_KICKSTART enable verification of the kickstart including package dep checking, prior to rolling the ISO. Checking
 #			       increases the build time by a minute or so, but avoids rolling a full ISO and starting an install
@@ -25,20 +21,28 @@
 #			       or requirements have changed within packages. I.e., you might not need this if those are changing. 
 # CONFIG_BUILD_ENABLE_GUI Enables X11 + GNOME
 # CONFIG_BUILD_BREAK_GUI Clobber X/GNOME conf and package set to tighten down the environment. This might very well break you GUI environment
-#			 as it does rude things like ignoring deps when removing packages and manually removing .desktop files for things like the
-#			 control center. Checkout kickstart/includes/gnome-
+#			 as it does rude things like ignoring deps when removing packages or just ignoring packaging all together and removing executables.
+#			 Checkout kickstart/includes/gui-config to see what is being done.
 #			        
 # Note: these variables and values will be inserted into /root/clip-info.txt for inspection at run-time.
 CONFIG_BUILD_ENFORCING_MODE := y
 CONFIG_BUILD_REMEDIATE := y
 CONFIG_BUILD_UNCONFINED_TOOR := y
 CONFIG_BUILD_ENABLE_DHCP := n
-CONFIG_BUILD_VPN_ENABLE_TOOR := n
-CONFIG_BUILD_ENABLE_SSH_6 := n
 CONFIG_BUILD_SELINUX_POL_TYPE := mcs
-CONFIG_BUILD_CHECK_KICKSTART := y
-CONFIG_BUILD_ENABLE_GUI := y
-CONFIG_BUILD_BREAK_GUI := y
+CONFIG_BUILD_CHECK_KICKSTART := n
+CONFIG_BUILD_ENABLE_GUI := n
+CONFIG_BUILD_BREAK_GUI := n
+
+# DEPRECATED OPTIONS
+# These CONFIG_BUILD_ options are deprecated and no longer tested/used.
+# They are here to prevent breakage of existing kickstarts referring to them. They will be removed from default kickstarts soonish.
+# CONFIG_BUILD_ENABLE_SSH_6 enable OpenSSH version 6 with modern crypto and the Secure Secure Shell configuation.
+# 			    This includes support for ED25519 and RSA keys and disables weak algorithms.
+# 			    See here for info on the configuration: https://stribika.github.io/2015/01/04/secure-secure-shell.html
+CONFIG_BUILD_ENABLE_SSH_6 := n
+# CONFIG_BUILD_VPN_INCLUDE_TOOR enable toor user for vpn variant
+CONFIG_BUILD_VPN_ENABLE_TOOR := n
 
 # This is the default ISO to use as a starting point for fast builds.
 # It should be a valid RHEL/CLIP installation image. You can also
