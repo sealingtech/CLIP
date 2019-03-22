@@ -1,0 +1,25 @@
+To enable GUI support:
+
+1. Update CONFIG_BUILD and set this to "y"
+CONFIG_BUILD_ENABLE_GUI=y
+
+Then, you need to make sure your kickstart
+has "%include includes/gui-config" immediately
+after %include includes/fix-bad-scap. That
+chunk should now look something like:
+
+%include includes/fix-bad-scap
+%include includes/gui-config
+%include includes/late-scap-audit
+%include includes/set-enforcement-mode
+
+There is a second flag in CONFIG_BUILD,
+CONFIG_BUILD_BREAK_GUI. If set to "y", riskier
+actions are tkaen that might break random things
+in X in favor of enhancing the security posture
+of the system, like forcibly removing bluetooth
+packages and ignoring dependencies while doing
+so. Use this flag carefully and if things break,
+try setting it to "no" to see if the problem is
+resolved. Then you can visit kickstart/includes/gui-config
+and try to track down what action broke things.
