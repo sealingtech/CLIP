@@ -1,0 +1,51 @@
+CLIP builds take some time. A good bit of this time
+is due to re-rolling an entire installation image
+including re-creating Anaconda's live environment
+used during installation. One way to think of it is
+
+1. CLIP builds source packages, then binary packages.
+
+2. CLIP creates does a full install of all the packages
+Anaconda needs in the live environment. This part is
+a full install of RPMs into the live image environment.
+Effectively, it installs a whole OS during this process.
+
+3. The live environment and installation package set is
+placed into a directory and packed up into an ISO.
+
+Steps 2 and 3 above can be eliminated in most circumstances.
+So, the fast build concept has been introduced that skips
+step 2 and reduces the work done in step 3. 
+
+Before we start be aware that fast builds
+don't re-create and entire SIO from source,
+inclduing an Anaconda modifications. So 
+don't use this for production images.
+
+To use fast builds you need one additional
+thing compared to normal builds - a "donor
+ISO" containing a full Anaconda-based installation
+environment. Basically, you need a RHEL installation
+ISO or a CLIP ISO.
+
+Then, having that ISO hand, you change our build target
+and add a single flag. 
+
+Instead of doing this:
+make clip-minimal-inst-iso
+
+you do this:
+make clip-minimal-inst-iso-fast DONOR_ISO=foo.iso
+
+This takes a twenty minute build and brings it down
+to about four minutes on one of our build systems.
+
+NOTE: as a result of not re-rolling anaconda or
+other parets of the ISO, like the bootloader, the
+ISO version stored in those components remains the same
+meaning what you see when booting and running Anaconda
+might not match the version of the packages, kickstart,
+etc. This is expected, but might be misleading.
+
+Again, do not use this feature when generating production ISOs.
+Enjoy!
