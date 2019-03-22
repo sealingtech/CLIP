@@ -59,6 +59,7 @@ reboot --eject
 
 %packages --excludedocs
 %include includes/packages
+%include includes/gui-packages
 #CONFIG-BUILD-ADDTL-PACKAGES
 selinux-policy
 selinux-policy-mcs
@@ -161,6 +162,7 @@ echo "Turning sshd off"
 %include includes/disable-graphical-boot
 
 %include includes/fix-bad-scap
+%include includes/gui-config
 %include includes/late-scap-audit
 %include includes/set-enforcement-mode
 
