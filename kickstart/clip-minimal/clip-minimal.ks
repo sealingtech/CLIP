@@ -59,6 +59,7 @@ reboot --eject
 
 %packages --excludedocs
 %include includes/packages
+%include includes/gui-packages
 #CONFIG-BUILD-ADDTL-PACKAGES
 selinux-policy
 selinux-policy-mcs
