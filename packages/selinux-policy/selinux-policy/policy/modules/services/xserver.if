@@ -861,6 +861,7 @@ interface(`xserver_read_xdm_home_files',`
 	')
 
 	userdom_search_user_home_dirs($1)
+	allow $1 xdm_home_t:dir search;
 	allow $1 xdm_home_t:file read_file_perms;
 ')
 

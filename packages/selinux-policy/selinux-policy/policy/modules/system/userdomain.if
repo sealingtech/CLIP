@@ -636,6 +636,7 @@ template(`userdom_xwindows_client_template',`
 		xserver_create_xdm_tmp_sockets($1_t)
 		# Needed for escd, remove if we get escd policy
 		xserver_manage_xdm_tmp_files($1_t)
+		miscfiles_map_fonts($1_t)
 	')
 ')
 

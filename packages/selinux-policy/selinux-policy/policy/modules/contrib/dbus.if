@@ -125,6 +125,10 @@ template(`dbus_role_template',`
 	systemd_list_unit_dirs($1_dbusd_t)
 
 	optional_policy(`
+		xserver_read_xdm_home_files($1_dbusd_t)
+	')
+
+	optional_policy(`
 		mozilla_domtrans_spec($1_dbusd_t, $1_t)
 	')
 ')

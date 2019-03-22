@@ -315,6 +315,26 @@ interface(`miscfiles_read_fonts',`
 
 ########################################
 ## <summary>
+##	Memory map fonts.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`miscfiles_map_fonts',`
+	gen_require(`
+		type fonts_t;
+	')
+
+	miscfiles_read_fonts($1)
+	allow $1 fonts_t:file map;
+')
+
+########################################
+## <summary>
 ##	Set the attributes on a fonts directory.
 ## </summary>
 ## <param name="domain">

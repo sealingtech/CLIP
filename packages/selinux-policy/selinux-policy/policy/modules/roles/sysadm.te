@@ -545,6 +545,7 @@ optional_policy(`
 
 optional_policy(`
 	xserver_role(sysadm_r, sysadm_t)
+	miscfiles_map_fonts(sysadm_t)
 ')
 
 optional_policy(`
