@@ -25,6 +25,11 @@
 # name_list : name | name_list name		
 #
 
+# SRS: uncomment once you have SECMARK rules in-place
+# only allow kernel_t to send and receive unlabeled packets
+#constrain packet { send recv }
+#          ((t1 == kernel_t) or ((t2 != unlabeled_t) ));
+
 define(`basic_ubac_conditions',`
 	ifdef(`enable_ubac',`
 		u1 == u2
