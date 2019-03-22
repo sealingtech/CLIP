@@ -70,3 +70,8 @@ optional_policy(`
 optional_policy(`
 	vlock_run(auditadm_t, auditadm_r)
 ')
+
+optional_policy(`
+        xserver_role(auditadm_r, auditadm_t)
+        miscfiles_map_fonts(auditadm_t)
+')

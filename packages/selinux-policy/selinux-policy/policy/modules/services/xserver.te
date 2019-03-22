@@ -492,6 +492,7 @@ files_var_lib_filetrans(xdm_t, xdm_var_lib_t, { file dir })
 # and the source process is indeed gnome-shell
 # FIXME: try to figure out if we can label whatever this is uniquely.
 allow xdm_t xdm_var_lib_t:file execute;
+allow xdm_t xdm_var_lib_t:file map;
 # Read machine-id
 files_read_var_lib_files(xdm_t)
 
@@ -675,7 +676,7 @@ systemd_dbus_chat_hostnamed(xdm_t)
 logging_read_generic_logs(xdm_t)
 
 miscfiles_search_man_pages(xdm_t)
-miscfiles_read_fonts(xdm_t)
+miscfiles_map_fonts(xdm_t)
 miscfiles_manage_fonts_cache(xdm_t)
 miscfiles_manage_localization(xdm_t)
 miscfiles_read_hwdata(xdm_t)
@@ -1243,6 +1244,7 @@ userdom_search_user_home_dirs(xserver_t)
 userdom_use_user_ttys(xserver_t)
 userdom_setattr_user_ttys(xserver_t)
 userdom_read_user_tmp_files(xserver_t)
+userdom_map_tmp_files(xserver_t)
 userdom_rw_user_tmpfs_files(xserver_t)
 
 ifndef(`distro_redhat',`

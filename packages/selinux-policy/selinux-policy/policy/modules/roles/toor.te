@@ -413,6 +413,7 @@ optional_policy(`
 
 optional_policy(`
 	xserver_role(toor_r, toor_t)
+	miscfiles_map_fonts(toor_t)
 ')
 
 optional_policy(`

@@ -167,6 +167,7 @@ optional_policy(`
 	
 		xserver_rw_session(unconfined_t, user_tmpfs_t)
 		xserver_dbus_chat_xdm(unconfined_t)
+        	miscfiles_map_fonts(unconfined_t)
 	')
 ')
 
