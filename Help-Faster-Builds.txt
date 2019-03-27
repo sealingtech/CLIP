@@ -3,9 +3,9 @@ is due to re-rolling an entire installation image
 including re-creating Anaconda's live environment
 used during installation. One way to think of it is
 
-1. CLIP builds source packages, then binary packages.
+1. CLIP builds source packages, then, using mock, it builds binary packages.
 
-2. CLIP creates does a full install of all the packages
+2. CLIP, using Pungi and Lorax, creates a full OS install of all the packages
 Anaconda needs in the live environment. This part is
 a full install of RPMs into the live image environment.
 Effectively, it installs a whole OS during this process.
@@ -41,7 +41,7 @@ This takes a twenty minute build and brings it down
 to about four minutes on one of our build systems.
 
 NOTE: as a result of not re-rolling anaconda or
-other parets of the ISO, like the bootloader, the
+other parts of the ISO, like the bootloader, the
 ISO version stored in those components remains the same
 meaning what you see when booting and running Anaconda
 might not match the version of the packages, kickstart,

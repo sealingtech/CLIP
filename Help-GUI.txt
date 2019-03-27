@@ -15,7 +15,7 @@ chunk should now look something like:
 
 There is a second flag in CONFIG_BUILD,
 CONFIG_BUILD_BREAK_GUI. If set to "y", riskier
-actions are tkaen that might break random things
+actions are taken that might break random things
 in X in favor of enhancing the security posture
 of the system, like forcibly removing bluetooth
 packages and ignoring dependencies while doing
