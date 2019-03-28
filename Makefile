@@ -538,8 +538,8 @@ $(LIVECDS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 PHONIES += $(FASTINSTISOS)
 $(FASTINSTISOS):  $(CONFIG_BUILD_DEPS) $(RPMS)
 	$(call CHECK_DEPS)
-# FIXME: i can *not* get passing DONOR_ISO down via the normal routes to work - export, export -e, override, etc. $(MAKE) isn't doing it. am i missing something wrt command-line vars in recuszrive make?
-	$(VERBOSE)OS_REL="$(call OS_REL)" $(MAKE) DONOR_ISO=$(DONOR_ISO) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso-fast/\1/'`" iso-fast
+	# the script for generating fast ISOs runs the kickstart parser so, regardless of what the user told us to do, ignore it.
+	$(VERBOSE)OS_REL="$(call OS_REL)" CONFIG_BUILD_CHECK_KICKSTART=n $(MAKE) DONOR_ISO=$(DONOR_ISO) -f $(KICKSTART_DIR)/Makefile -C $(KICKSTART_DIR)/"`echo '$(@)'|$(SED) -e 's/\(.*\)-inst-iso-fast/\1/'`" iso-fast
 
 PHONIES += $(INSTISOS)
 $(INSTISOS):  $(CONFIG_BUILD_DEPS) $(RPMS)
