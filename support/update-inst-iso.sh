@@ -52,7 +52,7 @@ fi
 
 # copy all packages
 rm -rf "$ISO_ROOT"/Packages/*
-$KICKSTART_PARSER "$BUILDTIME_KS" -o expected-packages
+$KICKSTART_PARSER "$BUILDTIME_KS" -o expected-packages || exit 1
 grep -v -e '^#' expected-packages | while read p; do
 	find $REPOS_DIR -name $p.rpm -exec cp '{}' "$ISO_ROOT"/Packages/ \;
 done
