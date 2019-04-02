@@ -105,6 +105,19 @@ constrain process { transition dyntransition noatsecure siginh rlimitinh }
 	or ( t1 == process_uncond_exempt )
 );
 
+# Constrain access to memory mapping file objects
+# One scenario in which this is useful is for a series of 
+# filters where, once filterA is done processing/modifying it, it passes
+# it to filterB. If filterA had memory mapped the file, it
+# could make changes after filterB had begun processing the file giving filterA
+# the opporunity to send malicious or sensitive information compromising the security
+# goals of the system.
+# Use the "files_not_mappable_file(<type_name>)" interface call to prevent mapping of a file type.
+constrain { dir file blk_file chr_file fifo_file } { map }
+(
+	t2 != not_mappable_file_type
+);
+
 # These permissions do not have ubac constraints:
 # fork
 # setexec
