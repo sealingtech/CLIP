@@ -117,9 +117,9 @@ HASHED_PASSWORD='$6$314159265358$ytgatj7CAZIRFMPbEanbdi.krIJs.mS9N2JEl0jkPsCvtwC
 #
 # Don't get lost in the 'if' statement - basically map $USERNAME to the unconfined toor_r:toor_t role if it is enabled.  
 if [ x"$CONFIG_BUILD_UNCONFINED_TOOR" == "xy" ]; then
-	semanage user -N -a -R toor_r -R staff_r -R sysadm_r "${USERNAME}_u" 
+	semanage user -N -a -R toor_r -R staff_r -R sysadm_r -R system_r "${USERNAME}_u" 
 else
-	semanage user -N -a -R staff_r -R sysadm_r "${USERNAME}_u" || semanage user -a -R staff_r "${USERNAME}_u"
+	semanage user -N -a -R staff_r -R sysadm_r -R system_r "${USERNAME}_u" || semanage user -a -R staff_r -R system_r "${USERNAME}_u"
 fi
 useradd -m "$USERNAME" -G wheel
 semanage login -N -a -s "${USERNAME}_u" "${USERNAME}"
