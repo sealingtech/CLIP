@@ -105,6 +105,25 @@ if [ x"$CONFIG_BUILD_ENABLE_GUI" == "xy" ]; then
 	gnome_lock org.gnome.desktop.wm.keybindings panel-run-dialog "[]"
 	gnome_lock org.gnome.desktop.wm.keybindings panel-main-menu "[]"	
 
+	# we strip out fonts and end up with a horrific font as the default.
+	# set defaults to something decent
+	# NOTE: we're not currently applyig dconf locks on these. if we do, switch to gnome_lock
+	/usr/bin/gsettings set org.gnome.desktop.interface monospace-font-name 'Liberation Mono 11'
+	/usr/bin/sudo -u ${USERNAME} /usr/bin/gsettings set org.gnome.desktop.interface monospace-font-name 'Liberation Mono 11'
+	/usr/bin/echo "[org/gnome/desktop/interface]" > /etc/dconf/db/local.d/fonts
+	/usr/bin/echo "monospace-font-name='Liberation Mono 11'" >> /etc/dconf/db/local.d/fonts
+
+	/usr/bin/gsettings set org.gnome.desktop.interface font-name 'Liberation Sans 12'
+	/usr/bin/sudo -u ${USERNAME} /usr/bin/gsettings set org.gnome.desktop.interface font-name 'Liberation Sans 12'
+	/usr/bin/echo "[org/gnome/desktop/interface]" >> /etc/dconf/db/local.d/fonts
+	/usr/bin/echo "font-name='Liberation Sans 12'" >> /etc/dconf/db/local.d/fonts
+
+	/usr/bin/gsettings set org.gnome.desktop.interface document-font-name 'Liberation Serif 12'
+	/usr/bin/sudo -u ${USERNAME} /usr/bin/gsettings set org.gnome.desktop.interface document-font-name 'Liberation Serif 12'
+	/usr/bin/echo "[org/gnome/desktop/interface]" >> /etc/dconf/db/local.d/fonts
+	/usr/bin/echo "document-font-name='Liberation Serif 12'" >> /etc/dconf/db/local.d/fonts
+
+
 	/usr/bin/dconf update
 fi
 
