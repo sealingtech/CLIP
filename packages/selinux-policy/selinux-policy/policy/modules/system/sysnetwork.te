@@ -229,9 +229,13 @@ optional_policy(`
 	netutils_domtrans_ping(dhcpc_t)
 	netutils_domtrans(dhcpc_t)
 	    allow dhcpc_t netutils_exec_t:file map;
-',`
-	allow dhcpc_t self:capability setuid;
-	allow dhcpc_t self:rawip_socket create_socket_perms;
+# SRS: CIL doesnt support else blocks in optional policy and
+# instead of bailing during build it just emits one message that is hard to catch.
+# Explicitly remove it so people dont get confused.
+# put a single quote, here to restore this if/when CIL supports it.
+# <quote>,<backtick>
+#	allow dhcpc_t self:capability setuid;
+#	allow dhcpc_t self:rawip_socket create_socket_perms;
 ')
 
 optional_policy(`
