@@ -217,6 +217,27 @@ interface(`files_type',`
 
 ########################################
 ## <summary>
+##      Mark the specified type as a non-mappable file
+##      preventing any process from memory mapping the type.
+## </summary>
+## <param name="file_type">
+##      <summary>
+##      Type of the non-mappable file.
+##      file.
+##      </summary>
+## </param>
+#
+interface(`files_not_mappable_file',`
+        gen_require(`
+                attribute not_mappable_file_type;
+        ')
+
+        typeattribute $1 not_mappable_file_type;
+')
+
+
+########################################
+## <summary>
 ##	Mark the specified type as a file
 ##	that is related to authentication.
 ## </summary>
