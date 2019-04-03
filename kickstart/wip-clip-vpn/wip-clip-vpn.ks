@@ -58,14 +58,12 @@ reboot --eject
 %include includes/packages
 %include includes/gui-packages
 #CONFIG-BUILD-ADDTL-PACKAGES
-@Base
 selinux-policy
-# by default use MCS policy (selinux-policy-clip)
--selinux-policy-mls
 selinux-policy-mcs
+selinux-policy-mcs-aide
 selinux-policy-mcs-ssh
 selinux-policy-mcs-unprivuser
-selinux-policy-mcs-ec2ssh
+#selinux-policy-mcs-ec2ssh
 selinux-policy-mcs-config-strongswan
 selinux-policy-mcs-vpnadm
 clip-miscfiles
