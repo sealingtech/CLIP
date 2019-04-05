@@ -54,6 +54,7 @@ allow chronyd_t self:shm create_shm_perms;
 allow chronyd_t self:udp_socket create_socket_perms;
 allow chronyd_t self:unix_dgram_socket { create_socket_perms sendto };
 allow chronyd_t self:fifo_file rw_fifo_file_perms;
+allow chronyd_t self:netlink_route_socket create_netlink_socket_perms;
 
 allow chronyd_t chronyd_keys_t:file append_file_perms;
 allow chronyd_t chronyd_keys_t:file setattr_file_perms;
