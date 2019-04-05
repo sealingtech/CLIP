@@ -191,6 +191,8 @@ optional_policy(`
 	chronyd_initrc_domtrans(dhcpc_t)
 	chronyd_systemctl(dhcpc_t)
 	chronyd_read_keys(dhcpc_t)
+	# SRS: there appear to be cases where dhcpc directly executes chronyd rather than using systemctl/systemd interfaces
+	chronyd_domtrans(dhcpc_t)
 ')
 
 optional_policy(`

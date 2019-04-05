@@ -96,6 +96,8 @@ term_dontaudit_use_console(netutils_t)
 userdom_use_inherited_user_terminals(netutils_t)
 userdom_use_all_users_fds(netutils_t)
 
+sysnet_read_config(netutils_t)
+
 optional_policy(`
 	nis_use_ypbind(netutils_t)
 ')
@@ -122,6 +124,8 @@ allow ping_t self:rawip_socket create_socket_perms;
 allow ping_t self:packet_socket create_socket_perms;
 allow ping_t self:netlink_route_socket create_netlink_socket_perms;
 allow ping_t self:icmp_socket create_socket_perms;
+# SRS: ping appears to probe for the source IP that packets will be routed through if -I isn't used on the command-line.
+allow ping_t self:udp_socket { connect getattr create setopt };
 
 corenet_all_recvfrom_netlabel(ping_t)
 corenet_tcp_sendrecv_generic_if(ping_t)
@@ -150,6 +154,8 @@ auth_use_nsswitch(ping_t)
 init_rw_inherited_script_tmp_files(ping_t)
 
 logging_send_syslog_msg(ping_t)
+
+sysnet_read_config(ping_t)
 
 ifdef(`hide_broken_symptoms',`
 	init_dontaudit_use_fds(ping_t)
@@ -252,6 +258,8 @@ dev_read_rand(traceroute_t)
 dev_read_urand(traceroute_t)
 
 term_use_all_inherited_terms(traceroute_t)
+
+sysnet_read_config(traceroute_t)
 
 tunable_policy(`selinuxuser_ping',`
 	term_use_all_ttys(traceroute_t)
