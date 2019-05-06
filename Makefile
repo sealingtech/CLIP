@@ -72,6 +72,12 @@ else
 $(foreach VARIANT,$(VARIANTS), $(eval include kickstart/$(VARIANT)/variant_pkgs.mk))
 endif
 
+ifneq ($(CONFIG_BUILD_ENABLE_GUI),n)
+PACKAGES += clip-gnome-extensions
+endif
+
+
+
 # FIXME: remove when AWS is supported by CLIP for v7
 ifneq ($(filter %-aws-ami,$(MAKECMDGOALS)),)
 $(error "AWS/EC2 targets not supported for RHEL/CentOS v7 quite yet. Stay tuned.")

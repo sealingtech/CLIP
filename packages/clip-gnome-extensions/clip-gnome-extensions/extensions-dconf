@@ -1,0 +1,2 @@
+[org/gnome/shell]
+enabled-extensions=['disable_account_settings@clip.quarksecurity.com']
