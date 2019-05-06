@@ -16,24 +16,45 @@ gnu-free-sans-fonts
 gnu-free-serif-fonts
 gnu-free-fonts-common
 
+# Including this package installs
+# a GNOME extension that disables
+# Account Settings in the user menu in the system tray.
+#clip-gnome-extensions
+
+
 enchant
 evolution-data-server
+gedit
 gdk-pixbuf2
 gnome-icon-theme
+# this is for Google, Facebook, etc.
+# but unfortunately GDM fails to start without it.
 gnome-online-accounts
+gnome-vfs2
+gspell
 gtk2
 gtk3
+gvfs
+gvfs-client
 hicolor-icon-theme
 hunspell
 hunspell-en
 hunspell-en-GB
 hunspell-en-US
+# libgnome is not required but includes schema and convenience tools like gnome-open
+libgnome
+libudisks2
 selinux-policy-mcs-accountsd
 selinux-policy-mcs-colord
 selinux-policy-mcs-devicekit
+# cant remove geoclue due to deps and it provides a dbus service :-/
+selinux-policy-mcs-geoclue
 selinux-policy-mcs-rtkit
 selinux-policy-mcs-xserver
+udisks2
 webkitgtk4
+# provides hand tools like xdg-open that our clip-gui.desktop text entry uses
+xdg-utils
 
 # the driver package pulls in unnecessary drivers
 # update this list to include the packages explcitly
