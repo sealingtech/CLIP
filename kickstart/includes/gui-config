@@ -13,7 +13,7 @@ function gnome_lock() {
 
 	/usr/bin/gsettings set "$1" "$2" "$3"
 	/usr/bin/sudo -u ${USERNAME} gsettings set "$1" "$2" "$3"
-	
+
 	# make them system-wide as well
 	test -f /etc/dconf/db/local.d/${1} || echo "[${dconf_str}]" > /etc/dconf/db/local.d/${1}
 	local val="'$3'"
@@ -98,12 +98,21 @@ if [ x"$CONFIG_BUILD_ENABLE_GUI" == "xy" ]; then
 	gnome_lock org.gnome.desktop.lockdown user-administration-disabled true
 
 	# omg you can install extensions via a web browser.
+	# NB: although RH's docs clearly differentiate between system extensions
+	# and user extensions the actual implementation treats them all as user extensions
+	# so, if you want even system extensions to work you have to enable user extensions
+	# and development tools
+	# RH states that the approach to use when you need extensions is to leave both on, and use
+	# and use a comprehensive extension list and place a dconf lock on the list.
 	gnome_lock org.gnome.shell disable-user-extensions true
-
-	# these up a developer menu via hot key or similar magic
 	gnome_lock org.gnome.shell development-tools false
+	#gnome_lock org.gnome.shell disable-user-extensions false
+	#gnome_lock org.gnome.shell development-tools true
+
 	gnome_lock org.gnome.desktop.wm.keybindings panel-run-dialog "[]"
 	gnome_lock org.gnome.desktop.wm.keybindings panel-main-menu "[]"	
+
+	gnome_lock org.gnome.desktop.search-providers disable-external true
 
 	# we strip out fonts and end up with a horrific font as the default.
 	# set defaults to something decent
@@ -123,6 +132,10 @@ if [ x"$CONFIG_BUILD_ENABLE_GUI" == "xy" ]; then
 	/usr/bin/echo "[org/gnome/desktop/interface]" >> /etc/dconf/db/local.d/fonts
 	/usr/bin/echo "document-font-name='Liberation Serif 12'" >> /etc/dconf/db/local.d/fonts
 
+	/usr/bin/gsettings set org.gnome.shell favorite-apps '["org.gnome.Terminal.desktop","clip-gui.desktop"]'
+	/usr/bin/sudo -u ${USERNAME} /usr/bin/gsettings set org.gnome.shell favorite-apps '["org.gnome.Terminal.desktop","clip-gui.desktop"]'
+	/usr/bin/echo "[org/gnome/shell]" > /etc/dconf/db/local.d/favorites
+	/usr/bin/echo 'favorite-apps=["org.gnome.Terminal.desktop","clip-gui.desktop"]' >> /etc/dconf/db/local.d/favorites
 
 	/usr/bin/dconf update
 fi
@@ -173,12 +186,17 @@ if [ x"$CONFIG_BUILD_BREAK_GUI" == "xy" ] && [ x"$CONFIG_BUILD_ENABLE_GUI" == "x
 	/usr/bin/rm -f /usr/share/applications/gnome-removable-media-panel.desktop
 
 	# gnome online accounts panel that let's you add accounts like google, flickr, etc
-	# (online accounts panel)
-	/usr/bin/rm -f /usr/share/applications/gnome-online-accounts-panel.desktop
+	# removing this used to work, but as of 7.6 it causes control-center to throw an assertion violation and bail
+	#/usr/bin/rm -f /usr/share/applications/gnome-online-accounts-panel.desktop
 
-	# disable bluetooth panel. the functionality is disabled elsewhere (masking the bluez unit
-	# probably does it) so remove the panel too (bluetooth panel)
-	/usr/bin/rm -f /usr/share/applications/gnome-bluetooth.desktop
+	# disable bluetooth.
+	/usr/bin/rpm -q bluez && rpm -e --nodeps bluez
+	/usr/bin/rpm -q gnome-bluetooth && rpm -e --nodeps gnome-bluetooth
+			
+	# control center owns this file and if it is missing it won't open.
+	# based on the error it seems like control center is hard-coded to select this panel
+	# on startup and it fails if it is missing.
+	#/usr/bin/rm -f /usr/share/applications/gnome-bluetooth-panel.desktop
 
 	# disable printers panel. if present and clicked, it causes gnome control center (e.g. staff_t)
 	# to try to connect to the IPP port. i think it is only connecting to localhost,
@@ -188,7 +206,9 @@ if [ x"$CONFIG_BUILD_BREAK_GUI" == "xy" ] && [ x"$CONFIG_BUILD_ENABLE_GUI" == "x
 	# disable panel for contolling user accounts such as enable auto-login,
 	# changing a user to an admin, see who is logged in, etc. 
 	# (details->users panel)
-	/usr/bin/rm -f /usr/share/applications/gnome-user-accounts-panel.desktop
+	# SRS: leaving this in-place so the GUI is somewhat still capable of performing
+	# all admin tasks without needing a terminal.
+	#/usr/bin/rm -f /usr/share/applications/gnome-user-accounts-panel.desktop
 
 	# disable panel for controlling what is indexed for searching
 	# (search panel)
@@ -216,3 +236,129 @@ if [ x"$CONFIG_BUILD_BREAK_GUI" == "xy" ] && [ x"$CONFIG_BUILD_ENABLE_GUI" == "x
 	rpm -e --nodeps vino
 fi
 ### STOP Breaking X 
+
+# FIXME: this documentation stuff should be shifted into an RPM instead of here docs in a kickstart...
+if [ x"$CONFIG_BUILD_ENABLE_GUI" == "xy" ]; then
+cat <<-EOF > /usr/share/applications/clip-gui.desktop
+[Desktop Entry]
+	Name=CLIP GUI Information
+	Comment=Important info regarding CLIP's GUI focusing on functional and security issues.
+	Exec=xdg-open /usr/share/doc/clip-gui-notes.txt
+	Icon=help-browser
+	Terminal=false
+	Type=Application
+	Categories=Documentation
+	Encoding=UTF-8
+	X-Desktop-File-Install-Version=0.22
+EOF
+
+cat <<-EOF > /usr/share/doc/clip-gui-notes.txt
+Important notes:
+
+Packages:
+1. We have removed a number of packages that would normall be installed in a GUI config, including 
+packages that provide the "classic" theme which is the default in RHEL 7. Thus, you will see the default,
+unthemed GNOME Shell interface.
+
+2. If you enabled the CONFIG_BUILD_BREAK_GUI
+feature, some packages were forcibly removed. This
+might very well break things. When you encounter
+a problem, try disabling this flag before you spend
+too much time investigating the issue.
+
+3. Unfortunately, some packages can't be removed that we
+really want to remove, like GNOME Online Accounts
+which can manage online accounts like Goole and Facebook.
+GDM has a hard dependency on this package and won't start
+if it is missing.
+
+4. We removed a bunch of fonts to keep
+the ISO size down and perhaps mitigate
+rendering bugs.
+
+Security:
+1. We apply the normal dconf/gsettings lockdowns. Checkout /etc/dconf/db/local.d/locks/settings
+for a complete list of the locks we put in-place and /etc/dconf/db/local.d/* for the settings we
+have applied before inserting the locks.
+
+2. We have left user extensions enabled
+which is apparently required to load system-level extensions (weird right?). However,
+the extensions that can be loaded are still somewhat controlled by enabled-extensions
+dconf setting and accompanying lock.
+
+SELinux:
+
+If you look at the audit logs after booting a GUI configuration of CLIP, you will notice a dbus denial. The denial
+is from a location service called geoclue. The geoclue_t domain attempts to provide those location services via dbus
+service org.freedesktop.GeoClue2, which can be seen by running 'ausearch -m user_avc'. Specifically it is trying to
+"acuire_svc" on that identifier.
+
+In SELinux, if no specific label is applied to a service name, the service defaults to system_dbusd_t. Thus,
+if it was permitted to do this, geoclue's service would have all the permissions associated with the system
+dbus service provider, which is not desirable.
+ 
+Our approach to dbus is that every single dbus service should have a specific label in dbus_contexts.
+If there is no specific label there, things get system_dbusd_t permission denials. But we don't want anyone
+to accidentally grant access to that type, so this assertion is in-place to prevent users from accidentally doing that.
+
+If you don't know what all this means, here is an example entry from config/appconfig-mcs/dbus_contexts:
+       <associate
+       own="org.freedesktop.NetworkManager"
+       context="system_u:object_r:NetworkManager_t:s0"/>
+
+This says that any access to the org.freedesktop.NetworkManager service
+will be checked against the NetworkManager_t type, This applies to both the
+service provider who is performing acquire_service to provide the service,
+and the clients who will be sending messages (send_msg) to the service.
+
+Then you policy would look something like this:
+allow networkmanager_t self:dbus acquire_svc;
+allow staff_t networkmanager_t:dbus send_msg;
+
+Remember: 'ausearch -m user_avc' will help identify the service name. 
+
+Remember: you might not want to allow access to a service. If that is the
+case you have two options:
+1. Do nothing and live with the denial as doing nothing still prevents
+any access to the service, like we have done with genclue.
+
+2. Add a label for the service to dbus_contexts, but sitll grant
+no access to that label.
+
+Note about permissive mode:
+In permissive mode you may see denials that only pop-up when certain actions
+are allowed as a direct result of being in permissive mode. Sometimes, you should
+*NOT* add rules based on those denials. An example is denials from login managers
+and gettys on the password and shadow files. Normally, when access is denied, PAM
+falls back to running helper applications to manipulate the files. However, if it
+can, PAM tries to modify those files without using the helpers. Thus, in permissive
+mode you will see denials for the login applications accessing types like oshadow_t, 
+passwd_t, shadow_t, ...
+
+Don't add access based on these denials. If it worked in enforcing, consider not
+adding the rules just because they appear in permissive mode. You might actually
+be compromising the security of the system.
+
+Misc:
+1. We forcibly remove gnome-control-center panels, so you
+will notice errors in the logs indicating it attempted to load
+a panel but the panel's desktop file was missing. These errors
+can be ignored.
+
+2. Look at kickstart/includes/gui-config and kickstart/includes/gui-packages
+for all of the stuff we're doing for configuring the GUI. Ifg something is broken
+these are the first two places to look. If you're looking at a deployed system,
+look in /root/anaconda-ks.cfg and search for gnome_lock and conditional blocks controlled
+by CONFIG_BUILD_ENABLE_GUI and CONFIG_BUILD_BREAK_GUI to review what was done to
+configure the GUI during installation.
+
+3. We have left the ability for the user to adjust network settings in-place. Similarly,
+we have left the ability for the user to change Account Settings in-place. This is to strike
+a balance between security and how the system works out of the box on a stock RHEL system.
+
+You can disable certain things using GNOME extensions. CLIP contains a package called "clip-gnome-extensions"
+that currently includes an extension to disable Account Settings. It is not enabled by default, but you can
+add it to your kickstart to remove the Account Settings. You can also use the extension in that package as
+a starting point for adding your own extensions.
+EOF
+fi
