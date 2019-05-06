@@ -173,6 +173,11 @@ template(`userdom_base_user_template',`
 		ssh_delete_tmp($1_t)
 		ssh_signal($1_t)
 	')
+
+	# SRS: all interactive GUI logins chat with org.freedesktop.systemd1
+	optional_policy(`
+		init_dbus_chat($1_t)
+	')
 ')
 
 #######################################

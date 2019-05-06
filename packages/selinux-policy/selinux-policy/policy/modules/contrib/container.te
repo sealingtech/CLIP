@@ -348,9 +348,10 @@ ps_process_pattern(container_runtime_t, spc_t)
 allow container_runtime_t spc_t:socket_class_set { relabelto relabelfrom };
 filetrans_pattern(container_runtime_t, container_var_lib_t, container_share_t, dir, "overlay")
 
-optional_policy(`
-	dbus_chat_system_bus(spc_t)
-')
+# SRS: removed for CLIP
+#optional_policy(`
+#	dbus_chat_system_bus(spc_t)
+#')
 
 optional_policy(`
 	unconfined_domain_noaudit(spc_t)
