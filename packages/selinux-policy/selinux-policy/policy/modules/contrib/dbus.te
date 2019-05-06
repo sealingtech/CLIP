@@ -99,6 +99,28 @@ dev_rw_inherited_dri(system_dbusd_t)
 # SRS: bad dbus, bad. stop writing to everything!
 #files_rw_inherited_non_security_files(system_dbusd_t)
 
+#### IMPORTANT CLIP INFORMATION
+# Our approach to dbus is that every single dbus service should have a specific label in dbus_contexts.
+# If there is no specific label there, things get system_dbusd_t permission denials. But we don't want anyone
+# to accidentally grant access to that type, so this assertion is in-place to prevent users from accidentally doing that.
+#
+# If you don't know what all this means, here is an example entry from config/appconfig-mcs/dbus_contexts:
+#        <associate
+#        own="org.freedesktop.NetworkManager"
+#        context="system_u:object_r:NetworkManager_t:s0"/>
+#
+# This says that any access to the org.freedesktop.NetworkManager service
+# will be checked against the NetworkManager_t type, This applies to both the
+# service provider who is performing acquire_service to provide the service,
+# and the clients who will be sending messages (send_msg) to the service.
+#
+# Then you policy would look something like this:
+# allow networkmanager_t self:dbus acquire_svc;
+# allow staff_t networkmanager_t:dbus send_msg;
+#
+neverallow ~{ system_dbusd_t } system_dbusd_t:dbus acquire_svc;
+
+
 fs_getattr_all_fs(system_dbusd_t)
 fs_list_inotifyfs(system_dbusd_t)
 fs_search_auto_mountpoints(system_dbusd_t)

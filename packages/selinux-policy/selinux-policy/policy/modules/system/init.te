@@ -164,6 +164,14 @@ allow init_t self:fifo_file rw_fifo_file_perms;
 
 allow init_t self:service manage_service_perms;
 
+optional_policy(`
+        gen_require(`
+                class dbus acquire_svc;
+        ')
+
+	allow init_t self:dbus acquire_svc;
+')
+
 # Re-exec itself
 can_exec(init_t, init_exec_t)
 # executing content in /run/initramfs
@@ -576,7 +584,9 @@ optional_policy(`
 ')
 
 optional_policy(`
-	dbus_connect_system_bus(init_t)
+	# SRS: removed for CLIP as it grants acquire_svc on the system bus
+	# FYI: refer to the neverallow in contrib/dbus.if for more info.
+	#dbus_connect_system_bus(init_t)
 	dbus_system_bus_client(init_t)
 	dbus_delete_pid_files(init_t)
 

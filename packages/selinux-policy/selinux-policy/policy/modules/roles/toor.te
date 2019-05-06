@@ -60,6 +60,10 @@ optional_policy(`
 ')
 
 optional_policy(`
+	init_dbus_chat(toor_t)
+')
+
+optional_policy(`
 	seutil_run_setfiles(toor_t, toor_r)
 	seutil_run_runinit(toor_t, toor_r)
 	seutil_run_semanage(toor_t, toor_r)

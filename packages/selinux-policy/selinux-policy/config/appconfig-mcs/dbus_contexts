@@ -10,7 +10,7 @@
         context="system_u:object_r:systemd_logind_t:s0"/>
         <associate
         own="org.freedesktop.systemd1"
-        context="system_u:object_r:system_dbusd_t:s0"/>
+        context="system_u:object_r:init_t:s0"/>
         <associate
         own="com.redhat.tuned"
         context="system_u:object_r:tuned_t:s0"/>
@@ -53,6 +53,9 @@
         <associate
         own="org.freedesktop.UPower"
         context="system_u:object_r:devicekit_power_t:s0"/>
+        <associate
+        own="org.freedesktop.UDisks2"
+        context="system_u:object_r:devicekit_disk_t:s0"/>
         <associate
         own="org.freedesktop.PackageKit"
         context="system_u:object_r:rpm_t:s0"/>

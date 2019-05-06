@@ -70,11 +70,12 @@ interface(`unconfined_domain_noaudit',`
 		auth_unconfined($1)
 	')
 
-	optional_policy(`
+# SRS: removed for CLIP to enforce specific labels for each service
+#	optional_policy(`
 		# Communicate via dbusd.
-		dbus_system_bus_unconfined($1)
-		dbus_unconfined($1)
-	')
+		#dbus_system_bus_unconfined($1)
+		#dbus_unconfined($1)
+#	')
 
 	optional_policy(`
 		ipsec_setcontext_default_spd($1)
