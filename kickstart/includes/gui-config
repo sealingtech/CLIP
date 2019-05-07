@@ -362,5 +362,45 @@ You can disable certain things using GNOME extensions. CLIP contains a package c
 that currently includes an extension to disable Account Settings. It is not enabled by default, but you can
 add it to your kickstart to remove the Account Settings. You can also use the extension in that package as
 a starting point for adding your own extensions.
+
+Another recommendation is to start using policykit rules to restrict functionality. A few suggestions:
+
+3a. You need to figure out the action being performed to add a rule for it. To aid in this, add this content
+to /etc/polkit-1/rules.d/00-clip.rules:
+
+polkit.addRule(function(action,subject) {
+                polkit.log("action=" + action);
+                polkit.log("subject=" + subject);
+}
+);
+
+Then systemctl restart policykit and tail -f /var/log/secure. Finally, start poking
+around in, e.g. the control center, to see what actions appear.
+
+Then, when you find one you want to restrict, add something like this to 
+/etc/polkit-1/rules.d/00-clip.rules:
+
+polkit.addRule(function(action,subject) {
+        if (action.id == "org.gnome.controlcenter.user-accounts.administration") {
+                polkit.log("CLIP disables configuring account settings in GNOME using policykit.");
+                return polkit.Result.NO;
+        }
+}
+);
+
+The rule above prevents admins from changing user account settings, including
+enabling automatic login. We suggest doing this.
+
+For a good time try exercising the network settings via control center with the
+first rule in-place.
+
+4. Adding users in CLIP should still be done via the command-line similar to these steps
+for a privileged user during development:
+semanage user -N -a -R toor_r -R staff_r -R sysadm_r -R system_r "USERNAME_u"
+useradd -m "USERNAME" -G wheel
+semanage login -N -a -s "USERNAME_u" "USERNAME"
+passwd USERNAME
+echo "USERNAME        ALL=(ALL) ROLE=toor_r TYPE=toor_t      ALL" >> /etc/sudoers
+
 EOF
 fi
