@@ -186,6 +186,16 @@ fs_dontaudit_append_ecryptfs_files(policykit_auth_t)
 auth_rw_var_auth(policykit_auth_t)
 auth_use_nsswitch(policykit_auth_t)
 auth_domtrans_chk_passwd(policykit_auth_t)
+# SRS: for some reason, even though it seems to trans to chkpwd_t
+# it still requires direct shadow_t access, even though the polkit
+# pam config points to system-auth so it should act "normal"
+#
+# i believe that in standard targeted this stuff is 
+# taking different code paths as there are basically no
+# rules for polkit<->unconfined and in our policy there 
+# are a ton governing the relationship
+# 
+auth_read_shadow(policykit_auth_t)
 
 logging_send_syslog_msg(policykit_auth_t)
 
