@@ -131,15 +131,11 @@ echo "net.ipv6.conf.all.accept_source_route = 0" >> /etc/sysctl.conf
 # disable magic sysrq for good measure
 echo "kernel.sysrq = 0" > /etc/sysctl.d/00-sysrq.conf
 
-# CCE-27557-8
-echo "TMOUT=600" > /etc/profile.d/tmout.sh
-chmod 755 /etc/profile.d/tmout.sh
-
 # CCE-27309-4
-# dont use root/admin/administrator as bootloader PW
-# anaconda always
-# FIXME: set a agreed upon default grub superuser name.
-sed -Eie 's/"root"| root /toor/g' /etc/grub.d/01_users
+# dont use root/admin/administrator as bootloader user
+sed -Ei -e 's/"root"/"toor"/g' -e 's/ root / toor /g' /etc/grub.d/01_users
+grub2-mkconfig -o /etc/grub2.cfg
+grub2-mkconfig -o /etc/grub2-efi.cfg
 
 if [ -f /etc/default/grub ]; then
         /sbin/grubby --update-kernel=ALL --remove-args="fips"
