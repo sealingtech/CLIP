@@ -1,9 +1,10 @@
 # Copyright (C) 2011-2012 Tresys Technology, LLC
 # Copyright (C) 2013 Cubic Corporation
-# Copyright (C) 2014 Quark Security, Inc
+# Copyright (C) 2014-2019 Quark Security, Inc
 #
 # Authors: Spencer Shimko <sshimko@tresys.com>
 #          Kyle Rosales <krosales@quarksecurity.com>
+#	   Spencer Shimko <spencer@quarksecurity.com>
 
 # The name of the package
 PKGNAME := clip-gnome-extensions
