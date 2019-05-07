@@ -102,7 +102,7 @@ if [ x"$CONFIG_BUILD_ENABLE_GUI" == "xy" ]; then
 	# and user extensions the actual implementation treats them all as user extensions
 	# so, if you want even system extensions to work you have to enable user extensions
 	# and development tools
-	# RH states that the approach to use when you need extensions is to leave both on, and use
+	# RH states that the approach to use when you need extensions is to leave both on,
 	# and use a comprehensive extension list and place a dconf lock on the list.
 	gnome_lock org.gnome.shell disable-user-extensions true
 	gnome_lock org.gnome.shell development-tools false
@@ -214,8 +214,6 @@ if [ x"$CONFIG_BUILD_BREAK_GUI" == "xy" ] && [ x"$CONFIG_BUILD_ENABLE_GUI" == "x
 	# (search panel)
 	/usr/bin/rm -f /usr/share/applications/gnome-search-panel.desktop
 
-	# no need for wifis and i think it needs to send_msg to NetworkManager_t from e.g. staff_t
-	# which we're trying to avoid
 	# (wifi panel)
 	/usr/bin/rm -f /usr/share/applications/gnome-wifi-panel.desktop
 
@@ -268,7 +266,7 @@ too much time investigating the issue.
 
 3. Unfortunately, some packages can't be removed that we
 really want to remove, like GNOME Online Accounts
-which can manage online accounts like Goole and Facebook.
+which can manage online accounts like Google and Facebook.
 GDM has a hard dependency on this package and won't start
 if it is missing.
 
@@ -293,25 +291,29 @@ is from a location service called geoclue. The geoclue_t domain attempts to prov
 service org.freedesktop.GeoClue2, which can be seen by running 'ausearch -m user_avc'. Specifically it is trying to
 "acuire_svc" on that identifier.
 
-In SELinux, if no specific label is applied to a service name, the service defaults to system_dbusd_t. Thus,
-if it was permitted to do this, geoclue's service would have all the permissions associated with the system
-dbus service provider, which is not desirable.
- 
-Our approach to dbus is that every single dbus service should have a specific label in dbus_contexts.
-If there is no specific label there, things get system_dbusd_t permission denials. But we don't want anyone
-to accidentally grant access to that type, so this assertion is in-place to prevent users from accidentally doing that.
+Our approach to dbus is that every single dbus service should have a specific label in dbus_contexts. We have
+chosen to stick with the type of the service provider as the label for the service, thus NetworkManager's service
+is labeled networkmanager_t.
+
+If there is no specific label for a service in dbus_contexts, the default label is used, system_dbusd_t, and
+permission denials will reflect that. But we don't want anyone to accidentally grant access to that type,
+so this assertion is in-place to prevent users from accidentally doing that.
 
 If you don't know what all this means, here is an example entry from config/appconfig-mcs/dbus_contexts:
        <associate
        own="org.freedesktop.NetworkManager"
        context="system_u:object_r:NetworkManager_t:s0"/>
 
-This says that any access to the org.freedesktop.NetworkManager service
-will be checked against the NetworkManager_t type, This applies to both the
-service provider who is performing acquire_service to provide the service,
-and the clients who will be sending messages (send_msg) to the service.
+This says that an application providing a service via org.freedesktop.NetworkManager
+will be checked against the NetworkManager_t type. This applies to the
+service provider who is performing acquire_svc to provide the service.
 
-Then you policy would look something like this:
+Note that send_msg checks are not performed by consulting the dbus_contexts file.
+Once a a process has "acquired a service" a client may communicate with it
+via send_msg. This check is done by dbus calling "getpeercon()" on the sending
+process and the receiving processes to obtain the contexts of the service and client.
+
+The policy would look something like this:
 allow networkmanager_t self:dbus acquire_svc;
 allow staff_t networkmanager_t:dbus send_msg;
 
@@ -322,7 +324,7 @@ case you have two options:
 1. Do nothing and live with the denial as doing nothing still prevents
 any access to the service, like we have done with genclue.
 
-2. Add a label for the service to dbus_contexts, but sitll grant
+2. Add a label for the service to dbus_contexts, but still grant
 no access to that label.
 
 Note about permissive mode:
@@ -346,7 +348,7 @@ a panel but the panel's desktop file was missing. These errors
 can be ignored.
 
 2. Look at kickstart/includes/gui-config and kickstart/includes/gui-packages
-for all of the stuff we're doing for configuring the GUI. Ifg something is broken
+for all of the stuff we're doing for configuring the GUI. If something is broken
 these are the first two places to look. If you're looking at a deployed system,
 look in /root/anaconda-ks.cfg and search for gnome_lock and conditional blocks controlled
 by CONFIG_BUILD_ENABLE_GUI and CONFIG_BUILD_BREAK_GUI to review what was done to
