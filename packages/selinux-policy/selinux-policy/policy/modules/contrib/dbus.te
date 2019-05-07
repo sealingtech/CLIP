@@ -100,23 +100,41 @@ dev_rw_inherited_dri(system_dbusd_t)
 #files_rw_inherited_non_security_files(system_dbusd_t)
 
 #### IMPORTANT CLIP INFORMATION
-# Our approach to dbus is that every single dbus service should have a specific label in dbus_contexts.
-# If there is no specific label there, things get system_dbusd_t permission denials. But we don't want anyone
-# to accidentally grant access to that type, so this assertion is in-place to prevent users from accidentally doing that.
+# Our approach to dbus is that every single dbus service should have a specific label in dbus_contexts. We have
+# chosen to stick with the type of the service provider as the label for the service, thus NetworkManager's service
+# is labeled networkmanager_t.
+#
+# If there is no specific label for a service in dbus_contexts, the default label is used, system_dbusd_t, and 
+# permission denials will reflect that. But we don't want anyone to accidentally grant access to that type, 
+# so this assertion is in-place to prevent users from accidentally doing that.
 #
 # If you don't know what all this means, here is an example entry from config/appconfig-mcs/dbus_contexts:
 #        <associate
 #        own="org.freedesktop.NetworkManager"
 #        context="system_u:object_r:NetworkManager_t:s0"/>
 #
-# This says that any access to the org.freedesktop.NetworkManager service
-# will be checked against the NetworkManager_t type, This applies to both the
-# service provider who is performing acquire_service to provide the service,
-# and the clients who will be sending messages (send_msg) to the service.
+# This says that an application providing a service via org.freedesktop.NetworkManager
+# will be checked against the NetworkManager_t type. This applies to the
+# service provider who is performing acquire_svc to provide the service.
 #
-# Then you policy would look something like this:
+# Note that send_msg checks are not performed by consulting the dbus_contexts file.
+# Once a a process has "acquired a service" a client may communicate with it
+# via send_msg. This check is done by dbus calling "getpeercon()" on the sending
+# process and the receiving processes to obtain the contexts of the service and client.
+#
+# The policy would look something like this:
 # allow networkmanager_t self:dbus acquire_svc;
 # allow staff_t networkmanager_t:dbus send_msg;
+#
+# Remember: 'ausearch -m user_avc' will help identify the service name.
+#
+# You might not want to allow access to a service. If that is the
+# case you have two options:
+# 1. Do nothing and live with the denial as doing nothing still prevents
+# any access to the service, like we have done with genclue.
+#
+# 2. Add a label for the service to dbus_contexts, but sitll grant
+# no access to that label.
 #
 neverallow ~{ system_dbusd_t } system_dbusd_t:dbus acquire_svc;
 
