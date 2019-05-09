@@ -205,7 +205,7 @@ MOCK := /usr/bin/mock
 REPO_LINK := /bin/ln -s
 REPO_WGET := /usr/bin/wget
 REPO_CREATE := /usr/bin/createrepo -d --workers $(shell /usr/bin/nproc) --simple-md-filenames -c $(REPO_DIR)/yumcache
-FIND_COMPS = $(shell find "$(1)" -name comps.xml||echo "$(COMPS_FILE)")
+FIND_COMPS = $(shell found_comps=$$(find "$(1)" -type f -name comps.xml); test -z "$$found_comps" && echo $(COMPS_FILE) || echo $$found_comps)
 REPO_QUERY = repoquery -c $(1) --quiet -a --queryformat '%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm'
 MOCK_ARGS += --resultdir=$(CLIP_REPO_DIR) -r $(MOCK_REL) --configdir=$(MOCK_CONF_DIR) --unpriv --rebuild --uniqueext=$(shell echo $$USER)
 
