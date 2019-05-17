@@ -50,11 +50,17 @@ ifdef(`enable_mls',`
 #
 type kernel_t, can_load_kernmodule;
 domain_base_type(kernel_t)
+mls_process_set_level(kernel_t)
 mls_rangetrans_source(kernel_t)
 mls_trusted_object(kernel_t)
 role system_r types kernel_t;
+# Allow the kernel to run ranged on an MCS system
+ifdef(`enable_mcs',`
+sid kernel gen_context(system_u:system_r:kernel_t,,mcs_systemhighrange)
+')
+ifndef(`enable_mcs',`
 sid kernel gen_context(system_u:system_r:kernel_t,mls_systemhigh)
-
+')
 #
 # DebugFS
 #

@@ -70,6 +70,4 @@ ifdef(`distro_suse', `
 /var/log/YaST2(/.*)?			gen_context(system_u:object_r:rpm_log_t,s0)
 ')
 
-ifdef(`enable_mls',`
 /sbin/cpio			--	gen_context(system_u:object_r:rpm_exec_t,s0)
-')

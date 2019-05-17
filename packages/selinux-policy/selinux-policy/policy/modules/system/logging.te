@@ -125,6 +125,11 @@ ifdef(`enable_mls',`
 	init_ranged_daemon_domain(syslogd_t, syslogd_exec_t, mls_systemhigh)
 ')
 
+ifdef(`enable_mcs',`
+        init_ranged_daemon_domain(auditd_t, auditd_exec_t, s0 - mcs_systemhigh)
+        init_ranged_daemon_domain(syslogd_t, syslogd_exec_t, s0 - mcs_systemhigh)
+')
+
 ########################################
 #
 # Auditctl local policy

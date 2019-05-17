@@ -13,6 +13,10 @@ ifdef(`enable_mls',`
 	init_ranged_daemon_domain(dmesg_t, dmesg_exec_t, mls_systemhigh)
 ')
 
+ifdef(`enable_mcs',`
+	init_ranged_daemon_domain(dmesg_t, dmesg_exec_t, mcs_systemhigh)
+')
+
 ########################################
 #
 # Local policy
