@@ -67,6 +67,7 @@ mount /dev/$vg_name/root $MOUNT_DIR
 is_mounted=1
 
 scap_result_file=$MOUNT_DIR/root/scap/post/html/results.xml
+cp -r $MOUNT_DIR/root/scap ./scap
 if [ ! -e $scap_result_file ]; then
   echo "error: scap scan results do not exist"
   exit 1
@@ -75,7 +76,6 @@ else
   bad_result_count=$(grep -e "$bad_result_re" $scap_result_file | wc -l)
   if [ $bad_result_count -gt 0 ]; then
     grep -e "$bad_result_re" -B1 $scap_result_file
-    echo "error: scap scan reported $bad_result_count failures or errors"
-    exit 1
+    echo "scap scan reported $bad_result_count failures or errors"
   fi
 fi
