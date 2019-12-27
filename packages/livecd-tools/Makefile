@@ -12,11 +12,11 @@ PKGNAME := livecd-tools
 
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
-VERSION := 21.4
+VERSION := 27.1
 
 # Bump this if creating multiple releases from the same
 # version.
-RELEASE := 2.el7.centos
+RELEASE := 2.el8
 
 # The name of the Vendor
 VENDOR := null
@@ -28,7 +28,7 @@ PACKAGER := Quark Security, Inc
 # Hard code an arch if cross-compiling or going noarch.
 ARCH := noarch
 
-SOURCES := $(PKGNAME)-$(VERSION).tar.bz2 *.patch
+SOURCES := $(PKGNAME)-$(VERSION).tar.gz *.patch
 
 # Spec file name
 RPM_SPEC := $(PKGNAME).spec
@@ -80,7 +80,7 @@ $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm: $(RPM_DEPS)
 	@echo "Building $(PKGNAME) SRPM..."
 	$(call rpm-prep)
 	cp $(SOURCES) $(RPM_TOPDIR)/SOURCES/
-	echo -e "%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n" > $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
+	echo -e "%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\n" > $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
 	cat $(RPM_SPEC) >> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
 	cd $(RPM_TOPDIR) && rpmbuild $(RPMBUILD_ARGS) -bs SPECS/$(notdir $(RPM_SPEC)) --nodeps
 	mv  $(RPM_TOPDIR)/SRPMS/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm $(SRPM_OUTPUT_DIR)

@@ -1,145 +1,540 @@
-%{!?python_sitelib: %define python_sitelib %(%{__python} -c "import distutils.sysconfig as d; print d.get_python_lib()")}
-
 %define debug_package %{nil}
+
+# Use Python 2 on RHEL 7
+%if 0%{?rhel} && 0%{?rhel} < 8
+%bcond_with python3
+%else
+%bcond_without python3
+%endif
+
+# Do not build Python 2 for Fedora 30+ and RHEL 8+
+%if 0%{?fedora} > 29 || 0%{?rhel} >= 8
+%bcond_with python2
+%else
+%bcond_without python2
+%endif
 
 Summary: Tools for building live CDs
 Name: livecd-tools
-Version: 21.4
-Release: 2.el7.centos
+Version: 27.1
+Release: 2%{?dist}
 Epoch: 1
 License: GPLv2
-Group: System Environment/Base
-URL: http://git.fedorahosted.org/git/livecd
-#BuildArch: noarch
-# To make source tar ball:
-# git clone git://git.fedorahosted.org/livecd
-# cd livecd
-# make dist
-# scp livecd*.tar.bz2 fedorahosted.org:livecd
-Source0: http://fedorahosted.org/releases/l/i/livecd/%{name}-%{version}.tar.bz2
-Patch0: relabel-with-restorecon.patch
-Patch1: add-live-sata-mods.patch
-Patch2: disable-mac-iso.patch
-# Drop the requirements for grub2-efi and shim: breaks 32-bit compose
-# and not needed as we have them in comps
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-Requires: python-imgcreate = %{epoch}:%{version}-%{release}
-Requires: mkisofs
-Requires: isomd5sum
-Requires: parted
-Requires: pyparted
-Requires: util-linux
-Requires: dosfstools
-Requires: e2fsprogs
-Requires: lorax >= 18.3
-Requires: rsync
-Requires: system-config-keyboard >= 1.3.0
-%ifarch %{ix86} x86_64 ppc ppc64
-Requires: hfsplus-tools
+URL: https://github.com/livecd-tools/livecd-tools
+Source0: https://releases.pagure.org/%{name}/%{name}-%{version}.tar.gz
+
+%if %{with python2}
+BuildRequires: python2-devel
 %endif
-%ifarch %{ix86} x86_64
-Requires: syslinux 
-#Requires: syslinux-nonlinux 
-Requires: syslinux-extlinux
+%if %{with python3}
+BuildRequires: python3-devel
 %endif
-%ifarch ppc
-Requires: yaboot
-%endif
-Requires: dumpet
-Requires: sssd-client
-BuildRequires: python
 BuildRequires: /usr/bin/pod2man
-%description 
+
+%if %{with python3}
+Requires: python3-imgcreate = %{epoch}:%{version}-%{release}
+%else
+Requires: python2-imgcreate = %{epoch}:%{version}-%{release}
+%endif
+
+# For splitting out livecd-iso-to-disk to separate subpackage
+Conflicts: livecd-tools < 25.0
+
+%ifarch %{ix86} x86_64
+Requires: livecd-iso-to-mediums = %{epoch}:%{version}-%{release}
+%endif
+
+%description
 Tools for generating live CDs on Fedora based systems including
 derived distributions such as RHEL, CentOS and others. See
 http://fedoraproject.org/wiki/FedoraLiveCD for more details.
 
-%package -n python-imgcreate
-Summary: Python modules for building system images
-Group: System Environment/Base
-Requires: util-linux
+%package -n python-imgcreate-sysdeps
+Summary: Common system dependencies for python-imgcreate
 Requires: coreutils
-Requires: e2fsprogs
-Requires: yum >= 3.2.18
-Requires: squashfs-tools
-Requires: pykickstart >= 1.99.52
+Requires: xorriso >= 1.4.8
+Requires: isomd5sum
+Requires: parted
+Requires: util-linux
 Requires: dosfstools >= 2.11-8
-Requires: system-config-keyboard >= 1.3.0
-Requires: python-urlgrabber
+Requires: e2fsprogs
+Requires: lorax >= 18.3
+Requires: rsync
+
+# hfs+ support for Macs
+%ifarch %{ix86} x86_64 ppc ppc64
+Requires: hfsplus-tools
+%endif
+
+# syslinux dependency
+%ifarch %{ix86} x86_64
+%if 0%{?rhel} && 0%{?rhel} < 8
+Requires: syslinux >= 4.05-13
+%else
+Requires: syslinux >= 6.02-4
+Requires: syslinux-nonlinux >= 6.02-4
+%endif
+Requires: syslinux-extlinux
+%endif
+
+# For legacy ppc32 systems
+%ifarch ppc
+Requires: yaboot
+%endif
+
+Requires: dumpet
+Requires: sssd-client
+Requires: cryptsetup
+Requires: squashfs-tools
+Requires: policycoreutils
+Requires: selinux-policy-targeted
+# dracut 045+ required for overlayfs live media support
+Requires: dracut
+
+%if ! %{with python2}
+Obsoletes: python2-imgcreate < %{epoch}:%{version}-%{release}
+%endif
+
+%description -n python-imgcreate-sysdeps
+This package describes the common system dependencies for
+python-imgcreate.
+
+%if %{with python2}
+%package -n python2-imgcreate
+Summary: Python 2 modules for building system images
+%{?python_provide:%python_provide python2-imgcreate}
+Requires: python-imgcreate-sysdeps%{?_isa} = %{epoch}:%{version}-%{release}
+Requires: python2-dnf >= 1.1.0
+%if 0%{?rhel} && 0%{?rhel} < 8
+Requires: pyparted
+Requires: pykickstart
 Requires: libselinux-python
 Requires: dbus-python
-Requires: policycoreutils
+Requires: python-six
+%else
+Requires: python2-pyparted
+Requires: python2-kickstart
+Requires: python2-libselinux
+Requires: python2-dbus
+Requires: python2-six
+%endif
 
-
-%description -n python-imgcreate
-Python modules that can be used for building images for things
+%description -n python2-imgcreate
+Python 2 modules that can be used for building images for things
 like live image or appliances.
+%endif
 
+%if %{with python3}
+%package -n python3-imgcreate
+Summary: Python 3 modules for building system images
+%{?python_provide:%python_provide python3-imgcreate}
+Requires: python-imgcreate-sysdeps%{?_isa} = %{epoch}:%{version}-%{release}
+Requires: python3-pyparted
+Requires: python3-dnf >= 1.1.0
+Requires: python3-kickstart
+Requires: python3-six
+Requires: libselinux-python3
+Requires: python3-dbus
+
+%description -n python3-imgcreate
+Python 3 modules that can be used for building images for things
+like live image or appliances.
+%endif
+
+%ifarch %{ix86} x86_64
+%package -n livecd-iso-to-mediums
+Summary: Tools for installing ISOs to different mediums
+Requires: python-imgcreate-sysdeps%{?_isa} = %{epoch}:%{version}-%{release}
+Conflicts: livecd-tools < 25.0
+
+%description -n livecd-iso-to-mediums
+Tools for installing Live CD ISOs to different mediums
+(e.g. USB sticks, hard drives, PXE boot, etc.)
+%endif
 
 %prep
-%setup -q
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
+%autosetup -p1
 
 %build
-make
+# Nothing to do
 
 %install
-rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT
+%if %{with python2}
+# Install Python 2 stuff
+%make_install PYTHON=python2
+%endif
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+%if %{with python3}
+# Install Python 3 stuff
+%make_install PYTHON=python3
+%endif
+
+# Delete docs, we'll grab them later
+rm -rf %{buildroot}%{_datadir}/doc/%{name}
+
+%ifnarch %{ix86} x86_64
+# livecd-iso-to-mediums doesn't work without syslinux
+rm -rfv %{buildroot}%{_bindir}/livecd-iso-to-*
+rm -rfv %{buildroot}%{_mandir}/man8/livecd-iso-to-*
+%endif
 
 %files
-%defattr(-,root,root,-)
-%doc AUTHORS COPYING README HACKING
+%license COPYING
+%doc AUTHORS README HACKING
 %doc config/livecd-fedora-minimal.ks
-%{_defaultdocdir}/livecd-tools/*
+%doc config/livecd-mageia-minimal-*.ks
 %{_mandir}/man*/*
+%exclude %{_mandir}/man8/livecd-iso-to-disk.8*
 %{_bindir}/livecd-creator
-%{_bindir}/livecd-iso-to-disk
-%{_bindir}/livecd-iso-to-pxeboot
 %{_bindir}/image-creator
 %{_bindir}/liveimage-mount
-%{_bindir}/edit-livecd
+%{_bindir}/editliveos
 %{_bindir}/mkbiarch
 
-%files -n python-imgcreate
-%defattr(-,root,root,-)
-%doc API COPYING
-%dir %{python_sitelib}/imgcreate
-%{python_sitelib}/imgcreate/*.py
-%{python_sitelib}/imgcreate/*.pyo
-%{python_sitelib}/imgcreate/*.pyc
+%files -n python-imgcreate-sysdeps
+# No files because empty metapackage
+
+%if %{with python2}
+%files -n python2-imgcreate
+%license COPYING
+%doc API
+%{python2_sitelib}/imgcreate
+%endif
+
+%if %{with python3}
+%files -n python3-imgcreate
+%license COPYING
+%doc API
+%{python3_sitelib}/imgcreate
+%endif
+
+%ifarch %{ix86} x86_64
+%files -n livecd-iso-to-mediums
+%license COPYING
+%{_bindir}/livecd-iso-to-disk
+%{_bindir}/livecd-iso-to-pxeboot
+%{_mandir}/man8/livecd-iso-to-disk.8*
+%endif
 
 %changelog
-* Wed Nov 25 2015 Fabian Arrotin <arrfab@centos.org> 21.4-2
-- Changed the Requires: line for syslinux-extlinux
-- Removed the Requires: on syslinux-nonlinux (doesn't exist for el7)
-- Lowered the version check for extlinux for el7 compat
-- Added %{_defaultdocdir}/livecd-tools/* in the %files section
+* Thu Jul 25 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1:27.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
+* Fri Apr 19 2019 Neal Gompa <ngompa13@gmail.com> - 1:27.1-1
+- Bump version to 27.1 (ngompa13)
+- Fix Kernel version detection (pablo)
+
+* Sun Apr 14 2019 Neal Gompa <ngompa13@gmail.com> - 1:27.0-1
+- Bump version to 27.0 (ngompa13)
+- imgcreate/creator: Change to text strings for reading file list from rpm
+  (ngompa13)
+- imgcreate/live: Check for dracut being installed to determine usability
+  (ngompa13)
+- imgcreate/live: Add squashfs as a mandatory extra filesystem (ngompa13)
+- imgcreate/live: Rename dracut config file to 99-liveos.conf (ngompa13)
+- 'udevadm settle' needs some time to settle (sbonds)
+- README: Removed unnecessary 'the' (scwicker)
+- imgcreate/kickstart: Use systemctl for enabling/disabling services (ngompa13)
+- livecd-iso-to-disk: Simply mount read-only to test for flat_squashfs.
+  (fgrose)
+- editliveos: Accommodate netinstall in multi boot configuration files.
+  (fgrose)
+- livecd-iso-to-disk+pod: Support netinstall .isos and as multi install.
+  (fgrose)
+
+* Fri Apr 12 2019 Neal Gompa <ngompa13@gmail.com> - 1:26.1-4
+- Add patch to adapt to rpm Python bindings changing from bytes to strings (RH#1699432)
+
+* Thu Apr 04 2019 Neal Gompa <ngompa13@gmail.com> - 1:26.1-3
+- Backport fix from upstream to use systemctl instead of chkconfig (RH#1696064)
+
+* Fri Feb 01 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1:26.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+
+* Sat Dec 08 2018 Neal Gompa <ngompa13@gmail.com> - 1:26.1-1
+- Bump version to 26.1 (ngompa13)
+- Run setfiles after chroot (noto.kazufumi)
+- imgcreate/dnfinst: Force latest packages from only specified repos (ngompa13)
+
+* Sat Nov 24 2018 Neal Gompa <ngompa13@gmail.com> - 1:26.0-3
+- Backport fix from upstream to ensure latest versions install
+- Fix extlinux dependency for EL7
+
+* Fri Nov 23 2018 Neal Gompa <ngompa13@gmail.com> - 1:26.0-2
+- Fix Obsoletes of python2-imgcreate from <F29 for F30+
+
+* Fri Nov 23 2018 Neal Gompa <ngompa13@gmail.com> - 1:26.0-1
+- Bump version to 26.0 (ngompa13)
+- imgcreate/kickstart: Exclude /sys from SELinux labeling (ngompa13)
+- imgcreate/live: Switch to single-step ISO hybridization by xorrisofs
+  (ngompa13)
+- Use xorrisofs instead of genisoimage (ngompa13)
+- imgcreate/live: Drop UDF support (ngompa13)
+- Fix excludeWeakdeps for older pykickstart versions (pablo)
+- README: Update to include --flat-squashfs option. (fgrose)
+- editliveos: Fix inconsistent ops argument. (fgrose)
+- livecd-iso-to-disk: Accept both dracut 045-8 and 049+ for OverlayFS. (fgrose)
+- README: Update to include liveimage-mount & editliveos tools. (fgrose)
+- config/livecd-fedora-minimal.ks:  Increase root partition size. (fgrose)
+- Support a flattened squashfs.img & non-standard image & overlay paths.
+  (fgrose)
+- livecd-iso-to-disk: Support netinstall .iso (fgrose)
+- edit-livecd: Delete unmaintained script superceded by editliveos. (fgrose)
+- Handle dnf config option showing as tuple, not list, in DNF 3.6 (awilliam)
+- live.py: Fix unreported logging.error (fgrose)
+- livecd-iso-to-disk: Skip Multi Image query on --skipcopy condition. (fgrose)
+- livecd-iso-to-disk: Tighten permissions on some files. (fgrose)
+- DNF 3: workaround a bug with config values that are lists (awilliam)
+- Add support for RISC-V (riscv64) (david.abdurachmanov)
+- Revert "Use restorecon instead of setfiles for relabeling" (puiterwijk)
+- imgcreate: Copy gcdia32.efi in __copy_efi_files if it exists (Kevin)
+- Fix the io.open() and utf-8 problems in imgcreate/util.py (david.l.cantrell)
+- Remove get_modules(). (david.l.cantrell)
+- livecd-iso-to-disk: adjust efi boot configuration code. (fgrose)
+- fs.py & editliveos: remove code glitches (fgrose)
+- editliveos: Bind mount /etc/resolv.conf (fgrose)
+- fs.py & editliveos: Fix overlay changing. (fgrose)
+- util.py: Captured output from subprocesses should always be decoded. (scott)
+- Update livecd-creator manpage with info about imcomplete options
+  (zhang.xianwei8)
+- livecd-iso-to-disk: Revert change that broke EFI/MBR hybrid booting (scott)
+- livecd-iso-to-disk: Fix faulty --efi boot config code. (fgrose)
+- livecd-iso-to-disk: Fix overlay size reporting & type testing. (fgrose)
+- livecd-iso-to-disk: Accommodate multiple BOOT*.EFI files. (fgrose)
+
+* Thu Nov 22 2018 Neal Gompa <ngompa13@gmail.com> - 1:25.0-14
+- Backport workaround for lack of excludeWeakDeps with EL7 pykickstart
+
+* Thu Nov 15 2018 Neal Gompa <ngompa13@gmail.com> - 1:25.0-13
+- Fix when Python 2 subpackage is obsoleted
+- Fix up EL7 support
+
+* Tue Nov 13 2018 Neal Gompa <ngompa13@gmail.com> - 1:25.0-12
+- Drop Python 2 subpackage for F30+/RHEL8+
+
+* Wed Sep 26 2018 Adam Williamson <awilliam@redhat.com> - 1:25.0-11
+- Backport further fix for #1595917
+
+* Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1:25.0-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
+* Mon Jul 02 2018 Miro Hrončok <mhroncok@redhat.com> - 1:25.0-9
+- Rebuilt for Python 3.7
+
+* Wed Jun 27 2018 Adam Williamson <awilliam@redhat.com> - 1:25.0-8
+- Work around a DNF 3 bug that breaks repo setup (#1595917)
+
+* Tue Jun 19 2018 Miro Hrončok <mhroncok@redhat.com> - 1:25.0-7
+- Rebuilt for Python 3.7
+
+* Thu Mar 22 2018 Patrick Uiterwijk <puiterwijk@redhat.com> - 1:25.0-6
+- Revert patch to use restorecon due to unloaded selinux policy
+
+* Thu Mar 22 2018 Patrick Uiterwijk <puiterwijk@redhat.com> - 1:25.0-5
+- Require selinux-policy-targeted in imgcreate-sysdeps
+
+* Tue Feb 20 2018 Iryna Shcherbina <ishcherb@redhat.com> - 1:25.0-4
+- Update Python 2 dependency declarations to new packaging standards
+  (See https://fedoraproject.org/wiki/FinalizingFedoraSwitchtoPython3)
+
+* Fri Feb 09 2018 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 1:25.0-3
+- Escape macros in %%changelog
+
+* Wed Feb 07 2018 Patrick Uiterwijk <patrick@puiterwijk.org> - 1:25.0-2
+- Backport patch to fix appliance-creator
+
+* Sat Oct 21 2017 Neal Gompa <ngompa13@gmail.com> - 25.0-1
+- Bump version to 25.0 (ngompa13)
+- Set the correct partition size for minimal Mageia kickstarts (ngompa13)
+- editliveos: A full featured replacement for tools/edit-livecd. (fgrose)
+- fs.py: Add functions and classes to support Live Image Mounting. (fgrose)
+- creator.py, live.py: Allow more options to be passed to functions. (fgrose)
+- debug.py: Add support for argparse parser. (fgrose)
+- fs.py: Allow more options to be passed to functions. (fgrose)
+- util.py: Add a subprocess call that returns standard values. (fgrose)
+- Remove absolute directories on external program call paths. (fgrose)
+- livecd-iso-to-disk: Allow auto --multi install. (fgrose)
+- Fix ARM architecture check (ngompa13)
+- Declare the literal "kernel-" as a byte array to fix crash (ngompa13)
+- livecd-iso-to-disk: Fix boot configuration for images lacking /EFI (fgrose)
+- livecd-iso-to-disk: Fix space evaluation for images lacking /EFI (fgrose)
+- Use restorecon instead of setfiles for relabeling (scott)
+- liveimage-mount: Add support for OverlayFS overlays. (fgrose)
+- livecd-iso-to-disk+pod:  Enable a --copy-overlay option. (fgrose)
+- livecd-iso-to-disk+pod:  Enable a --copy-home option. (fgrose)
+- livecd-iso-to-disk+pod: Add --overlayfs option for overlay. (fgrose)
+- livecd-iso-to-disk+pod: Allow multi installs to live booted devices (fgrose)
+- livecd-iso-to-disk: Fix sed for kernelargs. (fgrose)
+- livecd-iso-to-disk: Adjust syslinux default menu style, as needed. (fgrose)
+
+* Thu Aug 03 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1:24.4-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
+
+* Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1:24.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
+* Mon May 08 2017 Neal Gompa <ngompa13@gmail.com> - 24.4-1
+- Bump version to 24.4 (ngompa13)
+- livecd-iso-to-disk: Fix freespace determination for DVD installer. (fgrose)
+- livecd-iso-to-disk: Fix labeling of target device filesystem. (fgrose)
+- Switch the default filesystem to ext4 (ngompa13)
+
+* Wed Apr 12 2017 Neal Gompa <ngompa13@gmail.com> - 24.3-2
+- Include missing sample kickstarts
+
+* Wed Apr 12 2017 Neal Gompa <ngompa13@gmail.com> - 24.3-1
+- Bump version to 24.3 (ngompa13)
+- livecd-iso-to-disk: Fix --efi --format code sequence problems. (fgrose)
+- livecd-iso-to-disk+pod: Add options for automatic boot. (fgrose)
+- livecd-iso-to-disk+pod: Add --no-overlay & --reset-overlay options. (fgrose)
+- livecd-iso-to-disk: Remove checkLVM() as it seems unnecessary now. (fgrose)
+- livecd-iso-to-disk & liveimage-mount: Multi Live Image Boot fixes. (fgrose)
+- Update minimal Fedora kickstart to use sha512 auth algorithm (ngompa13)
+- Add minimal Mageia kickstarts to serve as examples (ngompa13)
+- Use genisoimage instead of mkisofs (ngompa13)
+
+* Tue Mar 07 2017 Neal Gompa <ngompa13@gmail.com> - 24.2-1
+- Bump version to 24.2 (ngompa13)
+- livecd-iso-to-disk+pod: Code cleanups & modernization. (fgrose)
+- livecd-iso-to-disk: Update partition handling (fgrose)
+- livecd-iso-to-disk: Replace unneeded uses of awk. (fgrose)
+- livecd-iso-to-disk+pod: Multi Live Image boot configuration (fgrose)
+
+* Tue Feb 28 2017 Neal Gompa <ngompa13@gmail.com> - 24.1-1
+- Fix livecd-iso-to-disk pod text (ngompa13)
+- Bump version to 24.1 (ngompa13)
+- Add more primary authors (ngompa13)
+- liveimage-mount: Add an exception class to allow standalone use. (fgrose)
+- liveimage-mount: Support multiple concurrent invocations. (fgrose)
+- liveimage-mount: Extend mount-hacks & overlay options. (fgrose)
+- liveimage-mount: Support encrypted home filesystems. (fgrose)
+- liveimage-mount: Add a read-only option for mounting. (fgrose)
+- liveimage-mount: Add an unmount mode. (fgrose)
+- liveimage-mount: Don't bypass udev in dmsetup. (fgrose)
+- livecd-iso-to-disk: Restructure filesystem label handling (fgrose)
+- livecd-iso-to-disk+pod: Fix missing/outdated boot configurations (fgrose)
+- livecd-iso-to-disk: Cleanup sed statements (fgrose)
+- Disable 64bit feature in mke2fs for syslinux>=6.03 (yturgema)
+
+* Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1:24.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
+* Mon Jan 02 2017 Neal Gompa <ngompa13@gmail.com> - 24.0-3
+- Move system dependencies for livecd-tools to python-imgcreate-sysdeps (#1409536)
+- Ensure pythonX-imgcreate depend on python-imgcreate-sysdeps (#1409536)
+
+* Wed Dec 21 2016 Kevin Fenzi <kevin@scrye.com> - 24.0-2
+- Rebuild for Python 3.6
+
+* Tue Dec 06 2016 Brian C. Lane <bcl@redhat.com> - 24.0-1
+- Remove unused tmpdir parameter in resize2fs(). (fgrose)
+- HACKING: Fix mailing list address (ngompa13)
+- README: Fix the mailing list reference (ngompa13)
+- Check if FirewallD is installed before running ks firewall commands (ngompa13)
+- Merge pull request #6 from Conan-Kudo/yumtodbo (kevin.kofler)
+- Fixup and update the README (ngompa13)
+- Yum -> DNF; ayum -> dbo (ngompa13)
+- Properly exclude packages from the install set (ngompa13)
+- Merge pull request #3 from Conan-Kudo/warningfix (kevin.kofler)
+- logging.warn -> logging.warning (ngompa13)
+- Delete any leftover (Kevin)
+- Fix error handling in creator.py (Kevin)
+- Merge pull request #2 from Conan-Kudo/fixmakefile (kevin.kofler)
+- Fix command for creating symlink in Makefile (ngompa13)
+- Fix command for getting Python directory in the Makefile (ngompa13)
+- Merge pull request #1 from Conan-Kudo/futurize (kevin.kofler)
+- Bump version to 24.0 (ngompa13)
+- Fix up README (ngompa13)
+- More conversion of strings to bytestrings (ngompa13)
+- Convert bytestring to string (ngompa13)
+- Replace deprecated string.join() with str.join (ngompa13)
+- Fix division to be unambiguous (ngompa13)
+- Purge all Python < 2.6 exception handling code (ngompa13)
+- 'msg' should be 'message' for CreatorError exceptions (ngompa13)
+- More string to bytestring conversions (ngompa13)
+- Convert string to bytestring (ngompa13)
+- Convert result sliced from bytestring into string (ngompa13)
+- More declaring bytestrings as bytestrings (ngompa13)
+- Replace file() with open() (ngompa13)
+- use six module for urllib import (ngompa13)
+- Mark byte being written as byte (ngompa13)
+- Prepend file:// for local paths that don't have it already (ngompa13)
+- Remove unused import for system-config-keyboard (ngompa13)
+- Migrate from urlgrabber to urllib for Python 2/3 compatibility (ngompa13)
+- Makefile fixes for setting which Python to use (ngompa13)
+- Add support for setting Python interpreter to be used (ngompa13)
+- Port to Python 2.6+, 3.3+ (ngompa13)
+- Port from yum to dnf. (Kevin)
+- Add imgcreate/.gitignore (Kevin)
+- Disambiguation (PeteLawler)
+
+* Fri Aug 26 2016 Brian C. Lane <bcl@redhat.com> - 23.4-1
+- Version 23.4 (bcl)
+- yuminst.LiveCDYum.runInstall: import yum.Errors (sandro.bonazzola)
+- Wrap all parted calls in LC_ALL=C (#1350253) (bcl)
+- Fix calling livecd-iso-to-pxeboot with a full path (cadegenn)
+- Stop truncating /etc/resolv.conf in SELinux module -- fixes #31 (torrancew)
+- litp: Copy ldlinux.c32 to tftpboot for PXE live setup. (bcl)
+- Always use rsync to copy Packages (#1343645) (bcl)
+- Fix extended regular expression [0-9] (fgrose)
+- Enable loop device as installation target (fgrose)
+
+* Tue Jul 19 2016 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:23.3-2
+- https://fedoraproject.org/wiki/Changes/Automatic_Provides_for_Python_RPM_Packages
+
+* Thu May 05 2016 Brian C. Lane <bcl@redhat.com> 23.3-1
+- Version 23.3 (bcl)
+- litd: add the "rw" argument even if there's no "ro" (#1318470) (lkundrak)
+- Remove everything but LiveOS/ from appended ISO (lzap+git)
+- support aarch64 (jef199006)
+
+* Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 1:23.2-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
+* Thu Oct 15 2015 Brian C. Lane <bcl@redhat.com> 23.2-3
+- Actually add the source file
+
+* Thu Oct 15 2015 Brian C. Lane <bcl@redhat.com> 23.2-2
+- Version 23.2 (bcl)
+- Use add_drivers for dracut config (#1192030) (bcl)
+- litd: Don't add inst.stage2 to cmdline (bcl)
+- livecd-iso-to-disk: partnum should only be a digit (#1136586) (bcl)
+- Handle devices ending in a digit (#1136586) (bcl)
+
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:23.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
+* Mon Jun 08 2015 Brian C. Lane <bcl@redhat.com> 23.1-1
+- Version 23.1 (bcl)
+- litd: All parted calls should use -s mode (#1195478) (bcl)
+- litd: Make sure device nodes have time to appear (bcl)
+- Sync usage documentation with livecd-iso-to-disk.pod (fgrose)
+- Correct misinformation and cover new options (fgrose)
+- Update repo urls to point to new github location (#1208825) (bcl)
+- Explicitly add the uas driver to the initrd (#1201983) (bcl)
+- Update repo urls to point to new github location.
+
+* Mon Mar 02 2015 Brian C. Lane <bcl@redhat.com> 23.0-1
+- Version 23.0 (bcl)
+- kickstart: Handle resolv.conf being a nonexistent symlink (walters)
+- Report Kickstart errors without traceback (#1168030) (bcl)
+- Change console font to eurlatgr (myllynen)
+- litd: Add missing syslinux modules (#1192137) (bcl)
+- Note lz4 compression in help (bruno)
+
+* Thu Feb 26 2015 Dennis Gilmore <dennis@ausil.us> - 21.4-2
+- Require python-kickstart since it has teh python2 version of pykickstart
 
 * Mon Oct 27 2014 Brian C. Lane <bcl@redhat.com> 21.4-1
 - Version 21.4 (bcl)
 - Ignore case when looking for UEFI boot*efi file (#1156380) (bcl)
 - Preload the libnss_sss library (#1127103) (bcl)
-  Dropped patch now included upstream
 
 * Mon Oct 20 2014 Brian C. Lane <bcl@redhat.com> 21.3-1
 - Version 21.3 (bcl)
 - mkefiboot now expects all upper case for BOOT*.EFI (#1154138) (bcl)
 - Move __fstype into ImageCreator class (bcl)
 - Catch Yum errors and print them (#1119906) (bcl)
-
-* Wed Aug 20 2014 Peter Jones <pjones@redhat.com> - 21.2-4
-- Obviously, as bcl points out, 21.2-3's fix means we require sssd-client now.
-  Related: rhbz#1127103
-
-* Wed Aug 20 2014 Peter Jones <pjones@redhat.com> - 21.2-3
-- Work around rhbz#1127103 by manually loading the problematic library.
-  Related: rhbz#1127103
 
 * Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:21.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
@@ -429,7 +824,7 @@ rm -rf $RPM_BUILD_ROOT
 - Version 16.1 (bcl)
 - Print reason for sudden exit (bcl)
 - Fix skipcopy usage with DVD iso (#644194) (bmj001)
-- Move selinux relabel to after %post (#648591) (bcl)
+- Move selinux relabel to after %%post (#648591) (bcl)
 - Add support for virtio disks to livecd (#672936) (bcl)
 - Support attached LiveOS devices as well as image files for LiveOS editing.
   (fgrose)
@@ -558,7 +953,7 @@ rm -rf $RPM_BUILD_ROOT
 - Try normal umount before falling back to lazy umount.
 - Allow creation of SELinux enabled LiveCD from an SELinux disabled system.
 
-* Tue Jul 30 2010 Bruno Wolff III <bruno@wolff.to> - 033-3
+* Fri Jul 30 2010 Bruno Wolff III <bruno@wolff.to> - 033-3
 - The previous update got replaced by the python update; another bump is needed.
 
 * Tue Jul 27 2010 Bruno Wolff III <bruno@wolff.to> - 033-2
