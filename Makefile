@@ -17,8 +17,8 @@ include CONFIG_BUILD
 -include CONFIG_AWS
 
 # This is the RHEL version supported by this release of CLIP.  Do not alter.
-export RHEL_VER := 7
-export CENTOS_VER := 7
+export RHEL_VER := 8
+export CENTOS_VER := 8
 
 ######################################################
 # BEGIN MAGIC
@@ -30,7 +30,7 @@ endif
 # E.g., the SELinux policy uses different spec files based on release
 # Make sure $(YUM_CONF_ALL_FILE) is a dep for any recipes that use this feature
 define OS_REL
-$(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery --whatprovides -c $(YUM_CONF_ALL_FILE) "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}'))
+$(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery -c $(YUM_CONF_ALL_FILE) --whatprovides "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}'))
 endef
 
 # NOTE: DO NOT REMOVE THIS CHECK. RUNNING MOCK AS ROOT *WILL* BREAK THINGS.
@@ -38,18 +38,18 @@ ifeq ($(shell id -u),0)
 $(error Never build CLIP as root! The tools used by CLIP (mock) will break things! Try again as an unprivileged user with sudo access.)
 endif
 
-HOST_RPM_DEPS := rpm-build createrepo mock repoview make git sudo python-lockfile libselinux-python python-mako pykickstart GConf2 e2fsprogs squashfs-tools genisoimage syslinux isomd5sum dosfstools libcdio
+HOST_RPM_DEPS := $(shell ./support/get-host-deps.sh all)
 
 export ROOT_DIR ?= $(CURDIR)
 export OUTPUT_DIR ?= $(ROOT_DIR)
 export RPM_TMPDIR ?= $(ROOT_DIR)/tmp
+export YUM_CACHEDIR ?= $(ROOT_DIR)/tmp/yumcache
 export CONF_DIR ?= $(ROOT_DIR)/conf
 export TOOLS_DIR ?= $(ROOT_DIR)/tmp/tools
-export LIVECD_VERSION ?= $(shell rpm --eval `sed -n -e 's/Release: \(.*\)/\1/p' -e 's/Version: \(.*\)/\1/p' \
-                 packages/livecd-tools/livecd-tools.spec| sed 'N;s/\n/-/'`)
 
-#TODO: Investigate how to handle updates better
-export PUNGI_VERSION ?= 3.12-3.el7*
+LIVECD_RPMS = $(shell ./support/get-rpms-from-spec.sh packages/livecd-tools/livecd-tools.spec)
+PUNGI_RPMS = $(shell ./support/get-rpms-from-spec.sh packages/pungi/pungi.spec)
+LORAX_RPMS = $(shell ./support/get-rpms-from-spec.sh packages/lorax/lorax.spec)
 
 # Config deps
 CONFIG_BUILD_DEPS := $(ROOT_DIR)/CONFIG_BUILD $(ROOT_DIR)/CONFIG_REPOS $(ROOT_DIR)/Makefile $(CONF_DIR)/pkglist.blacklist
@@ -205,7 +205,8 @@ MOCK := /usr/bin/mock
 REPO_LINK := /bin/ln -s
 REPO_WGET := /usr/bin/wget
 REPO_CREATE := /usr/bin/createrepo -d --workers $(shell /usr/bin/nproc) --simple-md-filenames -c $(REPO_DIR)/yumcache
-FIND_COMPS = $(shell found_comps=$$(find "$(1)" -type f -name comps.xml); test -z "$$found_comps" && echo $(COMPS_FILE) || echo $$found_comps)
+FIND_COMPS = $(shell found_comps=$$(find "$(1)" -type f -name '*comps-*.xml'); test -z "$$found_comps" && echo $(COMPS_FILE) || echo $$found_comps)
+FIND_MODMD = $(shell find "$(1)" -type f -name '*modules.yaml.gz')
 REPO_QUERY = repoquery -c $(1) --quiet -a --queryformat '%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm'
 MOCK_ARGS += --resultdir=$(CLIP_REPO_DIR) -r $(MOCK_REL) --configdir=$(MOCK_CONF_DIR) --unpriv --rebuild --uniqueext=$(shell echo $$USER)
 
@@ -286,31 +287,27 @@ define CHECK_AWS_VARS
 	@echo "AWS variables are all set."
 endef
 
+define INSTALL_TOOLS
+	mkdir -p $(TOOLS_DIR) && \
+	for p in $(1); do \
+	    rpm2cpio $(CLIP_REPO_DIR)/$$p | \
+	        cpio -D $(TOOLS_DIR) -idv; \
+	done
+endef
+
 define MAKE_LIVE_TOOLS
 	$(MAKE) livecd-tools-rpm && \
-	mkdir -p $(TOOLS_DIR) && \
-	cp $(CLIP_REPO_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR) && \
-	cp $(CLIP_REPO_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm $(TOOLS_DIR) && \
-	rpm2cpio $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio&& \
-	rpm2cpio $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm > $(TOOLS_DIR)/python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio && \
-	cd $(TOOLS_DIR) && cpio -idv < livecd-tools-$(LIVECD_VERSION).noarch.rpm.cpio && \
-	cpio -idv < python-imgcreate-$(LIVECD_VERSION).noarch.rpm.cpio
+	$(call INSTALL_TOOLS,$(LIVECD_RPMS))
 endef
 
 define MAKE_PUNGI
 	$(MAKE) pungi-rpm && \
-	mkdir -p $(TOOLS_DIR) && \
-	cp $(CLIP_REPO_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm $(TOOLS_DIR) && \
-	rpm2cpio $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm > $(TOOLS_DIR)/pungi-$(PUNGI_VERSION).noarch.rpm.cpio && \
-	cd $(TOOLS_DIR) && cpio -idv < pungi-$(PUNGI_VERSION).noarch.rpm.cpio
+	$(call INSTALL_TOOLS,$(PUNGI_RPMS))
 endef
 
 define MAKE_LORAX
 	$(MAKE) lorax-rpm && \
-	mkdir -p $(TOOLS_DIR) && \
-	cp $(CLIP_REPO_DIR)/$(call RPM_FROM_PKG_NAME,lorax) $(TOOLS_DIR) && \
-	rpm2cpio $(TOOLS_DIR)/$(call RPM_FROM_PKG_NAME,lorax) > $(TOOLS_DIR)/$(call RPM_FROM_PKG_NAME,lorax).cpio && \
-	cd $(TOOLS_DIR) && cpio -idv < $(call RPM_FROM_PKG_NAME,lorax).cpio;
+	$(call INSTALL_TOOLS,$(LORAX_RPMS))
 endef
 
 ######################################################
@@ -406,13 +403,14 @@ $(REPO_DIR)/$(REPO_ID)-repo/last-updated: $(CONF_DIR)/pkglist.$(REPO_ID) $(CONFI
 	done < $(CONF_DIR)/pkglist.$(REPO_ID)
 	@echo "Generating $(REPO_ID) yum repo metadata, this could take a few minutes..."
 	$(VERBOSE)cd $(REPO_DIR)/$(REPO_ID)-repo && $(REPO_CREATE) -g $(call FIND_COMPS,$(REPO_PATH)) .
-	test -f $(YUM_CONF_ALL_FILE) || ( cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE);\
+	modmd="$(call FIND_MODMD,$(REPO_PATH))"; if [ -n "$$$$modmd" ]; then cd $(REPO_DIR)/$(REPO_ID)-repo/repodata && modifyrepo --mdtype modules "$$$$modmd" .; fi
+	test -f $(YUM_CONF_ALL_FILE) || ( sed -e 's;^cachedir=.*$$$$;cachedir=$(YUM_CACHEDIR);' $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE);\
 		echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_ALL_FILE))
 	echo -e $(YUM_CONF) >> $(YUM_CONF_ALL_FILE)
 # This lets sub-makes take actions based on the full OS rver+release found in the mock repos instead of on host version
 # E.g., the SELinux policy uses different spec files based on release
 # Make sure YUM_CONF_ALL_FILE is a dep for any recipes that use this feature
-	$(eval export OS_VER := $(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery --whatprovides -c $(YUM_CONF_ALL_FILE) "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}')))
+	$(eval export OS_VER := $(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery -c $(YUM_CONF_ALL_FILE) --whatprovides "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}')))
 	$(VERBOSE)touch $(REPO_DIR)/$(REPO_ID)-repo/last-updated
 
 # If a pkglist is missing then assume we should generate one ourselves.
@@ -424,7 +422,7 @@ $(CONF_DIR)/pkglist.$(REPO_ID) ./$(shell basename $(CONF_DIR))/pkglist.$(REPO_ID
 	$(VERBOSE)$(RM) $(YUM_CONF_FILE)
 	$(VERBOSE)$(RM) $(MOCK_CONF_DIR)/$(MOCK_REL).cfg
 	@echo "Generating list of packages for $(call GET_REPO_ID,$(1))"
-	$(VERBOSE)cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_FILE)
+	$(VERBOSE)sed -e 's;^cachedir=.*$$$$;cachedir=$(YUM_CACHEDIR);' $(YUM_CONF_FILE).tmpl > $(YUM_CONF_FILE)
 	echo -e $(YUM_CONF) >> $(YUM_CONF_FILE)
 	$(VERBOSE)$(call REPO_QUERY,$(YUM_CONF_FILE)) --repoid=$(REPO_ID) |sort 1>$(CONF_DIR)/pkglist.$(REPO_ID)
 
@@ -508,7 +506,7 @@ SRPMS := $(SRPMS) $(addprefix $(SRPM_OUTPUT_DIR)/,$(foreach RPM,$(HOST_RPMS),$(c
 # built every single time.  So we'll use this to fake it.
 $(CLIP_REPO_DIR)/exists $(YUM_CONF_ALL_FILE):
 	$(call CHECK_DEPS)
-	test -f $(YUM_CONF_ALL_FILE) || ( cat $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE);\
+	test -f $(YUM_CONF_ALL_FILE) || ( sed -e 's;^cachedir=.*$$;cachedir=$(YUM_CACHEDIR);' $(YUM_CONF_FILE).tmpl > $(YUM_CONF_ALL_FILE);\
 		echo -e "[clip-repo]\\nname=clip-repo\\nbaseurl=file://$(CLIP_REPO_DIR)/\\nenabled=1\\n" >> $(YUM_CONF_ALL_FILE))
 	$(call MKDIR,$(basename $@))
 	echo "Generating clip-repo metadata."; \
