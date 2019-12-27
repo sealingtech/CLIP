@@ -27,5 +27,7 @@
 #epel = /mnt/repos/epel-pinned-revisions
 
 # NOTE: If using RHEL, *not CentOS*, you must provide the Optional repo. 
-rhel7.6 = /opt/repos/nfs/rhel-7.6-server-newest-only
-rhel7.6-optional = /opt/repos/nfs/rhel-7.6-server-optional-newest-only
+rhel8.1-baseos = /opt/repos/rhel8-baseos
+rhel8.1-appstream = /opt/repos/rhel8-appstream
+epel8 = /opt/repos/epel
+rhel8.1-codeready = /opt/repos/rhel8-codeready
