@@ -1,0 +1,24 @@
+Updating host dependencies is hard.  It is not always clear why something
+is a dependency.  Packages are sometimes removed, split, or renamed.
+Some dependencies come from repos that are not enabled by
+default, such as epel.
+
+On a fresh minimal install
+
+Install epel repo
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+
+Download packages for dependency
+yum install --downloadonly --downloaddir=rpms-pungi pungi
+
+Move rpms into folders corresponding with the yum repo they originated from
+rpmdir=rpms-pungi; for f in $rpmdir/*.rpm; do rpmname=$(rpm -qp --queryformat '%{name}' $f); rpmrepo=$(sudo yum repoquery --enablerepo=codeready-builder-for-rhel-8-x86_64-rpms --queryformat '%{repoid}' $rpmname | tail -n 1); if [ -n "$rpmrepo" ]; then mkdir -p $rpmdir/"$rpmrepo"; mv $f $rpmdir/"$rpmrepo"/; fi; done
+
+Copy rpms that did not come from RHEL repos
+for f in rpms-pungi/*; do if rpm -qpi $f | grep -q 'Packager.*Fedora Project'; then cp $f host_packages/8/epel/; fi; done
+
+pungi is a special case because we build it from source, so we would want to remove its rpm
+
+Download build dependencies
+yum-builddep --downloadonly --downloaddir=builddeps-pungi --enablerepo=codeready-builder-for-rhel-8-x86_64-rpms ~/pungi-4.1.38-1.el8.2.src.rpm
+
