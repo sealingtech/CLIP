@@ -1,5 +1,4 @@
 PACKAGES += \
-anaconda-dracut \
 cacti \
 clip-miscfiles \
 selinux-policy \
