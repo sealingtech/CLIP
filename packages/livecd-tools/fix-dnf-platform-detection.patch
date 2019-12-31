@@ -1,0 +1,14 @@
+diff -ur livecd-tools-27.1.orig/imgcreate/creator.py livecd-tools-27.1/imgcreate/creator.py
+--- livecd-tools-27.1.orig/imgcreate/creator.py	2019-12-31 10:11:33.324854604 -0500
++++ livecd-tools-27.1/imgcreate/creator.py	2019-12-31 10:16:42.393135513 -0500
+@@ -571,6 +571,10 @@
+         os.symlink("/proc/self/mounts", self._instroot + "/etc/mtab")
+ 
+         self.__write_fstab()
++        # hack to get around bug in dnf
++        # see https://bugzilla.redhat.com/show_bug.cgi?id=1678596
++        # should not be necessary with dnf-4.2.7-6.el8 and dnf-plugins-core-4.0.8-3.el8
++        shutil.copyfile("/etc/os-release", self._instroot + "/etc/os-release")
+ 
+     def unmount(self):
+         """Unmounts the target filesystem.
