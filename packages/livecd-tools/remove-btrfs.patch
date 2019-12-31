@@ -1,0 +1,12 @@
+diff -ur livecd-tools-27.1.orig/imgcreate/live.py livecd-tools-27.1/imgcreate/live.py
+--- livecd-tools-27.1.orig/imgcreate/live.py	2019-12-31 12:43:03.093871158 -0500
++++ livecd-tools-27.1/imgcreate/live.py	2019-12-31 12:43:31.839956869 -0500
+@@ -268,7 +268,7 @@
+         return env
+ 
+     def __extra_filesystems(self):
+-        return "vfat msdos isofs ext4 xfs btrfs squashfs";
++        return "vfat msdos isofs ext4 xfs squashfs";
+ 
+     def __extra_drivers(self):
+         retval = "sr_mod sd_mod ide-cd cdrom "

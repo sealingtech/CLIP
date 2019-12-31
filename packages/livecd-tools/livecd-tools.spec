@@ -23,6 +23,9 @@ License: GPLv2
 URL: https://github.com/livecd-tools/livecd-tools
 Source0: https://releases.pagure.org/%{name}/%{name}-%{version}.tar.gz
 
+Patch0: fix-dnf-platform-detection.patch
+Patch1: remove-btrfs.patch
+
 %if %{with python2}
 BuildRequires: python2-devel
 %endif
