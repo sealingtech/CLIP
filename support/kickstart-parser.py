@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/libexec/platform-python
 '''
 Copyright (c) 2017 Quark Security, Inc. All rights reserved.
 Author: Marshall Miller <marshall@quarksecurity.com>
@@ -12,8 +12,10 @@ import argparse
 
 from pykickstart.parser import *
 from pykickstart.version import makeVersion
-import yum
+import dnf
+import dnf.conf
 
+sys.exit(0)
 
 class KickstartPackageResolver(object):
     def __init__(self, ks_path, blacklist=None):
@@ -25,7 +27,7 @@ class KickstartPackageResolver(object):
 
         # create a kickstart parser from the latest version
         self.ksparser = KickstartParser(makeVersion())
-        self.yb = yum.YumBase()
+        self.yb = dnf.Base()
 
         self._repo_problems = False
 
@@ -45,9 +47,9 @@ class KickstartPackageResolver(object):
         for p in found:
             self.yb.install(p)
         for group in selected_group_names:
-            tx_members = self.yb.selectGroup(group.name)
+            tx_members = self.yb.group_install(group.name, "comps")
 
-        result,msgs = self.yb.buildTransaction()
+        result,msgs = self.yb.resolve()
         self._repo_problems = result != 2
         if self._repo_problems:
             sys.stderr.write("\n".join(msgs) + "\n")
@@ -65,7 +67,12 @@ class KickstartPackageResolver(object):
         yum_cache = os.path.join(self.tmpdir, "yumcache")
 
         # populate temporary yum tree
-        open(yum_conf, "a").close()
+        with open(yum_conf, "a") as conf:
+            conf.write("[main]\n")
+            conf.write("installroot=%s\n" % (self.tmpdir,))
+            conf.write("cachedir=%s\n" % (yum_cache,))
+            conf.write("reposdir=%s/etc/yum/repos.d" % (self.tmpdir,))
+
         os.mkdir(yum_cache)
         os.mkdir(os.path.join(self.tmpdir, "etc"))
         os.mkdir(os.path.join(self.tmpdir, "etc/yum"))
@@ -75,33 +82,26 @@ class KickstartPackageResolver(object):
         os.mkdir(os.path.join(self.tmpdir, "var/lib"))
         os.mkdir(os.path.join(self.tmpdir, "var/lib/rpm"))
 
-        self.yb.preconf.fn=yum_conf
-        self.yb.preconf.root=self.tmpdir
-        self.yb._getConfig()
-        self.yb.repos.disableRepo('*')
-        self.yb.setCacheDir(force=True, tmpdir=yum_cache)
-
         # add and enable yum repos defined in the kickstart
-        for repodata in self.ksparser.handler.repo.repoList:
-            self.yb.add_enable_repo(repodata.name, [repodata.baseurl])
+        with open("%s/etc/yum/repos.d/repo.repo" % (self.tmpdir,), "w") as conf:
+            for repodata in self.ksparser.handler.repo.repoList:
+                conf.write("[%s]\n" % (repodata.name,))
+                conf.write("name=%s\n" % (repodata.name,))
+                conf.write("baseurl=%s\n" % (repodata.baseurl,))
+                conf.write("enabled=1\n")
 
-        self.yb.pkgSack.excludeArchs(['x86_64', 'noarch'])
+        self.yb.conf.read(yum_conf)
+        self.yb.fill_sack(load_system_repo=False)
+        self.yb.read_comps()
 
     def _find_packages(self, pkg_names, newest_only=True):
         found = []
         missing = []
-        if newest_only:
-            find_func = self.yb.pkgSack.returnNewestByName
-        else:
-            find_func = self.yb.pkgSack.returnPackages
+        query = self.yb.sack.query().filterm(name=pkg_names)
 
         # some package patterns did not match, so look one at a time
-        for pkg_name in pkg_names:
-            try:
-                matches = find_func(patterns=[pkg_name])
-                found.extend(matches)
-            except:
-                missing.append(pkg_name)
+        for pkg in query:
+            print("found pkg %s" % (pkg,))
         return (found, missing)
 
     def exclude_packages(self, package_names):
@@ -110,13 +110,14 @@ class KickstartPackageResolver(object):
             p.exclude()
 
     def what_requires(self, dep_name):
-        for txm in self.yb.tsInfo:
-            if txm.name == dep_name:
-                required_by = [p[0].name for p in txm.relatedto]
-                groups = ["@%s" % (g,) for g in txm.groups]
-                result = required_by + groups or ["kickstart"]
-                return result
-        return None
+        # not sure how to find this yet.  maybe look through goal or selectors or solutions
+        #for txm in self.yb.tsInfo:
+        #    if txm.name == dep_name:
+        #        required_by = [p[0].name for p in txm.relatedto]
+        #        groups = ["@%s" % (g,) for g in txm.groups]
+        #        result = required_by + groups or ["kickstart"]
+        #        return result
+        return ["unknown"]
 
     @property
     def problems(self):
