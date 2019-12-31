@@ -82,7 +82,7 @@ CHECK_VOL_ID ?= $(SUPPORT_DIR)/checkVolID.py
 
 RUN_LIVECD ?= $(SUPPORT_DIR)/runlivecd.sh
 LIVECD_CREATOR ?= $(TOOLS_DIR)/usr/bin/livecd-creator
-LIVECD_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python2.7/site-packages/
+LIVECD_PYTHONPATH ?= $(TOOLS_DIR)/usr/lib/python3.6/site-packages/
 RUN_IMAGECREATE ?= $(SUPPORT_DIR)/runimagecreate.sh
 IMAGE_CREATOR ?= $(TOOLS_DIR)/usr/bin/image-creator
 
