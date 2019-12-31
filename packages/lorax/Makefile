@@ -10,11 +10,11 @@ PKGNAME := lorax
 
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
-VERSION := 19.6.66
+VERSION := 28.14.30
 
 # Bump this if creating multiple releases from the same
 # version.
-RELEASE := 1.el7
+RELEASE := 1.el8
 
 # The name of the Vendor
 VENDOR := null
@@ -24,7 +24,7 @@ PACKAGER ?= null
 
 # Snag the architecture.  Assume host arch.
 # Hard code an arch if cross-compiling or going noarch.
-ARCH := noarch
+ARCH := x86_64
 
 SOURCES := $(PKGNAME)-$(VERSION).tar.gz $(wildcard *.patch)
 
