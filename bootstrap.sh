@@ -32,8 +32,10 @@ rhn_subscribe() {
 		/bin/subscription-manager attach --pool="$pool_id"
 	fi
 
-	# Enable the required optional repo
-	/bin/subscription-manager repos --enable=rhel-7-*-optional-rpms
+	if [ "$major_version" -eq 7 ]; then
+		# Enable the required optional repo
+		/bin/subscription-manager repos --enable=rhel-7-*-optional-rpms
+	fi
 }
 
 
@@ -42,6 +44,22 @@ set_selinux_permissive() {
 	/usr/sbin/setenforce 0
 	/bin/sed -i -e 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 }
+
+get_os_major_version() {
+	local full_version=$(rpm -q --whatprovides --queryformat '%{version}' system-release)
+	echo -n ${full_version:0:1}
+}
+
+# make sure the system is a supported version
+major_version=$(get_os_major_version)
+if [ -z "$major_version" ]; then
+	echo "error: unable to detect OS major version.  is this a rhel or centos system?"
+	exit 1
+fi
+if [ "$major_version" != "8" -a "$major_version" != 7 ]; then
+	echo "error: unsupport OS major version ${major_version}.  supported versions are 7 and 8"
+	exit 1
+fi
 
 if [ $EUID -ne 0 ]; then
 	echo "The bootstrap script requires root; try re-running with sudo."
@@ -192,20 +210,19 @@ Press enter to continue."
 fi
 
 # install packages that we need but aren't commonly present on default RHEL installs.
-LIVECD_TOOL_DEPS="sssd-client system-config-keyboard"
-INSTALL_ISO_DEPS="python-mako genisoimage syslinux"
-for i in createrepo rpm-build make anaconda policycoreutils-python ruby squashfs-tools git sudo libselinux-python pykickstart GConf2 e2fsprogs isomd5sum libcdio dosfstools ${LIVECD_TOOL_DEPS} ${INSTALL_ISO_DEPS}; do
-	/bin/rpm -q "$i" >/dev/null || /usr/bin/yum install -y $i
-done;
+all_needed_packages=$(./support/get-host-deps.sh yum)
+needed_packages=""
+for i in $all_needed_packages; do
+	if ! /bin/rpm -q "$i" >/dev/null; then
+	       needed_packages="$needed_packages $i"
+       fi
+done
+if [ -n "$needed_packages" ]; then
+	/usr/bin/yum install -y $needed_packages
+fi
 
-# install packages from epel that we carry in CLIP
-pushd . >/dev/null
-cd host_packages/epel
-/usr/bin/yum -y localinstall *.rpm
-# install packages from centos extras that we carry in CLIP
-cd ../extras
-/usr/bin/yum -y localinstall *.rpm
-popd > /dev/null
+# install packages that we carry in CLIP
+/usr/bin/yum -y localinstall host_packages/${major_version}/*/*.rpm
 
 # add us to the mock group
 /bin/echo "Adding user to mock group and configuring sudo."
