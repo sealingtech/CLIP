@@ -1,7 +1,7 @@
 
 Map matrix_axes = [
     hosttype: ['clip'],
-    media_type: ['inst-iso', 'live-iso'],
+    media_type: ['live-iso'],
     target_name: ['minimal'],
     os_name: ['rhel'],
     os_version: ['8.1']
