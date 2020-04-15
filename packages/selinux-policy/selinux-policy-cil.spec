@@ -13,7 +13,6 @@ License: GPLv2+
 Group: System Environment/Base
 Source: %{pkgname}-%{version}.tar.gz
 Url: http:/oss.tresys.com/repos/refpolicy/
-BuildArch: noarch
 BuildRequires: python gawk checkpolicy >= %{CHECKPOLICYVER} m4 policycoreutils-devel >= %{POLICYCOREUTILSVER} bzip2
 Requires(pre): policycoreutils >= %{POLICYCOREUTILSVER}
 Requires(post): /bin/awk /usr/bin/sha512sum
