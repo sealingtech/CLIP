@@ -131,7 +131,7 @@ else
 fi
 
 # Lock the root acct to prevent direct logins
-usermod -L root
+#usermod -L root
 
 ######## END DEFAULT USER CONFIG ##########
 
