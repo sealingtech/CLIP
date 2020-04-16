@@ -13,7 +13,7 @@ License: GPLv2+
 Group: System Environment/Base
 Source: %{pkgname}-%{version}.tar.gz
 Url: http:/oss.tresys.com/repos/refpolicy/
-BuildRequires: python gawk checkpolicy >= %{CHECKPOLICYVER} m4 policycoreutils-devel >= %{POLICYCOREUTILSVER} bzip2
+BuildRequires: python3 gawk checkpolicy >= %{CHECKPOLICYVER} m4 policycoreutils-devel >= %{POLICYCOREUTILSVER} bzip2
 Requires(pre): policycoreutils >= %{POLICYCOREUTILSVER}
 Requires(post): /bin/awk /usr/bin/sha512sum
 Requires: libsemanage >= %{LIBSEMANAGEVER}
@@ -43,7 +43,7 @@ Summary: SELinux policy documentation
 Group: System Environment/Base
 Requires(pre): selinux-policy = %{version}-%{release}
 Requires: /usr/bin/xdg-open
-BuildRequires: policycoreutils-python m4 policycoreutils python make gcc checkpolicy >= %{CHECKPOL_VERSION} policycoreutils-devel
+BuildRequires: m4 python3 make gcc checkpolicy >= %{CHECKPOL_VERSION} policycoreutils-devel
 
 %description doc
 Policy documentation
@@ -59,7 +59,7 @@ Policy documentation
 Summary: SELinux %2 policy for %1 \
 Group: System Environment/Base \
 Requires(pre): selinux-policy-%2 = %{version}-%{release} \
-BuildRequires: policycoreutils-python m4 policycoreutils python make gcc checkpolicy >= %{CHECKPOL_VERSION} \
+BuildRequires: m4 policycoreutils-devel python3 make gcc checkpolicy >= %{CHECKPOL_VERSION} \
 \
 %description %2-%1  \
 SELinux %2 policy for %1 \
