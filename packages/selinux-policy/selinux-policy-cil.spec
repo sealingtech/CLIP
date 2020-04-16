@@ -142,11 +142,6 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/semanage.read.LOCK \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/semanage.trans.LOCK \
 %dir %attr(700,root,root) %dir %{_sysconfdir}/selinux/%1/active/modules/ \
-%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/commit_num \
-# TODO: stop globbing \
-%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/modules/100/*/* \
-%config(noreplace) %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/users_extra \
-%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/homedir_template \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/policy.kern \
 %ghost %{_sysconfdir}/selinux/%1/active/*.local \
 %ghost %{_sysconfdir}/selinux/%1/active/*.linked \
@@ -174,7 +169,6 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/userhelper_context \
 %dir %{_sysconfdir}/selinux/%1/contexts/files \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts \
-%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/file_contexts \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts.homedirs \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/file_contexts.homedirs \
 %ghost %{_sysconfdir}/selinux/%1/contexts/files/*.bin \
