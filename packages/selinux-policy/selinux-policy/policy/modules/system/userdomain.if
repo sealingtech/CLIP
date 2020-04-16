@@ -4880,7 +4880,7 @@ interface(`userdom_users_dgram_send',`
 #
 interface(`userdom_execmod_user_home_files',`
 	gen_require(`
-		type user_home_type;
+		attribute user_home_type;
 	')
 
 	allow $1 user_home_type:file execmod;
