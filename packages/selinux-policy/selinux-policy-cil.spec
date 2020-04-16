@@ -213,6 +213,8 @@ touch %{buildroot}%{_sysconfdir}/sysconfig/selinux
 mkdir -p %{buildroot}%{_usr}/share/selinux/%{type}/
 mkdir -p %{buildroot}%{_usr}/share/selinux/modules/
 
+mkdir -p %{buildroot}/var/lib/selinux/%{type}
+
 # Install devel
 make %{?_smp_mflags} clean
 # installCmds NAME TYPE DIRECT_INITRC POLY UNKNOWN
