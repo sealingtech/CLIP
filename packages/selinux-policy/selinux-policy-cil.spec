@@ -87,7 +87,7 @@ make %{?_smp_mflags} UNK_PERMS=%5 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=y DIRECT
 mkdir -p %{buildroot}%{_usr}/share/selinux/%1/ \
 %{__cp} *.pp %{buildroot}/%{_usr}/share/selinux/%1/ \
 make UNK_PERMS=%4 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=n DIRECT_INITRC=%3 MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} MLS_CATS=1024 MCS_CATS=1024 SEMODULE="semodule -p %{buildroot} -X 100 " APPS_MODS="%{enable_modules}" load \
-%{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/active/modules/disabled \
+%{__mkdir} -p %{buildroot}/var/lib/selinux/%1/active/modules/disabled \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/logins \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs \
 install -m0644 selinux_config/securetty_types-%1 %{buildroot}%{_sysconfdir}/selinux/%1/contexts/securetty_types \
@@ -107,26 +107,26 @@ touch %{buildroot}%{_sysconfdir}/selinux/%1/seusers \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.homedirs \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs \
-touch %{buildroot}%{_sysconfdir}/selinux/%1/active/seusers \
-touch %{buildroot}%{_sysconfdir}/selinux/%1/active/file_contexts.local \
-touch %{buildroot}%{_sysconfdir}/selinux/%1/active/file_contexts.homedirs \
-touch %{buildroot}%{_sysconfdir}/selinux/%1/active/nodes.local \
-touch %{buildroot}%{_sysconfdir}/selinux/%1/active/users_extra.local \
-touch %{buildroot}%{_sysconfdir}/selinux/%1/active/users.local \
-touch %{buildroot}%{_sysconfdir}/selinux/%1/active/file_contexts.homedirs.bin \
+touch %{buildroot}/var/lib/selinux/%1/active/seusers \
+touch %{buildroot}/var/lib/selinux/%1/active/file_contexts.local \
+touch %{buildroot}/var/lib/selinux/%1/active/file_contexts.homedirs \
+touch %{buildroot}/var/lib/selinux/%1/active/nodes.local \
+touch %{buildroot}/var/lib/selinux/%1/active/users_extra.local \
+touch %{buildroot}/var/lib/selinux/%1/active/users.local \
+touch %{buildroot}/var/lib/selinux/%1/active/file_contexts.homedirs.bin \
 find %{buildroot}/%{_usr}/share/selinux/%1/ -type f |xargs -P `/usr/bin/nproc` -n `/usr/bin/nproc`  bzip2 \
 for i in %{buildroot}/%{_usr}/share/selinux/%1/*; do mv ${i} ${i%.bz2}; done \
 awk '$1 !~ "/^#/" && $2 == "=" && $3 == "module" { printf "%%s.pp ", $1 }' ./policy/modules.conf > %{buildroot}/%{_usr}/share/selinux/%1/modules.lst \
 [ x"%{enable_modules}" != "x" ] && for i in %{enable_modules}; do echo ${i}.pp >> %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done \
 SORTED_PKGS=`for p in %{separatePkgs}; do echo $p | awk '{ print length($0) " " $0; }'; done | sort -r -n | cut -d ' ' -f 2` \
 for f in ${SORTED_PKGS}; do grep $f\.pp\ %{buildroot}/%{_usr}/share/selinux/%1/modules.lst || (echo "failed to update module.lst for module $f" && exit -1); sed -i -e "s/$f.pp//g" %{buildroot}/%{_usr}/share/selinux/%1/modules.lst; done \
-mkdir -p %{buildroot}/%{_sysconfdir}/selinux/%1/active/modules/100 \
-mkdir -p %{buildroot}/%{_sysconfdir}/selinux/%1/active/modules/disabled \
+mkdir -p %{buildroot}/var/lib/selinux/%1/active/modules/100 \
+mkdir -p %{buildroot}/var/lib/selinux/%1/active/modules/disabled \
 /sbin/semodule -s %1 -p %{buildroot} -X 100 -r %{separatePkgs} \
 /usr/bin/sha512sum %{buildroot}%{_sysconfdir}/selinux/%1/policy/policy.`/bin/checkpolicy --version|awk ' { print $1; } '` | cut -d' ' -f 1 > %{buildroot}%{_sysconfdir}/selinux/%1/.policy.sha512; \
 rm -rf %{buildroot}%{_sysconfdir}/selinux/%1/contexts/netfilter_contexts  \
-rm -rf %{buildroot}%{_sysconfdir}/selinux/%1/active/policy.kern \
-ln -sf /etc/selinux/%1/policy/policy.`/bin/checkpolicy --version|awk ' { print $1; } '`  %{buildroot}%{_sysconfdir}/selinux/%1/active/policy.kern \
+rm -rf %{buildroot}/var/lib/selinux/%1/active/policy.kern \
+ln -sf /etc/selinux/%1/policy/policy.`/bin/checkpolicy --version|awk ' { print $1; } '`  %{buildroot}/var/lib/selinux/%1/active/policy.kern \
 rm -rf %{buildroot}/usr/share/selinux/devel/include
 %nil
 
@@ -138,20 +138,20 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %dir %{_sysconfdir}/selinux/%1 \
 %config(noreplace) %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/seusers \
 %dir %{_sysconfdir}/selinux/%1/logins \
-%dir %{_sysconfdir}/selinux/%1/active \
+%dir /var/lib/selinux/%1/active \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/semanage.read.LOCK \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/semanage.trans.LOCK \
-%dir %attr(700,root,root) %dir %{_sysconfdir}/selinux/%1/active/modules/ \
-%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/commit_num \
+%dir %attr(700,root,root) %dir /var/lib/selinux/%1/active/modules/ \
+%verify(not md5 size mtime) /var/lib/selinux/%1/active/commit_num \
 # TODO: stop globbing \
-%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/modules/100/*/* \
-%config(noreplace) %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/users_extra \
-%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/homedir_template \
-%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/policy.kern \
-%ghost %{_sysconfdir}/selinux/%1/active/*.local \
-%ghost %{_sysconfdir}/selinux/%1/active/*.linked \
-%ghost %{_sysconfdir}/selinux/%1/active/*.bin \
-%ghost %{_sysconfdir}/selinux/%1/active/seusers \
+%verify(not md5 size mtime) /var/lib/selinux/%1/active/modules/100/*/* \
+%config(noreplace) %verify(not md5 size mtime) /var/lib/selinux/%1/active/users_extra \
+%verify(not md5 size mtime) /var/lib/selinux/%1/active/homedir_template \
+%verify(not md5 size mtime) /var/lib/selinux/%1/active/policy.kern \
+%ghost /var/lib/selinux/%1/active/*.local \
+%ghost /var/lib/selinux/%1/active/*.linked \
+%ghost /var/lib/selinux/%1/active/*.bin \
+%ghost /var/lib/selinux/%1/active/seusers \
 %dir %{_sysconfdir}/selinux/%1/policy/ \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/policy/policy.* \
 %{_sysconfdir}/selinux/%1/.policy.sha512 \
@@ -174,9 +174,9 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/userhelper_context \
 %dir %{_sysconfdir}/selinux/%1/contexts/files \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts \
-%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/file_contexts \
+%verify(not md5 size mtime) /var/lib/selinux/%1/active/file_contexts \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts.homedirs \
-%verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/active/file_contexts.homedirs \
+%verify(not md5 size mtime) /var/lib/selinux/%1/active/file_contexts.homedirs \
 %ghost %{_sysconfdir}/selinux/%1/contexts/files/*.bin \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts.local \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs \
@@ -227,7 +227,7 @@ mkdir %{buildroot}%{_usr}/share/selinux/devel/
 install -m 644 selinux_config/Makefile.devel %{buildroot}%{_usr}/share/selinux/devel/Makefile
 install -m 644 doc/example.* %{buildroot}%{_usr}/share/selinux/devel/
 install -m 644 doc/policy.* %{buildroot}%{_usr}/share/selinux/devel/
-touch %{buildroot}%{_sysconfdir}/selinux/%{type}/active/seusers.linked
+touch %{buildroot}/var/lib/selinux/%{type}/active/seusers.linked
 #echo  "xdg-open file://usr/share/doc/selinux-policy/html/index.html"> %{buildroot}%{_usr}/share/selinux/devel/policyhelp
 #chmod +x %{buildroot}%{_usr}/share/selinux/devel/policyhelp
 # This insanity is b/c libselinux always looks at the host's /etc/selinux/config
