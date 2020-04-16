@@ -100,8 +100,8 @@ sefcontext_compile -o %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/policy \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/contexts/files \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/logins \
-touch %{buildroot}/%{_sysconfdir}/selinux/%1/semanage.read.LOCK \
-touch %{buildroot}/%{_sysconfdir}/selinux/%1/semanage.trans.LOCK \
+touch %{buildroot}/var/lib/selinux/%1/semanage.read.LOCK \
+touch %{buildroot}/var/lib/selinux/%1/semanage.trans.LOCK \
 rm -rf %{buildroot}%{_sysconfdir}/selinux/%1/booleans \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/seusers \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts \
