@@ -43,7 +43,7 @@ Summary: SELinux policy documentation
 Group: System Environment/Base
 Requires(pre): selinux-policy = %{version}-%{release}
 Requires: /usr/bin/xdg-open
-BuildRequires: m4 python3 make gcc checkpolicy >= %{CHECKPOL_VERSION} policycoreutils-devel
+BuildRequires: m4 python3 make gcc checkpolicy >= %{CHECKPOLICYVER} policycoreutils-devel
 
 %description doc
 Policy documentation
@@ -59,7 +59,7 @@ Policy documentation
 Summary: SELinux %2 policy for %1 \
 Group: System Environment/Base \
 Requires(pre): selinux-policy-%2 = %{version}-%{release} \
-BuildRequires: m4 policycoreutils-devel python3 make gcc checkpolicy >= %{CHECKPOL_VERSION} \
+BuildRequires: m4 policycoreutils-devel python3 make gcc checkpolicy >= %{CHECKPOLICYVER} \
 \
 %description %2-%1  \
 SELinux %2 policy for %1 \
