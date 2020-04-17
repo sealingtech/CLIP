@@ -63,10 +63,10 @@ reboot --eject
 selinux-policy
 # rhel8 does not appear to build an mcs package
 # but the targeted package is built as mcs
-#selinux-policy-mcs
-#selinux-policy-mcs-ssh
-#selinux-policy-mcs-unprivuser
-#selinux-policy-mcs-aide
+selinux-policy-mcs
+selinux-policy-mcs-ssh
+selinux-policy-mcs-unprivuser
+selinux-policy-mcs-aide
 #selinux-policy-mcs-ec2ssh
 clip-miscfiles
 
