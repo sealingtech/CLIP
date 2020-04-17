@@ -1,25 +1,27 @@
-diff -puNr livecd-tools-21.4-orig/imgcreate/kickstart.py livecd-tools-21.4/imgcreate/kickstart.py
---- livecd-tools-21.4-orig/imgcreate/kickstart.py	2016-07-15 10:59:16.416850105 -0400
-+++ livecd-tools-21.4/imgcreate/kickstart.py	2016-07-19 12:04:50.545243719 -0400
-@@ -447,15 +447,13 @@ class SelinuxConfig(KickstartConfig):
-         if ksselinux.selinux == ksconstants.SELINUX_DISABLED:
+diff -u -r livecd-tools-27.1.orig/imgcreate/kickstart.py livecd-tools-27.1/imgcreate/kickstart.py
+--- livecd-tools-27.1.orig/imgcreate/kickstart.py	2019-04-19 11:05:15.000000000 -0400
++++ livecd-tools-27.1/imgcreate/kickstart.py	2020-04-17 09:48:33.461601050 -0400
+@@ -479,19 +479,15 @@
              return
  
--        if not os.path.exists(self.path("/sbin/setfiles")):
-+        if not os.path.exists(self.path("/sbin/restorecon")):
-             return
--
--        rc = self.call(["/sbin/setfiles", "-p", "-e", "/proc", "-e", "/sys", "-e", "/dev", selinux.selinux_file_context_path(), "/"])
-+	#Init labels with restorceon since it won't complain about custom policies in the the chroot
-+        rc = self.call(["/sbin/restorecon", "-F", "-R", "-e", "/proc", "-e", "/sys", "-e", "/dev", "/"])
-+        #Since the policy installed may be very different from the installed host we will just log an error
+         try:
+-            rc = subprocess.call(['setfiles', '-p', '-e', '/proc',
+-                                  '-e', '/sys', '-e', '/dev',
+-                                  selinux.selinux_file_context_path(), '/'],
++            #Init labels with restorecon since it won't complain about custom policies in the the chroot
++            rc = subprocess.call(["/sbin/restorecon", "-F", "-R", "-e", "/proc", "-e", "/sys", "-e", "/dev", "/"],
+                                  preexec_fn=self.chroot)
+         except OSError as e:
+             if e.errno == errno.ENOENT:
+-                logging.info('The setfiles command is not available.')
++                logging.warning('The restorecon command is not available.')
+                 return
          if rc:
 -            if ksselinux.selinux == ksconstants.SELINUX_ENFORCING:
 -                raise errors.KickstartError("SELinux relabel failed.")
 -            else:
 -                logging.error("SELinux relabel failed.")
-+            logging.error("SELinux relabel failed.")
++            logging.warning("SELinux relabel failed.")
  
      def apply(self, ksselinux):
          selinux_config = "/etc/selinux/config"
-Binary files livecd-tools-21.4-orig/imgcreate/.kickstart.py.swp and livecd-tools-21.4/imgcreate/.kickstart.py.swp differ
