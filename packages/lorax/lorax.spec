@@ -16,6 +16,8 @@ URL:            https://github.com/weldr/lorax
 # tito build --tgz
 Source0:        %{name}-%{version}.tar.gz
 
+Patch0: setfiles-fixes.patch
+
 BuildRequires:  python3-devel
 
 Requires:       lorax-templates

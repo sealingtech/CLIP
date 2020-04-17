@@ -1,28 +1,27 @@
-diff -purN a/src/pylorax/imgutils.py b/src/pylorax/imgutils.py
---- a/src/pylorax/imgutils.py	2016-06-03 15:42:06.803659497 -0400
-+++ b/src/pylorax/imgutils.py	2016-06-03 15:44:46.733466978 -0400
-@@ -99,12 +99,18 @@ def mkrootfsimg(rootdir, outfile, label,
+diff -u -r a/src/pylorax/installer.py b/src/pylorax/installer.py
+--- a/src/pylorax/installer.py	2019-06-27 15:09:27.000000000 -0400
++++ b/src/pylorax/installer.py	2020-04-16 23:35:47.622167590 -0400
+@@ -392,10 +392,13 @@
+             log.info(line)
  
-     mkext4img(rootdir, outfile, label=label, size=fssize)
-     # Reset selinux context on new rootfs
--    with LoopDev(outfile) as loopdev:
--        with Mount(loopdev) as mnt:
--            cmd = [ "setfiles", "-e", "/proc", "-e", "/sys", "-e", "/dev", "-e", "/install",
--                    "/etc/selinux/targeted/contexts/files/file_contexts", "/"]
--            root = join(mnt, sysroot.lstrip("/"))
--            runcmd(cmd, root=root)
-+    # SRS: this is all sorts of messed up.
-+    # It assumes a targeted policy is
-+    # present in the image being generated.
-+    # Then later, in a .tmpl file, it removes
-+    # the policy, making this problematic 
-+    # relabeling moot.
-+#    with LoopDev(outfile) as loopdev:
-+#        with Mount(loopdev) as mnt:
-+#            cmd = [ "setfiles", "-e", "/proc", "-e", "/sys", "-e", "/dev", "-e", "/install",
-+#                    "/etc/selinux/targeted/contexts/files/file_contexts", "/"]
-+#            root = join(mnt, sysroot.lstrip("/"))
-+#            runcmd(cmd, root=root)
+         # Make sure the new filesystem is correctly labeled
++        fc_tmpl = "/etc/selinux/%s/contexts/files/file_contexts"
+         setfiles_args = ["-e", "/proc", "-e", "/sys", "-e", "/dev",
+-                         "/etc/selinux/targeted/contexts/files/file_contexts", "/"]
++                         "", "/"]
  
- ######## Utility functions ###############################################
- 
+         if "--dirinstall" in args:
++            poltype = execWithCapture("python3", ["-c", "import selinux; print(selinux.selinux_getpolicytype())"], root=dirinstall_path)
++            setfiles_args[-2] = fc_tmpl % poltype.strip()
+             # setfiles may not be available, warn instead of fail
+             try:
+                 execWithRedirect("setfiles", setfiles_args, root=dirinstall_path)
+@@ -404,6 +407,8 @@
+         else:
+             with PartitionMount(disk_img) as img_mount:
+                 if img_mount and img_mount.mount_dir:
++                    poltype = execWithCapture("python3", ["-c", "import selinux; print(selinux.selinux_getpolicytype())"], root=img_mount.mount_dir)
++                    setfiles_args[-2] = fc_tmpl % poltype.strip()
+                     try:
+                         execWithRedirect("setfiles", setfiles_args, root=img_mount.mount_dir)
+                     except (subprocess.CalledProcessError, OSError) as e:
