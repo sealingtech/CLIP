@@ -26,6 +26,8 @@ Source0: https://releases.pagure.org/%{name}/%{name}-%{version}.tar.gz
 Patch0: fix-dnf-platform-detection.patch
 Patch1: remove-btrfs.patch
 
+Patch100: relabel-with-restorecon.patch
+
 %if %{with python2}
 BuildRequires: python2-devel
 %endif
