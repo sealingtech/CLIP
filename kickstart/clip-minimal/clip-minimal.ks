@@ -65,6 +65,7 @@ selinux-policy
 # but the targeted package is built as mcs
 selinux-policy-mcs
 selinux-policy-mcs-ssh
+selinux-policy-mcs-sssd
 selinux-policy-mcs-unprivuser
 selinux-policy-mcs-aide
 #selinux-policy-mcs-ec2ssh
