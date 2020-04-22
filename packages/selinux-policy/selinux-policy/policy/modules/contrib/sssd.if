@@ -463,16 +463,16 @@ interface(`sssd_rw_inherited_pipes',`
     allow $1 sssd_t:fifo_file rw_inherited_fifo_file_perms;
 ')
 
-########################################
-### <summary>
-###      Transition to sssd named content
-### </summary>
-### <param name="domain">
-###      <summary>
-###      Domain allowed access.
-###      </summary>
-### </param>
-##
+#######################################
+## <summary>
+##      Transition to sssd named content
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
 interface(`sssd_filetrans_named_content',`
 	gen_require(`
 		type sssd_var_run_t;
