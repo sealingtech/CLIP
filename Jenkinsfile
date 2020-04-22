@@ -102,6 +102,7 @@ List getTaskMap(List axes) {
                     if(message != null && message.contains("Queue task was cancelled")) {
                         error("Timeout exceeded during build and test")
                     } else {
+                        archiveArtifacts(artifacts:"repos/clip-repo/build.log", allowEmptyArchive:true)
                         echo "hudson.AbortException when trying to build and test but message is unexpected: message: ${message}"
                         throw err
                     }
