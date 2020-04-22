@@ -91,7 +91,12 @@ List getTaskMap(List axes) {
                                 error("No CONFIG_REPO file " + repoFile)
                             }
                             sh "cp ${repoFile} CONFIG_REPOS"
-                            sh "make clip-${target_name}-${media_type}"
+                            try {
+                                sh "make clip-${target_name}-${media_type}"
+                            } catch (err) {
+                                archiveArtifacts(artifacts:"repos/clip-repo/build.log", allowEmptyArchive:true)
+                                throw err
+                            }
                             archiveArtifacts "*.iso"
                             sh "./support/tests/media/qemu-test-${media_type}.sh *.iso"
                             archiveArtifacts(artifacts:"scap", allowEmptyArchive:true)
@@ -102,8 +107,7 @@ List getTaskMap(List axes) {
                     if(message != null && message.contains("Queue task was cancelled")) {
                         error("Timeout exceeded during build and test")
                     } else {
-                        archiveArtifacts(artifacts:"repos/clip-repo/build.log", allowEmptyArchive:true)
-                        echo "hudson.AbortException when trying to build and test but message is unexpected: message: ${message}"
+                        echo "Error during build and test: ${message}"
                         throw err
                     }
                 } catch (err) {
