@@ -46,7 +46,7 @@ expect {
   }
 }
 
-set timeout 300
+set timeout 500
 send_user "waiting for login prompt\n"
 expect {
   default { send_user "\nerror: timeout or eof encountered\n"; exit 1 }
