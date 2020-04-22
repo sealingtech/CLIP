@@ -1,0 +1,12 @@
+diff -u -r a/imgcreate/live.py b/imgcreate/live.py
+--- a/imgcreate/live.py	2020-04-22 18:00:20.360037920 -0400
++++ b/imgcreate/live.py	2020-04-22 18:02:31.750650808 -0400
+@@ -725,7 +725,7 @@
+               fonts/unicode.pf2
+         """
+         fail = False
+-        files = [("/boot/efi/EFI/*/shim.efi", "/EFI/BOOT/BOOT%s.EFI" % (self.efiarch,), True),
++        files = [("/boot/efi/EFI/*/shim%s.efi" % (self.efiarch.lower(),), "/EFI/BOOT/BOOT%s.EFI" % (self.efiarch,), True),
+                  ("/boot/efi/EFI/*/gcdx64.efi", "/EFI/BOOT/grubx64.efi", True),
+                  ("/boot/efi/EFI/*/gcdia32.efi", "/EFI/BOOT/grubia32.efi", False),
+                  ("/boot/efi/EFI/*/fonts/unicode.pf2", "/EFI/BOOT/fonts/", True),

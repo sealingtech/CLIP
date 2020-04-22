@@ -27,6 +27,7 @@ Patch0: fix-dnf-platform-detection.patch
 Patch1: remove-btrfs.patch
 
 Patch100: relabel-with-restorecon.patch
+Patch101: efi-shim-arch.patch
 
 %if %{with python2}
 BuildRequires: python2-devel
