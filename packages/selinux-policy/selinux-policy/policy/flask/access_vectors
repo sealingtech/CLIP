@@ -376,6 +376,7 @@ class process
 	setfscreate
 	noatsecure
 	siginh
+	getrlimit
 	setrlimit
 	rlimitinh
 	dyntransition
