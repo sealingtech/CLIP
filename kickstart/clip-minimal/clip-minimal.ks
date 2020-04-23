@@ -68,6 +68,7 @@ selinux-policy-mcs-ssh
 selinux-policy-mcs-sssd
 selinux-policy-mcs-unprivuser
 selinux-policy-mcs-aide
+selinux-policy-mcs-rngd
 #selinux-policy-mcs-ec2ssh
 clip-miscfiles
 
