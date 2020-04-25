@@ -684,6 +684,27 @@ interface(`dbus_filetrans_named_content_system',`
 
 ########################################
 ## <summary>
+##	Allow attempts to send dbus
+##	messages to system dbusd type.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`dbus_acquire_svc_system_dbusd',`
+	gen_require(`
+		type system_dbusd_t;
+		class dbus acquire_svc;
+	')
+
+	allow $1 system_dbusd_t:dbus acquire_svc;
+
+')
+
+########################################
+## <summary>
 ##      Manage session_dbusd tmp dirs.
 ## </summary>
 ## <param name="domain">
