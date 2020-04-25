@@ -192,9 +192,6 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %dir %{_usr}/share/selinux/%1/include \
 %{_usr}/share/selinux/%1/include/*
 
-%description
-SELinux Reference Policy - modular.
-
 %build
 
 %prep 
