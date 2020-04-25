@@ -376,7 +376,6 @@ class process
 	setfscreate
 	noatsecure
 	siginh
-	getrlimit
 	setrlimit
 	rlimitinh
 	dyntransition
@@ -386,7 +385,7 @@ class process
 	execheap
 	setkeycreate
 	setsockcreate
-	ptrace_child
+	getrlimit
 }
 
 class process2
@@ -458,14 +457,17 @@ class system
 	syslog_console
 	module_request
 	module_load
+	# these are overloaded userspace
+	# permissions from systemd
 	halt
 	reboot
 	status
+	start
+	stop
+	enable
+	disable
+	reload
 	undefined
-    enable
-    disable
-    reload
-	kill
 }
 
 #
@@ -479,7 +481,6 @@ class capability2
 inherits cap2
 {
 	epolwakeup
-	compromise_kernel
 }
 #
 # Define the access vector interpretation for controlling
@@ -950,8 +951,6 @@ class service
 	reload
 	enable
 	disable
-	kill
-	load
 }
 
 class proxy
