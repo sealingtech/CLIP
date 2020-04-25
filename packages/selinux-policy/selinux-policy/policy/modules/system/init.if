@@ -1569,6 +1569,44 @@ interface(`init_config_all_script_files',`
 
 ########################################
 ## <summary>
+##	Allow the specified domain to modify the systemd configuration of 
+##	transient scripts.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`init_config_transient_files',`
+	gen_require(`
+		type init_var_run_t;
+	')
+
+	allow $1 init_var_run_t:service all_service_perms;
+')
+
+########################################
+## <summary>
+##	Allow the specified domain to modify the systemd configuration of 
+##	transient scripts.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`init_manage_config_transient_files',`
+	gen_require(`
+		type init_var_run_t;
+	')
+
+	allow $1 init_var_run_t:service manage_service_perms;
+')
+
+########################################
+## <summary>
 ##	Read all init script files.
 ## </summary>
 ## <param name="domain">
