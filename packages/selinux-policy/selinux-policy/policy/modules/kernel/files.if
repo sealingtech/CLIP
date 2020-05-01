@@ -732,6 +732,24 @@ interface(`files_write_non_security_dirs',`
 
 ########################################
 ## <summary>
+##	Allow attempts to setattr any directory
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_setattr_non_security_dirs',`
+	gen_require(`
+		attribute non_security_file_type;
+	')
+
+	allow $1 non_security_file_type:dir { read setattr };
+')
+
+########################################
+## <summary>
 ##	Allow attempts to manage non-security directories
 ## </summary>
 ## <param name="domain">
@@ -924,6 +942,25 @@ interface(`files_read_all_files',`
 
 ########################################
 ## <summary>
+##	Mmap all files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_mmap_all_files',`
+	gen_require(`
+		attribute file_type;
+	')
+
+	allow $1 file_type:file map;
+
+')
+
+########################################
+## <summary>
 ##	Allow shared library text relocations in all files.
 ## </summary>
 ## <desc>
@@ -971,12 +1008,12 @@ interface(`files_read_non_security_files',`
 
 ########################################
 ## <summary>
-##      Map all non-security files.
+##	Map all non-security files.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 ## <rolecap/>
 #
@@ -2228,6 +2265,43 @@ interface(`files_read_all_mountpoint_symlinks',`
     allow $1 mountpoint:lnk_file read_lnk_file_perms;
 ')
 
+
+########################################
+## <summary>
+##	Make all mountpoint as entrypoint.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_entrypoint_all_mountpoint',`
+	gen_require(`
+		attribute mountpoint;
+	')
+
+    allow $1 mountpoint:file entrypoint;
+')
+
+########################################
+## <summary>
+##	Remove all file type directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_rmdir_all_dirs',`
+	gen_require(`
+		attribute file_type;
+	')
+
+	allow $1 file_type:dir rmdir;
+')
+
 ########################################
 ## <summary>
 ##	Write all file type directories.
@@ -2769,26 +2843,7 @@ interface(`files_map_boot_files',`
      gen_require(`
          type boot_t;
     ')
-    allow $1 boot_t:file map;
-')
-
-########################################
-## <summary>
-##      Mmap kernel module files.
-## </summary>
-## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
-## </param>
-#
-interface(`files_map_kernel_modules',`
-	gen_require(`
-		type modules_object_t;
-	')
-
-	allow $1 modules_object_t:file map;
-
+     allow $1 boot_t:file map;
 ')
 
 ########################################
@@ -2809,6 +2864,26 @@ interface(`files_manage_boot_files',`
 	')
 
 	manage_files_pattern($1, boot_t, boot_t)
+')
+
+########################################
+## <summary>
+##	Dontaudit Create, read, write, and delete files
+##	in the boot files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`files_dontaudit_manage_boot_files',`
+	gen_require(`
+		type boot_t;
+	')
+
+    dontaudit $1 boot_t:file manage_file_perms;
 ')
 
 ########################################
@@ -3219,6 +3294,24 @@ interface(`files_read_default_pipes',`
 	')
 
 	allow $1 default_t:fifo_file read_fifo_file_perms;
+')
+
+########################################
+## <summary>
+##	Mounton directories on filesystem /etc.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_mounton_etc',`
+	gen_require(`
+		type etc_t;
+	')
+
+	allow $1 etc_t:dir mounton;
 ')
 
 ########################################
@@ -4438,6 +4531,25 @@ interface(`files_manage_isid_type_chr_files',`
 
 ########################################
 ## <summary>
+##	Dontaudit Moundon directories on new filesystems
+##	that have not yet been labeled.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_dontaudit_mounton_isid',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	dontaudit $1 unlabeled_t:dir mounton;
+')
+
+########################################
+## <summary>
 ##	Get the attributes of the home directories root
 ##	(/home).
 ## </summary>
@@ -4496,7 +4608,23 @@ interface(`files_dontaudit_access_check_home_dir',`
 	dontaudit $1 home_root_t:dir_file_class_set audit_access;
 ')
 
+########################################
+## <summary>
+## 	Create /home directories
+## </summary>
+## <param name="domain">
+## 	<summary>
+##	Domain allowed access
+##	</summary>
+## </param>
+#
+interface(`files_create_home_dir',`
+	gen_require(`
+		type home_root_t;
+	')
 
+	create_dirs_pattern($1, home_root_t, home_root_t)
+')
 
 ########################################
 ## <summary>
@@ -4885,6 +5013,45 @@ interface(`files_read_mnt_symlinks',`
 	')
 
 	read_lnk_files_pattern($1, mnt_t, mnt_t)
+')
+
+
+########################################
+## <summary>
+##	Load kernel module files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_load_kernel_modules',`
+	gen_require(`
+		type modules_object_t;
+	')
+
+	files_read_kernel_modules($1)
+	allow $1 modules_object_t:system module_load;
+')
+
+########################################
+## <summary>
+##	Mmap kernel module files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_map_kernel_modules',`
+	gen_require(`
+		type modules_object_t;
+	')
+
+	allow $1 modules_object_t:file map;
+
 ')
 
 ########################################
@@ -5369,6 +5536,25 @@ interface(`files_filetrans_system_db_named_files',`
     filetrans_pattern($1, var_lib_t, system_db_t, file, "servicelog.db-journal")
 ')
 
+#####################################
+## <summary>
+##  File name transition for tmp files in /.
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed access.
+##  </summary>
+## </param>
+#
+interface(`files_filetrans_tmp_named_files',`
+    gen_require(`
+        type tmp_t;
+    ')
+
+	files_root_filetrans($1, tmp_t, dir, "tmp-inst")
+
+')
+
 ########################################
 ## <summary>
 ##	Allow the specified type to associate
@@ -5562,6 +5748,24 @@ interface(`files_rw_generic_tmp_dir',`
 
 ########################################
 ## <summary>
+##	Delete generic tmp files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_delete_tmp_files',`
+       gen_require(`
+		type tmp_t;
+       ')
+
+       delete_files_pattern($1, tmp_t, tmp_t)
+')
+
+########################################
+## <summary>
 ##	Remove entries from the tmp directory.
 ## </summary>
 ## <param name="domain">
@@ -5657,6 +5861,25 @@ interface(`files_manage_generic_tmp_files',`
 	')
 
 	manage_files_pattern($1, tmp_t, tmp_t)
+')
+
+#######################################
+## <summary>
+##	Mmap temporary files
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolebase/>
+#
+interface(`files_map_generic_tmp_files',`
+	gen_require(`
+		type tmp_t;
+	')
+
+	allow $1 tmp_t:file map;
 ')
 
 ########################################
@@ -6175,6 +6398,24 @@ interface(`files_delete_usr_dirs',`
 
 ########################################
 ## <summary>
+##	Manage generic directories in /usr in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_manage_usr_dirs',`
+	gen_require(`
+		type usr_t;
+	')
+
+	manage_dirs_pattern($1, usr_t, usr_t)
+')
+
+########################################
+## <summary>
 ##	Delete generic files in /usr in the caller domain.
 ## </summary>
 ## <param name="domain">
@@ -6191,15 +6432,14 @@ interface(`files_delete_usr_files',`
 	delete_files_pattern($1, usr_t, usr_t)
 ')
 
-
 ########################################
 ## <summary>
-##      Map files in /usr in the caller domain.
+##	Map files in /usr in the caller domain.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`files_mmap_usr_files',`
@@ -6379,24 +6619,6 @@ interface(`files_relabelfrom_var_dirs',`
 
 ########################################
 ## <summary>
-##	Relabel a dir with the type used in /var.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`files_relabel_var_dirs',`
-	gen_require(`
-		type var_t;
-	')
-
-	allow $1 var_t:dir { relabelto relabelfrom };
-')
-
-########################################
-## <summary>
 ##	Relabel a dir from the type used in /var/lib.
 ## </summary>
 ## <param name="domain">
@@ -6411,24 +6633,6 @@ interface(`files_relabelfrom_var_lib_dirs',`
 	')
 
 	allow $1 var_lib_t:dir relabelfrom;
-')
-
-########################################
-## <summary>
-##	Relabel a dir with the type used in /var/lib.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`files_relabel_var_lib_dirs',`
-	gen_require(`
-		type var_lib_t;
-	')
-
-	allow $1 var_lib_t:dir relabel_dir_perms;
 ')
 
 ########################################
@@ -6628,7 +6832,7 @@ interface(`files_create_kernel_symbol_table',`
 ##	</summary>
 ## </param>
 #
-interface(`files_dontaduit_getattr_kernel_symbol_table',`
+interface(`files_dontaudit_getattr_kernel_symbol_table',`
 	gen_require(`
 		type system_map_t;
 	')
@@ -6672,6 +6876,26 @@ interface(`files_delete_kernel_symbol_table',`
 
 	allow $1 boot_t:dir list_dir_perms;
 	delete_files_pattern($1, boot_t, system_map_t)
+')
+
+########################################
+
+## <summary>
+##	Mounton system_map directory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_mounton_kernel_symbol_table',`
+	gen_require(`
+		type system_map_t;
+	')
+
+	allow $1 system_map_t:dir { mounton getattr };
+	allow $1 system_map_t:file { mounton getattr };
 ')
 
 ########################################
@@ -6726,6 +6950,24 @@ interface(`files_write_var_dirs',`
 	')
 
 	allow $1 var_t:dir write;
+')
+
+########################################
+## <summary>
+##	Set the attributes of the /var directory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_setattr_var_dirs',`
+	gen_require(`
+		type usr_t;
+	')
+
+	allow $1 var_t:dir setattr;
 ')
 
 ########################################
@@ -6963,6 +7205,24 @@ interface(`files_var_filetrans',`
 	filetrans_pattern($1, var_t, $2, $3, $4)
 ')
 
+
+########################################
+## <summary>
+## Relabel dirs in the /var directory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_relabel_var_dirs',`
+	gen_require(`
+		type var_t;
+	')
+    allow $1 var_t:dir relabel_dir_perms;
+')
+
 ########################################
 ## <summary>
 ##	Get the attributes of the /var/lib directory.
@@ -7069,6 +7329,24 @@ interface(`files_rw_var_lib_dirs',`
 	rw_dirs_pattern($1, var_lib_t, var_lib_t)
 ')
 
+###########################################
+## <summary>
+##	Map /var/lib directories
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_map_var_lib_files',`
+	gen_require(`
+		type var_lib_t;
+	')
+
+	allow $1 var_lib_t:file map;
+')
+
 ########################################
 ## <summary>
 ##	Create directories in /var/lib
@@ -7087,6 +7365,23 @@ interface(`files_create_var_lib_dirs',`
 	allow $1 var_lib_t:dir { create rw_dir_perms };
 ')
 
+########################################
+## <summary>
+##	Create symlinks in /var/lib
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_create_var_lib_symlinks',`
+	gen_require(`
+		type var_lib_t;
+	')
+
+	allow $1 var_lib_t:lnk_file { create write };
+')
 
 ########################################
 ## <summary>
@@ -7217,6 +7512,42 @@ interface(`files_manage_urandom_seed',`
 
 	allow $1 var_t:dir search_dir_perms;
 	manage_files_pattern($1, var_lib_t, var_lib_t)
+')
+
+
+########################################
+## <summary>
+## Relabel to dirs in the /var/lib directory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_relabelto_var_lib_dirs',`
+	gen_require(`
+		type var_lib_t;
+	')
+    allow $1 var_lib_t:dir relabelto;
+')
+
+
+########################################
+## <summary>
+## Relabel dirs in the /var/lib directory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_relabel_var_lib_dirs',`
+	gen_require(`
+		type var_lib_t;
+	')
+    allow $1 var_lib_t:dir relabel_dir_perms;
 ')
 
 ########################################
@@ -7715,6 +8046,24 @@ interface(`files_dontaudit_search_all_pids',`
 
 ########################################
 ## <summary>
+##	Allow search the all /var/run directory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`files_search_all_pids',`
+	gen_require(`
+		attribute pidfile;
+	')
+
+	allow $1 pidfile:dir search_dir_perms;
+')
+
+########################################
+## <summary>
 ##	List the contents of the runtime process
 ##	ID directories (/var/run).
 ## </summary>
@@ -7770,6 +8119,25 @@ interface(`files_write_generic_pid_pipes',`
 
 	files_search_pids($1)
 	allow $1 var_run_t:fifo_file write;
+')
+
+########################################
+## <summary>
+##	Write named generic process ID sockets
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_write_generic_pid_sockets',`
+	gen_require(`
+		type var_run_t;
+	')
+
+	files_search_pids($1)
+	allow $1 var_run_t:sock_file write;
 ')
 
 ########################################
@@ -8140,6 +8508,25 @@ interface(`files_exec_generic_pid_files',`
 	')
 
 	exec_files_pattern($1, var_run_t, var_run_t)
+')
+
+########################################
+## <summary>
+##	Write all sockets
+##	in the /var/run directory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_write_all_pid_sockets',`
+	gen_require(`
+		attribute pidfile;
+	')
+
+	allow $1 pidfile:sock_file write_sock_file_perms;
 ')
 
 ########################################
@@ -8869,8 +9256,9 @@ interface(`files_rw_all_inherited_files',`
 interface(`files_entrypoint_all_files',`
 	gen_require(`
 		attribute file_type;
+		type unlabeled_t;
 	')
-	allow $1 file_type:file entrypoint;
+	allow $1 {file_type -unlabeled_t} :file entrypoint;
 ')
 
 ########################################
@@ -9194,4 +9582,22 @@ interface(`files_status_etc',`
 	')
 
 	allow $1 etc_t:service status;
+')
+
+########################################
+## <summary>
+##	Dontaudit Mount a modules_object_t
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_dontaudit_mounton_modules_object',`
+	gen_require(`
+		type modules_object_t;
+	')
+
+	allow $1 modules_object_t:dir mounton;
 ')
