@@ -103,6 +103,43 @@ interface(`firewalld_dontaudit_write_tmp_files',`
 
 ########################################
 ## <summary>
+##	Read firewalld PID files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`firewalld_read_pid_files',`
+	gen_require(`
+		type firewalld_var_run_t;
+	')
+
+	files_search_pids($1)
+	allow $1 firewalld_var_run_t:file read_file_perms;
+')
+
+########################################
+## <summary>
+##	Dontaudit read and write leaked firewalld file descriptors 
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`firewalld_dontaudit_leaks',`
+	gen_require(`
+		type firewalld_tmpfs_t;
+	')
+
+	dontaudit $1 firewalld_tmpfs_t:file rw_inherited_file_perms;
+')
+
+########################################
+## <summary>
 ##	All of the rules required to administrate
 ##	an firewalld environment
 ## </summary>
