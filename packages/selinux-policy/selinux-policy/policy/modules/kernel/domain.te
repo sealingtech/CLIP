@@ -348,6 +348,10 @@ optional_policy(`
 ')
 
 optional_policy(`
+	container_filetrans_named_content(named_filetrans_domain)
+')
+
+optional_policy(`
 	cups_filetrans_named_content(named_filetrans_domain)
 ')
 
@@ -361,10 +365,6 @@ optional_policy(`
 
 optional_policy(`
 	devicekit_filetrans_named_content(named_filetrans_domain)
-')
-
-optional_policy(`
-    docker_filetrans_named_content(named_filetrans_domain)
 ')
 
 optional_policy(`
