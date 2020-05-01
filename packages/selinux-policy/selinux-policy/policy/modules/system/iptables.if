@@ -185,9 +185,27 @@ interface(`iptables_manage_config',`
 	manage_files_pattern($1, iptables_conf_t, iptables_conf_t)
 ')
 
-###################################
+########################################
 ## <summary>
-##	Read iptables PID files
+##	Transition to iptables named content
+## </summary>
+## <param name="domain">
+##	<summary>
+##      Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`iptables_filetrans_named_content',`
+	gen_require(`
+		type iptables_var_run_t;
+	')
+
+	files_pid_filetrans($1, iptables_var_run_t, file, "xtables.lock")
+')
+
+#####################################
+## <summary>
+##	Read iptables run files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -195,10 +213,11 @@ interface(`iptables_manage_config',`
 ##	</summary>
 ## </param>
 #
-interface(`iptables_read_pid',`
+interface(`iptables_read_var_run',`
 	gen_require(`
 		type iptables_var_run_t;
 	')
 
+	allow $1 iptables_var_run_t:dir list_dir_perms;
 	read_files_pattern($1, iptables_var_run_t, iptables_var_run_t)
 ')
