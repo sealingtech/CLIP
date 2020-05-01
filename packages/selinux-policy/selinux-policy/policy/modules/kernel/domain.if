@@ -1640,3 +1640,77 @@ interface(`domain_dontaudit_access_check',`
 
 	dontaudit $1 domain:dir_file_class_set audit_access;
 ')
+
+########################################
+## <summary>
+##	Allow set resource limits to all domains.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`domain_setrlimit_all_domains',`
+	gen_require(`
+		attribute domain;
+	')
+
+	allow $1 domain:process setrlimit;
+')
+
+########################################
+## <summary>
+##	Allow set resource limits to all domains.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`domain_rlimitinh_all_domains',`
+	gen_require(`
+		attribute domain;
+	')
+
+	allow $1 domain:process rlimitinh;
+')
+
+########################################
+## <summary>
+##	Allow all domains noatsecure permission
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`domain_noatsecure_all_domains',`
+	gen_require(`
+		attribute domain;
+	')
+
+    allow $1 domain:process { noatsecure };
+')
+
+######################################
+## <summary>
+##  Allow domain dyntransition to all domains in domain attribute.
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed to transition.
+##  </summary>
+## </param>
+#
+interface(`domain_dyntrans',`
+    gen_require(`
+        attribute domain;
+    ')
+
+    dyntrans_pattern($1, domain)
+')
