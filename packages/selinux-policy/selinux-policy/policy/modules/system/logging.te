@@ -635,6 +635,10 @@ optional_policy(`
 ')
 
 optional_policy(`
+    systemd_read_unit_files(syslogd_t)
+')
+
+optional_policy(`
     daemontools_search_svc_dir(syslogd_t)
 ')
 
