@@ -3,7 +3,7 @@
 
 ########################################
 ## <summary>
-##	Execute docker in the docker domain.
+##	Execute container in the container domain.
 ## </summary>
 ## <param name="domain">
 ## <summary>
@@ -18,11 +18,38 @@ interface(`container_runtime_domtrans',`
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, container_runtime_exec_t, container_runtime_t)
+	allow container_runtime_t $1:fifo_file setattr;
 ')
 
 ########################################
 ## <summary>
-##	Execute docker in the caller domain.
+##	Execute container runtime in the container runtime domain
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`container_runtime_run',`
+	gen_require(`
+		type container_runtime_t;
+	')
+
+	container_runtime_domtrans($1)
+	role $2 types container_runtime_t;
+')
+
+
+########################################
+## <summary>
+##	Execute container in the caller domain.
 ## </summary>
 ## <param name="domain">
 ## <summary>
@@ -41,7 +68,25 @@ interface(`container_runtime_exec',`
 
 ########################################
 ## <summary>
-##	Search docker lib directories.
+##	Read the process state of container runtime
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`container_read_state',`
+	gen_require(`
+		type container_runtime_t;
+	')
+
+	ps_process_pattern($1, container_runtime_t)
+')
+
+########################################
+## <summary>
+##	Search container lib directories.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -60,7 +105,7 @@ interface(`container_search_lib',`
 
 ########################################
 ## <summary>
-##	Execute docker lib directories.
+##	Execute container lib directories.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -79,7 +124,7 @@ interface(`container_exec_lib',`
 
 ########################################
 ## <summary>
-##	Read docker lib files.
+##	Read container lib files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -98,7 +143,7 @@ interface(`container_read_lib_files',`
 
 ########################################
 ## <summary>
-##	Read docker share files.
+##	Read container share files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -117,9 +162,70 @@ interface(`container_read_share_files',`
 	read_lnk_files_pattern($1, container_share_t, container_share_t)
 ')
 
+########################################
+## <summary>
+##	Read container runtime tmpfs files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`container_runtime_read_tmpfs_files',`
+	gen_require(`
+		type container_runtime_tmpfs_t;
+	')
+
+	files_search_var_lib($1)
+	list_dirs_pattern($1, container_runtime_tmpfs_t, container_runtime_tmpfs_t)
+	read_files_pattern($1, container_runtime_tmpfs_t, container_runtime_tmpfs_t)
+	read_lnk_files_pattern($1, container_runtime_tmpfs_t, container_runtime_tmpfs_t)
+')
+
+########################################
+## <summary>
+##	Manage container share files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`container_manage_share_files',`
+	gen_require(`
+		type container_share_t;
+	')
+
+	files_search_var_lib($1)
+	list_dirs_pattern($1, container_share_t, container_share_t)
+	manage_files_pattern($1, container_share_t, container_share_t)
+	manage_lnk_files_pattern($1, container_share_t, container_share_t)
+')
+
+########################################
+## <summary>
+##	Manage container share dirs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`container_manage_share_dirs',`
+	gen_require(`
+		type container_share_t;
+	')
+
+	files_search_var_lib($1)
+	manage_dirs_pattern($1, container_share_t, container_share_t)
+')
+
 ######################################
 ## <summary>
-##	Allow the specified domain to execute docker shared files
+##	Allow the specified domain to execute container shared files
 ##	in the caller domain.
 ## </summary>
 ## <param name="domain">
@@ -138,7 +244,26 @@ interface(`container_exec_share_files',`
 
 ########################################
 ## <summary>
-##	Manage docker lib files.
+##	Manage container config files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`container_manage_config_files',`
+	gen_require(`
+		type container_config_t;
+	')
+
+	files_search_var_lib($1)
+	manage_files_pattern($1, container_config_t, container_config_t)
+')
+
+########################################
+## <summary>
+##	Manage container lib files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -158,7 +283,44 @@ interface(`container_manage_lib_files',`
 
 ########################################
 ## <summary>
-##	Manage docker lib directories.
+##	Manage container files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`container_manage_files',`
+	gen_require(`
+		type container_files_t;
+	')
+
+	manage_files_pattern($1, container_files_t, container_files_t)
+	manage_lnk_files_pattern($1, container_files_t, container_files_t)
+')
+
+########################################
+## <summary>
+##	Manage container directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`container_manage_dirs',`
+	gen_require(`
+		type container_files_t;
+	')
+
+	manage_dirs_pattern($1, container_files_t, container_files_t)
+')
+
+########################################
+## <summary>
+##	Manage container lib directories.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -177,7 +339,7 @@ interface(`container_manage_lib_dirs',`
 
 ########################################
 ## <summary>
-##	Create objects in a docker var lib directory
+##	Create objects in a container var lib directory
 ##	with an automatic type transition to
 ##	a specified private type.
 ## </summary>
@@ -212,7 +374,7 @@ interface(`container_lib_filetrans',`
 
 ########################################
 ## <summary>
-##	Read docker PID files.
+##	Read container PID files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -231,7 +393,7 @@ interface(`container_read_pid_files',`
 
 ########################################
 ## <summary>
-##	Execute docker server in the docker domain.
+##	Execute container server in the container domain.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -256,7 +418,7 @@ interface(`container_systemctl',`
 
 ########################################
 ## <summary>
-##	Read and write docker shared memory.
+##	Read and write container shared memory.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -272,9 +434,28 @@ interface(`container_rw_sem',`
 	allow $1 container_runtime_t:sem rw_sem_perms;
 ')
 
+########################################
+## <summary>
+##	Allow the specified domain to append
+##	to container files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`container_append_file',`
+	gen_require(`
+		type container_file_t;
+	')
+
+	append_files_pattern($1, container_file_t, container_file_t)
+')
+
 #######################################
 ## <summary>
-##  Read and write the docker pty type.
+##  Read and write the container pty type.
 ## </summary>
 ## <param name="domain">
 ##  <summary>
@@ -292,7 +473,7 @@ interface(`container_use_ptys',`
 
 #######################################
 ## <summary>
-##      Allow domain to create docker content
+##      Allow domain to create container content
 ## </summary>
 ## <param name="domain">
 ##      <summary>
@@ -304,28 +485,48 @@ interface(`container_filetrans_named_content',`
 
     gen_require(`
         type container_var_lib_t;
+        type container_file_t;
         type container_share_t;
     	type container_log_t;
-	    type container_var_run_t;
+        type container_var_run_t;
         type container_home_t;
     ')
 
+    files_pid_filetrans($1, container_var_run_t, file, "container.pid")
     files_pid_filetrans($1, container_var_run_t, file, "docker.pid")
-    files_pid_filetrans($1, container_var_run_t, sock_file, "docker.sock")
-    files_pid_filetrans($1, container_var_run_t, dir, "docker-client")
+    files_pid_filetrans($1, container_var_run_t, sock_file, "container.sock")
+    files_pid_filetrans($1, container_var_run_t, dir, "container-client")
+    files_pid_filetrans($1, container_var_run_t, dir, "docker")
+    files_pid_filetrans($1, container_var_run_t, dir, "containerd")
+    files_pid_filetrans($1, container_var_run_t, dir, "ocid")
+    files_pid_filetrans($1, container_var_run_t, dir, "containers")
     logging_log_filetrans($1, container_log_t, dir, "lxc")
+    files_var_lib_filetrans($1, container_var_lib_t, dir, "containers")
+    files_var_lib_filetrans($1, container_file_t, dir, "origin")
+    files_var_lib_filetrans($1, container_var_lib_t, dir, "ocid")
     files_var_lib_filetrans($1, container_var_lib_t, dir, "docker")
+    files_var_lib_filetrans($1, container_var_lib_t, dir, "docker-latest")
+    filetrans_pattern($1, container_var_lib_t, container_file_t, dir, "_data")
     filetrans_pattern($1, container_var_lib_t, container_share_t, file, "config.env")
     filetrans_pattern($1, container_var_lib_t, container_share_t, file, "hosts")
     filetrans_pattern($1, container_var_lib_t, container_share_t, file, "hostname")
     filetrans_pattern($1, container_var_lib_t, container_share_t, file, "resolv.conf")
+    filetrans_pattern($1, container_var_lib_t, container_share_t, dir, "sandboxes")
     filetrans_pattern($1, container_var_lib_t, container_share_t, dir, "init")
-    userdom_admin_home_dir_filetrans($1, container_home_t, dir, ".docker")
+    filetrans_pattern($1, container_var_lib_t, container_share_t, dir, "overlay")
+    filetrans_pattern($1, container_var_lib_t, container_share_t, dir, "overlay-images")
+    filetrans_pattern($1, container_var_lib_t, container_share_t, dir, "overlay-layers")
+    filetrans_pattern($1, container_var_lib_t, container_share_t, dir, "overlay2")
+    filetrans_pattern($1, container_var_lib_t, container_share_t, dir, "overlay2-images")
+    filetrans_pattern($1, container_var_lib_t, container_share_t, dir, "overlay2-layers")
+    filetrans_pattern($1, container_var_lib_t, container_share_t, dir, "atomic")
+    userdom_admin_home_dir_filetrans($1, container_home_t, dir, ".container")
+
 ')
 
 ########################################
 ## <summary>
-##	Connect to docker over a unix stream socket.
+##	Connect to container over a unix stream socket.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -335,11 +536,13 @@ interface(`container_filetrans_named_content',`
 #
 interface(`container_stream_connect',`
 	gen_require(`
-		type container_runtime_t, container_var_run_t;
+		type container_runtime_t, container_var_run_t, container_runtime_tmpfs_t;
 	')
 
 	files_search_pids($1)
 	stream_connect_pattern($1, container_var_run_t, container_var_run_t, container_runtime_t)
+	stream_connect_pattern($1, container_runtime_tmpfs_t, container_runtime_tmpfs_t, container_runtime_t)
+	allow $1 container_runtime_tmpfs_t:lnk_file read_lnk_file_perms;
 ')
 
 ########################################
@@ -364,8 +567,8 @@ interface(`container_spc_stream_connect',`
 
 ########################################
 ## <summary>
-##	All of the rules required to administrate
-##	an docker environment
+##	All of the rules required to administer
+##	a container environment
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -408,24 +611,6 @@ interface(`container_admin',`
 		systemd_passwd_agent_exec($1)
 		systemd_read_fifo_file_passwd_run($1)
 	')
-')
-
-########################################
-## <summary>
-##	Read the process state of spc containers
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`container_spc_read_state',`
-	gen_require(`
-		type spc_t;
-	')
-
-	ps_process_pattern($1, spc_t)
 ')
 
 ########################################
@@ -487,7 +672,7 @@ interface(`container_auth_stream_connect',`
 
 ########################################
 ## <summary>
-##	docker domain typebounds calling domain.
+##	container domain typebounds calling domain.
 ## </summary>
 ## <param name="domain">
 ## <summary>
@@ -500,7 +685,7 @@ interface(`container_runtime_typebounds',`
 		type container_runtime_t;
 	')
 
-	typebounds container_runtime_t $1;
+	allow container_runtime_t $1:process2 nnp_transition;
 ')
 
 ########################################
@@ -514,13 +699,122 @@ interface(`container_runtime_typebounds',`
 ## </param>
 ## <rolecap/>
 #
-interface(`container_entrypoint',`
+interface(`container_runtime_entrypoint',`
 	gen_require(`
 		type container_runtime_exec_t;
 	')
 	allow $1 container_runtime_exec_t:file entrypoint;
 ')
 
+interface(`docker_exec_lib',`
+	container_exec_lib($1)
+')
+
+interface(`docker_read_share_files',`
+	container_read_share_files($1)
+')
+
+interface(`docker_exec_share_files',`
+	container_exec_share_files($1)
+')
+
+interface(`docker_manage_lib_files',`
+	container_manage_lib_files($1)
+')
+
+
+interface(`docker_manage_lib_dirs',`
+	container_manage_lib_dirs($1)
+')
+
+interface(`docker_lib_filetrans',`
+	container_lib_filetrans($1, $2, $3, $4)
+')
+
+interface(`docker_read_pid_files',`
+	container_read_pid_files($1)
+')
+
+interface(`docker_systemctl',`
+	container_systemctl($1)
+')
+
+interface(`docker_use_ptys',`
+	container_use_ptys($1)
+')
+
+interface(`docker_stream_connect',`
+	container_stream_connect($1)
+')
+
+interface(`docker_spc_stream_connect',`
+	container_spc_stream_connect($1)
+')
+
+########################################
+## <summary>
+##	Read the process state of spc containers
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`container_spc_read_state',`
+	gen_require(`
+		type spc_t;
+	')
+
+	ps_process_pattern($1, spc_t)
+')
+
+########################################
+## <summary>
+##	Creates types and rules for a basic
+##	container process domain.
+## </summary>
+## <param name="prefix">
+##	<summary>
+##	Prefix for the domain.
+##	</summary>
+## </param>
+#
+template(`container_domain_template',`
+	gen_require(`
+		attribute container_domain;
+		type container_runtime_t;
+		type container_var_lib_t;
+		type container_share_t;
+	')
+
+	type $1_t, container_domain;
+	domain_type($1_t)
+	domain_user_exemption_target($1_t)
+	mls_rangetrans_target($1_t)
+	mcs_constrained($1_t)
+	role system_r types $1_t;
+
+	kernel_read_all_proc($1_t)
+')
+
+########################################
+## <summary>
+##	Read and write a spc_t unnamed pipe.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`container_spc_rw_pipes',`
+	gen_require(`
+		type spc_t;
+	')
+
+	allow $1 spc_t:fifo_file rw_inherited_fifo_file_perms;
+')
 ########################################
 ## <summary>
 ##	rw configuration files.
