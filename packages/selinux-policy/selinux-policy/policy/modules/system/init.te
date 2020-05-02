@@ -203,7 +203,9 @@ manage_files_pattern(init_t, init_var_run_t, init_var_run_t)
 manage_lnk_files_pattern(init_t, init_var_run_t, init_var_run_t)
 manage_sock_files_pattern(init_t, init_var_run_t, init_var_run_t)
 manage_fifo_files_pattern(init_t, init_var_run_t, init_var_run_t)
-files_pid_filetrans(init_t, init_var_run_t, { dir file })
+manage_blk_files_pattern(init_t, init_var_run_t, init_var_run_t)
+manage_chr_files_pattern(init_t, init_var_run_t, init_var_run_t)
+files_pid_filetrans(init_t, init_var_run_t, { dir file blk_file chr_file fifo_file})
 allow init_t init_var_run_t:dir mounton;
 allow init_t init_var_run_t:file mounton;
 allow init_t init_var_run_t:sock_file relabelto;
@@ -313,6 +315,13 @@ selinux_set_all_booleans(init_t)
 selinux_load_policy(init_t)
 selinux_mounton_fs(init_t)
 allow init_t security_t:security load_policy;
+
+selinux_compute_access_vector(init_t)
+selinux_compute_create_context(init_t)
+selinux_compute_user_contexts(init_t)
+selinux_validate_context(init_t)
+selinux_compute_relabel_context(init_t)
+selinux_unmount_fs(init_t)
 
 term_create_pty_dir(init_t)
 term_use_unallocated_ttys(init_t)
@@ -486,6 +495,9 @@ fs_manage_cgroup_dirs(init_t)
 fs_manage_cgroup_files(init_t)
 fs_manage_hugetlbfs_dirs(init_t)
 fs_manage_tmpfs_dirs(init_t)
+fs_relabel_tmpfs_blk_file(init_t)
+fs_relabel_tmpfs_chr_file(init_t)
+fs_relabel_pstore_dirs(init_t)
 fs_relabel_tmpfs_dirs(init_t)
 fs_relabel_tmpfs_files(init_t)
 fs_relabel_tmpfs_fifo_files(init_t)
@@ -550,14 +562,6 @@ auth_domtrans_chk_passwd(init_t)
 
 # Needed to delete /.autorelabel
 files_delete_boot_flag(init_t)
-
-optional_policy(`
-	# SRS: this is very weird, but when chronyd and its helpers start
-	# they trigger this, but it occurs in the init_t domain evne though
-	# it has transitions correctly.
-	require { type chronyd_t; }
-	files_dontaudit_mounton_etc(init_t)
-')
 
 
 optional_policy(`
@@ -648,6 +652,8 @@ optional_policy(`
 
 optional_policy(`
 	sssd_stream_connect(init_t)
+	# this is usually granted through auth_use_nsswitch
+	sssd_run_stream_connect(init_t)
 ')
 
 optional_policy(`

@@ -121,11 +121,11 @@ logging_log_file(wtmp_t)
 # Check password local policy
 #
 
-allow chkpwd_t self:capability { dac_override setuid };
+allow chkpwd_t self:capability { dac_read_search  setuid };
 dontaudit chkpwd_t self:capability sys_tty_config;
 allow chkpwd_t self:process { getattr signal };
 
-allow chkpwd_t shadow_t:file read_file_perms;
+allow chkpwd_t shadow_t:file { read_file_perms map };
 files_list_etc(chkpwd_t)
 
 kernel_read_crypto_sysctls(chkpwd_t)
@@ -463,6 +463,7 @@ optional_policy(`
 allow nsswitch_domain self:key manage_key_perms;
 
 auth_read_passwd(nsswitch_domain)
+auth_map_passwd(nsswitch_domain)
 
 files_list_var_lib(nsswitch_domain)
 
@@ -510,6 +511,10 @@ tunable_policy(`authlogin_nsswitch_use_ldap',`
 #		ldap_stream_connect(nsswitch_domain)
 #	')
 #')
+
+optional_policy(`
+    dbus_system_bus_client(nsswitch_domain)
+')
 
 optional_policy(`
 	avahi_stream_connect(nsswitch_domain)
