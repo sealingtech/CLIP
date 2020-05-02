@@ -69,7 +69,6 @@ manage_files_pattern(kmod_t, kmod_tmp_t, kmod_tmp_t)
 files_tmp_filetrans(kmod_t, kmod_tmp_t, { file dir })
 
 can_exec(kmod_t, kmod_exec_t)
-can_exec(kmod_t, update_modules_exec_t)
 
 manage_files_pattern(kmod_t,kmod_tmpfs_t,kmod_tmpfs_t)
 fs_tmpfs_filetrans(kmod_t,kmod_tmpfs_t,file)
