@@ -222,6 +222,8 @@ echo -e '\n-f 2' >> /etc/audit/rules.d/audit.rules
 
 echo \-D >> /etc/audit/rules.d/audit.rules
 
+echo '-b 65536' >> /etc/audit/rules.d/audit.rules
+
 # fix rule file perms
 chmod 600 /etc/audit/rules.d/*
 
