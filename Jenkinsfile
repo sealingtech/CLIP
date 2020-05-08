@@ -4,7 +4,7 @@ Map matrix_axes = [
     media_type: ['live-iso'],
     target_name: ['minimal'],
     os_name: ['rhel'],
-    os_version: ['8.1']
+    os_version: ['8.2']
 ]
 
 @NonCPS
