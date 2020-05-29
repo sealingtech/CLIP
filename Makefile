@@ -30,7 +30,7 @@ endif
 # E.g., the SELinux policy uses different spec files based on release
 # Make sure $(YUM_CONF_ALL_FILE) is a dep for any recipes that use this feature
 define OS_REL
-$(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery -c $(YUM_CONF_ALL_FILE) --whatprovides "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}'))
+$(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery --disableplugin=* -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery --disableplugin=* -c $(YUM_CONF_ALL_FILE) --whatprovides "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}'))
 endef
 
 # NOTE: DO NOT REMOVE THIS CHECK. RUNNING MOCK AS ROOT *WILL* BREAK THINGS.
@@ -410,7 +410,7 @@ $(REPO_DIR)/$(REPO_ID)-repo/last-updated: $(CONF_DIR)/pkglist.$(REPO_ID) $(CONFI
 # This lets sub-makes take actions based on the full OS rver+release found in the mock repos instead of on host version
 # E.g., the SELinux policy uses different spec files based on release
 # Make sure YUM_CONF_ALL_FILE is a dep for any recipes that use this feature
-	$(eval export OS_VER := $(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery -c $(YUM_CONF_ALL_FILE) --whatprovides "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}')))
+	$(eval export OS_VER := $(strip $(shell test -f $(YUM_CONF_ALL_FILE) && repoquery --disableplugin=* -c $(YUM_CONF_ALL_FILE) --provides $$(repoquery --disableplugin=* -c $(YUM_CONF_ALL_FILE) --whatprovides "system-release") | awk ' /^system-release =/ { gsub(/-.*/,"",$$3); print $$3}')))
 	$(VERBOSE)touch $(REPO_DIR)/$(REPO_ID)-repo/last-updated
 
 # If a pkglist is missing then assume we should generate one ourselves.
