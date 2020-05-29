@@ -10,7 +10,7 @@ NAME := $(shell basename $(CURDIR))
 KS := $(CURDIR)/$(NAME).ks
 INC_BASE := $(CURDIR)/..
 
-OS_REL ?= 7.2
+OS_REL ?= 8.2
 
 TARGET_ARCH ?= $(shell uname -i)
 
