@@ -265,7 +265,11 @@ kill $TAILPID 2>/dev/null 1>/dev/null
 
 echo "Done with post install scripts..."
 
-chvt 6
+if [ x"$CONFIG_BUILD_LIVE_MEDIA" != "xy" ] \
+	&& [ x"$CONFIG_BUILD_AWS" != "xy" ];
+then
+	chvt 6
+fi
 
 
 %end
