@@ -1,15 +1,11 @@
 
-if [ -f /usr/share/xml/scap/ssg/content/ssg-centos7-ds.xml ]; then
-        ds='centos7'
+if [ -f /usr/share/xml/scap/ssg/content/ssg-centos8-ds.xml ]; then
+        ds='centos8'
 else   
-	ds='rhel7'
+	ds='rhel8'
 fi
 
-if oscap info /usr/share/xml/scap/ssg/content/ssg-${ds}-ds.xml | grep -q 'xccdf_org\.ssgproject\.content_profile_stig-rhel7-disa'; then
-	xccdf_profile=xccdf_org.ssgproject.content_profile_stig-rhel7-disa
-else
-	xccdf_profile=xccdf_org.ssgproject.content_profile_stig-rhel7-server-upstream
-fi
+xccdf_profile=xccdf_org.ssgproject.content_profile_stig
 
 # Disable SCAP content that removes X iff we want a GUI. Do this using SCAP's tailoring support.
 if [ x"$CONFIG_BUILD_ENABLE_GUI" == "xy" ]; then
@@ -21,7 +17,7 @@ if [ x"$CONFIG_BUILD_ENABLE_GUI" == "xy" ]; then
 		  <xccdf:benchmark href="/usr/share/xml/scap/ssg/content/ssg-${ds}-ds.xml"/>
 		  <xccdf:version time="2019-01-25T15:54:11">1</xccdf:version>
 		  <xccdf:Profile id="${xccdf_profile}${tailor_suffix}" extends="${xccdf_profile}">
-		    <xccdf:title xmlns:xhtml="http://www.w3.org/1999/xhtml" xml:lang="en-US" override="true">DISA STIG for Red Hat Enterprise Linux 7 [CUSTOMIZED]</xccdf:title>
+		    <xccdf:title xmlns:xhtml="http://www.w3.org/1999/xhtml" xml:lang="en-US" override="true">DISA STIG for Red Hat Enterprise Linux 8 [CUSTOMIZED]</xccdf:title>
 		    <xccdf:description xmlns:xhtml="http://www.w3.org/1999/xhtml" xml:lang="en-US" override="true">This profile contains configuration checks that align to the
 		  DISA STIG for Red Hat Enterprise Linux V1R4.
 
