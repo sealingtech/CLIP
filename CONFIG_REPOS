@@ -1,33 +1,4 @@
-# Copyright (C) 2011-2012 Tresys Technology, LLC
-#
-# Authors: Spencer Shimko <sshimko@tresys.com>
-#
-# CLIP officially supports RHEL.  If you choose to use CentOS it will probably
-# work.  There is guidance below for both.
-#
-# Basic instructions:
-#
-# This is the file where you configure yum repos.  The packages found in these
-# yum repos can be referenced from the kickstart files in 
-# ./kickstarts/<name>/<name>.ks.  The packages from the repos below will be 
-# included in generated ISOs.
-#
-#
-# Note that for now, these must be local repos.  We plan on adding FTP/HTTP
-# support in the future.  One of the issues we are trying to wrap our heads
-# around is ensuring we still version the packages used when rolling the
-# builds.  To do this with FTP/HTTP we would like to wget the packages when
-# rolling the ISO.  We do not want to just stick URLs into kickstarts
-# because we lose the benefit of rigorously versioning the packages used.
-# Anywho, we're thinking about it, but no timeline yet ;)
-
-#opt = /mnt/repos-6-3/rhel-6-3-x86_64/rhel-x86_64-server-optional-6/getPackage
-
-# It is fairly common to pull in packages from EPEL but having EPEL is not a requirement!
-#epel = /mnt/repos/epel-pinned-revisions
-
-# NOTE: If using RHEL, *not CentOS*, you must provide the Optional repo. 
-rhel8.1-baseos = /opt/repos/rhel8-baseos
-rhel8.1-appstream = /opt/repos/rhel8-appstream
-epel8 = /opt/repos/epel
-rhel8.1-codeready = /opt/repos/rhel8-codeready
+rhel8.2-appstream=/opt/repos/rhel8.2/rhel-8-for-x86_64-appstream-rpms
+rhel8.2-baseos=/opt/repos/rhel8.2/rhel-8-for-x86_64-baseos-rpms
+rhel8.2-codeready=/opt/repos/rhel8.1-codeready
+rhel8.2-epel=/opt/repos/epel
