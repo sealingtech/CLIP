@@ -180,5 +180,9 @@ seutil_manage_default_contexts(sssd_selinux_manager_t)
 
 seutil_exec_setfiles(sssd_selinux_manager_t)
 logging_dontaudit_search_audit_logs(sssd_selinux_manager_t)
+# allow to communicate with systemd via libnss_systemd.so.2
+optional_policy(`
+    init_dbus_chat(sssd_selinux_manager_t)
+')
 
 allow sssd_selinux_manager_t sssd_var_log_t:file append;
