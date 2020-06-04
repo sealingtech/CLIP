@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 '''
 Copyright (c) 2018 Quark Security, Inc. All rights reserved.
 Author: Marshall Miller <marshall@quarksecurity.com>
@@ -18,7 +18,7 @@ def get_command_output(cmd):
     rc = proc.wait()
     if rc != 0:
         raise Exception("command '%s' failed with rc %s" % (" ".join(cmd), rc))
-    return stdout, stderr
+    return stdout.decode("ascii"), stderr.decode("ascii")
 
 # run a command
 def run_command(cmd, **kwargs):
@@ -32,10 +32,11 @@ def locate_executable(exe):
     try:
         loc, _ = get_command_output(["which", exe])
         loc = loc.strip()
-        if not os.path.exists(loc):
-            raise Exception("failed to locate %s" % (exe,))
     except Exception as e:
         raise Exception("failed to locate %s: %s" % (exe, str(e)))
+
+    if not os.path.exists(loc):
+        raise Exception("failed to locate %s: somehow path %s does not exist" % (exe, loc))
 
     return loc
 
@@ -95,17 +96,17 @@ class IsoRepacker(object):
 
     def _unpack(self):
         os.makedirs(self.iso_mountpoint)
-        run_command(["sudo", "mount", "-o", "loop", self.orig_iso_path, self.iso_mountpoint])
+        run_command(["sudo", "mount", "-o", "loop,ro", self.orig_iso_path, self.iso_mountpoint])
         self.iso_mounted = True
         shutil.copytree(self.iso_mountpoint, self.extracted_dir)
 
     def _run_update_command(self):
+        env = {"ISO_ROOT":self.extracted_dir}
         if not self.command:
             print("modify contents of iso rooted at %s and exit the shell to continue" % (self.extracted_dir,))
             command = ["/bin/bash"]
-            env = {"PS1":r"[isorepack: \u@\h \W]\$ "}
+            env["PS1"] = r"[isorepack: \u@\h \W]\$ "
         else:
-            env = None
             command = [self.command[0]]
             for arg in self.command[1:]:
                 if arg == "%ISO_ROOT":
@@ -115,13 +116,22 @@ class IsoRepacker(object):
         run_command(command, env=env)
 
     def _pack(self):
+        possible_boot_images = ["isolinux.bin", "isolinux/isolinux.bin"]
+        possible_boot_catalogs = ["boot.cat", "isolinux/boot.cat"]
+        boot_img_args = []
+        boot_cat_args = []
+        for possible_boot_image in possible_boot_images:
+            if os.path.exists(os.path.join(self.extracted_dir, possible_boot_image)):
+                boot_img_args = ["-b", possible_boot_image]
+        for possible_boot_catalog in possible_boot_catalogs:
+            if os.path.exists(os.path.join(self.extracted_dir, possible_boot_catalog)):
+                boot_cat_args = ["-c", possible_boot_catalog]
         run_command([
             MKISOFS,
             "-f", "-v", "-U", "-J", "-R", "-T",
             "-m", "repoview",
             "-m", "boot.iso",
-            "-b", "isolinux/isolinux.bin",
-            "-c", "isolinux/boot.cat",
+            ] + boot_img_args + boot_cat_args + [
             "-no-emul-boot",
             "-boot-load-size", "4",
             "-boot-info-table",
