@@ -16,11 +16,11 @@ CONFIG_BUILD_TOOR ?= n
 
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
-VERSION := 999.3.13.1
+VERSION := 999.1
 
 # bump this if creating multiple releases from the same
 # version (think about this... why are you doing this?)
-RELEASE := el7_6.5
+RELEASE := el8
 
 # The name of the Vendor
 VENDOR := Quark Security, Inc
