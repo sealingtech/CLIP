@@ -18,24 +18,6 @@ interface(`ipsec_domtrans',`
 	domtrans_pattern($1, ipsec_exec_t, ipsec_t)
 ')
 
-#######################################
-## <summary>
-##  Allow read/write ipsec pipes
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-#
-interface(`ipsec_rw_inherited_pipes',`
-    gen_require(`
-        type ipsec_t;
-    ')
-
-    allow $1 ipsec_t:fifo_file rw_inherited_fifo_file_perms;
-')
-
 ########################################
 ## <summary>
 ##	Connect to IPSEC using a unix domain stream socket.
@@ -48,11 +30,11 @@ interface(`ipsec_rw_inherited_pipes',`
 #
 interface(`ipsec_stream_connect',`
 	gen_require(`
-		type ipsec_t, ipsec_var_run_t;
+		type ipsec_t, ipsec_runtime_t;
 	')
 
 	files_search_pids($1)
-	stream_connect_pattern($1, ipsec_var_run_t, ipsec_var_run_t, ipsec_t)
+	stream_connect_pattern($1, ipsec_runtime_t, ipsec_runtime_t, ipsec_t)
 ')
 
 ########################################
@@ -73,64 +55,6 @@ interface(`ipsec_domtrans_mgmt',`
 	domtrans_pattern($1, ipsec_mgmt_exec_t, ipsec_mgmt_t)
 ')
 
-#######################################
-## <summary>
-##  Allow to create OBJECT in /etc with ipsec_key_file_t.
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-#
-interface(`ipsec_filetrans_key_file',`
-    gen_require(`
-        type ipsec_key_file_t;
-    ')
-
-    files_etc_filetrans($1, ipsec_key_file_t, file)
-')
-
-#######################################
-## <summary>
-##  Allow to manage ipsec key files.
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-#
-interface(`ipsec_manage_key_file',`
-    gen_require(`
-        type ipsec_key_file_t;
-    ')
-
-    manage_files_pattern($1, ipsec_key_file_t, ipsec_key_file_t)
-    files_etc_filetrans($1, ipsec_key_file_t, file, "ipsec.secrets")
-')
-
-########################################
-## <summary>
-##	Read the ipsec_mgmt_var_run_t files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`ipsec_mgmt_read_pid',`
-	gen_require(`
-		type ipsec_var_run_t;
-		type ipsec_mgmt_var_run_t;
-	')
-
-	files_search_pids($1)
-	read_files_pattern($1, ipsec_var_run_t, ipsec_mgmt_var_run_t)
-')
-
-
 ########################################
 ## <summary>
 ##	Connect to racoon using a unix domain stream socket.
@@ -143,11 +67,11 @@ interface(`ipsec_mgmt_read_pid',`
 #
 interface(`ipsec_stream_connect_racoon',`
 	gen_require(`
-		type racoon_t, ipsec_var_run_t;
+		type racoon_t, ipsec_runtime_t;
 	')
 
 	files_search_pids($1)
-	stream_connect_pattern($1, ipsec_var_run_t, ipsec_var_run_t, racoon_t)
+	stream_connect_pattern($1, ipsec_runtime_t, ipsec_runtime_t, racoon_t)
 ')
 
 ########################################
@@ -196,6 +120,7 @@ interface(`ipsec_exec_mgmt',`
 ##	</summary>
 ## </param>
 #
+#
 interface(`ipsec_signal_mgmt',`
 	gen_require(`
 		type ipsec_mgmt_t;
@@ -213,6 +138,7 @@ interface(`ipsec_signal_mgmt',`
 ##	Domain allowed access.
 ##	</summary>
 ## </param>
+#
 #
 interface(`ipsec_signull_mgmt',`
 	gen_require(`
@@ -232,66 +158,13 @@ interface(`ipsec_signull_mgmt',`
 ##	</summary>
 ## </param>
 #
+#
 interface(`ipsec_kill_mgmt',`
 	gen_require(`
 		type ipsec_mgmt_t;
 	')
 
 	allow $1 ipsec_mgmt_t:process sigkill;
-')
-
-########################################
-## <summary>
-##	Send ipsec  a general signal.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`ipsec_signal',`
-	gen_require(`
-		type ipsec_t;
-	')
-
-	allow $1 ipsec_t:process signal;
-')
-
-########################################
-## <summary>
-##	Send ipsec  a null signal.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`ipsec_signull',`
-	gen_require(`
-		type ipsec_t;
-	')
-
-	allow $1 ipsec_t:process signull;
-')
-
-########################################
-## <summary>
-##	Send ipsec  a kill signal.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`ipsec_kill',`
-	gen_require(`
-		type ipsec_t;
-	')
-
-	allow $1 ipsec_t:process sigkill;
 ')
 
 ######################################
@@ -352,7 +225,6 @@ interface(`ipsec_match_default_spd',`
 
 	allow $1 ipsec_spd_t:association polmatch;
 	allow $1 self:association sendto;
-	allow $1 self:peer recv;
 ')
 
 ########################################
@@ -373,29 +245,10 @@ interface(`ipsec_setcontext_default_spd',`
 
 	allow $1 ipsec_spd_t:association setcontext;
 ')
-########################################
-## <summary>
-##	Read the ipsec_var_run_t files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`ipsec_read_pid',`
-	gen_require(`
-		type ipsec_var_run_t;
-	')
-
-	files_search_pids($1)
-	read_files_pattern($1, ipsec_var_run_t, ipsec_var_run_t)
-    read_sock_files_pattern($1, ipsec_var_run_t, ipsec_var_run_t)
-')
 
 ########################################
 ## <summary>
-##	write the ipsec_var_run_t files.
+##	write the ipsec_runtime_t files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -405,11 +258,11 @@ interface(`ipsec_read_pid',`
 #
 interface(`ipsec_write_pid',`
 	gen_require(`
-		type ipsec_var_run_t;
+		type ipsec_runtime_t;
 	')
 
 	files_search_pids($1)
-	write_files_pattern($1, ipsec_var_run_t, ipsec_var_run_t)
+	write_files_pattern($1, ipsec_runtime_t, ipsec_runtime_t)
 ')
 
 ########################################
@@ -424,12 +277,11 @@ interface(`ipsec_write_pid',`
 #
 interface(`ipsec_manage_pid',`
 	gen_require(`
-		type ipsec_var_run_t;
+		type ipsec_runtime_t;
 	')
 
 	files_search_pids($1)
-	manage_files_pattern($1, ipsec_var_run_t, ipsec_var_run_t)
-    manage_sock_files_pattern($1, ipsec_var_run_t, ipsec_var_run_t)
+	manage_files_pattern($1, ipsec_runtime_t, ipsec_runtime_t)
 ')
 
 ########################################
@@ -518,45 +370,54 @@ interface(`ipsec_run_setkey',`
 	role $2 types setkey_t;
 ')
 
-#######################################
-## <summary>
-##  Execute strongswan in the ipsec_mgmt domain.
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed to transition.
-##  </summary>
-## </param>
-#
-interface(`ipsec_mgmt_systemctl',`
-    gen_require(`
-        type ipsec_mgmt_unit_file_t;
-        type ipsec_mgmt_t;
-    ')
-
-    systemd_exec_systemctl($1)
-    init_reload_services($1)
-    allow $1 ipsec_mgmt_unit_file_t:file read_file_perms;
-    allow $1 ipsec_mgmt_unit_file_t:service manage_service_perms;
-
-    ps_process_pattern($1, ipsec_mgmt_t)
-')
-
 ########################################
 ## <summary>
-##	Do not audit attempts to write the ipsec
-##	log files.
+##	All of the rules required to
+##	administrate an ipsec environment.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
-##	Domain to not audit.
+##	Domain allowed access.
 ##	</summary>
 ## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
 #
-interface(`ipsec_dontaudit_write_log',`
+interface(`ipsec_admin',`
 	gen_require(`
-		type ipsec_log_t;
+		type ipsec_t, ipsec_initrc_exec_t, ipsec_conf_file_t;
+		type ipsec_key_file_t, ipsec_log_t, ipsec_tmp_t;
+		type ipsec_runtime_t, ipsec_mgmt_lock_t;
+		type ipsec_mgmt_runtime_t, racoon_tmp_t;
+		type ipsec_unit_t;
 	')
 
-	dontaudit $1 ipsec_log_t:file rw_inherited_file_perms;
+	allow $1 ipsec_t:process { ptrace signal_perms };
+	ps_process_pattern($1, ipsec_t)
+
+	init_startstop_service($1, $2, ipsec_t, ipsec_initrc_exec_t, ipsec_unit_t)
+
+	ipsec_exec_mgmt($1)
+	ipsec_stream_connect($1)
+	# for lsof
+	ipsec_getattr_key_sockets($1)
+
+	files_search_etc($1)
+	admin_pattern($1, { ipsec_conf_file_t ipsec_key_file_t })
+
+	files_search_tmp($1)
+	admin_pattern($1, { ipsec_tmp_t racoon_tmp_t })
+
+	files_search_pids($1)
+	admin_pattern($1, { ipsec_runtime_t ipsec_mgmt_runtime_t })
+
+	files_search_locks($1)
+	admin_pattern($1, ipsec_mgmt_lock_t)
+
+	logging_search_logs($1)
+	admin_pattern($1, ipsec_log_t)
 ')

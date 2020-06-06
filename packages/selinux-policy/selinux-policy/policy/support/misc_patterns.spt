@@ -1,15 +1,32 @@
 #
-# Specified domain transition patterns
+# Common domain transition pattern perms
+#
+# Parameters:
+# 1. source domain
+# 2. entry point file type
+# 3. target domain
 #
 define(`domain_transition_pattern',`
 	allow $1 $2:file mmap_exec_file_perms;
 	allow $1 $3:process transition;
-#	dontaudit $1 $3:process { noatsecure siginh rlimitinh };
+	dontaudit $1 $3:process { noatsecure siginh rlimitinh };
 ')
 
-# compatibility:
-define(`domain_trans',`domain_transition_pattern($*)')
+# compatibility: Deprecated (20161201)
+define(`domain_trans',`
+	refpolicywarn(`$0() has been deprecated, please use domain_transition_pattern() instead.')
+	domain_transition_pattern($*)
+')
 
+
+#
+# Specified domain transition patterns
+#
+# Parameters:
+# 1. source domain
+# 2. entry point file type
+# 3. target domain
+#
 define(`spec_domtrans_pattern',`
 	allow $1 self:process setexec;
 	domain_transition_pattern($1,$2,$3)
@@ -22,14 +39,31 @@ define(`spec_domtrans_pattern',`
 #
 # Automatic domain transition patterns
 #
+# Parameters:
+# 1. source domain
+# 2. entry point file type
+# 3. target domain
+#
 define(`domain_auto_transition_pattern',`
 	domain_transition_pattern($1,$2,$3)
 	type_transition $1 $2:process $3;
 ')
 
-# compatibility:
-define(`domain_auto_trans',`domain_auto_transition_pattern($*)')
+# compatibility: Deprecated (20161201)
+define(`domain_auto_trans',`
+	refpolicywarn(`$0() has been deprecated, please use domain_auto_transition_pattern() instead.')
+	domain_auto_transition_pattern($*)
+')
 
+#
+# Automatic domain transition patterns
+# with feedback permissions
+#
+# Parameters:
+# 1. source domain
+# 2. entry point file type
+# 3. target domain
+#
 define(`domtrans_pattern',`
 	domain_auto_transition_pattern($1,$2,$3)
 
@@ -41,6 +75,10 @@ define(`domtrans_pattern',`
 #
 # Dynamic transition pattern
 #
+# Parameters:
+# 1. source domain
+# 2. target domain
+#
 define(`dyntrans_pattern',`
 	allow $1 self:process setcurrent;
 	allow $1 $2:process dyntransition;
@@ -48,7 +86,11 @@ define(`dyntrans_pattern',`
 ')
 
 #
-# Other process permissions
+# Read foreign domain proc data
+#
+# Parameters:
+# 1. source domain
+# 2. target domain
 #
 define(`ps_process_pattern',`
 	allow $1 $2:dir list_dir_perms;
@@ -56,3 +98,25 @@ define(`ps_process_pattern',`
 	allow $1 $2:lnk_file read_lnk_file_perms;
 	allow $1 $2:process getattr;
 ')
+
+#
+# Process administration pattern
+#
+# Parameters:
+# 1. source domain
+# 2. target domain
+#
+define(`admin_process_pattern',`
+	ps_process_pattern($1, $2)
+
+	allow $1 $2:process { ptrace signal_perms };
+')
+
+#
+# File execution pattern
+#
+# Parameters:
+# 1. source domain
+# 2. executable file type
+#
+define(`can_exec',`allow $1 $2:file { mmap_exec_file_perms ioctl lock execute_no_trans };')

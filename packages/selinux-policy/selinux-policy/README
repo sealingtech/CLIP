@@ -60,6 +60,11 @@ install-headers		Install the policy headers into /usr/share/selinux/NAME.
 			for this policy configuration should be set before
 			using this target.
 
+build-interface-db	Build the policy interface database with
+			'sepolgen-ifgen'.  This database is required for
+			reference style policy generation by
+			'audit2allow --reference'.
+
 Make targets specific to monolithic policies:
 
 policy			Compile a policy locally for development and testing.
@@ -95,10 +100,9 @@ NAME			String (optional).  Sets the name of the policy; the
 			set, the policy type (TYPE) is used.
 
 DISTRO			String (optional).  Enable distribution-specific policy.
-			Available options are redhat, rhel4, gentoo, debian,
-			and suse.  This option controls distro_redhat,
-			distro_rhel4, distro_gentoo, distro_debian, and
-			distro_suse policy blocks.
+			Available options are redhat, gentoo, and debian.
+			This option controls distro_redhat, distro_gentoo, and
+			distro_debian build option policy blocks.
 
 MONOLITHIC		Boolean.  If set, a monolithic policy is built,
 			otherwise a modular policy is built.
@@ -116,11 +120,15 @@ OUTPUT_POLICY		Integer.  Set the version of the policy created when
 
 UNK_PERMS		String.  Set the kernel behavior for handling of
 			permissions defined in the kernel but missing from the
-			policy.  The permissions can either be allowed, denied,
-			or the policy loading can be rejected.
+			policy.  The permissions can either be allowed (allow),
+			denied (deny), or the policy loading can be rejected
+			(reject).
 
 UBAC			Boolean.  If set, the SELinux user will be used
 			additionally for approximate role separation.
+
+SYSTEMD			Boolean.  If set, systemd will be assumed to be the init
+			process provider.
 
 MLS_SENS		Integer.  Set the number of sensitivities in the MLS
 			policy.  Ignored on standard and MCS policies.
@@ -134,6 +142,10 @@ MCS_CATS		Integer.  Set the number of categories in the MCS
 QUIET			Boolean.  If set, the build system will only display
 			status messages and error messages.  This option has no
 			effect on policy.
+
+WERROR			Boolean.  If set, the build system will treat warnings
+			as errors.  If any warnings are encountered, the build
+			will fail.
 
 
 3) Reference Policy Files and Directories
@@ -230,7 +242,7 @@ install-headers target from the full Reference Policy sources.
 To set up a directory to build a local module, one must simply place a .te
 file in a directory.  A sample Makefile to use in the directory is the
 Makefile.example in the doc directory.  This may be installed in
-/usr/share/doc, under the directory for the distribution's policy. 
+/usr/share/doc, under the directory for the distribution's policy.
 Alternatively, the primary Makefile in the headers directory (typically
 /usr/share/selinux/NAME/Makefile) can be called directly, using make's -f
 option.

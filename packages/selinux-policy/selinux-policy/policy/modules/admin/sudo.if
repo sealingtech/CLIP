@@ -32,7 +32,6 @@ template(`sudo_role_template',`
 
 	gen_require(`
 		type sudo_exec_t;
-		type sudo_db_t;
 		attribute sudodomain;
 	')
 
@@ -41,22 +40,37 @@ template(`sudo_role_template',`
 	# Declarations
 	#
 
-	type $1_sudo_t, sudodomain; 
+	type $1_sudo_t, sudodomain;
 	userdom_user_application_domain($1_sudo_t, sudo_exec_t)
 	domain_interactive_fd($1_sudo_t)
 	domain_role_change_exemption($1_sudo_t)
 	role $2 types $1_sudo_t;
-	userdom_home_manager($1_sudo_t)
 
-	type $1_sudo_tmp_t;
-	files_tmp_file($1_sudo_tmp_t)
+	##############################
+	#
+	# Local Policy
+	#
 
-	allow $1_sudo_t $1_sudo_tmp_t:file manage_file_perms;
-	files_tmp_filetrans($1_sudo_t, $1_sudo_tmp_t, file)
+	# Use capabilities.
+	allow $1_sudo_t self:capability { chown dac_override fowner kill setgid setuid sys_nice sys_resource };
+	allow $1_sudo_t self:process { signal_perms getsched setsched getsession getpgid setpgid getcap setcap share getattr getrlimit rlimitinh siginh transition setsockcreate dyntransition noatsecure setkeycreate };
+	allow $1_sudo_t self:process { setexec setrlimit };
+	allow $1_sudo_t self:fd use;
+	allow $1_sudo_t self:fifo_file rw_fifo_file_perms;
+	allow $1_sudo_t self:shm create_shm_perms;
+	allow $1_sudo_t self:sem create_sem_perms;
+	allow $1_sudo_t self:msgq create_msgq_perms;
+	allow $1_sudo_t self:msg { send receive };
+	allow $1_sudo_t self:unix_dgram_socket create_socket_perms;
+	allow $1_sudo_t self:unix_stream_socket create_stream_socket_perms;
+	allow $1_sudo_t self:unix_dgram_socket sendto;
+	allow $1_sudo_t self:unix_stream_socket connectto;
+	allow $1_sudo_t self:key manage_key_perms;
 
-        allow $1_sudo_t $3:dir search_dir_perms;;
-        allow $1_sudo_t $3:file read_file_perms;;
-        allow $1_sudo_t $3:key search;
+	allow $1_sudo_t $3:key search;
+
+	# Transmit SIGWINCH to children
+	allow $1_sudo_t $3:process signal;
 
 	# Enter this derived domain from the user domain
 	domtrans_pattern($3, sudo_exec_t, $1_sudo_t)
@@ -64,35 +78,97 @@ template(`sudo_role_template',`
 	# By default, revert to the calling domain when a shell is executed.
 	corecmd_shell_domtrans($1_sudo_t, $3)
 	corecmd_bin_domtrans($1_sudo_t, $3)
-	userdom_domtrans_user_home($1_sudo_t, $3)
-	userdom_domtrans_user_tmp($1_sudo_t, $3)
-	domain_entry_file($3, sudo_exec_t)
-	domain_auto_transition_pattern($1_sudo_t, sudo_exec_t, $3)
-
 	allow $3 $1_sudo_t:fd use;
 	allow $3 $1_sudo_t:fifo_file rw_fifo_file_perms;
 	allow $3 $1_sudo_t:process signal_perms;
 
+	kernel_read_kernel_sysctls($1_sudo_t)
 	kernel_read_system_state($1_sudo_t)
-	seutil_libselinux_linked($1_sudo_t)
+	kernel_link_key($1_sudo_t)
+
+	corecmd_exec_all_executables($1_sudo_t)
+
+	dev_getattr_fs($1_sudo_t)
+	dev_read_urand($1_sudo_t)
+	dev_rw_generic_usb_dev($1_sudo_t)
+	dev_read_sysfs($1_sudo_t)
+
+	domain_use_interactive_fds($1_sudo_t)
+	domain_sigchld_interactive_fds($1_sudo_t)
+	domain_getattr_all_entry_files($1_sudo_t)
+
+	files_read_etc_files($1_sudo_t)
+	files_read_var_files($1_sudo_t)
+	files_read_usr_symlinks($1_sudo_t)
+	files_getattr_usr_files($1_sudo_t)
+	# for some PAM modules and for cwd
+	files_dontaudit_search_home($1_sudo_t)
+	files_list_tmp($1_sudo_t)
+
+	fs_search_auto_mountpoints($1_sudo_t)
+	fs_getattr_xattr_fs($1_sudo_t)
+
+	selinux_validate_context($1_sudo_t)
+	selinux_compute_relabel_context($1_sudo_t)
+
+	term_getattr_pty_fs($1_sudo_t)
+	term_dontaudit_getattr_unallocated_ttys($1_sudo_t)
+	term_relabel_all_ttys($1_sudo_t)
+	term_relabel_all_ptys($1_sudo_t)
 
 	auth_run_chk_passwd($1_sudo_t, $2)
-	auth_use_nsswitch($1_sudo_t)
+	# sudo stores a token in the pam_pid directory
+	auth_manage_pam_pid($1_sudo_t)
+	auth_use_pam($1_sudo_t)
+	auth_pid_filetrans_pam_var_run($1_sudo_t, dir, "sudo")
 
+	init_rw_utmp($1_sudo_t)
+
+	logging_send_audit_msgs($1_sudo_t)
 	logging_send_syslog_msg($1_sudo_t)
 
-	optional_policy(`
-		mta_role($2, $1_sudo_t)
+	miscfiles_read_localization($1_sudo_t)
+
+	seutil_read_default_contexts($1_sudo_t)
+	seutil_libselinux_linked($1_sudo_t)
+
+	userdom_spec_domtrans_all_users($1_sudo_t)
+	userdom_create_all_users_keys($1_sudo_t)
+	userdom_create_user_pty($1_sudo_t)
+	userdom_manage_user_home_content_files($1_sudo_t)
+	userdom_manage_user_home_content_symlinks($1_sudo_t)
+	userdom_manage_user_tmp_files($1_sudo_t)
+	userdom_manage_user_tmp_symlinks($1_sudo_t)
+	userdom_setattr_user_ptys($1_sudo_t)
+	userdom_use_user_terminals($1_sudo_t)
+	# for some PAM modules and for cwd
+	userdom_dontaudit_search_user_home_content($1_sudo_t)
+	userdom_dontaudit_search_user_home_dirs($1_sudo_t)
+
+	ifdef(`hide_broken_symptoms', `
+		dontaudit $1_sudo_t $3:socket_class_set { read write };
+	')
+
+	tunable_policy(`use_nfs_home_dirs',`
+		fs_manage_nfs_files($1_sudo_t)
+	')
+
+	tunable_policy(`use_samba_home_dirs',`
+		fs_manage_cifs_files($1_sudo_t)
 	')
 
 	optional_policy(`
-	    	kerberos_manage_host_rcache($1_sudo_t)
-		kerberos_read_config($1_sudo_t)
+		dbus_system_bus_client($1_sudo_t)
+
+		ifdef(`init_systemd',`
+			init_dbus_chat($1_sudo_t)
+		')
 	')
-	
+
 	optional_policy(`
-		sssd_read_config($1_sudo_t)
+		fprintd_dbus_chat($1_sudo_t)
 	')
+
 ')
 
 ########################################
@@ -111,67 +187,4 @@ interface(`sudo_sigchld',`
 	')
 
 	allow $1 sudodomain:process sigchld;
-')
-
-#######################################
-## <summary>
-##  Allow execute sudo in called domain.
-##  This interfaces is added for nova-stack policy.
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-#
-interface(`sudo_exec',`
-    gen_require(`
-        type sudo_exec_t;
-    ')
-
-	can_exec($1, sudo_exec_t)
-')
-
-######################################
-## <summary>
-##  Allow to manage sudo database in called domain.
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-#
-interface(`sudo_manage_db',`
-    gen_require(`
-        type sudo_db_t;
-    ')
-    
-    manage_dirs_pattern($1, sudo_db_t, sudo_db_t)
-    manage_files_pattern($1, sudo_db_t, sudo_db_t)
-')
-
-######################################
-## <summary>
-##  Allow to manage sudoers files.
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-#
-interface(`sudo_manage_sudoers',`
-    gen_require(`
-        type sudo_sudoers_t;
-    ')
-    
-    manage_dirs_pattern($1, sudo_sudoers_t, sudo_sudoers_t)
-    manage_files_pattern($1, sudo_sudoers_t, sudo_sudoers_t)
-    files_rw_etc_dirs($1)
-    filetrans_pattern($1, sudo_sudoers_t, sudo_sudoers_t, file, "sudoers")
-    filetrans_pattern($1, sudo_sudoers_t, sudo_sudoers_t, dir, "sudoers.d")
-    files_etc_filetrans($1, sudo_sudoers_t, file, "sudoers")
-    files_etc_filetrans($1, sudo_sudoers_t, file, "sudoers.tmp")
-    files_etc_filetrans($1, sudo_sudoers_t, dir, "sudoers.d")
 ')

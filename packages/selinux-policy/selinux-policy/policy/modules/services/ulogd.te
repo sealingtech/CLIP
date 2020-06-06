@@ -1,0 +1,88 @@
+policy_module(ulogd, 1.6.0)
+
+########################################
+#
+# Declarations
+#
+
+type ulogd_t;
+type ulogd_exec_t;
+init_daemon_domain(ulogd_t, ulogd_exec_t)
+
+type ulogd_etc_t;
+files_config_file(ulogd_etc_t)
+
+type ulogd_initrc_exec_t;
+init_script_file(ulogd_initrc_exec_t)
+
+type ulogd_modules_t;
+files_type(ulogd_modules_t)
+
+type ulogd_runtime_t;
+files_pid_file(ulogd_runtime_t)
+
+type ulogd_var_log_t;
+logging_log_file(ulogd_var_log_t)
+
+########################################
+#
+# Local policy
+#
+
+# If there is an AVC about capability dac_read_search being denied to ulogd_t,
+# it may be caused by root not being able to access to /var/log/ulog according
+# to the directory permissions. Such an issue can be fixed using ACL (for
+# example with: setfacl -m u:root:rwx /var/log/ulog). Please do not add
+# a rule allowing dac_read_search if you encounter this, but fix your system.
+allow ulogd_t self:capability { net_admin setgid setuid sys_nice };
+allow ulogd_t self:process setsched;
+allow ulogd_t self:fifo_file rw_fifo_file_perms;
+allow ulogd_t self:netlink_netfilter_socket create_socket_perms;
+allow ulogd_t self:netlink_nflog_socket create_socket_perms;
+allow ulogd_t self:netlink_socket create_socket_perms;
+allow ulogd_t self:tcp_socket create_stream_socket_perms;
+
+read_files_pattern(ulogd_t, ulogd_etc_t, ulogd_etc_t)
+
+list_dirs_pattern(ulogd_t, ulogd_modules_t, ulogd_modules_t)
+mmap_exec_files_pattern(ulogd_t, ulogd_modules_t, ulogd_modules_t)
+
+manage_files_pattern(ulogd_t, ulogd_runtime_t, ulogd_runtime_t)
+
+append_files_pattern(ulogd_t, ulogd_var_log_t, ulogd_var_log_t)
+create_files_pattern(ulogd_t, ulogd_var_log_t, ulogd_var_log_t)
+setattr_files_pattern(ulogd_t, ulogd_var_log_t, ulogd_var_log_t)
+logging_log_filetrans(ulogd_t, ulogd_var_log_t, file)
+
+files_read_etc_files(ulogd_t)
+files_read_usr_files(ulogd_t)
+
+# For /proc/sys/kernel/ngroups_max
+kernel_read_kernel_sysctls(ulogd_t)
+
+logging_send_syslog_msg(ulogd_t)
+
+miscfiles_read_localization(ulogd_t)
+
+sysnet_dns_name_resolve(ulogd_t)
+
+ifdef(`init_systemd', `
+	# For /run/systemd/dynamic-uid/
+	init_list_pids(ulogd_t)
+
+	optional_policy(`
+		dbus_system_bus_client(ulogd_t)
+		# For GetDynamicUser() of org.freedesktop.systemd1.Manager
+		init_dbus_chat(ulogd_t)
+	')
+')
+
+optional_policy(`
+	mysql_stream_connect(ulogd_t)
+	mysql_tcp_connect(ulogd_t)
+')
+
+optional_policy(`
+	postgresql_stream_connect(ulogd_t)
+	postgresql_tcp_connect(ulogd_t)
+')

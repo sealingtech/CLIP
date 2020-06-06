@@ -1,26 +1,28 @@
-# ecryptfs does not support xattr
-HOME_DIR/\.ecryptfs(/.*)?	gen_context(system_u:object_r:ecryptfs_t,s0)
-HOME_DIR/\.Private(/.*)?	gen_context(system_u:object_r:ecryptfs_t,s0)
+/cgroup			-d	gen_context(system_u:object_r:cgroup_t,s0)
+/cgroup/.*			<<none>>
 
 /dev/hugepages		-d	gen_context(system_u:object_r:hugetlbfs_t,s0)
 /dev/hugepages(/.*)?		<<none>>
-
-/dev/shm                -d      gen_context(system_u:object_r:tmpfs_t,s0-mls_systemhigh)
-/dev/shm/.*                     <<none>>
+/dev/shm		-d	gen_context(system_u:object_r:tmpfs_t,s0)
+/dev/shm/.*			<<none>>
 
 /usr/lib/udev/devices/hugepages -d	gen_context(system_u:object_r:hugetlbfs_t,s0)
 /usr/lib/udev/devices/hugepages/.*	<<none>>
 /usr/lib/udev/devices/shm	-d	gen_context(system_u:object_r:tmpfs_t,s0)
 /usr/lib/udev/devices/shm/.*	<<none>>
-/var/run/user/[^/]*/gvfs		-d	gen_context(system_u:object_r:fusefs_t,s0)
-/var/run/user/[^/]*/gvfs/.*	<<none>>
 
-# for systemd systems:
+/sys/fs/bpf(/.*)?	<<none>>
+
 /sys/fs/cgroup	-d	gen_context(system_u:object_r:cgroup_t,s0)
 /sys/fs/cgroup/.*	<<none>>
+/sys/fs/cgroup/[^/]+	-l	gen_context(system_u:object_r:cgroup_t,s0)
 
 /sys/fs/pstore	-d	gen_context(system_u:object_r:pstore_t,s0)
 /sys/fs/pstore/.*	<<none>>
 
-/var/run/shm		-d	gen_context(system_u:object_r:tmpfs_t,s0)
-/var/run/shm/.*			<<none>>
+/sys/kernel/tracing(/.*)?	<<none>>
+
+ifdef(`distro_debian',`
+/run/shm		-d	gen_context(system_u:object_r:tmpfs_t,s0)
+/run/shm/.*			<<none>>
+')

@@ -34,7 +34,37 @@ interface(`udev_domtrans',`
 	')
 
 	domtrans_pattern($1, udev_exec_t, udev_t)
-	allow $1 udev_t:process noatsecure;
+')
+
+########################################
+## <summary>
+##	Allow udev to execute the specified program in
+##	the specified domain.
+## </summary>
+## <desc>
+##	<p>
+##	This is a interface to support the UDEV 'RUN'
+##	command.  This will allow the command run by
+##	udev to be run in a domain other than udev_t.
+##	</p>
+## </desc>
+## <param name="domain">
+##	<summary>
+##	Domain to execute in.
+##	</summary>
+## </param>
+## <param name="entry_file">
+##	<summary>
+##	Domain entry point file.
+##	</summary>
+## </param>
+#
+interface(`udev_run_domain',`
+	gen_require(`
+		type udev_t;
+	')
+
+	domtrans_pattern(udev_t,$2,$1)
 ')
 
 ########################################
@@ -89,7 +119,27 @@ interface(`udev_read_state',`
 	')
 
 	kernel_search_proc($1)
-	ps_process_pattern($1, udev_t)
+	allow $1 udev_t:file read_file_perms;
+	allow $1 udev_t:lnk_file read_lnk_file_perms;
+')
+
+
+########################################
+## <summary>
+##	Allow domain to create uevent sockets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`udev_create_kobject_uevent_sockets',`
+	gen_require(`
+		type udev_t;
+	')
+
+	allow $1 udev_t:netlink_kobject_uevent_socket create_socket_perms;
 ')
 
 ########################################
@@ -164,10 +214,10 @@ interface(`udev_manage_rules_files',`
 #
 interface(`udev_dontaudit_search_db',`
 	gen_require(`
-		type udev_var_run_t;
+		type udev_tbl_t;
 	')
 
-	dontaudit $1 udev_var_run_t:dir search_dir_perms;
+	dontaudit $1 udev_tbl_t:dir search_dir_perms;
 ')
 
 ########################################
@@ -187,7 +237,20 @@ interface(`udev_dontaudit_search_db',`
 ## <infoflow type="read" weight="10"/>
 #
 interface(`udev_read_db',`
-	udev_read_pid_files($1)
+	gen_require(`
+		type udev_tbl_t;
+	')
+
+	allow $1 udev_tbl_t:dir list_dir_perms;
+
+	read_files_pattern($1, udev_tbl_t, udev_tbl_t)
+	read_lnk_files_pattern($1, udev_tbl_t, udev_tbl_t)
+
+	dev_list_all_dev_nodes($1)
+
+	files_search_etc($1)
+
+	udev_search_pids($1)
 ')
 
 ########################################
@@ -202,36 +265,36 @@ interface(`udev_read_db',`
 #
 interface(`udev_rw_db',`
 	gen_require(`
-		type udev_var_run_t;
+		type udev_tbl_t;
 	')
 
-	files_search_pids($1)
 	dev_list_all_dev_nodes($1)
-	rw_files_pattern($1, udev_var_run_t, udev_var_run_t)
+	allow $1 udev_tbl_t:file rw_file_perms;
 ')
 
 ########################################
 ## <summary>
-##	Allow process to modify relabelto udev database
+##      Allow process to relabelto udev database
 ## </summary>
 ## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
+##      <summary>
+##      Domain allowed access.
+##      </summary>
 ## </param>
 #
 interface(`udev_relabelto_db',`
 	gen_require(`
-		type udev_var_run_t;
+		type udev_runtime_t;
 	')
 
 	files_search_pids($1)
-	allow $1 udev_var_run_t:{ file lnk_file } relabelto_file_perms;
+	allow $1 udev_runtime_t:file relabelto_file_perms;
+	allow $1 udev_runtime_t:lnk_file relabelto_lnk_file_perms;
 ')
 
 ########################################
 ## <summary>
-##	Relabel the udev sock_file.
+##	Allow process to relabelto sockets in /run/udev
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -239,35 +302,12 @@ interface(`udev_relabelto_db',`
 ##	</summary>
 ## </param>
 #
-interface(`udev_relabel_pid_sockfile',`
+interface(`udev_relabelto_db_sockets',`
 	gen_require(`
-		type udev_var_run_t;
+		type udev_runtime_t;
 	')
 
-	allow $1 udev_var_run_t:sock_file relabel_sock_file_perms;
-')
-
-########################################
-## <summary>
-##	Create, read, write, and delete
-##	udev pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`udev_read_pid_files',`
-	gen_require(`
-		type udev_var_run_t;
-	')
-
-	dev_list_all_dev_nodes($1)
-	files_search_pids($1)
-	allow $1 udev_var_run_t:dir list_dir_perms;
-	read_files_pattern($1, udev_var_run_t, udev_var_run_t)
-	read_lnk_files_pattern($1, udev_var_run_t, udev_var_run_t)
+	allow $1 udev_runtime_t:sock_file relabelto_sock_file_perms;
 ')
 
 ########################################
@@ -282,11 +322,30 @@ interface(`udev_read_pid_files',`
 #
 interface(`udev_search_pids',`
 	gen_require(`
-		type udev_var_run_t;
+		type udev_runtime_t;
 	')
 
 	files_search_pids($1)
-	search_dirs_pattern($1, udev_var_run_t, udev_var_run_t)
+	search_dirs_pattern($1, udev_runtime_t, udev_runtime_t)
+')
+
+########################################
+## <summary>
+##      list udev pid content
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`udev_list_pids',`
+	gen_require(`
+		type udev_runtime_t;
+	')
+
+	files_search_pids($1)
+	allow $1 udev_runtime_t:dir list_dir_perms;
 ')
 
 ########################################
@@ -302,11 +361,48 @@ interface(`udev_search_pids',`
 #
 interface(`udev_manage_pid_dirs',`
 	gen_require(`
-		type udev_var_run_t;
+		type udev_runtime_t;
 	')
 
 	files_search_var($1)
-	manage_dirs_pattern($1, udev_var_run_t, udev_var_run_t)
+	manage_dirs_pattern($1, udev_runtime_t, udev_runtime_t)
+')
+
+########################################
+## <summary>
+##	Read udev pid files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`udev_read_pid_files',`
+	gen_require(`
+		type udev_runtime_t;
+	')
+
+	files_search_pids($1)
+	read_files_pattern($1, udev_runtime_t, udev_runtime_t)
+')
+
+########################################
+## <summary>
+##	dontaudit attempts to read/write udev pidfiles
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`udev_dontaudit_rw_pid_files',`
+	gen_require(`
+		type udev_runtime_t;
+	')
+
+	dontaudit $1 udev_runtime_t:file { read write };
 ')
 
 ########################################
@@ -322,93 +418,16 @@ interface(`udev_manage_pid_dirs',`
 #
 interface(`udev_manage_pid_files',`
 	gen_require(`
-		type udev_var_run_t;
+		type udev_runtime_t;
 	')
 
 	files_search_pids($1)
-	manage_files_pattern($1, udev_var_run_t, udev_var_run_t)
-')
-
-#######################################
-## <summary>
-##  Execute udev in the udev domain, and
-##  allow the specified role the udev domain.
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-## <param name="role">
-##  <summary>
-##  The role to be allowed the iptables domain.
-##  </summary>
-## </param>
-## <rolecap/>
-#
-interface(`udev_run',`
-    gen_require(`
-        type udev_t;
-    ')
-
-    udev_domtrans($1)
-    role $2 types udev_t;
-')
-
-#######################################
-## <summary>
-##	Allow caller to create kobject uevent socket for udev
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`udev_create_kobject_uevent_socket',`
-	gen_require(`
-		type udev_t;
-		role system_r;
-	')
-
-	allow $1 udev_t:netlink_kobject_uevent_socket create_socket_perms;
+	manage_files_pattern($1, udev_runtime_t, udev_runtime_t)
 ')
 
 ########################################
 ## <summary>
-##	Create a domain for processes
-##	which can be started by udev.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Type to be used as a domain.
-##	</summary>
-## </param>
-## <param name="entry_point">
-##	<summary>
-##	Type of the program to be used as an entry point to this domain.
-##	</summary>
-## </param>
-#
-interface(`udev_system_domain',`
-	gen_require(`
-		type udev_t;
-		role system_r;
-	')
-
-	domain_type($1)
-	domain_entry_file($1, $2)
-
-	role system_r types $1;
-
-	domtrans_pattern(udev_t, $2, $1)
-
-	dontaudit $1 udev_t:unix_dgram_socket { read write };
-')
-
-########################################
-## <summary>
-##	Create directories in the run location with udev_var_run_t type
+##	Create directories in the run location with udev_runtime_t type
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -423,8 +442,70 @@ interface(`udev_system_domain',`
 #
 interface(`udev_generic_pid_filetrans_run_dirs',`
 	gen_require(`
-		type udev_var_run_t;
+		type udev_runtime_t;
 	')
 
-	files_pid_filetrans($1, udev_var_run_t, dir, $2)
+	files_pid_filetrans($1, udev_runtime_t, dir, $2)
+')
+
+########################################
+## <summary>
+##	Execute udev admin in the udevadm domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition.
+##	</summary>
+## </param>
+#
+interface(`udevadm_domtrans',`
+	gen_require(`
+		type udevadm_t, udevadm_exec_t;
+	')
+
+	domtrans_pattern($1, udevadm_exec_t, udevadm_t)
+')
+
+########################################
+## <summary>
+##	Execute udevadm in the udevadm domain, and
+##	allow the specified role the udevadm domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`udevadm_run',`
+	gen_require(`
+		attribute_role udevadm_roles;
+	')
+
+	udevadm_domtrans($1)
+	roleattribute $2 udevadm_roles;
+')
+
+########################################
+## <summary>
+##	Execute udevadm in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`udevadm_exec',`
+	gen_require(`
+		type udevadm_exec_t;
+	')
+
+	can_exec($1, udevadm_exec_t)
 ')

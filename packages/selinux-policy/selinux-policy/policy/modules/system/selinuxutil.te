@@ -1,4 +1,4 @@
-policy_module(selinuxutil, 1.17.2)
+policy_module(selinuxutil, 1.27.2)
 
 gen_require(`
 	bool secure_mode;
@@ -11,16 +11,14 @@ gen_require(`
 
 attribute can_write_binary_policy;
 attribute can_relabelto_binary_policy;
-attribute setfiles_domain;
-attribute policy_manager_domain;
 
-#attribute_role newrole_roles;
+attribute_role newrole_roles;
 
-#attribute_role run_init_roles;
-#role system_r types run_init_t;
+attribute_role run_init_roles;
+role system_r types run_init_t;
 
-#attribute_role semanage_roles;
-#roleattribute system_r semanage_roles;
+attribute_role semanage_roles;
+roleattribute system_r semanage_roles;
 
 #
 # selinux_config_t is the type applied to
@@ -30,13 +28,7 @@ attribute policy_manager_domain;
 # in the domain_type interface
 # (fix dup decl)
 type selinux_config_t;
-files_security_file(selinux_config_t)
-
-type selinux_login_config_t;
-files_security_file(selinux_login_config_t)
-
-type selinux_var_lib_t;
-files_type(selinux_var_lib_t)
+files_type(selinux_config_t)
 
 type checkpolicy_t, can_write_binary_policy;
 type checkpolicy_exec_t;
@@ -48,14 +40,14 @@ role system_r types checkpolicy_t;
 # /etc/selinux/*/contexts/*
 #
 type default_context_t;
-files_security_file(default_context_t)
+files_type(default_context_t)
 
 #
 # file_context_t is the type applied to
 # /etc/selinux/*/contexts/files
 #
 type file_context_t;
-files_security_file(file_context_t)
+files_type(file_context_t)
 
 type load_policy_t;
 type load_policy_exec_t;
@@ -68,23 +60,17 @@ application_domain(newrole_t, newrole_exec_t)
 domain_role_change_exemption(newrole_t)
 domain_obj_id_change_exemption(newrole_t)
 domain_interactive_fd(newrole_t)
-#role newrole_roles types newrole_t;
-role system_r types newrole_t;
+role newrole_roles types newrole_t;
 
 #
 # policy_config_t is the type of /etc/security/selinux/*
 # the security server policy configuration.
 #
-#type policy_config_t;
-#files_type(policy_config_t)
-gen_require(`
-	type semanage_store_t;
-')
-
-typealias semanage_store_t alias policy_config_t;
+type policy_config_t;
+files_security_file(policy_config_t)
 
 neverallow ~can_relabelto_binary_policy policy_config_t:file relabelto;
-neverallow ~can_write_binary_policy policy_config_t:file { write append };
+#neverallow ~can_write_binary_policy policy_config_t:file { write append };
 
 #
 # policy_src_t is the type of the policy source
@@ -93,64 +79,54 @@ neverallow ~can_write_binary_policy policy_config_t:file { write append };
 type policy_src_t;
 files_type(policy_src_t)
 
-type restorecond_t, can_relabelto_binary_policy;
+type restorecond_t;
 type restorecond_exec_t;
 init_daemon_domain(restorecond_t, restorecond_exec_t)
 domain_obj_id_change_exemption(restorecond_t)
+role system_r types restorecond_t;
 
-type restorecond_var_run_t;
-files_pid_file(restorecond_var_run_t)
+type restorecond_unit_t;
+init_unit_file(restorecond_unit_t)
+
+type restorecond_run_t;
+typealias restorecond_run_t alias restorecond_var_run_t;
+files_pid_file(restorecond_run_t)
 
 type run_init_t;
 type run_init_exec_t;
 application_domain(run_init_t, run_init_exec_t)
 domain_system_change_exemption(run_init_t)
-#role run_init_roles types run_init_t;
-role system_r types run_init_t;
+role run_init_roles types run_init_t;
 
 type semanage_t;
 type semanage_exec_t;
 application_domain(semanage_t, semanage_exec_t)
-init_daemon_domain(semanage_t, semanage_exec_t)
 domain_interactive_fd(semanage_t)
-#role semanage_roles types semanage_t;
-role system_r types semanage_t;
+role semanage_roles types semanage_t;
 
-type setsebool_t;
-type setsebool_exec_t;
-init_system_domain(setsebool_t, setsebool_exec_t)
-
-type semanage_store_t;
-files_security_file(semanage_store_t)
+type semanage_store_t alias semanage_var_lib_t;
+files_type(semanage_store_t)
 
 type semanage_read_lock_t;
-files_lock_file(semanage_read_lock_t)
+files_type(semanage_read_lock_t)
 
 type semanage_tmp_t;
 files_tmp_file(semanage_tmp_t)
 
-type semanage_trans_lock_t; 
-files_lock_file(semanage_trans_lock_t)
-
-type semanage_var_lib_t;
-files_type(semanage_var_lib_t)
+type semanage_trans_lock_t;
+files_type(semanage_trans_lock_t)
 
 type setfiles_t alias restorecon_t, can_relabelto_binary_policy;
 type setfiles_exec_t alias restorecon_exec_t;
 init_system_domain(setfiles_t, setfiles_exec_t)
 domain_obj_id_change_exemption(setfiles_t)
 
-type setfiles_mac_t;
-domain_type(setfiles_mac_t)
-domain_entry_file(setfiles_mac_t, setfiles_exec_t)
-domain_obj_id_change_exemption(setfiles_mac_t)
-
 ########################################
 #
 # Checkpolicy local policy
 #
 
-#allow checkpolicy_t self:capability dac_override;
+allow checkpolicy_t self:capability dac_override;
 
 # able to create and modify binary policy files
 manage_files_pattern(checkpolicy_t, policy_config_t, policy_config_t)
@@ -162,7 +138,6 @@ filetrans_add_pattern(checkpolicy_t, policy_src_t, policy_config_t, file)
 read_files_pattern(checkpolicy_t, policy_src_t, policy_src_t)
 read_lnk_files_pattern(checkpolicy_t, policy_src_t, policy_src_t)
 allow checkpolicy_t selinux_config_t:dir search_dir_perms;
-allow checkpolicy_t selinux_login_config_t:dir search_dir_perms;
 
 domain_use_interactive_fds(checkpolicy_t)
 
@@ -177,10 +152,8 @@ term_use_console(checkpolicy_t)
 init_use_fds(checkpolicy_t)
 init_use_script_ptys(checkpolicy_t)
 
-optional_policy(`
-	userdom_use_inherited_user_terminals(checkpolicy_t)
-	userdom_use_all_users_fds(checkpolicy_t)
-')
+userdom_use_user_terminals(checkpolicy_t)
+userdom_use_all_users_fds(checkpolicy_t)
 
 ifdef(`distro_ubuntu',`
 	optional_policy(`
@@ -198,6 +171,8 @@ allow load_policy_t self:capability dac_override;
 # only allow read of policy config files
 read_files_pattern(load_policy_t, { policy_src_t policy_config_t }, policy_config_t)
 allow load_policy_t policy_config_t:file map;
+
+dev_read_urand(load_policy_t)
 
 domain_use_interactive_fds(load_policy_t)
 
@@ -217,15 +192,13 @@ term_list_ptys(load_policy_t)
 
 init_use_script_fds(load_policy_t)
 init_use_script_ptys(load_policy_t)
-init_write_script_pipes(load_policy_t)
+
+miscfiles_read_localization(load_policy_t)
 
 seutil_libselinux_linked(load_policy_t)
 
-optional_policy(`
-	userdom_use_inherited_user_terminals(load_policy_t)
-	userdom_use_all_users_fds(load_policy_t)
-	userdom_dontaudit_read_user_tmp_files(load_policy_t)
-')
+userdom_use_user_terminals(load_policy_t)
+userdom_use_all_users_fds(load_policy_t)
 
 ifdef(`distro_ubuntu',`
 	optional_policy(`
@@ -236,7 +209,6 @@ ifdef(`distro_ubuntu',`
 ifdef(`hide_broken_symptoms',`
 	# cjp: cover up stray file descriptors.
 	dontaudit load_policy_t selinux_config_t:file write;
-	dontaudit load_policy_t selinux_login_config_t:file write;
 
 	optional_policy(`
 		unconfined_dontaudit_read_pipes(load_policy_t)
@@ -247,23 +219,14 @@ optional_policy(`
 	portage_dontaudit_use_fds(load_policy_t)
 ')
 
-optional_policy(`
-    sssd_rw_inherited_pipes(load_policy_t)
-')
-
-optional_policy(`
-	# pki is leaking
-	pki_dontaudit_write_log(load_policy_t)
-')
-
 ########################################
 #
 # Newrole local policy
 #
 
-allow newrole_t self:capability { fowner setpcap setuid setgid dac_override };
-allow newrole_t self:process ~{ ptrace setcurrent setexec setfscreate setrlimit execmem execheap execstack };
-allow newrole_t self:process setexec;
+allow newrole_t self:capability { dac_override fowner setgid setuid };
+dontaudit newrole_t self:capability net_admin;
+allow newrole_t self:process { setcap setexec };
 allow newrole_t self:fd use;
 allow newrole_t self:fifo_file rw_fifo_file_perms;
 allow newrole_t self:sock_file read_sock_file_perms;
@@ -273,7 +236,7 @@ allow newrole_t self:msgq create_msgq_perms;
 allow newrole_t self:msg { send receive };
 allow newrole_t self:unix_dgram_socket sendto;
 allow newrole_t self:unix_stream_socket { create_stream_socket_perms connectto };
-logging_send_audit_msgs(newrole_t)
+allow newrole_t self:netlink_audit_socket { create_netlink_socket_perms nlmsg_relay };
 
 read_files_pattern(newrole_t, default_context_t, default_context_t)
 read_lnk_files_pattern(newrole_t, default_context_t, default_context_t)
@@ -282,7 +245,6 @@ kernel_read_system_state(newrole_t)
 kernel_read_kernel_sysctls(newrole_t)
 
 corecmd_list_bin(newrole_t)
-corecmd_read_bin_symlinks(newrole_t)
 
 dev_read_urand(newrole_t)
 
@@ -290,7 +252,6 @@ domain_use_interactive_fds(newrole_t)
 # for when the user types "exec newrole" at the command line:
 domain_sigchld_interactive_fds(newrole_t)
 
-files_list_var(newrole_t)
 files_read_etc_files(newrole_t)
 files_read_var_files(newrole_t)
 files_read_var_symlinks(newrole_t)
@@ -318,35 +279,24 @@ term_relabel_all_ptys(newrole_t)
 term_getattr_unallocated_ttys(newrole_t)
 term_dontaudit_use_unallocated_ttys(newrole_t)
 
-auth_use_pam(newrole_t)
+auth_use_nsswitch(newrole_t)
+auth_run_chk_passwd(newrole_t, newrole_roles)
+auth_run_upd_passwd(newrole_t, newrole_roles)
+auth_rw_faillog(newrole_t)
 
 # Write to utmp.
 init_rw_utmp(newrole_t)
 init_use_fds(newrole_t)
 
+logging_send_syslog_msg(newrole_t)
+
+miscfiles_read_localization(newrole_t)
 
 seutil_libselinux_linked(newrole_t)
 
-optional_policy(`
-	userdom_use_unpriv_users_fds(newrole_t)
-	# for some PAM modules and for cwd
-	userdom_dontaudit_search_user_home_content(newrole_t)
-	userdom_search_user_home_dirs(newrole_t)
-')
-
-# need to talk with dbus
-optional_policy(`
-    dbus_system_bus_client(newrole_t)
-')
-
-#optional_policy(`
-#	namespace_init_run(newrole_t, newrole_roles)
-#')
-
-
-optional_policy(`
-	xserver_dontaudit_exec_xauth(newrole_t)
-')
+# for some PAM modules and for cwd
+userdom_dontaudit_search_user_home_content(newrole_t)
+userdom_search_user_home_dirs(newrole_t)
 
 ifdef(`distro_ubuntu',`
 	optional_policy(`
@@ -354,19 +304,40 @@ ifdef(`distro_ubuntu',`
 	')
 ')
 
-# if secure mode is enabled, then newrole
-# can only transition to unprivileged users
-optional_policy(`
-	if(secure_mode) {
-		userdom_spec_domtrans_unpriv_users(newrole_t)
-	} else {
-		userdom_spec_domtrans_all_users(newrole_t)
-	}
+ifdef(`init_systemd',`
+	optional_policy(`
+		systemd_use_logind_fds(newrole_t)
+		systemd_dbus_chat_logind(newrole_t)
+	')
 ')
 
-#tunable_policy(`polyinstantiation_enabled',`
-#	files_polyinstantiate_all(newrole_t)
-#')
+optional_policy(`
+	auth_use_pam_systemd(newrole_t)
+')
+
+optional_policy(`
+	dbus_system_bus_client(newrole_t)
+
+	optional_policy(`
+		consolekit_dbus_chat(newrole_t)
+	')
+')
+
+# if secure mode is enabled, then newrole
+# can only transition to unprivileged users
+if(secure_mode) {
+	userdom_spec_domtrans_unpriv_users(newrole_t)
+} else {
+	userdom_spec_domtrans_all_users(newrole_t)
+}
+
+tunable_policy(`allow_polyinstantiation',`
+	files_polyinstantiate_all(newrole_t)
+')
+
+optional_policy(`
+	systemd_use_logind_fds(newrole_t)
+')
 
 ########################################
 #
@@ -376,21 +347,22 @@ optional_policy(`
 allow restorecond_t self:capability { dac_override dac_read_search fowner };
 allow restorecond_t self:fifo_file rw_fifo_file_perms;
 
-allow restorecond_t restorecond_var_run_t:file manage_file_perms;
-files_pid_filetrans(restorecond_t, restorecond_var_run_t, file)
+allow restorecond_t restorecond_run_t:file manage_file_perms;
+files_pid_filetrans(restorecond_t, restorecond_run_t, file)
 
-kernel_use_fds(restorecond_t)
-kernel_rw_pipes(restorecond_t)
+kernel_getattr_debugfs(restorecond_t)
 kernel_read_system_state(restorecond_t)
+kernel_rw_pipes(restorecond_t)
+kernel_use_fds(restorecond_t)
 
-dev_relabel_all_dev_nodes(restorecond_t)
-
-files_dontaudit_read_all_symlinks(restorecond_t)
-
-fs_relabelfrom_noxattr_fs(restorecond_t)
 fs_dontaudit_list_nfs(restorecond_t)
-fs_getattr_all_fs(restorecond_t)
+fs_getattr_all_xattr_fs(restorecond_t)
+fs_getattr_cgroup(restorecond_t)
+fs_getattr_pstore_dirs(restorecond_t)
+fs_getattr_tracefs(restorecond_t)
 fs_list_inotifyfs(restorecond_t)
+fs_relabelfrom_noxattr_fs(restorecond_t)
+fs_getattr_pstorefs(restorecond_t)
 
 selinux_validate_context(restorecond_t)
 selinux_compute_access_vector(restorecond_t)
@@ -399,24 +371,24 @@ selinux_compute_relabel_context(restorecond_t)
 selinux_compute_user_contexts(restorecond_t)
 
 files_relabel_non_auth_files(restorecond_t )
-files_read_non_auth_files(restorecond_t)
-
+files_dontaudit_read_all_symlinks(restorecond_t)
 auth_use_nsswitch(restorecond_t)
-
-locallogin_dontaudit_use_fds(restorecond_t)
 
 logging_send_syslog_msg(restorecond_t)
 
-seutil_libselinux_linked(restorecond_t)
+miscfiles_read_localization(restorecond_t)
 
-optional_policy(`
-	userdom_read_user_home_content_symlinks(restorecond_t)
-')
+seutil_libselinux_linked(restorecond_t)
+seutil_read_default_contexts(restorecond_t)
 
 ifdef(`distro_ubuntu',`
 	optional_policy(`
 		unconfined_domain(restorecond_t)
 	')
+')
+
+optional_policy(`
+	locallogin_dontaudit_use_fds(restorecond_t)
 ')
 
 optional_policy(`
@@ -428,24 +400,21 @@ optional_policy(`
 # Run_init local policy
 #
 
-#allow run_init_roles system_r;
+allow run_init_roles system_r;
 
 allow run_init_t self:process setexec;
 allow run_init_t self:capability setuid;
-allow run_init_t self:fifo_file rw_file_perms;
-logging_send_audit_msgs(run_init_t)
+allow run_init_t self:fifo_file rw_fifo_file_perms;
+allow run_init_t self:netlink_audit_socket { create_netlink_socket_perms nlmsg_relay };
 
 # often the administrator runs such programs from a directory that is owned
 # by a different user or has restrictive SE permissions, do not want to audit
 # the failed access to the current directory
 dontaudit run_init_t self:capability { dac_override dac_read_search };
 
-kernel_dontaudit_getattr_core_if(run_init_t)
-
 corecmd_exec_bin(run_init_t)
 corecmd_exec_shell(run_init_t)
 
-dev_dontaudit_getattr_all(run_init_t)
 dev_dontaudit_list_all_dev_nodes(run_init_t)
 
 domain_use_interactive_fds(run_init_t)
@@ -463,32 +432,23 @@ selinux_compute_create_context(run_init_t)
 selinux_compute_relabel_context(run_init_t)
 selinux_compute_user_contexts(run_init_t)
 
-term_use_console(run_init_t)
-
-#auth_use_nsswitch(run_init_t)
-#auth_run_chk_passwd(run_init_t, run_init_roles)
-#auth_run_upd_passwd(run_init_t, run_init_roles)
-#auth_dontaudit_read_shadow(run_init_t)
-
 auth_use_nsswitch(run_init_t)
-auth_domtrans_chk_passwd(run_init_t)
-auth_domtrans_upd_passwd(run_init_t)
+auth_run_chk_passwd(run_init_t, run_init_roles)
+auth_run_upd_passwd(run_init_t, run_init_roles)
 auth_dontaudit_read_shadow(run_init_t)
-
 
 init_spec_domtrans_script(run_init_t)
 # for utmp
 init_rw_utmp(run_init_t)
-init_dontaudit_getattr_initctl(run_init_t)
 
 logging_send_syslog_msg(run_init_t)
+
+miscfiles_read_localization(run_init_t)
 
 seutil_libselinux_linked(run_init_t)
 seutil_read_default_contexts(run_init_t)
 
-optional_policy(`
-	userdom_use_inherited_user_terminals(run_init_t)
-')
+userdom_use_user_terminals(run_init_t)
 
 ifndef(`direct_sysadm_daemon',`
 	ifdef(`distro_gentoo',`
@@ -497,19 +457,6 @@ ifndef(`direct_sysadm_daemon',`
 
 		init_exec_rc(run_init_t)
 	')
-')
-
-# need to talk with dbus
-optional_policy(`
-    dbus_system_bus_client(run_init_t)
-')
-
-optional_policy(`
-	gpm_dontaudit_getattr_gpmctl(run_init_t)
-')
-
-optional_policy(`
-	rpm_domtrans(run_init_t)
 ')
 
 ifdef(`distro_ubuntu',`
@@ -527,90 +474,96 @@ optional_policy(`
 # semodule local policy
 #
 
+allow semanage_t self:capability { audit_write dac_override };
+allow semanage_t self:unix_stream_socket create_stream_socket_perms;
+allow semanage_t self:unix_dgram_socket create_socket_perms;
 allow semanage_t self:netlink_audit_socket { create_netlink_socket_perms nlmsg_relay };
+allow semanage_t self:fifo_file rw_fifo_file_perms;
 
-manage_dirs_pattern(semanage_t, semanage_var_lib_t, semanage_var_lib_t)
-manage_files_pattern(semanage_t, semanage_var_lib_t, semanage_var_lib_t)
+allow semanage_t policy_config_t:file rw_file_perms;
 
+allow semanage_t policy_src_t:dir search;
+
+filetrans_pattern(semanage_t, selinux_config_t, semanage_store_t, dir, "modules")
+
+allow semanage_t semanage_tmp_t:dir manage_dir_perms;
+allow semanage_t semanage_tmp_t:file { manage_file_perms mmap_exec_file_perms };
+files_tmp_filetrans(semanage_t, semanage_tmp_t, { file dir })
+
+kernel_read_system_state(semanage_t)
+kernel_read_kernel_sysctls(semanage_t)
+
+corecmd_exec_bin(semanage_t)
+corecmd_exec_shell(semanage_t)
+
+dev_read_urand(semanage_t)
+
+domain_use_interactive_fds(semanage_t)
+
+files_read_etc_files(semanage_t)
+files_read_etc_runtime_files(semanage_t)
+files_map_usr_files(semanage_t)
+files_read_usr_files(semanage_t)
+files_list_pids(semanage_t)
+
+mls_file_write_all_levels(semanage_t)
+mls_file_read_all_levels(semanage_t)
+
+selinux_validate_context(semanage_t)
+selinux_get_enforce_mode(semanage_t)
+selinux_getattr_fs(semanage_t)
+# for setsebool:
 selinux_set_all_booleans(semanage_t)
-can_exec(semanage_t, semanage_exec_t)
 
-# Admins are creating pp files in random locations
-files_read_non_security_files(semanage_t)
+term_use_all_terms(semanage_t)
 
-seutil_semanage_policy(semanage_t)
+# Running genhomedircon requires this for finding all users
+auth_use_nsswitch(semanage_t)
+
+logging_send_syslog_msg(semanage_t)
+
+miscfiles_read_localization(semanage_t)
+
+seutil_libselinux_linked(semanage_t)
 seutil_manage_file_contexts(semanage_t)
 seutil_manage_config(semanage_t)
-seutil_domtrans_setfiles(semanage_t)
-
-#seutil_run_setfiles(semanage_t, semanage_roles)
-#seutil_run_loadpolicy(semanage_t, semanage_roles)
-#seutil_manage_bin_policy(semanage_t)
-#seutil_use_newrole_fds(semanage_t)
-#seutil_manage_module_store(semanage_t)
-#seutil_get_semanage_trans_lock(semanage_t)
-#seutil_get_semanage_read_lock(semanage_t)
+seutil_manage_config_dirs(semanage_t)
+seutil_run_setfiles(semanage_t, semanage_roles)
+seutil_run_loadpolicy(semanage_t, semanage_roles)
+seutil_manage_bin_policy(semanage_t)
+seutil_use_newrole_fds(semanage_t)
+seutil_manage_module_store(semanage_t)
+seutil_get_semanage_trans_lock(semanage_t)
+seutil_get_semanage_read_lock(semanage_t)
 # netfilter_contexts:
 seutil_manage_default_contexts(semanage_t)
 
-optional_policy(`
 # Handle pp files created in homedir and /tmp
-	userdom_read_user_home_content_files(semanage_t)
-	userdom_read_user_tmp_files(semanage_t)
-	userdom_home_reader(semanage_t)
-	userdom_map_tmp_files(semanage_t)
-')
+userdom_read_user_home_content_files(semanage_t)
+userdom_map_user_home_content_files(semanage_t)
+userdom_read_user_tmp_files(semanage_t)
+userdom_map_user_tmp_files(semanage_t)
 
 ifdef(`distro_debian',`
 	files_read_var_lib_files(semanage_t)
 	files_read_var_lib_symlinks(semanage_t)
 ')
 
-optional_policy(`
-	dbus_system_domain(semanage_t, semanage_exec_t)
+ifdef(`distro_ubuntu',`
+	optional_policy(`
+		unconfined_domain(semanage_t)
+	')
+')
+
+ifdef(`init_systemd',`
+	optional_policy(`
+		init_dbus_chat(semanage_t)
+		dbus_system_bus_client(semanage_t)
+	')
 ')
 
 optional_policy(`
-	mock_manage_lib_files(semanage_t)
-	mock_manage_lib_dirs(semanage_t)
-')
-
-optional_policy(`
-	unconfined_domain(semanage_t)
-')
-
-####################################n####
-#
-# setsebool local policy
-#
-seutil_semanage_policy(setsebool_t)
-selinux_set_all_booleans(setsebool_t)
-
-init_dontaudit_use_fds(setsebool_t)
-
-# Bug in semanage
-seutil_domtrans_setfiles(setsebool_t)
-seutil_manage_file_contexts(setsebool_t)
-seutil_manage_default_contexts(setsebool_t)
-seutil_manage_config(setsebool_t)
-
-########################################
-#
-# Setfiles mac local policy
-#
-seutil_setfiles(setfiles_mac_t)
-allow setfiles_mac_t self:capability2 mac_admin;
-kernel_relabelto_unlabeled(setfiles_mac_t)
-
-optional_policy(`
-	files_dontaudit_write_isid_chr_files(setfiles_mac_t)
-	livecd_dontaudit_leaks(setfiles_mac_t)
-	livecd_rw_tmp_files(setfiles_mac_t)
-	dev_dontaudit_write_all_chr_files(setfiles_mac_t)
-')
-
-optional_policy(`
-	unconfined_domain(setfiles_mac_t)
+	locallogin_use_fds(semanage_t)
 ')
 
 ########################################
@@ -618,202 +571,125 @@ optional_policy(`
 # Setfiles local policy
 #
 
-seutil_setfiles(setfiles_t)
-# During boot in Rawhide
-term_use_generic_ptys(setfiles_t)
+allow setfiles_t self:capability { dac_override dac_read_search fowner };
+dontaudit setfiles_t self:capability sys_tty_config;
+allow setfiles_t self:fifo_file rw_fifo_file_perms;
 
-# needs to be able to read symlinks to make restorecon on symlink working
-files_read_all_symlinks(setfiles_t)
+allow setfiles_t { policy_src_t policy_config_t file_context_t default_context_t }:dir list_dir_perms;
+allow setfiles_t { policy_src_t policy_config_t file_context_t default_context_t }:file read_file_perms;
+allow setfiles_t { policy_src_t policy_config_t file_context_t default_context_t }:lnk_file { read_lnk_file_perms ioctl lock };
 allow setfiles_t file_context_t:file map;
+
+kernel_read_system_state(setfiles_t)
+kernel_relabelfrom_unlabeled_dirs(setfiles_t)
+kernel_relabelfrom_unlabeled_files(setfiles_t)
+kernel_relabelfrom_unlabeled_symlinks(setfiles_t)
+kernel_relabelfrom_unlabeled_pipes(setfiles_t)
+kernel_relabelfrom_unlabeled_sockets(setfiles_t)
+kernel_use_fds(setfiles_t)
+kernel_rw_pipes(setfiles_t)
+kernel_rw_unix_dgram_sockets(setfiles_t)
+kernel_dontaudit_list_all_proc(setfiles_t)
+kernel_dontaudit_list_all_sysctls(setfiles_t)
+kernel_getattr_debugfs(setfiles_t)
+
+dev_read_urand(setfiles_t)
+dev_relabel_all_dev_nodes(setfiles_t)
+# to handle when /dev/console needs to be relabeled
+dev_rw_generic_chr_files(setfiles_t)
+
+domain_use_interactive_fds(setfiles_t)
+domain_dontaudit_search_all_domains_state(setfiles_t)
+
+files_read_etc_runtime_files(setfiles_t)
+files_read_etc_files(setfiles_t)
+files_list_all(setfiles_t)
+files_relabel_all_files(setfiles_t)
+files_read_usr_symlinks(setfiles_t)
+files_dontaudit_read_all_symlinks(setfiles_t)
+
+fs_getattr_all_xattr_fs(setfiles_t)
+fs_getattr_cgroup(setfiles_t)
+fs_getattr_nfs(setfiles_t)
+fs_getattr_pstore_dirs(setfiles_t)
+fs_getattr_pstorefs(setfiles_t)
+fs_getattr_tracefs(setfiles_t)
+fs_getattr_tracefs_files(setfiles_t)
+fs_list_all(setfiles_t)
+fs_relabelfrom_noxattr_fs(setfiles_t)
+fs_search_auto_mountpoints(setfiles_t)
+
+mls_file_read_all_levels(setfiles_t)
+mls_file_write_all_levels(setfiles_t)
+mls_file_upgrade(setfiles_t)
+mls_file_downgrade(setfiles_t)
+
+selinux_validate_context(setfiles_t)
+selinux_compute_access_vector(setfiles_t)
+selinux_compute_create_context(setfiles_t)
+selinux_compute_relabel_context(setfiles_t)
+selinux_compute_user_contexts(setfiles_t)
+
+term_use_all_ttys(setfiles_t)
+term_use_all_ptys(setfiles_t)
+term_use_unallocated_ttys(setfiles_t)
+
+# this is to satisfy the assertion:
+auth_relabelto_shadow(setfiles_t)
+
+init_use_fds(setfiles_t)
+init_use_script_fds(setfiles_t)
+init_use_script_ptys(setfiles_t)
+init_exec_script_files(setfiles_t)
 
 logging_send_audit_msgs(setfiles_t)
 logging_send_syslog_msg(setfiles_t)
 
-optional_policy(`
-    cloudform_dontaudit_write_cloud_log(setfiles_t)
-')
+miscfiles_read_localization(setfiles_t)
 
-optional_policy(`
-	devicekit_dontaudit_read_pid_files(setfiles_t)
-	devicekit_dontaudit_rw_log(setfiles_t)
-')
+seutil_libselinux_linked(setfiles_t)
+seutil_read_module_store(setfiles_t)
 
-optional_policy(`
-	# pki is leaking
-	pki_dontaudit_write_log(setfiles_t)
-')
-
-optional_policy(`
-	xserver_append_xdm_tmp_files(setfiles_t)
-')
-
-ifdef(`hide_broken_symptoms',`
-
-	optional_policy(`
-		setroubleshoot_fixit_dontaudit_leaks(setfiles_t)
-		setroubleshoot_fixit_dontaudit_leaks(setsebool_t)
-		setroubleshoot_fixit_dontaudit_leaks(load_policy_t)
-	')
-')
-ifdef(`distro_ubuntu',`
-  	optional_policy(`
-		unconfined_domain(setfiles_t)
-	')
-')
-
-########################################
-#
-# Setfiles common policy
-#
-allow setfiles_domain self:capability { dac_override dac_read_search fowner };
-dontaudit setfiles_domain self:capability sys_tty_config;
-allow setfiles_domain self:fifo_file rw_file_perms;
-dontaudit setfiles_domain self:dir relabelfrom;
-dontaudit setfiles_domain self:file relabelfrom;
-dontaudit setfiles_domain self:lnk_file relabelfrom;
-
-domain_relabelfrom(setfiles_domain)
-
-allow setfiles_domain { policy_src_t policy_config_t file_context_t default_context_t }:dir list_dir_perms;
-allow setfiles_domain { policy_src_t policy_config_t file_context_t default_context_t }:file read_file_perms;
-allow setfiles_domain { policy_src_t policy_config_t file_context_t default_context_t }:lnk_file { read_lnk_file_perms ioctl lock };
-
-logging_send_audit_msgs(setfiles_domain)
-
-kernel_relabelfrom_unlabeled_dirs(setfiles_domain)
-kernel_relabelfrom_unlabeled_files(setfiles_domain)
-kernel_relabelfrom_unlabeled_symlinks(setfiles_domain)
-kernel_relabelfrom_unlabeled_pipes(setfiles_domain)
-kernel_relabelfrom_unlabeled_sockets(setfiles_domain)
-kernel_use_fds(setfiles_domain)
-kernel_rw_pipes(setfiles_domain)
-kernel_rw_unix_dgram_sockets(setfiles_domain)
-kernel_dontaudit_list_all_proc(setfiles_domain)
-kernel_read_all_sysctls(setfiles_domain)
-kernel_read_network_state_symlinks(setfiles_domain)
-kernel_relabelto_usermodehelper(setfiles_domain)
-
-dev_relabel_all_dev_nodes(setfiles_domain)
-dev_dontaudit_rw_lvm_control(setfiles_domain)
-dev_dontaudit_read_rand(setfiles_domain)
-dev_dontaudit_read_urand(setfiles_domain)
-
-domain_use_interactive_fds(setfiles_domain)
-domain_read_all_domains_state(setfiles_domain)
- 
-files_read_etc_runtime_files(setfiles_domain)
-files_read_etc_files(setfiles_domain)
-files_list_all(setfiles_domain)
-files_list_isid_type_dirs(setfiles_domain)
-files_read_isid_type_files(setfiles_domain)
-files_dontaudit_read_all_symlinks(setfiles_domain)
-
-fs_getattr_all_fs(setfiles_domain)
-fs_list_all(setfiles_domain)
-fs_getattr_all_files(setfiles_domain)
-fs_search_auto_mountpoints(setfiles_domain)
-fs_relabelfrom_noxattr_fs(setfiles_domain)
-
-selinux_validate_context(setfiles_domain)
-selinux_compute_access_vector(setfiles_domain)
-selinux_compute_create_context(setfiles_domain)
-selinux_compute_relabel_context(setfiles_domain)
-selinux_compute_user_contexts(setfiles_domain)
-
-term_use_all_inherited_terms(setfiles_domain)
-
-init_use_fds(setfiles_domain)
-init_use_script_fds(setfiles_domain)
-init_use_script_ptys(setfiles_domain)
-init_exec_script_files(setfiles_domain)
-
-optional_policy(`
-	userdom_use_all_users_fds(setfiles_domain)
-	# for config files in a home directory
-	userdom_read_user_home_content_files(setfiles_domain)
-	userdom_rw_inherited_user_home_content_files(setfiles_domain)
-')
+userdom_use_all_users_fds(setfiles_t)
+# for config files in a home directory
+userdom_read_user_home_content_files(setfiles_t)
 
 ifdef(`distro_debian',`
 	# udev tmpfs is populated with static device nodes
 	# and then relabeled afterwards; thus
 	# /dev/console has the tmpfs type
-	fs_rw_tmpfs_chr_files(setfiles_domain)
+	fs_rw_tmpfs_chr_files(setfiles_t)
 ')
 
-ifdef(`distro_redhat',`
-	fs_rw_tmpfs_chr_files(setfiles_domain)
-	fs_rw_tmpfs_blk_files(setfiles_domain)
-	fs_relabel_tmpfs_blk_file(setfiles_domain)
-	fs_relabel_tmpfs_chr_file(setfiles_domain)
+ifdef(`distro_redhat', `
+	fs_rw_tmpfs_chr_files(setfiles_t)
+	fs_rw_tmpfs_blk_files(setfiles_t)
+	fs_relabel_tmpfs_blk_file(setfiles_t)
+	fs_relabel_tmpfs_chr_file(setfiles_t)
+')
+
+ifdef(`distro_ubuntu',`
+	optional_policy(`
+		unconfined_domain(setfiles_t)
+	')
+')
+
+ifdef(`hide_broken_symptoms',`
+	optional_policy(`
+		udev_dontaudit_rw_dgram_sockets(setfiles_t)
+	')
+
+	# cjp: cover up stray file descriptors.
+	optional_policy(`
+		unconfined_dontaudit_read_pipes(setfiles_t)
+		unconfined_dontaudit_rw_tcp_sockets(setfiles_t)
+	')
 ')
 
 optional_policy(`
-	hotplug_use_fds(setfiles_domain)
+	apt_use_fds(setfiles_t)
 ')
 
 optional_policy(`
-	dbus_read_pid_files(setfiles_domain)
-')
-
-allow policy_manager_domain self:capability { dac_override sys_nice sys_resource };
-dontaudit policy_manager_domain self:capability sys_tty_config;
-allow policy_manager_domain self:process { signal setsched };
-allow policy_manager_domain self:unix_stream_socket create_stream_socket_perms;
-allow policy_manager_domain self:unix_dgram_socket create_socket_perms;
-allow policy_manager_domain self:fifo_file rw_fifo_file_perms;
-
-dev_read_rand(policy_manager_domain)
-dev_read_urand(policy_manager_domain)
-
-logging_send_audit_msgs(policy_manager_domain)
-
-# Domains that will manage policy 
-allow policy_manager_domain policy_config_t:file rw_file_perms;
-
-allow policy_manager_domain semanage_tmp_t:dir manage_dir_perms;
-allow policy_manager_domain semanage_tmp_t:file manage_file_perms;
-files_tmp_filetrans(policy_manager_domain, semanage_tmp_t, { file dir })
-
-kernel_read_kernel_sysctls(policy_manager_domain)
-
-corecmd_exec_bin(policy_manager_domain)
-corecmd_exec_shell(policy_manager_domain)
-
-domain_use_interactive_fds(policy_manager_domain)
-
-files_read_etc_files(policy_manager_domain)
-files_read_etc_runtime_files(policy_manager_domain)
-files_read_usr_files(policy_manager_domain)
-files_list_pids(policy_manager_domain)
-fs_list_inotifyfs(policy_manager_domain)
-fs_getattr_all_fs(policy_manager_domain)
-
-selinux_validate_context(policy_manager_domain)
-selinux_read_policy(policy_manager_domain)
-
-term_use_all_inherited_terms(policy_manager_domain)
-
-locallogin_use_fds(policy_manager_domain)
-
-seutil_search_default_contexts(policy_manager_domain)
-seutil_domtrans_loadpolicy(policy_manager_domain)
-seutil_read_config(policy_manager_domain)
-seutil_use_newrole_fds(policy_manager_domain)
-seutil_manage_module_store(policy_manager_domain)
-seutil_get_semanage_trans_lock(policy_manager_domain)
-seutil_get_semanage_read_lock(policy_manager_domain)
-
-optional_policy(`
-	userdom_dontaudit_write_user_home_content_files(policy_manager_domain)
-	userdom_use_user_ptys(policy_manager_domain)
-')
-
-files_rw_inherited_generic_pid_files(setfiles_domain)
-files_rw_inherited_generic_pid_files(policy_manager_domain)
-files_create_boot_flag(policy_manager_domain, ".autorelabel")
-files_delete_boot_flag(policy_manager_domain)
-
-optional_policy(`
-	policykit_dbus_chat(policy_manager_domain)
+	hotplug_use_fds(setfiles_t)
 ')

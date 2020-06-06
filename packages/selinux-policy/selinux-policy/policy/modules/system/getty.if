@@ -1,4 +1,4 @@
-## <summary>Policy for getty.</summary>
+## <summary>Manages physical or virtual terminals.</summary>
 
 ########################################
 ## <summary>
@@ -70,11 +70,11 @@ interface(`getty_read_log',`
 #
 interface(`getty_read_config',`
 	gen_require(`
-		type getty_etc_t;
+		type getty_conf_t;
 	')
 
 	files_search_etc($1)
-	allow $1 getty_etc_t:file read_file_perms;
+	allow $1 getty_conf_t:file read_file_perms;
 ')
 
 ########################################
@@ -90,51 +90,9 @@ interface(`getty_read_config',`
 #
 interface(`getty_rw_config',`
 	gen_require(`
-		type getty_etc_t;
+		type getty_conf_t;
 	')
 
 	files_search_etc($1)
-	allow $1 getty_etc_t:file rw_file_perms;
-')
-
-########################################
-## <summary>
-##	Execute getty server in the getty domain.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed to transition.
-##	</summary>
-## </param>
-#
-interface(`getty_systemctl',`
-	gen_require(`
-		type getty_unit_file_t;
-		type getty_t;
-	')
-
-	systemd_exec_systemctl($1)
-	allow $1 getty_unit_file_t:file read_file_perms;
-	allow $1 getty_unit_file_t:service manage_service_perms;
-
-	ps_process_pattern($1, getty_t)
-')
-
-########################################
-## <summary>
-##	Start getty unit files domain.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed to transition.
-##	</summary>
-## </param>
-#
-interface(`getty_start_services',`
-	gen_require(`
-		type getty_unit_file_t;
-	')
-
-	systemd_exec_systemctl($1)
-	allow $1 getty_unit_file_t:service start;
+	allow $1 getty_conf_t:file rw_file_perms;
 ')

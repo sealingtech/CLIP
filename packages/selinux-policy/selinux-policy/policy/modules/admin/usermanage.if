@@ -17,6 +17,10 @@ interface(`usermanage_domtrans_chfn',`
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, chfn_exec_t, chfn_t)
+
+	ifdef(`hide_broken_symptoms',`
+		dontaudit chfn_t $1:socket_class_set { read write };
+	')
 ')
 
 ########################################
@@ -38,7 +42,6 @@ interface(`usermanage_domtrans_chfn',`
 interface(`usermanage_run_chfn',`
 	gen_require(`
 		attribute_role chfn_roles;
-		type chfn_t;
 	')
 
 	usermanage_domtrans_chfn($1)
@@ -62,25 +65,10 @@ interface(`usermanage_domtrans_groupadd',`
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, groupadd_exec_t, groupadd_t)
-')
 
-########################################
-## <summary>
-##	Check access to the groupadd executable.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`usermanage_access_check_groupadd',`
-	gen_require(`
-		type groupadd_exec_t;
+	ifdef(`hide_broken_symptoms',`
+		dontaudit groupadd_t $1:socket_class_set { read write };
 	')
-
-	corecmd_search_bin($1)
-	allow $1 groupadd_exec_t:file { getattr_file_perms execute };
 ')
 
 ########################################
@@ -102,58 +90,11 @@ interface(`usermanage_access_check_groupadd',`
 #
 interface(`usermanage_run_groupadd',`
 	gen_require(`
-		type groupadd_t;
 		attribute_role groupadd_roles;
 	')
 
 	usermanage_domtrans_groupadd($1)
 	roleattribute $2 groupadd_roles;
-')
-
-########################################
-## <summary>
-##	Execute chage in the chage domain.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed to transition.
-##	</summary>
-## </param>
-#
-interface(`usermanage_domtrans_chage',`
-	gen_require(`
-		type chage_t, chage_exec_t;
-	')
-
-	corecmd_search_bin($1)
-	domtrans_pattern($1, chage_exec_t, chage_t)
-')
-
-########################################
-## <summary>
-##	Execute chage in the chage domain, and
-##	allow the specified role the chage domain.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed to transition.
-##	</summary>
-## </param>
-## <param name="role">
-##	<summary>
-##	Role allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
-interface(`usermanage_run_chage',`
-	gen_require(`
-		type chage_t;
-		attribute_role chage_roles;
-	')
-
-	usermanage_domtrans_chage($1)
-	roleattribute $2 chage_roles;
 ')
 
 ########################################
@@ -173,6 +114,10 @@ interface(`usermanage_domtrans_passwd',`
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, passwd_exec_t, passwd_t)
+
+	ifdef(`hide_broken_symptoms',`
+		dontaudit passwd_t $1:socket_class_set { read write };
+	')
 ')
 
 ########################################
@@ -229,31 +174,11 @@ interface(`usermanage_check_exec_passwd',`
 #
 interface(`usermanage_run_passwd',`
 	gen_require(`
-		type passwd_t;
 		attribute_role passwd_roles;
 	')
 
 	usermanage_domtrans_passwd($1)
 	roleattribute $2 passwd_roles;
-')
-
-########################################
-## <summary>
-##	Check access to the passwd executable
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`usermanage_access_check_passwd',`
-	gen_require(`
-		type passwd_exec_t;
-	')
-
-	corecmd_search_bin($1)
-	allow $1 passwd_exec_t:file { getattr_file_perms execute };
 ')
 
 ########################################
@@ -296,7 +221,6 @@ interface(`usermanage_domtrans_admin_passwd',`
 #
 interface(`usermanage_run_admin_passwd',`
 	gen_require(`
-		type sysadm_passwd_t;
 		attribute_role sysadm_passwd_roles;
 	')
 
@@ -339,7 +263,10 @@ interface(`usermanage_domtrans_useradd',`
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, useradd_exec_t, useradd_t)
-    allow $1 useradd_exec_t:file map;
+
+	ifdef(`hide_broken_symptoms',`
+		dontaudit useradd_t $1:socket_class_set { read write };
+	')
 ')
 
 ########################################
@@ -380,30 +307,10 @@ interface(`usermanage_check_exec_useradd',`
 interface(`usermanage_run_useradd',`
 	gen_require(`
 		attribute_role useradd_roles;
-		type useradd_t;
 	')
 
 	usermanage_domtrans_useradd($1)
 	roleattribute $2 useradd_roles;
-')
-
-########################################
-## <summary>
-##	Check access to the useradd executable.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`usermanage_access_check_useradd',`
-	gen_require(`
-		type useradd_exec_t;
-	')
-
-	corecmd_search_bin($1)
-	allow $1 useradd_exec_t:file { getattr_file_perms execute };
 ')
 
 ########################################

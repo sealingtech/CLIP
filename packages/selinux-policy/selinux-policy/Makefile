@@ -2,7 +2,7 @@
 # Makefile for the security policy.
 #
 # Targets:
-# 
+#
 # install       - compile and install the policy configuration, and context files.
 # load          - compile, install, and load the policy configuration.
 # reload        - compile, install, and load/reload the policy configuration.
@@ -32,7 +32,7 @@ ifdef LOCAL_ROOT
 endif
 
 # refpolicy version
-version = $(shell cat VERSION)
+version := $(shell cat VERSION)
 
 ifdef LOCAL_ROOT
 builddir := $(LOCAL_ROOT)/
@@ -61,8 +61,8 @@ SEMODULE ?= $(tc_usrsbindir)/semodule
 SEMOD_PKG ?= $(tc_usrbindir)/semodule_package
 SEMOD_LNK ?= $(tc_usrbindir)/semodule_link
 SEMOD_EXP ?= $(tc_usrbindir)/semodule_expand
-SEPOLGEN ?= $(tc_usrbindir)/sepolgen-ifgen
 LOADPOLICY ?= $(tc_usrsbindir)/load_policy
+SEPOLGEN_IFGEN ?= $(tc_usrbindir)/sepolgen-ifgen
 SETFILES ?= $(tc_sbindir)/setfiles
 XMLLINT ?= $(BINDIR)/xmllint
 SECHECK ?= $(BINDIR)/sechecker
@@ -71,13 +71,11 @@ SECHECK ?= $(BINDIR)/sechecker
 AWK ?= gawk
 GREP ?= egrep
 INSTALL ?= install
-M4 ?= m4
-PYTHON ?= python3
+M4 ?= m4 -E -E
+PYTHON ?= python3 -t -t -E -W error
 SED ?= sed
 SORT ?= LC_ALL=C sort
 UMASK ?= umask
-
-CFLAGS += -Wall
 
 # policy source layout
 poldir := policy
@@ -95,75 +93,79 @@ endif
 
 # policy building support tools
 support := support
-genxml := $(PYTHON) -E $(support)/segenxml.py
-gendoc := $(PYTHON) -E $(support)/sedoctool.py
-genperm := $(PYTHON) -E $(support)/genclassperms.py
-policyvers := $(PYTHON) -E $(support)/policyvers.py
-fcsort := $(tmpdir)/fc_sort
+genxml := $(PYTHON) $(support)/segenxml.py
+gendoc := $(PYTHON) $(support)/sedoctool.py
+genperm := $(PYTHON) $(support)/genclassperms.py
+policyvers := $(PYTHON) $(support)/policyvers.py
+fcsort := $(PYTHON) $(support)/fc_sort.py
 setbools := $(AWK) -f $(support)/set_bools_tuns.awk
 get_type_attr_decl := $(SED) -r -f $(support)/get_type_attr_decl.sed
 comment_move_decl := $(SED) -r -f $(support)/comment_move_decl.sed
-gennetfilter := $(PYTHON) -E $(support)/gennetfilter.py
+gennetfilter := $(PYTHON) $(support)/gennetfilter.py
 m4iferror := $(support)/iferror.m4
 m4divert := $(support)/divert.m4
 m4undivert := $(support)/undivert.m4
+m4terminate := $(support)/fatal_error.m4
 # use our own genhomedircon to make sure we have a known usable one,
 # so policycoreutils updates are not required (RHEL4)
-genhomedircon := $(PYTHON) -E $(support)/genhomedircon
+genhomedircon := $(PYTHON) $(support)/genhomedircon.py
+gentemplates := $(support)/gentemplates.sh
 
 # documentation paths
 docs := doc
-xmldtd = $(docs)/policy.dtd
-metaxml = metadata.xml
-doctemplate = $(docs)/templates
-docfiles = $(docs)/Makefile.example $(addprefix $(docs)/,example.te example.if example.fc)
+xmldtd := $(docs)/policy.dtd
+metaxml := metadata.xml
+doctemplate := $(docs)/templates
+docfiles := $(docs)/Makefile.example $(addprefix $(docs)/,example.te example.if example.fc)
 
 ifndef LOCAL_ROOT
-polxml = $(docs)/policy.xml
-tunxml = $(docs)/global_tunables.xml
-boolxml = $(docs)/global_booleans.xml
-htmldir = $(docs)/html
+polxml := $(docs)/policy.xml
+tunxml := $(docs)/global_tunables.xml
+boolxml := $(docs)/global_booleans.xml
+htmldir := $(docs)/html
+doctmpdir := $(docs)/tmp
 else
-polxml = $(LOCAL_ROOT)/doc/policy.xml
-tunxml = $(LOCAL_ROOT)/doc/global_tunables.xml
-boolxml = $(LOCAL_ROOT)/doc/global_booleans.xml
-htmldir = $(LOCAL_ROOT)/doc/html
+polxml := $(LOCAL_ROOT)/doc/policy.xml
+tunxml := $(LOCAL_ROOT)/doc/global_tunables.xml
+boolxml := $(LOCAL_ROOT)/doc/global_booleans.xml
+htmldir := $(LOCAL_ROOT)/doc/html
+doctmpdir := $(LOCAL_ROOT)/doc/tmp
 endif
 
 # config file paths
-globaltun = $(poldir)/global_tunables
-globalbool = $(poldir)/global_booleans
+globaltun := $(poldir)/global_tunables
+globalbool := $(poldir)/global_booleans
 user_files := $(poldir)/users
 policycaps := $(poldir)/policy_capabilities
+ctx_defaults := $(poldir)/context_defaults
 
 # local config file paths
 ifndef LOCAL_ROOT
-mod_conf = $(poldir)/modules.conf
-booleans = $(poldir)/booleans.conf
-tunables = $(poldir)/tunables.conf
+mod_conf := $(poldir)/modules.conf
+booleans := $(poldir)/booleans.conf
+tunables := $(poldir)/tunables.conf
 else
-mod_conf = $(local_poldir)/modules.conf
-booleans = $(local_poldir)/booleans.conf
-tunables = $(local_poldir)/tunables.conf
+mod_conf := $(local_poldir)/modules.conf
+booleans := $(local_poldir)/booleans.conf
+tunables := $(local_poldir)/tunables.conf
 endif
 
 # install paths
 PKGNAME ?= refpolicy-$(version)
-prefix = $(DESTDIR)/usr
-topdir = $(DESTDIR)/etc/selinux
-installdir = $(topdir)/$(strip $(NAME))
-srcpath = $(installdir)/src
-userpath = $(installdir)/users
-policypath = $(installdir)/policy
-contextpath = $(installdir)/contexts
-homedirpath = $(contextpath)/files/homedir_template
-fcpath = $(contextpath)/files/file_contexts
-fcsubspath = $(contextpath)/files/file_contexts.subs_dist
-ncpath = $(contextpath)/netfilter_contexts
-sharedir = $(prefix)/share/selinux
-modpkgdir = $(sharedir)/$(strip $(NAME))
-headerdir = $(modpkgdir)/include
-docsdir = $(prefix)/share/doc/$(PKGNAME)
+prefix := $(DESTDIR)/usr
+topdir := $(DESTDIR)/etc/selinux
+installdir := $(topdir)/$(strip $(NAME))
+srcpath := $(installdir)/src
+userpath := $(installdir)/users
+policypath := $(installdir)/policy
+contextpath := $(installdir)/contexts
+homedirpath := $(contextpath)/files/homedir_template
+fcpath := $(contextpath)/files/file_contexts
+fcsubspath := $(contextpath)/files/file_contexts.subs_dist
+sharedir := $(prefix)/share/selinux
+modpkgdir := $(sharedir)/$(strip $(NAME))
+headerdir := $(modpkgdir)/include
+docsdir := $(prefix)/share/doc/$(PKGNAME)
 
 # enable MLS if requested.
 ifeq "$(TYPE)" "mls"
@@ -186,13 +188,12 @@ ifneq ($(DISTRO),)
 	M4PARAM += -D distro_$(DISTRO)
 endif
 
-# rhel4 also implies redhat
-ifeq "$(DISTRO)" "rhel4"
-	M4PARAM += -D distro_redhat
-endif
-
 ifeq "$(DISTRO)" "ubuntu"
 	M4PARAM += -D distro_debian
+endif
+
+ifeq "$(SYSTEMD)" "y"
+	M4PARAM += -D init_systemd
 endif
 
 ifneq ($(OUTPUT_POLICY),)
@@ -207,10 +208,14 @@ endif
 NAME ?= $(TYPE)
 
 # default unknown permissions setting
-#UNK_PERMS ?= deny
+UNK_PERMS ?= deny
 
 ifeq ($(DIRECT_INITRC),y)
 	M4PARAM += -D direct_sysadm_daemon
+endif
+
+ifeq "$(WERROR)" "y"
+	M4PARAM += -D m4_werror
 endif
 
 ifeq "$(UBAC)" "y"
@@ -224,6 +229,8 @@ MCS_CATS ?= 1024
 
 ifeq ($(QUIET),y)
 	verbose = @
+else
+	VERBOSE_FLAG = --verbose
 endif
 
 M4PARAM += -D mls_num_sens=$(MLS_SENS) -D mls_num_cats=$(MLS_CATS) -D mcs_num_cats=$(MCS_CATS) -D hide_broken_symptoms
@@ -235,7 +242,7 @@ ifeq ($(DISTRO),debian)
 endif
 
 ifeq ($(DISTRO),gentoo)
-	CTAGS := exuberant-ctags	
+	CTAGS := exuberant-ctags
 endif
 
 CTAGS ?= ctags
@@ -251,12 +258,14 @@ seusers := $(appconf)/seusers
 appdir := $(contextpath)
 user_default_contexts := $(wildcard config/appconfig-$(TYPE)/*_default_contexts)
 user_default_contexts_names := $(addprefix $(contextpath)/users/,$(subst _default_contexts,,$(notdir $(user_default_contexts))))
-appfiles := $(addprefix $(appdir)/,default_contexts default_type initrc_context failsafe_context userhelper_context removable_context dbus_contexts sepgsql_contexts x_contexts customizable_types securetty_types virtual_image_context virtual_domain_context lxc_contexts systemd_contexts snapperd_contexts) $(contextpath)/files/media $(user_default_contexts_names)
+appfiles := $(addprefix $(appdir)/,default_contexts default_type initrc_context failsafe_context userhelper_context removable_context dbus_contexts sepgsql_contexts x_contexts customizable_types securetty_types lxc_contexts openrc_contexts virtual_domain_context virtual_image_context) $(contextpath)/files/media $(fcsubspath) $(user_default_contexts_names)
 net_contexts := $(builddir)net_contexts
+net_contexts_nft := $(builddir)net_contexts.nft
+docfiles += $(net_contexts) $(net_contexts_nft)
 
-all_layers := $(shell find $(wildcard $(moddir)/*) -maxdepth 0 -type d)
+all_layers := $(shell find $(moddir)/* -maxdepth 0 -type d)
 ifdef LOCAL_ROOT
-all_layers += $(shell find $(wildcard $(local_moddir)/*) -maxdepth 0 -type d)
+all_layers += $(shell find $(local_moddir)/* -maxdepth 0 -type d)
 endif
 
 generated_te := $(basename $(foreach dir,$(all_layers),$(wildcard $(dir)/*.te.in)))
@@ -267,8 +276,8 @@ generated_fc := $(basename $(foreach dir,$(all_layers),$(wildcard $(dir)/*.fc.in
 # when a generated file is already generated
 detected_mods := $(sort $(foreach dir,$(all_layers),$(wildcard $(dir)/*.te)) $(generated_te))
 
-modxml := $(addprefix $(tmpdir)/, $(detected_mods:.te=.xml))
-layerxml := $(sort $(addprefix $(tmpdir)/, $(notdir $(addsuffix .xml,$(all_layers)))))
+modxml := $(addprefix $(doctmpdir)/, $(detected_mods:.te=.xml))
+layerxml := $(sort $(addprefix $(doctmpdir)/, $(notdir $(addsuffix .xml,$(all_layers)))))
 layer_names := $(sort $(notdir $(all_layers)))
 all_metaxml = $(call detect-metaxml, $(layer_names))
 
@@ -294,9 +303,9 @@ cmdline_mods := $(addsuffix .te,$(APPS_MODS))
 cmdline_off := $(addsuffix .te,$(APPS_OFF))
 
 # extract settings from modules.conf
-mod_conf_base := $(addsuffix .te,$(sort $(shell awk '/^[[:blank:]]*[[:alpha:]]/{ if ($$3 == "$(configbase)") print $$1 }' $(mod_conf) 2> /dev/null)))
-mod_conf_mods := $(addsuffix .te,$(sort $(shell awk '/^[[:blank:]]*[[:alpha:]]/{ if ($$3 == "$(configmod)") print $$1 }' $(mod_conf) 2> /dev/null)))
-mod_conf_off := $(addsuffix .te,$(sort $(shell awk '/^[[:blank:]]*[[:alpha:]]/{ if ($$3 == "$(configoff)") print $$1 }' $(mod_conf) 2> /dev/null)))
+mod_conf_base := $(addsuffix .te,$(sort $(shell $(AWK) '/^[[:blank:]]*[[:alpha:]]/{ if ($$3 == "$(configbase)") print $$1 }' $(mod_conf) 2> /dev/null)))
+mod_conf_mods := $(addsuffix .te,$(sort $(shell $(AWK) '/^[[:blank:]]*[[:alpha:]]/{ if ($$3 == "$(configmod)") print $$1 }' $(mod_conf) 2> /dev/null)))
+mod_conf_off := $(addsuffix .te,$(sort $(shell $(AWK) '/^[[:blank:]]*[[:alpha:]]/{ if ($$3 == "$(configoff)") print $$1 }' $(mod_conf) 2> /dev/null)))
 
 base_mods := $(cmdline_base)
 mod_mods := $(cmdline_mods)
@@ -310,7 +319,7 @@ off_mods += $(filter-out $(cmdline_off) $(cmdline_base) $(cmdline_mods), $(mod_c
 off_mods += $(filter-out $(base_mods) $(mod_mods) $(off_mods),$(notdir $(detected_mods)))
 
 # filesystems to be used in labeling targets
-filesystems = $(shell mount | grep -v "context=" | egrep -v '\((|.*,)bind(,.*|)\)' | awk '/(ext[234]|btrfs| xfs| jfs).*rw/{print $$3}';)
+filesystems = $(shell mount | grep -v "context=" | egrep -v '\((|.*,)bind(,.*|)\)' | $(AWK) '/(ext[234]|btrfs| xfs| jfs).*rw/{print $$3}';)
 fs_names := "btrfs ext2 ext3 ext4 xfs jfs"
 
 ########################################
@@ -366,7 +375,7 @@ $(moddir)/kernel/corenetwork.if: $(moddir)/kernel/corenetwork.te.in $(moddir)/ke
 	@echo "# $(notdir $@).in or $(notdir $@).m4 file should be modified." >> $@
 	@echo "#" >> $@
 	$(verbose) cat $@.in >> $@
-	$(verbose) $(GREP) "^[[:blank:]]*network_(interface|node|port|packet)(_controlled)?\(.*\)" $< \
+	$(verbose) $(GREP) "^[[:blank:]]*(network_(interface|node|port|packet)(_controlled)?)|ib_(pkey|endport)\(.*\)" $< \
 		| $(M4) -D self_contained_policy $(M4PARAM) $(m4divert) $@.m4 $(m4undivert) - \
 		| $(SED) -e 's/dollarsone/\$$1/g' -e 's/dollarszero/\$$0/g' >> $@
 
@@ -386,34 +395,44 @@ $(net_contexts): $(moddir)/kernel/corenetwork.te.in
 	@echo "Creating netfilter network labeling rules"
 	$(verbose) $(gennetfilter) $^ > $@
 
+$(net_contexts_nft): $(moddir)/kernel/corenetwork.te.in
+	@echo "Creating netfilter NFT network labeling rules"
+	$(verbose) $(gennetfilter) --nft $^ > $@
+
 ########################################
 #
 # Create config files
 #
-conf: $(mod_conf) $(booleans) $(generated_te) $(generated_if) $(generated_fc)
+conf: $(mod_conf) $(booleans) generate
 
-$(mod_conf) $(booleans): $(polxml)
-	@echo "Updating $(mod_conf) and $(booleans)"
+$(booleans) $(mod_conf): conf.intermediate
+
+.INTERMEDIATE: conf.intermediate
+conf.intermediate: $(polxml)
+	@echo "Updating $(booleans) and $(mod_conf)"
 	$(verbose) $(gendoc) -b $(booleans) -m $(mod_conf) -x $(polxml)
-
-########################################
-#
-# Generate the fc_sort program
-#
-$(fcsort) : $(support)/fc_sort.c
-	$(verbose) $(CC) $(CFLAGS) $^ -o $@
 
 ########################################
 #
 # Documentation generation
 #
-$(layerxml): %.xml: $(all_metaxml) $(filter $(addprefix $(moddir)/, $(notdir $*))%, $(detected_mods)) $(subst .te,.if, $(filter $(addprefix $(moddir)/, $(notdir $*))%, $(detected_mods)))
-	@test -d $(tmpdir) || mkdir -p $(tmpdir)
-	$(verbose) cat $(filter %$(notdir $*)/$(metaxml), $(all_metaxml)) > $@
-	$(verbose) for i in $(basename $(filter $(addprefix $(moddir)/, $(notdir $*))%, $(detected_mods))); do $(genxml) -w -m $$i >> $@; done
+iftemplates: $(doctmpdir)/iftemplates
+$(doctmpdir)/iftemplates:
+	@echo "Generating interface templates into $(doctmpdir)/iftemplates"
+	@test -d $(doctmpdir)/iftemplates || mkdir -p $(doctmpdir)/iftemplates
+	$(verbose) $(gentemplates) -g -s $(moddir) -t $(doctmpdir)/iftemplates
 ifdef LOCAL_ROOT
-	$(verbose) for i in $(basename $(filter $(addprefix $(local_moddir)/, $(notdir $*))%, $(detected_mods))); do $(genxml) -w -m $$i >> $@; done
-endif	
+	$(verbose) $(gentemplates) -g -s $(local_moddir) -t $(doctmpdir)/iftemplates
+endif
+	@touch $(doctmpdir)/iftemplates
+
+$(layerxml): %.xml: $(doctmpdir)/iftemplates $(all_metaxml) $(filter $(addprefix $(moddir)/, $(notdir $*))%, $(detected_mods)) $(subst .te,.if, $(filter $(addprefix $(moddir)/, $(notdir $*))%, $(detected_mods)))
+	@test -d $(doctmpdir) || mkdir -p $(doctmpdir)
+	$(verbose) cat $(filter %/$(notdir $*)/$(metaxml), $(all_metaxml)) > $@
+	$(verbose) for i in $(basename $(filter $(addprefix $(moddir)/, $(notdir $*))%, $(detected_mods))); do $(genxml) -w -T $(doctmpdir)/iftemplates -m $$i >> $@; done
+ifdef LOCAL_ROOT
+	$(verbose) for i in $(basename $(filter $(addprefix $(local_moddir)/, $(notdir $*))%, $(detected_mods))); do $(genxml) -w -T $(doctmpdir)/iftemplates -m $$i >> $@; done
+endif
 
 $(tunxml): $(globaltun)
 	$(verbose) $(genxml) -w -t $< > $@
@@ -424,15 +443,17 @@ $(boolxml): $(globalbool)
 $(polxml): $(layerxml) $(tunxml) $(boolxml)
 	@echo "Creating $(@F)"
 	@test -d $(dir $(polxml)) || mkdir -p $(dir $(polxml))
-	@test -d $(tmpdir) || mkdir -p $(tmpdir)
+	@test -d $(doctmpdir) || mkdir -p $(doctmpdir)
 	$(verbose) echo '<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>' > $@
 	$(verbose) echo '<!DOCTYPE policy SYSTEM "$(notdir $(xmldtd))">' >> $@
 	$(verbose) echo '<policy>' >> $@
-	$(verbose) for i in $(basename $(notdir $(layerxml))); do echo "<layer name=\"$$i\">" >> $@; cat $(tmpdir)/$$i.xml >> $@; echo "</layer>" >> $@; done
+	$(verbose) for i in $(basename $(notdir $(layerxml))); do echo "<layer name=\"$$i\">" >> $@; cat $(doctmpdir)/$$i.xml >> $@; echo "</layer>" >> $@; done
 	$(verbose) cat $(tunxml) $(boolxml) >> $@
 	$(verbose) echo '</policy>' >> $@
 	$(verbose) if test -x $(XMLLINT) && test -f $(xmldtd); then \
 		$(XMLLINT) --noout --path $(dir $(xmldtd)) --dtdvalid $(xmldtd) $@ ;\
+		else \
+		echo "$@ XML validation not run. Please install the xmllint tool." ;\
 	fi
 
 xml: $(polxml)
@@ -514,7 +535,8 @@ install-headers: $(layerxml) $(tunxml) $(boolxml)
 	@echo "Installing $(NAME) policy headers."
 	$(verbose) $(INSTALL) -m 644 $^ $(headerdir)
 	$(verbose) mkdir -p $(headerdir)/support
-	$(verbose) $(INSTALL) -m 644 $(m4support) $(word $(words $(genxml)),$(genxml)) $(xmldtd) $(headerdir)/support
+	$(verbose) $(INSTALL) -m 644 $(m4support) $(xmldtd) $(headerdir)/support
+	$(verbose) $(INSTALL) -m 755 $(word $(words $(genxml)),$(genxml)) $(headerdir)/support
 	$(verbose) $(genperm) $(avs) $(secclass) > $(headerdir)/support/all_perms.spt
 	$(verbose) for i in $(notdir $(all_layers)); do \
 		mkdir -p $(headerdir)/$$i ;\
@@ -527,6 +549,8 @@ ifneq "$(DISTRO)" ""
 endif
 	$(verbose) echo "MONOLITHIC ?= n" >> $(headerdir)/build.conf
 	$(verbose) echo "DIRECT_INITRC ?= $(DIRECT_INITRC)" >> $(headerdir)/build.conf
+	$(verbose) echo "SYSTEMD ?= $(SYSTEMD)" >> $(headerdir)/build.conf
+	$(verbose) echo "CUSTOM_BUILDOPT ?= $(CUSTOM_BUILDOPT)" >> $(headerdir)/build.conf
 	$(verbose) echo "override UBAC := $(UBAC)" >> $(headerdir)/build.conf
 	$(verbose) echo "override MLS_SENS := $(MLS_SENS)" >> $(headerdir)/build.conf
 	$(verbose) echo "override MLS_CATS := $(MLS_CATS)" >> $(headerdir)/build.conf
@@ -535,9 +559,17 @@ endif
 
 ########################################
 #
+# Build policy interface database
+#
+build-interface-db: install-headers
+	@mkdir -p $(DESTDIR)/var/lib/sepolgen $(tmpdir)
+	$(verbose) $(SEPOLGEN_IFGEN) $(VERBOSE_FLAG) --interfaces $(headerdir) --output $(DESTDIR)/var/lib/sepolgen/interface_info
+
+########################################
+#
 # Install policy documentation
 #
-install-docs: $(tmpdir)/html
+install-docs: $(tmpdir)/html $(docfiles)
 	@mkdir -p $(docsdir)/html
 	@echo "Installing policy documentation"
 	$(verbose) $(INSTALL) -m 644 $(docfiles) $(docsdir)
@@ -549,7 +581,9 @@ install-docs: $(tmpdir)/html
 #
 install-src:
 	rm -rf $(srcpath)/policy.old
-	-mv $(srcpath)/policy $(srcpath)/policy.old
+	if test -d $(srcpath)/policy; then \
+		mv $(srcpath)/policy $(srcpath)/policy.old ;\
+	fi
 	mkdir -p $(srcpath)/policy
 	cp -R . $(srcpath)/policy
 
@@ -557,7 +591,7 @@ install-src:
 #
 # Generate tags file
 #
-tags: $(tags)
+ctags: $(tags)
 $(tags):
 	@($(CTAGS) --version | grep -q Exuberant) || (echo ERROR: Need exuberant-ctags to function!; exit 1)
 	@LC_ALL=C $(CTAGS) -f $(tags) --langdef=te --langmap=te:..te.if.spt \
@@ -567,7 +601,8 @@ $(tags):
 	 --regex-te='/^[ \t]*define\(`(\w+)/\1/d,define/' \
 	 --regex-te='/^[ \t]*interface\(`(\w+)/\1/i,interface/' \
 	 --regex-te='/^[ \t]*template\(`(\w+)/\1/i,template/' \
-	 --regex-te='/^[ \t]*bool[ \t]+(\w+)/\1/b,bool/' policy/modules/*/*.{if,te} policy/support/*.spt
+	 --regex-te='/^[ \t]*bool[ \t]+(\w+)/\1/b,bool/' \
+	 policy/modules/*/*.if policy/modules/*/*.te policy/support/*.spt
 
 ########################################
 #
@@ -610,32 +645,27 @@ resetlabels:
 # Clean everything
 #
 bare: clean
-	echo "hehe kde jsem asi tak"
-	pwd
-	#rm -f $(polxml)
-	#rm -f $(layerxml)
-	#rm -f $(modxml)
-	#rm -f $(tunxml)
-	#rm -f $(boolxml)
-	#rm -f $(mod_conf)
-	#rm -f $(booleans)
-	#rm -fR $(htmldir)
-	#rm -f $(tags)
+	$(verbose) rm -f $(polxml)
+	$(verbose) rm -fR $(doctmpdir)
+	$(verbose) rm -f $(tunxml)
+	$(verbose) rm -f $(boolxml)
+	$(verbose) rm -f $(mod_conf)
+	$(verbose) rm -f $(booleans)
+	$(verbose) rm -fR $(htmldir)
+	$(verbose) rm -f $(tags)
 # don't remove these files if we're given a local root
 ifndef LOCAL_ROOT
-	rm -f $(fcsort)
-	rm -f $(support)/*.pyc
+	$(verbose) rm -f $(support)/*.pyc
+	$(verbose) rm -Rf $(support)/__pycache__/
 ifneq ($(generated_te),)
-	rm -f $(generated_te)
+	$(verbose) rm -f $(generated_te)
 endif
 ifneq ($(generated_if),)
-	rm -f $(generated_if)
+	$(verbose) rm -f $(generated_if)
 endif
 ifneq ($(generated_fc),)
-	rm -f $(generated_fc)
+	$(verbose) rm -f $(generated_fc)
 endif
 endif
 
-.PHONY: install-src install-appconfig install-headers generate xml conf html bare tags
-.SUFFIXES:
-.SUFFIXES: .c
+.PHONY: install-src install-appconfig install-headers build-interface-db generate xml conf html bare tags

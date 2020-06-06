@@ -1,0 +1,22 @@
+policy_module(tboot, 1.1.1)
+
+########################################
+#
+# Declarations
+#
+
+attribute_role txtstat_roles;
+roleattribute system_r txtstat_roles;
+
+type txtstat_t;
+type txtstat_exec_t;
+application_domain(txtstat_t, txtstat_exec_t)
+role txtstat_roles types txtstat_t;
+
+########################################
+#
+# Local policy
+#
+
+domain_use_interactive_fds(txtstat_t)
+userdom_use_user_terminals(txtstat_t)

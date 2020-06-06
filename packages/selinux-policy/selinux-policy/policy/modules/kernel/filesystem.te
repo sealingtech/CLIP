@@ -1,4 +1,4 @@
-policy_module(filesystem, 1.17.2)
+policy_module(filesystem, 1.27.3)
 
 ########################################
 #
@@ -8,6 +8,7 @@ policy_module(filesystem, 1.17.2)
 attribute filesystem_type;
 attribute filesystem_unconfined_type;
 attribute noxattrfs;
+attribute xattrfs;
 
 ##############################
 #
@@ -15,7 +16,7 @@ attribute noxattrfs;
 # filesystems with extended attributes
 #
 type fs_t;
-fs_type(fs_t)
+fs_xattr_type(fs_t)
 sid fs gen_context(system_u:object_r:fs_t,s0)
 
 # Use xattrs for the following filesystem types.
@@ -33,11 +34,10 @@ fs_use_xattr gpfs gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr jffs2 gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr jfs gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr lustre gen_context(system_u:object_r:fs_t,s0);
-fs_use_xattr ocfs2 gen_context(system_u:object_r:fs_t,s0);
-fs_use_xattr xfs gen_context(system_u:object_r:fs_t,s0);
+fs_use_xattr overlay gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr squashfs gen_context(system_u:object_r:fs_t,s0);
+fs_use_xattr xfs gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr zfs gen_context(system_u:object_r:fs_t,s0);
-fs_use_xattr fuse.glusterfs gen_context(system_u:object_r:fs_t,s0);
 
 # Use the allocating task SID to label inodes in the following filesystem
 # types, and label the filesystem itself with the specified context.
@@ -47,7 +47,6 @@ fs_use_xattr fuse.glusterfs gen_context(system_u:object_r:fs_t,s0);
 fs_use_task eventpollfs gen_context(system_u:object_r:fs_t,s0);
 fs_use_task pipefs gen_context(system_u:object_r:fs_t,s0);
 fs_use_task sockfs gen_context(system_u:object_r:fs_t,s0);
-fs_use_task nsfs gen_context(system_u:object_r:fs_t,s0);
 
 ##############################
 #
@@ -58,7 +57,6 @@ type anon_inodefs_t;
 fs_type(anon_inodefs_t)
 files_mountpoint(anon_inodefs_t)
 genfscon anon_inodefs / gen_context(system_u:object_r:anon_inodefs_t,s0)
-mls_trusted_object(anon_inodefs_t)
 
 type bdev_t;
 fs_type(bdev_t)
@@ -69,22 +67,23 @@ fs_type(binfmt_misc_fs_t)
 files_mountpoint(binfmt_misc_fs_t)
 genfscon binfmt_misc / gen_context(system_u:object_r:binfmt_misc_fs_t,s0)
 
-type oracleasmfs_t;
-fs_type(oracleasmfs_t)
-dev_node(oracleasmfs_t)
-files_mountpoint(oracleasmfs_t)
-genfscon oracleasmfs / gen_context(system_u:object_r:oracleasmfs_t,s0)
+type bpf_t;
+fs_type(bpf_t)
+files_mountpoint(bpf_t)
+dev_associate_sysfs(bpf_t)
+genfscon bpf / gen_context(system_u:object_r:bpf_t,s0)
 
 type capifs_t;
 fs_type(capifs_t)
 files_mountpoint(capifs_t)
 genfscon capifs / gen_context(system_u:object_r:capifs_t,s0)
 
-type cgroup_t alias cgroupfs_t;
+type cgroup_t;
 fs_type(cgroup_t)
 files_mountpoint(cgroup_t)
 dev_associate_sysfs(cgroup_t)
 genfscon cgroup / gen_context(system_u:object_r:cgroup_t,s0)
+genfscon cgroup2 / gen_context(system_u:object_r:cgroup_t,s0)
 
 type configfs_t;
 fs_type(configfs_t)
@@ -110,10 +109,10 @@ fs_type(futexfs_t)
 genfscon futexfs / gen_context(system_u:object_r:futexfs_t,s0)
 
 type hugetlbfs_t;
-fs_type(hugetlbfs_t)
+fs_xattr_type(hugetlbfs_t)
 files_mountpoint(hugetlbfs_t)
-fs_use_trans hugetlbfs gen_context(system_u:object_r:hugetlbfs_t,s0);
 dev_associate(hugetlbfs_t)
+fs_use_trans hugetlbfs gen_context(system_u:object_r:hugetlbfs_t,s0);
 
 type ibmasmfs_t;
 fs_type(ibmasmfs_t)
@@ -136,7 +135,6 @@ genfscon mvfs / gen_context(system_u:object_r:mvfs_t,s0)
 
 type nfsd_fs_t;
 fs_type(nfsd_fs_t)
-files_mountpoint(nfsd_fs_t)
 genfscon nfsd / gen_context(system_u:object_r:nfsd_fs_t,s0)
 
 type nsfs_t;
@@ -147,7 +145,7 @@ type oprofilefs_t;
 fs_type(oprofilefs_t)
 genfscon oprofilefs / gen_context(system_u:object_r:oprofilefs_t,s0)
 
-type pstore_t alias pstorefs_t;
+type pstore_t;
 fs_type(pstore_t)
 files_mountpoint(pstore_t)
 dev_associate_sysfs(pstore_t)
@@ -179,6 +177,10 @@ files_mountpoint(sysv_t)
 genfscon sysv / gen_context(system_u:object_r:sysv_t,s0)
 genfscon v7 / gen_context(system_u:object_r:sysv_t,s0)
 
+type tracefs_t;
+fs_type(tracefs_t)
+genfscon tracefs / gen_context(system_u:object_r:tracefs_t,s0)
+
 type vmblock_t;
 fs_noxattr_type(vmblock_t)
 files_mountpoint(vmblock_t)
@@ -190,20 +192,16 @@ type vxfs_t;
 fs_noxattr_type(vxfs_t)
 files_mountpoint(vxfs_t)
 genfscon vxfs / gen_context(system_u:object_r:vxfs_t,s0)
-genfscon odmfs / gen_context(system_u:object_r:vxfs_t,s0)
-genfscon vxclonefs / gen_context(system_u:object_r:vxfs_t,s0)
 
 #
 # tmpfs_t is the type for tmpfs filesystems
 #
 type tmpfs_t;
 dev_associate(tmpfs_t)
-fs_type(tmpfs_t)
+fs_xattr_type(tmpfs_t)
 files_type(tmpfs_t)
 files_mountpoint(tmpfs_t)
 files_poly_parent(tmpfs_t)
-dev_associate(tmpfs_t)
-mls_trusted_object(tmpfs_t)
 
 # Use a transition SID based on the allocating task SID and the
 # filesystem SID to label inodes in the following filesystem types,
@@ -236,7 +234,7 @@ genfscon automount / gen_context(system_u:object_r:autofs_t,s0)
 # cifs_t is the type for filesystems and their
 # files shared from Windows servers
 #
-type cifs_t alias sambafs_t;
+type cifs_t;
 fs_noxattr_type(cifs_t)
 files_mountpoint(cifs_t)
 genfscon cifs / gen_context(system_u:object_r:cifs_t,s0)
@@ -283,8 +281,6 @@ genfscon udf / gen_context(system_u:object_r:iso9660_t,s0)
 type removable_t;
 allow removable_t noxattrfs:filesystem associate;
 fs_noxattr_type(removable_t)
-files_type(removable_t)
-dev_node(removable_t)
 files_mountpoint(removable_t)
 
 #
@@ -304,7 +300,6 @@ genfscon ncpfs / gen_context(system_u:object_r:nfs_t,s0)
 genfscon reiserfs / gen_context(system_u:object_r:nfs_t,s0)
 genfscon panfs / gen_context(system_u:object_r:nfs_t,s0)
 genfscon gadgetfs / gen_context(system_u:object_r:nfs_t,s0)
-genfscon 9p / gen_context(system_u:object_r:nfs_t,s0)
 
 ########################################
 #
@@ -326,9 +321,15 @@ fs_associate_noxattr(noxattrfs)
 # Unconfined access to this module
 #
 
-allow filesystem_unconfined_type filesystem_type:filesystem *;
+allow filesystem_unconfined_type filesystem_type:filesystem { mount remount unmount getattr relabelfrom relabelto associate quotamod quotaget watch };
 
 # Create/access other files. fs_type is to pick up various
 # pseudo filesystem types that are applied to both the filesystem
 # and its files.
-allow filesystem_unconfined_type filesystem_type:{ dir file lnk_file sock_file fifo_file chr_file blk_file } *;
+allow filesystem_unconfined_type filesystem_type:file { manage_file_perms relabelfrom relabelto map execute quotaon mounton execute_no_trans entrypoint audit_access execmod watch };
+allow filesystem_unconfined_type filesystem_type:lnk_file  { manage_lnk_file_perms relabelfrom relabelto append map execute quotaon mounton open audit_access execmod watch };
+allow filesystem_unconfined_type filesystem_type:sock_file { manage_sock_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
+allow filesystem_unconfined_type filesystem_type:fifo_file { manage_fifo_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
+allow filesystem_unconfined_type filesystem_type:blk_file { manage_blk_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
+allow filesystem_unconfined_type filesystem_type:chr_file { manage_chr_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
+allow filesystem_unconfined_type filesystem_type:dir { manage_dir_perms relabelfrom relabelto append map execute quotaon mounton add_name remove_name reparent search rmdir audit_access execmod watch };

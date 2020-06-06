@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 #  Author(s): Donald Miner <dminer@tresys.com>
 #	     Dave Sugar <dsugar@tresys.com>
@@ -17,21 +17,12 @@
 
 import sys
 import os
-import glob
 import re
 import getopt
 
 # GLOBALS
 
 # Default values of command line arguments:
-warn = False
-meta = "metadata"
-third_party = "third-party"
-layers = {}
-tunable_files = []
-bool_files = []
-xml_tunable_files = []
-xml_bool_files = []
 output_dir = ""
 
 # Pre compiled regular expressions:
@@ -43,7 +34,7 @@ output_dir = ""
 #	 -> ("interface", "kernel_read_system_state")
 #	"template(`base_user_template',`"
 #	 -> ("template", "base_user_template")
-INTERFACE = re.compile("^\s*(interface|template)\(`(\w*)'")
+INTERFACE = re.compile(r"^\s*(interface|template)\(`(\w*)'")
 
 # Matches either a gen_bool or a gen_tunable statement. Will give the tuple:
 #	("tunable" or "bool", name, "true" or "false")
@@ -52,7 +43,8 @@ INTERFACE = re.compile("^\s*(interface|template)\(`(\w*)'")
 #	 -> ("bool", "secure_mode", "false")
 #	"gen_tunable(allow_kerberos, false)"
 #	 -> ("tunable", "allow_kerberos", "false")
-BOOLEAN = re.compile("^\s*gen_(tunable|bool)\(\s*(\w*)\s*,\s*(true|false)\s*\)")
+BOOLEAN = re.compile(r"^\s*gen_(tunable|bool)\(\s*\`?\s*(\w*)\s*\'?\s*,\s*(true|false)\s*\)")
+TEMPLATE_BOOLEAN = re.compile(r"^\s*gen_(tunable|bool)\(\s*\`?\s*([\w\$]*)\s*\'?\s*,\s*(true|false)\s*\)")
 
 # Matches a XML comment in the policy, which is defined as any line starting
 #  with two # and at least one character of white space. Will give the single
@@ -63,8 +55,16 @@ BOOLEAN = re.compile("^\s*gen_(tunable|bool)\(\s*(\w*)\s*,\s*(true|false)\s*\)")
 #	 -> ("<summary>")
 #	"##		The domain allowed access.	"
 #	 -> ("The domain allowed access.")
-XML_COMMENT = re.compile("^##\s+(.*?)\s*$")
+XML_COMMENT = re.compile(r"^\s*##\s+(.*?)\s*$")
 
+# Matches a template call in the policy, which is defined as any line having
+#  a function call like structure, being a string, followed by a set of
+#  arguments between an opening and closing bracket. Regexp cannot deal with
+#  unknown number of arguments, so we will split arguments in the code later on.
+# Some examples:
+#	"userdom_user_access_template(gpg, gpg_t)"
+#	"zarafa_domain_template(gateway)"
+TEMPLATE_CALL = re.compile(r"^\s*(\w*_template)\(\s*(\w*)\s*(?:,\s*(?:[^,)]*)\s*)*\)")
 
 # FUNCTIONS
 def getModuleXML(file_name):
@@ -83,14 +83,14 @@ def getModuleXML(file_name):
 		module_file = open(module_if, "r")
 		module_code = module_file.readlines()
 		module_file.close()
-	except:
+	except OSError:
 		warning("cannot open file %s for read, skipping" % file_name)
 		return []
 
 	module_buf = []
 
 	# Infer the module name, which is the base of the file name.
-	module_buf.append("<module name=\"%s\" filename=\"%s\">\n" 
+	module_buf.append("<module name=\"%s\" filename=\"%s\">\n"
 		% (os.path.splitext(os.path.split(file_name)[-1])[0], module_if))
 
 	temp_buf = []
@@ -157,7 +157,7 @@ def getModuleXML(file_name):
 			# Add default summaries and parameters so that the
 			#  DTD is happy.
 			else:
-				warning ("unable to find XML for %s %s()" % (groups[0], groups[1]))	
+				warning ("unable to find XML for %s %s()" % (groups[0], groups[1]))
 				module_buf.append("<summary>\n")
 				module_buf.append("Summary is missing!\n")
 				module_buf.append("</summary>\n")
@@ -173,7 +173,13 @@ def getModuleXML(file_name):
 			interface = None
 			continue
 
-
+		# If the line is a boolean/tunable definition, ignore it for now (these
+		#  lines are processed later on) and dismiss the XML comment received
+		#  thus far as it is otherwise attributed to an interface.
+		tunable = TEMPLATE_BOOLEAN.match(line)
+		if tunable:
+			temp_buf = []
+			continue
 
 	# If the file just had a header, add the comments to the module buffer.
 	if finding_header:
@@ -200,12 +206,55 @@ def getTunableXML(file_name, kind):
 		tunable_file = open(file_name, "r")
 		tunable_code = tunable_file.readlines()
 		tunable_file.close()
-	except:
+	except OSError:
 		warning("cannot open file %s for read, skipping" % file_name)
 		return []
 
 	tunable_buf = []
 	temp_buf = []
+	tunable_processed_code = []
+
+	# We first go through the code and substitute template calls with the
+	#  complete template content. This needs to happen iteratively, because
+	#  a template can call another template. In order to ensure no cyclic
+	#  template calls keep us busy, we max out at 9999 substitutions
+	has_changed = True
+	subst_threshold = 9999
+	while (has_changed and (subst_threshold > 0)):
+		has_changed = False
+		for line in tunable_code:
+			# Get the template call match
+			template_call = TEMPLATE_CALL.match(line)
+			# If we reach a template call, read in the template data
+			#  from the template directory, but substitute all $1 with
+			#  the second match, $2 with the third match, etc.
+			if template_call:
+				# Read template file based on template_call.group(1)
+				try:
+					template_file = open(templatedir + "/" + template_call.group(1) + ".iftemplate", "r")
+					template_code = template_file.readlines()
+					template_file.close()
+				except OSError:
+					warning("cannot open file %s for read, bailing out" % (templatedir + "/" + template_call.group(1) + ".iftemplate"))
+					return []
+				# Substitute content (i.e. $1 for argument 1, $2 for argument 2, etc.)
+				template_split = re.findall(r"[\w\" {}]+", line.strip())
+				for index, item in enumerate(template_code):
+					for group in range(1, len(template_split)):
+						template_code[index] = template_code[index].replace("$" + str(group), template_split[group].strip())
+				# Now 'inject' the code in the tunable_code variable
+				tunable_processed_code.extend(template_code)
+				has_changed = True
+				subst_threshold -= 1
+			else:
+				tunable_processed_code.append(line)
+		# It is a bad practice to try and update lists while in a loop, so we
+		# created an intermediate one and are now assigning it back
+		tunable_code = tunable_processed_code
+		tunable_processed_code = []
+	# If subst_threshold is 0 or less we want to know
+	if (subst_threshold <= 0):
+		warning("Detected a possible loop in policy code and template usage")
 
 	# Find tunables and booleans line by line and use the comments above
 	# them.
@@ -250,74 +299,25 @@ def getTunableXML(file_name, kind):
 			for tunable_line in tunable_buf:
 				xml_outfile.write (tunable_line)
 			xml_outfile.close()
-		except:
+		except OSError:
 			warning ("cannot write to file %s, skipping creation" % xmlfile)
 
 	return tunable_buf
-
-def getXMLFileContents (file_name):
-	'''
-	Return all the XML in the file specified.
-	'''
-
-	tunable_buf = []
-	# Try to open the xml file for this type of file
-	# append the contents to the buffer.
-	try:
-		tunable_xml = open(file_name, "r")
-		tunable_buf += tunable_xml.readlines()
-		tunable_xml.close()
-	except:
-		warning("cannot open file %s for read, assuming no data" % file_name)
-
-	return tunable_buf
-
-def getPolicyXML():
-	'''
-	Return the compelete reference policy XML documentation through a list,
-	one line per item.
-	'''
-
-	policy_buf = []
-	policy_buf.append("<policy>\n")
-
-	# Add to the XML each layer specified by the user.
-	for layer in layers.keys ():
-		policy_buf += getLayerXML(layer, layers[layer])
-
-	# Add to the XML each tunable file specified by the user.
-	for tunable_file in tunable_files:
-		policy_buf += getTunableXML(tunable_file, "tunable")
-
-	# Add to the XML each XML tunable file specified by the user.
-	for tunable_file in xml_tunable_files:
-		policy_buf += getXMLFileContents (tunable_file)
-
-	# Add to the XML each bool file specified by the user.
-	for bool_file in bool_files:
-		policy_buf += getTunableXML(bool_file, "bool")
-
-	# Add to the XML each XML bool file specified by the user.
-	for bool_file in xml_bool_files:
-		policy_buf += getXMLFileContents (bool_file)
-
-	policy_buf.append("</policy>\n")
-
-	return policy_buf
 
 def usage():
 	"""
 	Displays a message describing the proper usage of this script.
 	"""
 
-	sys.stdout.write("usage: %s [-w] [-mtb] <file>\n\n" % sys.argv[0])
+	sys.stdout.write("usage: %s [-w] [-T <templatedir>] [-mtb] <file>\n\n" % sys.argv[0])
 	sys.stdout.write("-w --warn\t\t\tshow warnings\n"+\
 	"-m --module <file>\t\tname of module to process\n"+\
 	"-t --tunable <file>\t\tname of global tunable file to process\n"+\
-	"-b --boolean <file>\t\tname of global boolean file to process\n\n")
+	"-b --boolean <file>\t\tname of global boolean file to process\n"+\
+	"-T --templates <dir>\t\tname of template directory to use\n\n")
 
 	sys.stdout.write("examples:\n")
-	sys.stdout.write("> %s -w -m policy/modules/apache\n" % sys.argv[0])
+	sys.stdout.write("> %s -w -T tmp/templates -m policy/modules/apache\n" % sys.argv[0])
 	sys.stdout.write("> %s -t policy/global_tunables\n" % sys.argv[0])
 
 def warning(description):
@@ -348,6 +348,7 @@ warn = False
 module = False
 tunable = False
 boolean = False
+templatedir = ''
 
 # Check that there are command line arguments.
 if len(sys.argv) <= 1:
@@ -356,7 +357,7 @@ if len(sys.argv) <= 1:
 
 # Parse command line args
 try:
-	opts, args = getopt.getopt(sys.argv[1:], 'whm:t:b:', ['warn', 'help', 'module=', 'tunable=', 'boolean='])
+	opts, args = getopt.getopt(sys.argv[1:], 'whm:t:b:T:', ['warn', 'help', 'module=', 'tunable=', 'boolean=', 'templates='])
 except getopt.GetoptError:
 	usage()
 	sys.exit(2)
@@ -368,13 +369,12 @@ for o, a in opts:
 		sys.exit(0)
 	elif o in ('-m', '--module'):
 		module = a
-		break
 	elif o in ('-t', '--tunable'):
 		tunable = a
-		break
 	elif o in ('-b', '--boolean'):
 		boolean = a
-		break
+	elif o in ('-T', '--templates'):
+		templatedir = a
 	else:
 		usage()
 		sys.exit(2)
@@ -388,4 +388,3 @@ elif boolean:
 else:
 	usage()
 	sys.exit(2)
-

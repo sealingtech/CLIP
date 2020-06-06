@@ -1,4 +1,4 @@
-policy_module(terminal, 1.11.1)
+policy_module(terminal, 1.19.2)
 
 ########################################
 #
@@ -25,11 +25,11 @@ dev_node(console_device_t)
 # the type of the root directory of the file system.
 #
 type devpts_t;
+dev_associate(devpts_t)
 files_mountpoint(devpts_t)
 fs_associate_tmpfs(devpts_t)
-fs_type(devpts_t)
+fs_xattr_type(devpts_t)
 fs_use_trans devpts gen_context(system_u:object_r:devpts_t,s0);
-dev_associate(devpts_t)
 
 #
 # devtty_t is the type of /dev/tty.
@@ -58,8 +58,5 @@ dev_node(tty_device_t)
 type usbtty_device_t, serial_device;
 dev_node(usbtty_device_t)
 
-#
-# virtio_device_t is the type of /dev/vport[0-9]p[0-9]
-#
 type virtio_device_t, serial_device;
 dev_node(virtio_device_t)

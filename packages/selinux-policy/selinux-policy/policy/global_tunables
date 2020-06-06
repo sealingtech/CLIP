@@ -6,59 +6,62 @@
 
 ## <desc>
 ## <p>
-## Deny any process from ptracing or debugging any other processes.
-## </p>
-## </desc>
-gen_tunable(deny_ptrace, false)
-
-## <desc>
-## <p>
 ## Allow unconfined executables to make their heap memory executable.  Doing this is a really bad idea. Probably indicates a badly coded executable, but could indicate an attack. This executable should be reported in bugzilla
 ## </p>
 ## </desc>
-gen_tunable(selinuxuser_execheap,false)
+gen_tunable(allow_execheap,false)
 
 ## <desc>
 ## <p>
-## Deny user domains applications to map a memory region as both executable and writable, this is dangerous and the executable should be reported in bugzilla
+## Allow unconfined executables to map a memory region as both executable and writable, this is dangerous and the executable should be reported in bugzilla")
 ## </p>
 ## </desc>
-gen_tunable(deny_execmem,false)
+gen_tunable(allow_execmem,false)
 
 ## <desc>
 ## <p>
-## Allow all unconfined executables to use libraries requiring text relocation that are not labeled textrel_shlib_t
+## Allow all unconfined executables to use libraries requiring text relocation that are not labeled textrel_shlib_t")
 ## </p>
 ## </desc>
-gen_tunable(selinuxuser_execmod,false)
+gen_tunable(allow_execmod,false)
 
 ## <desc>
 ## <p>
-## Allow unconfined executables to make their stack executable.  This should never, ever be necessary. Probably indicates a badly coded executable, but could indicate an attack. This executable should be reported in bugzilla
+## Allow unconfined executables to make their stack executable.  This should never, ever be necessary. Probably indicates a badly coded executable, but could indicate an attack. This executable should be reported in bugzilla")
 ## </p>
 ## </desc>
-gen_tunable(selinuxuser_execstack,false)
+gen_tunable(allow_execstack,false)
+
+## <desc>
+## <p>
+## Allow raw memory device (/dev/mem, /dev/kmem, /dev/mergemem,
+## dev/oldmem, /dev/port) access for confined executables.  This is
+## extremely dangerous as it can bypass the SELinux protections, and
+## should only be used by trusted domains.
+## </p>
+## </desc>
+gen_tunable(allow_raw_memory_access,false)
 
 ## <desc>
 ## <p>
 ## Enable polyinstantiated directory support.
 ## </p>
 ## </desc>
-gen_tunable(polyinstantiation_enabled,false)
+gen_tunable(allow_polyinstantiation,false)
 
 ## <desc>
 ## <p>
 ## Allow system to run with NIS
 ## </p>
 ## </desc>
-gen_tunable(nis_enabled,false)
+gen_tunable(allow_ypbind,false)
 
 ## <desc>
 ## <p>
 ## Allow logging in and using the system from /dev/console.
 ## </p>
 ## </desc>
-gen_tunable(login_console_enabled,true)
+gen_tunable(console_login,true)
 
 ## <desc>
 ## <p>
@@ -72,6 +75,15 @@ gen_tunable(login_console_enabled,true)
 ## </p>
 ## </desc>
 gen_tunable(global_ssp,false)
+
+## <desc>
+## <p>
+## Allow email client to various content.
+## nfs, samba, removable devices, and user temp
+## files
+## </p>
+## </desc>
+gen_tunable(mail_read_content,false)
 
 ## <desc>
 ## <p>
@@ -103,39 +115,17 @@ gen_tunable(use_samba_home_dirs,false)
 
 ## <desc>
 ## <p>
-## Support ecryptfs home directories
-## </p>
-## </desc>
-gen_tunable(use_ecryptfs_home_dirs,false)
-
-## <desc>
-## <p>
-## Support fusefs home directories
-## </p>
-## </desc>
-gen_tunable(use_fusefs_home_dirs,false)
-
-## <desc>
-## <p>
 ## Allow users to run TCP servers (bind to ports and accept connection from
 ## the same domain and outside users)  disabling this forces FTP passive mode
 ## and may change other protocols.
 ## </p>
 ## </desc>
-gen_tunable(selinuxuser_tcp_server,false)
+gen_tunable(user_tcp_server,false)
 
 ## <desc>
 ## <p>
 ## Allow users to run UDP servers (bind to ports and accept connection from
-## the same domain and outside users)  disabling this may break avahi 
-## discovering services on the network and other udp related services.
+## the same domain and outside users)
 ## </p>
 ## </desc>
-gen_tunable(selinuxuser_udp_server,false)
-
-## <desc>
-## <p>
-## Allow the mount commands to mount any directory or file.
-## </p>
-## </desc>
-gen_tunable(mount_anyfile, false)
+gen_tunable(user_udp_server,false)

@@ -44,7 +44,11 @@ interface(`mcs_constrained',`
 ## <rolecap/>
 #
 interface(`mcs_file_read_all',`
-	refpolicywarn(`$0() has been deprecated, please remove mcs_constrained() instead.')
+	gen_require(`
+		attribute mcsreadall;
+	')
+
+	typeattribute $1 mcsreadall;
 ')
 
 ########################################
@@ -60,12 +64,16 @@ interface(`mcs_file_read_all',`
 ## <rolecap/>
 #
 interface(`mcs_file_write_all',`
-	refpolicywarn(`$0() has been deprecated, please remove mcs_constrained() instead.')
+	gen_require(`
+		attribute mcswriteall;
+	')
+
+	typeattribute $1 mcswriteall;
 ')
 
 ########################################
 ## <summary>
-##	This domain is allowed to sigkill and sigstop 
+##	This domain is allowed to sigkill and sigstop
 ##	all domains regardless of their MCS category set.
 ## </summary>
 ## <param name="domain">
@@ -76,7 +84,11 @@ interface(`mcs_file_write_all',`
 ## <rolecap/>
 #
 interface(`mcs_killall',`
-	refpolicywarn(`$0() has been deprecated, please remove mcs_constrained() instead.')
+	gen_require(`
+		attribute mcskillall;
+	')
+
+	typeattribute $1 mcskillall;
 ')
 
 ########################################
@@ -92,7 +104,11 @@ interface(`mcs_killall',`
 ## </param>
 #
 interface(`mcs_ptrace_all',`
-	refpolicywarn(`$0() has been deprecated, please remove mcs_constrained() instead.')
+	gen_require(`
+		attribute mcsptraceall;
+	')
+
+	typeattribute $1 mcsptraceall;
 ')
 
 ########################################
@@ -113,20 +129,4 @@ interface(`mcs_process_set_categories',`
 	')
 
 	typeattribute $1 mcssetcats;
-')
-
-########################################
-## <summary>
-##	Make specified domain MCS trusted
-##	for writing to sockets at any level.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
-interface(`mcs_socket_write_all_levels',`
-	refpolicywarn(`$0() has been deprecated, please remove mcs_constrained() instead.')
 ')

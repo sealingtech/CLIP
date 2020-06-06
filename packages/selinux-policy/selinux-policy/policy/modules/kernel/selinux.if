@@ -40,7 +40,7 @@ interface(`selinux_labeled_boolean',`
 
 	# because of this statement, any module which
 	# calls this interface must be in the base module:
-#	genfscon selinuxfs /booleans/$2 gen_context(system_u:object_r:$1,s0)
+	genfscon selinuxfs /booleans/$2 gen_context(system_u:object_r:$1,s0)
 ')
 
 ########################################
@@ -58,13 +58,14 @@ interface(`selinux_get_fs_mount',`
 		type security_t;
 	')
 
-	allow $1 security_t:lnk_file read_lnk_file_perms;
-	dev_getattr_sysfs_fs($1)
-	dev_search_sysfs($1)
 	# starting in libselinux 2.0.5, init_selinuxmnt() will
 	# attempt to short circuit by checking if SELINUXMNT
 	# (/selinux) is already a selinuxfs
 	allow $1 security_t:filesystem getattr;
+
+	# Same for /sys/fs/selinux
+	dev_getattr_sysfs($1)
+	dev_search_sysfs($1)
 
 	# read /proc/filesystems to see if selinuxfs is supported
 	# then read /proc/self/mount to see where selinuxfs is mounted
@@ -90,8 +91,11 @@ interface(`selinux_dontaudit_get_fs_mount',`
 	# starting in libselinux 2.0.5, init_selinuxmnt() will
 	# attempt to short circuit by checking if SELINUXMNT
 	# (/selinux) is already a selinuxfs
-	dev_dontaudit_search_sysfs($1)
 	dontaudit $1 security_t:filesystem getattr;
+
+	# Same for /sys/fs/selinux
+	dev_dontaudit_getattr_sysfs($1)
+	dev_dontaudit_search_sysfs($1)
 
 	# read /proc/filesystems to see if selinuxfs is supported
 	# then read /proc/self/mount to see where selinuxfs is mounted
@@ -113,9 +117,6 @@ interface(`selinux_mount_fs',`
 		type security_t;
 	')
 
-	dev_getattr_sysfs_fs($1)
-	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 	allow $1 security_t:filesystem mount;
 ')
 
@@ -135,9 +136,6 @@ interface(`selinux_remount_fs',`
 		type security_t;
 	')
 
-	dev_getattr_sysfs_fs($1)
-	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 	allow $1 security_t:filesystem remount;
 ')
 
@@ -156,9 +154,6 @@ interface(`selinux_unmount_fs',`
 		type security_t;
 	')
 
-	dev_getattr_sysfs_fs($1)
-	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 	allow $1 security_t:filesystem unmount;
 ')
 
@@ -177,8 +172,10 @@ interface(`selinux_getattr_fs',`
 		type security_t;
 	')
 
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 	allow $1 security_t:filesystem getattr;
+
+	dev_getattr_sysfs($1)
+	dev_search_sysfs($1)
 ')
 
 ########################################
@@ -198,6 +195,9 @@ interface(`selinux_dontaudit_getattr_fs',`
 	')
 
 	dontaudit $1 security_t:filesystem getattr;
+
+	dev_dontaudit_getattr_sysfs($1)
+	dev_dontaudit_search_sysfs($1)
 ')
 
 ########################################
@@ -235,7 +235,6 @@ interface(`selinux_search_fs',`
 	')
 
 	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 	allow $1 security_t:dir search_dir_perms;
 ')
 
@@ -259,28 +258,6 @@ interface(`selinux_dontaudit_search_fs',`
 
 ########################################
 ## <summary>
-##	Mount on selinuxfs directories.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`selinux_mounton_fs',`
-	gen_require(`
-		type security_t;
-	')
-
-	dev_getattr_sysfs_fs($1)
-	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
-	allow $1 security_t:dir mounton;
-')
-
-
-########################################
-## <summary>
 ##	Do not audit attempts to read
 ##	generic selinuxfs entries
 ## </summary>
@@ -295,7 +272,6 @@ interface(`selinux_dontaudit_read_fs',`
 		type security_t;
 	')
 
-	selinux_dontaudit_getattr_fs($1)
 	dontaudit $1 security_t:dir search_dir_perms;
 	dontaudit $1 security_t:file read_file_perms;
 ')
@@ -318,10 +294,8 @@ interface(`selinux_get_enforce_mode',`
 	')
 
 	dev_search_sysfs($1)
-	selinux_get_fs_mount($1)
 	allow $1 security_t:dir list_dir_perms;
 	allow $1 security_t:file read_file_perms;
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 ')
 
 ########################################
@@ -348,13 +322,9 @@ interface(`selinux_get_enforce_mode',`
 #
 interface(`selinux_set_enforce_mode',`
 	gen_require(`
-		type security_t;
 		attribute can_setenforce;
 	')
 
-	dev_search_sysfs($1)
-	allow $1 security_t:dir list_dir_perms;
-	allow $1 security_t:file rw_file_perms;
 	typeattribute $1 can_setenforce;
 ')
 
@@ -370,14 +340,9 @@ interface(`selinux_set_enforce_mode',`
 #
 interface(`selinux_load_policy',`
 	gen_require(`
-		type security_t;
 		attribute can_load_policy;
 	')
 
-	dev_search_sysfs($1)
-	allow $1 security_t:dir list_dir_perms;
-	allow $1 security_t:file rw_file_perms;
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 	typeattribute $1 can_load_policy;
 ')
 
@@ -399,40 +364,7 @@ interface(`selinux_read_policy',`
 	dev_search_sysfs($1)
 	allow $1 security_t:dir list_dir_perms;
 	allow $1 security_t:file read_file_perms;
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 	allow $1 security_t:security read_policy;
-')
-
-########################################
-## <summary>
-##	Allow caller to set the state of Booleans to
-##	enable or disable conditional portions of the policy.  (Deprecated)
-## </summary>
-## <desc>
-##	<p>
-##	Allow caller to set the state of Booleans to
-##	enable or disable conditional portions of the policy.
-##	</p>
-##	<p>
-##	Since this is a security event, this action is
-##	always audited.
-##	</p>
-##	<p>
-##	This interface has been deprecated.  Please use
-##	selinux_set_generic_booleans() or selinux_set_all_booleans()
-##	instead.
-##	</p>
-## </desc>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
-interface(`selinux_set_boolean',`
-	refpolicywarn(`$0($*) has been deprecated, use selinux_set_generic_booleans() instead.')
-	selinux_set_generic_booleans($1)
 ')
 
 ########################################
@@ -460,15 +392,14 @@ interface(`selinux_set_boolean',`
 interface(`selinux_set_generic_booleans',`
 	gen_require(`
 		type security_t;
-		attribute can_setbool;
 	')
 
-	typeattribute $1 can_setbool;
 	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
+
 	allow $1 security_t:dir list_dir_perms;
 	allow $1 security_t:file rw_file_perms;
 
+	allow $1 security_t:security setbool;
 ')
 
 ########################################
@@ -497,16 +428,20 @@ interface(`selinux_set_all_booleans',`
 	gen_require(`
 		type security_t, secure_mode_policyload_t;
 		attribute boolean_type;
-		attribute can_setbool;
+		bool secure_mode_policyload;
 	')
 
-	typeattribute $1 can_setbool;
-	dev_getattr_sysfs_fs($1)
 	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
+
 	allow $1 security_t:dir list_dir_perms;
-	allow $1 boolean_type:dir list_dir_perms;
-	allow $1 boolean_type:file rw_file_perms;
+	allow $1 { boolean_type -secure_mode_policyload_t }:file rw_file_perms;
+	allow $1 secure_mode_policyload_t:file read_file_perms;
+
+	allow $1 security_t:security setbool;
+
+	if(!secure_mode_policyload) {
+		allow $1 secure_mode_policyload_t:file write_file_perms;
+	}
 ')
 
 ########################################
@@ -533,17 +468,9 @@ interface(`selinux_set_all_booleans',`
 #
 interface(`selinux_set_parameters',`
 	gen_require(`
-		type security_t;
 		attribute can_setsecparam;
 	')
 
-	dev_getattr_sysfs_fs($1)
-	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
-	allow $1 security_t:dir list_dir_perms;
-	allow $1 security_t:file rw_file_perms;
-	allow $1 security_t:security setsecparam;
-	auditallow $1 security_t:security setsecparam;
 	typeattribute $1 can_setsecparam;
 ')
 
@@ -563,11 +490,9 @@ interface(`selinux_validate_context',`
 		type security_t;
 	')
 
-	dev_getattr_sysfs_fs($1)
 	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 	allow $1 security_t:dir list_dir_perms;
-	allow $1 security_t:file { map rw_file_perms };
+	allow $1 security_t:file rw_file_perms;
 	allow $1 security_t:security check_context;
 ')
 
@@ -608,9 +533,8 @@ interface(`selinux_compute_access_vector',`
 		type security_t;
 	')
 
-	dev_getattr_sysfs_fs($1)
 	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
+	allow $1 self:netlink_selinux_socket create_socket_perms;
 	allow $1 security_t:dir list_dir_perms;
 	allow $1 security_t:file rw_file_perms;
 	allow $1 security_t:security compute_av;
@@ -632,9 +556,7 @@ interface(`selinux_compute_create_context',`
 		type security_t;
 	')
 
-	dev_getattr_sysfs_fs($1)
 	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 	allow $1 security_t:dir list_dir_perms;
 	allow $1 security_t:file rw_file_perms;
 	allow $1 security_t:security compute_create;
@@ -656,9 +578,7 @@ interface(`selinux_compute_member',`
 		type security_t;
 	')
 
-	dev_getattr_sysfs_fs($1)
 	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 	allow $1 security_t:dir list_dir_perms;
 	allow $1 security_t:file rw_file_perms;
 	allow $1 security_t:security compute_member;
@@ -688,35 +608,10 @@ interface(`selinux_compute_relabel_context',`
 		type security_t;
 	')
 
-	dev_getattr_sysfs_fs($1)
 	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 	allow $1 security_t:dir list_dir_perms;
 	allow $1 security_t:file rw_file_perms;
 	allow $1 security_t:security compute_relabel;
-')
-
-########################################
-## <summary>
-##	Allows caller to setcheckreqprot
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`selinux_setcheckreqprot',`
-	gen_require(`
-		type security_t;
-	')
-
-	dev_getattr_sysfs_fs($1)
-	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
-	allow $1 security_t:dir list_dir_perms;
-	allow $1 security_t:file rw_file_perms;
-	allow $1 security_t:security setcheckreqprot;
 ')
 
 ########################################
@@ -734,12 +629,30 @@ interface(`selinux_compute_user_contexts',`
 		type security_t;
 	')
 
-	dev_getattr_sysfs_fs($1)
 	dev_search_sysfs($1)
-	allow $1 security_t:lnk_file read_lnk_file_perms;
 	allow $1 security_t:dir list_dir_perms;
 	allow $1 security_t:file rw_file_perms;
 	allow $1 security_t:security compute_user;
+')
+
+########################################
+## <summary>
+##	Allows caller to map secuirty_t files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+
+interface(`selinux_map_security_files',`
+	gen_require(`
+		type security_t;
+	')
+
+	dev_search_sysfs($1)
+	allow $1 security_t:file map;
 ')
 
 ########################################
@@ -758,28 +671,4 @@ interface(`selinux_unconfined',`
 	')
 
 	typeattribute $1 selinux_unconfined_type;
-	selinux_set_all_booleans($1)
-	selinux_load_policy($1)
-	selinux_set_parameters($1)
-	selinux_set_enforce_mode($1)
-')
-
-########################################
-## <summary>
-##	Generate a file context for a boolean type
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`selinux_genbool',`
-	gen_require(`
-		attribute boolean_type;
-	')
-
-	type $1, boolean_type;
-	fs_type($1)
-	mls_trusted_object($1)
 ')

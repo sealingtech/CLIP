@@ -6,16 +6,9 @@
 
 ## <desc>
 ## <p>
-## disallow programs, such as
+## Enabling secure mode disallows programs, such as
 ## newrole, from transitioning to administrative
 ## user domains.
 ## </p>
 ## </desc>
 gen_bool(secure_mode,false)
-
-## <desc>
-## <p>
-##	Allow programs from updating the AIDE DB.
-## </p>
-## </desc>
-gen_bool(aide_enable_write_db,true)

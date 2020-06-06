@@ -8,6 +8,27 @@
 
 ########################################
 ## <summary>
+##	Allows the kernel to start userland processes
+##	by dynamic transitions to the specified domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	The process type entered by the kernel.
+##	</summary>
+## </param>
+#
+interface(`kernel_dyntrans_to',`
+	gen_require(`
+		type kernel_t;
+	')
+
+	domain_dyntrans_type(kernel_t)
+	allow kernel_t self:process setcurrent;
+	allow kernel_t $1:process dyntransition;
+')
+
+########################################
+## <summary>
 ##	Allows to start userland processes
 ##	by transitioning to the specified domain.
 ## </summary>
@@ -61,7 +82,6 @@ interface(`kernel_ranged_domtrans_to',`
 
 	ifdef(`enable_mcs',`
 		range_transition kernel_t $2:process $3;
-		mls_rangetrans_target($1)
 	')
 
 	ifdef(`enable_mls',`
@@ -127,24 +147,6 @@ interface(`kernel_setsched',`
 
 ########################################
 ## <summary>
-##	Dontaudit attempts to set the priority of kernel threads.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_dontaudit_setsched',`
-	gen_require(`
-		type kernel_t;
-	')
-
-	dontaudit $1 kernel_t:process setsched;
-')
-
-########################################
-## <summary>
 ##	Send a SIGCHLD signal to kernel threads.
 ## </summary>
 ## <param name="domain">
@@ -195,24 +197,6 @@ interface(`kernel_signal',`
 	')
 
 	allow $1 kernel_t:process signal;
-')
-
-########################################
-## <summary>
-##	Send signull to kernel threads.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_signull',`
-	gen_require(`
-		type kernel_t;
-	')
-
-	allow $1 kernel_t:process signull;
 ')
 
 ########################################
@@ -291,6 +275,25 @@ interface(`kernel_rw_pipes',`
 
 ########################################
 ## <summary>
+##	Read/write to kernel using a unix
+##	domain stream socket.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_rw_stream_sockets',`
+	gen_require(`
+		type kernel_t;
+	')
+
+	allow $1 kernel_t:unix_stream_socket rw_socket_perms;
+')
+
+########################################
+## <summary>
 ##	Connect to kernel using a unix
 ##	domain stream socket.
 ## </summary>
@@ -310,6 +313,24 @@ interface(`kernel_stream_connect',`
 
 ########################################
 ## <summary>
+##	Getattr on kernel unix datagram sockets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_getattr_dgram_sockets',`
+	gen_require(`
+		type kernel_t;
+	')
+
+	allow $1 kernel_t:unix_dgram_socket getattr;
+')
+
+########################################
+## <summary>
 ##	Read and write kernel unix datagram sockets.
 ## </summary>
 ## <param name="domain">
@@ -323,7 +344,7 @@ interface(`kernel_rw_unix_dgram_sockets',`
 		type kernel_t;
 	')
 
-	allow $1 kernel_t:unix_dgram_socket { getattr read write ioctl };
+	allow $1 kernel_t:unix_dgram_socket { read write ioctl };
 ')
 
 ########################################
@@ -342,48 +363,6 @@ interface(`kernel_dgram_send',`
 	')
 
 	allow $1 kernel_t:unix_dgram_socket sendto;
-')
-
-########################################
-## <summary>
-##	Receive messages from kernel TCP sockets.  (Deprecated)
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_tcp_recvfrom',`
-	refpolicywarn(`$0($*) has been deprecated.')
-')
-
-########################################
-## <summary>
-##	Send UDP network traffic to the kernel.  (Deprecated)
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_udp_send',`
-	refpolicywarn(`$0($*) has been deprecated.')
-')
-
-########################################
-## <summary>
-##	Receive messages from kernel UDP sockets.  (Deprecated)
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_udp_recvfrom',`
-	refpolicywarn(`$0($*) has been deprecated.')
 ')
 
 ########################################
@@ -478,6 +457,60 @@ interface(`kernel_dontaudit_link_key',`
 
 ########################################
 ## <summary>
+##	Allow view the kernel key ring.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_view_key',`
+	gen_require(`
+		type kernel_t;
+	')
+
+	allow $1 kernel_t:key view;
+')
+
+########################################
+## <summary>
+##	dontaudit view the kernel key ring.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`kernel_dontaudit_view_key',`
+	gen_require(`
+		type kernel_t;
+	')
+
+	dontaudit $1 kernel_t:key view;
+')
+
+########################################
+## <summary>
+##	allow write access to the kernel key ring.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to allow.
+##	</summary>
+## </param>
+#
+interface(`kernel_write_key',`
+	gen_require(`
+		type kernel_t;
+	')
+
+	allow $1 kernel_t:key write;
+')
+
+########################################
+## <summary>
 ##	Allows caller to read the ring buffer.
 ## </summary>
 ## <param name="domain">
@@ -532,14 +565,6 @@ interface(`kernel_change_ring_buffer_level',`
 
 	allow $1 self:capability2 syslog;
 	allow $1 kernel_t:system syslog_console;
-
-	ifdef(`distro_rhel4',`
-		allow $1 self:capability sys_admin;
-	')
-
-	ifdef(`distro_rhel5',`
-		allow $1 self:capability sys_admin;
-	')
 ')
 
 ########################################
@@ -560,14 +585,6 @@ interface(`kernel_clear_ring_buffer',`
 
 	allow $1 self:capability2 syslog;
 	allow $1 kernel_t:system syslog_mod;
-
-	ifdef(`distro_rhel4',`
-		allow $1 self:capability sys_admin;
-	')
-
-	ifdef(`distro_rhel5',`
-		allow $1 self:capability sys_admin;
-	')
 ')
 
 ########################################
@@ -799,8 +816,8 @@ interface(`kernel_manage_debugfs',`
 	')
 
 	manage_files_pattern($1, debugfs_t, debugfs_t)
-    manage_dirs_pattern($1,debugfs_t, debugfs_t)
 	read_lnk_files_pattern($1, debugfs_t, debugfs_t)
+	list_dirs_pattern($1, debugfs_t, debugfs_t)
 ')
 
 ########################################
@@ -823,7 +840,7 @@ interface(`kernel_mount_kvmfs',`
 
 ########################################
 ## <summary>
-##	Mount the proc filesystem.
+##	mount the proc filesystem.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -837,6 +854,24 @@ interface(`kernel_mount_proc',`
 	')
 
 	allow $1 proc_t:filesystem mount;
+')
+
+########################################
+## <summary>
+##	remount the proc filesystem.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_remount_proc',`
+	gen_require(`
+		type proc_t;
+	')
+
+	allow $1 proc_t:filesystem remount;
 ')
 
 ########################################
@@ -859,24 +894,6 @@ interface(`kernel_unmount_proc',`
 
 ########################################
 ## <summary>
-##	Mounton a proc filesystem.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_mounton_proc',`
-	gen_require(`
-		type proc_t;
-	')
-
-	allow $1 proc_t:dir mounton;
-')
-
-########################################
-## <summary>
 ##	Get the attributes of the proc filesystem.
 ## </summary>
 ## <param name="domain">
@@ -891,6 +908,25 @@ interface(`kernel_getattr_proc',`
 	')
 
 	allow $1 proc_t:filesystem getattr;
+')
+
+########################################
+## <summary>
+##	Mount on proc directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`kernel_mounton_proc',`
+	gen_require(`
+		type proc_t;
+	')
+
+	allow $1 proc_t:dir mounton;
 ')
 
 ########################################
@@ -988,6 +1024,24 @@ interface(`kernel_dontaudit_write_proc_dirs',`
 
 ########################################
 ## <summary>
+##	Mount the directories in /proc.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_mounton_proc_dirs',`
+	gen_require(`
+		type proc_t;
+	')
+
+	allow $1 proc_t:dir mounton;
+')
+
+########################################
+## <summary>
 ##	Get the attributes of files in /proc.
 ## </summary>
 ## <param name="domain">
@@ -1064,10 +1118,13 @@ interface(`kernel_read_proc_symlinks',`
 #
 interface(`kernel_read_system_state',`
 	gen_require(`
-		attribute kernel_system_state_reader;
+		type proc_t;
 	')
 
-	typeattribute $1 kernel_system_state_reader;
+	read_files_pattern($1, proc_t, proc_t)
+	read_lnk_files_pattern($1, proc_t, proc_t)
+
+	list_dirs_pattern($1, proc_t, proc_t)
 ')
 
 ########################################
@@ -1095,44 +1152,6 @@ interface(`kernel_write_proc_files',`
 
 ########################################
 ## <summary>
-##	Do not audit attempts to write the
-##	file in /proc.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain to not audit.
-##	</summary>
-## </param>
-#
-interface(`kernel_dontaudit_write_proc_files',`
-	gen_require(`
-		type proc_t;
-	')
-
-	dontaudit $1 proc_t:file write;
-')
-
-########################################
-## <summary>
-##	Do not audit attempts to check the 
-##	access on generic proc entries.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain to not audit.
-##	</summary>
-## </param>
-#
-interface(`kernel_dontaudit_access_check_proc',`
-	gen_require(`
-		type proc_t;
-	')
-
-	dontaudit $1 proc_t:dir_file_class_set audit_access;
-')
-
-########################################
-## <summary>
 ##	Do not audit attempts by caller to
 ##	read system state information in proc.
 ## </summary>
@@ -1153,7 +1172,7 @@ interface(`kernel_dontaudit_read_system_state',`
 ########################################
 ## <summary>
 ##	Do not audit attempts by caller to
-##	read system state information in proc.
+##	read symbolic links in proc.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -1294,24 +1313,6 @@ interface(`kernel_read_core_if',`
 
 ########################################
 ## <summary>
-##	Allow caller to mounton the kernel messages file
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_mounton_core_if',`
-	gen_require(`
-		type proc_kcore_t;
-	')
-
-	allow $1 proc_kcore_t:file mounton;
-')
-
-########################################
-## <summary>
 ##	Allow caller to read kernel messages
 ##	using the /proc/kmsg interface.
 ## </summary>
@@ -1330,24 +1331,6 @@ interface(`kernel_read_messages',`
 	read_files_pattern($1, proc_t, proc_kmsg_t)
 
 	typeattribute $1 can_receive_kernel_messages;
-')
-
-########################################
-## <summary>
-##	Allow caller to mounton the kernel messages file
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_mounton_messages',`
-	gen_require(`
-		type proc_kmsg_t;
-	')
-
-	allow $1 proc_kmsg_t:file mounton;
 ')
 
 ########################################
@@ -1382,10 +1365,30 @@ interface(`kernel_getattr_message_if',`
 #
 interface(`kernel_dontaudit_getattr_message_if',`
 	gen_require(`
-		type proc_kmsg_t, proc_t;
+		type proc_kmsg_t;
 	')
 
 	dontaudit $1 proc_kmsg_t:file getattr;
+')
+
+########################################
+## <summary>
+##	Mount on kernel message interfaces files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`kernel_mounton_message_if',`
+	gen_require(`
+		type proc_t, proc_kmsg_t;
+	')
+
+	allow $1 proc_t:dir list_dir_perms;
+	allow $1 proc_kmsg_t:file { getattr mounton };
 ')
 
 ########################################
@@ -1421,7 +1424,7 @@ interface(`kernel_dontaudit_search_network_state',`
 #
 interface(`kernel_search_network_state',`
 	gen_require(`
-		type proc_net_t;
+		type proc_t, proc_net_t;
 	')
 
 	search_dirs_pattern($1, proc_t, proc_net_t)
@@ -1602,25 +1605,6 @@ interface(`kernel_list_all_proc',`
 
 ########################################
 ## <summary>
-##	Allow attempts to mounton all proc directories.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_mounton_all_proc',`
-	gen_require(`
-		attribute proc_type;
-	')
-
-	allow $1 proc_type:dir mounton;
-	allow $1 proc_type:file mounton;
-')
-
-########################################
-## <summary>
 ##	Do not audit attempts to list all proc directories.
 ## </summary>
 ## <param name="domain">
@@ -1636,25 +1620,6 @@ interface(`kernel_dontaudit_list_all_proc',`
 
 	dontaudit $1 proc_type:dir list_dir_perms;
 	dontaudit $1 proc_type:file getattr;
-')
-
-########################################
-## <summary>
-##	Allow attempts to read all proc types.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_read_all_proc',`
-	gen_require(`
-		attribute proc_type;
-		type proc_kcore_t;
-	')
-
-	read_files_pattern($1, { proc_type -proc_kcore_t }, { proc_type -proc_kcore_t })
 ')
 
 ########################################
@@ -1679,6 +1644,26 @@ interface(`kernel_dontaudit_search_sysctl',`
 
 ########################################
 ## <summary>
+##	Mount on sysctl_t dirs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`kernel_mounton_sysctl_dirs',`
+	gen_require(`
+		type proc_t, sysctl_t;
+	')
+
+	allow $1 proc_t:dir list_dir_perms;
+	allow $1 sysctl_t:dir { getattr mounton };
+')
+
+########################################
+## <summary>
 ##	Allow access to read sysctl directories.
 ## </summary>
 ## <param name="domain">
@@ -1695,6 +1680,26 @@ interface(`kernel_read_sysctl',`
 
 	list_dirs_pattern($1, proc_t, sysctl_t)
 	read_files_pattern($1, sysctl_t, sysctl_t)
+')
+
+########################################
+## <summary>
+##	Mount on sysctl files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`kernel_mounton_sysctl_files',`
+	gen_require(`
+		type proc_t, sysctl_t;
+	')
+
+	allow $1 { proc_t sysctl_t }:dir list_dir_perms;
+	allow $1 sysctl_t:file { getattr mounton };
 ')
 
 ########################################
@@ -1854,7 +1859,7 @@ interface(`kernel_read_net_sysctls',`
 	')
 
 	read_files_pattern($1, { proc_t sysctl_t sysctl_net_t }, sysctl_net_t)
-	read_lnk_files_pattern($1, { proc_t sysctl_t sysctl_net_t }, sysctl_net_t)
+
 	list_dirs_pattern($1, { proc_t sysctl_t }, sysctl_net_t)
 ')
 
@@ -1875,7 +1880,7 @@ interface(`kernel_rw_net_sysctls',`
 	')
 
 	rw_files_pattern($1, { proc_t sysctl_t sysctl_net_t }, sysctl_net_t)
-	read_lnk_files_pattern($1, { proc_t sysctl_t sysctl_net_t }, sysctl_net_t)
+
 	list_dirs_pattern($1, { proc_t sysctl_t }, sysctl_net_t)
 ')
 
@@ -1897,7 +1902,8 @@ interface(`kernel_read_unix_sysctls',`
 	')
 
 	read_files_pattern($1, { proc_t sysctl_t sysctl_net_t }, sysctl_net_unix_t)
-	list_dirs_pattern($1, { proc_t sysctl_t }, sysctl_net_t)
+
+	list_dirs_pattern($1, { proc_t sysctl_t }, { sysctl_net_t sysctl_net_unix_t })
 ')
 
 ########################################
@@ -1919,7 +1925,7 @@ interface(`kernel_rw_unix_sysctls',`
 
 	rw_files_pattern($1, { proc_t sysctl_t sysctl_net_t }, sysctl_net_unix_t)
 
-	list_dirs_pattern($1, { proc_t sysctl_t }, sysctl_net_t)
+	list_dirs_pattern($1, { proc_t sysctl_t }, { sysctl_net_t sysctl_net_unix_t })
 ')
 
 ########################################
@@ -1931,9 +1937,16 @@ interface(`kernel_rw_unix_sysctls',`
 ##	Domain allowed access.
 ##	</summary>
 ## </param>
+## <rolecap/>
 #
 interface(`kernel_read_hotplug_sysctls',`
-    refpolicywarn(`$0($*) has been deprecated.')
+	gen_require(`
+		type proc_t, sysctl_t, sysctl_kernel_t, sysctl_hotplug_t;
+	')
+
+	read_files_pattern($1, { proc_t sysctl_t sysctl_kernel_t }, sysctl_hotplug_t)
+
+	list_dirs_pattern($1, { proc_t sysctl_t }, sysctl_kernel_t)
 ')
 
 ########################################
@@ -1945,9 +1958,16 @@ interface(`kernel_read_hotplug_sysctls',`
 ##	Domain allowed access.
 ##	</summary>
 ## </param>
+## <rolecap/>
 #
 interface(`kernel_rw_hotplug_sysctls',`
-    refpolicywarn(`$0($*) has been deprecated.')
+	gen_require(`
+		type proc_t, sysctl_t, sysctl_kernel_t, sysctl_hotplug_t;
+	')
+
+	rw_files_pattern($1, { proc_t sysctl_t sysctl_kernel_t }, sysctl_hotplug_t)
+
+	list_dirs_pattern($1, { proc_t sysctl_t }, sysctl_kernel_t)
 ')
 
 ########################################
@@ -1959,9 +1979,16 @@ interface(`kernel_rw_hotplug_sysctls',`
 ##	Domain allowed access.
 ##	</summary>
 ## </param>
+## <rolecap/>
 #
 interface(`kernel_read_modprobe_sysctls',`
-    refpolicywarn(`$0($*) has been deprecated.')
+	gen_require(`
+		type proc_t, sysctl_t, sysctl_kernel_t, sysctl_modprobe_t;
+	')
+
+	read_files_pattern($1, { proc_t sysctl_t sysctl_kernel_t }, sysctl_modprobe_t)
+
+	list_dirs_pattern($1, { proc_t sysctl_t }, sysctl_kernel_t)
 ')
 
 ########################################
@@ -1973,9 +2000,16 @@ interface(`kernel_read_modprobe_sysctls',`
 ##	Domain allowed access.
 ##	</summary>
 ## </param>
+## <rolecap/>
 #
 interface(`kernel_rw_modprobe_sysctls',`
-    refpolicywarn(`$0($*) has been deprecated.')
+	gen_require(`
+		type proc_t, sysctl_t, sysctl_kernel_t, sysctl_modprobe_t;
+	')
+
+	rw_files_pattern($1, { proc_t sysctl_t sysctl_kernel_t }, sysctl_modprobe_t)
+
+	list_dirs_pattern($1, { proc_t sysctl_t }, sysctl_kernel_t)
 ')
 
 ########################################
@@ -1994,6 +2028,24 @@ interface(`kernel_dontaudit_search_kernel_sysctl',`
 	')
 
 	dontaudit $1 sysctl_kernel_t:dir search;
+')
+
+#######################################
+## <summary>
+##	Do not audit attempted reading of kernel sysctls
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit accesses from
+##	</summary>
+## </param>
+#
+interface(`kernel_dontaudit_read_kernel_sysctl',`
+	gen_require(`
+		type sysctl_kernel_t;
+	')
+
+	dontaudit $1 sysctl_kernel_t:file read_file_perms;
 ')
 
 ########################################
@@ -2094,6 +2146,105 @@ interface(`kernel_rw_kernel_sysctl',`
 	rw_files_pattern($1, { proc_t sysctl_t sysctl_kernel_t }, sysctl_kernel_t)
 
 	list_dirs_pattern($1, { proc_t sysctl_t }, sysctl_kernel_t)
+')
+
+#######################################
+## <summary>
+##	Mount on kernel sysctl files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`kernel_mounton_kernel_sysctl_files',`
+	gen_require(`
+		type proc_t, sysctl_t, sysctl_kernel_t;
+	')
+
+	allow $1 { proc_t sysctl_t sysctl_kernel_t }:dir list_dir_perms;
+	allow $1 sysctl_kernel_t:file { getattr mounton };
+')
+
+########################################
+## <summary>
+##	Read kernel ns lastpid sysctls.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`kernel_read_kernel_ns_lastpid_sysctls',`
+	gen_require(`
+		type proc_t, sysctl_t, sysctl_kernel_ns_last_pid_t;
+	')
+
+	read_files_pattern($1, { proc_t sysctl_t sysctl_kernel_ns_last_pid_t }, sysctl_kernel_ns_last_pid_t)
+
+	list_dirs_pattern($1, { proc_t sysctl_t }, sysctl_kernel_ns_last_pid_t)
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to write kernel ns lastpid sysctls.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`kernel_dontaudit_write_kernel_ns_lastpid_sysctl',`
+	gen_require(`
+		type sysctl_kernel_ns_last_pid_t;
+	')
+
+	dontaudit $1 sysctl_kernel_ns_last_pid_t:file write;
+')
+
+########################################
+## <summary>
+##	Read and write kernel ns lastpid sysctls.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`kernel_rw_kernel_ns_lastpid_sysctl',`
+	gen_require(`
+		type proc_t, sysctl_t, sysctl_kernel_ns_last_pid_t;
+	')
+
+	rw_files_pattern($1, { proc_t sysctl_t sysctl_kernel_ns_last_pid_t }, sysctl_kernel_ns_last_pid_t)
+
+	list_dirs_pattern($1, { proc_t sysctl_t }, sysctl_kernel_ns_last_pid_t)
+')
+
+########################################
+## <summary>
+##	Search filesystem sysctl directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`kernel_search_fs_sysctls',`
+	gen_require(`
+		type proc_t, sysctl_t, sysctl_fs_t;
+	')
+
+	search_dirs_pattern($1, { proc_t sysctl_t sysctl_fs_t }, sysctl_fs_t)
 ')
 
 ########################################
@@ -2238,54 +2389,7 @@ interface(`kernel_dontaudit_list_all_sysctls',`
 	')
 
 	dontaudit $1 sysctl_type:dir list_dir_perms;
-	dontaudit $1 sysctl_type:file read_file_perms;
-')
-
-########################################
-## <summary>
-##	Allow attempts to mounton all sysctl directories.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_mounton_all_sysctls',`
-	gen_require(`
-		attribute sysctl_type;
-	')
-
-	allow $1 sysctl_type:dir mounton;
-')
-
-########################################
-## <summary>
-##	Allow attempts to mounton all filesystems used by ProtectKernelTunables systemd feature.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_mounton_systemd_ProtectKernelTunables',`
-	gen_require(`
-		type sysctl_t;
-        type sysctl_irq_t;
-        type proc_t;
-        type mtrr_device_t;
-        type debugfs_t;
-        type cgroup_t;
-	')
-
-	allow $1 sysctl_t:dir mounton;
-	allow $1 sysctl_irq_t:dir mounton;
-	allow $1 proc_t:dir mounton;
-	allow $1 mtrr_device_t:dir mounton;
-	allow $1 debugfs_t:dir mounton;
-	allow $1 cgroup_t:dir mounton;
-
+	dontaudit $1 sysctl_type:file getattr;
 ')
 
 ########################################
@@ -2464,6 +2568,42 @@ interface(`kernel_sigchld_unlabeled',`
 
 ########################################
 ## <summary>
+##	Get the attributes of unlabeled directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_getattr_unlabeled_dirs',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	allow $1 unlabeled_t:dir getattr_dir_perms;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to search unlabeled directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`kernel_dontaudit_search_unlabeled',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	dontaudit $1 unlabeled_t:dir search_dir_perms;
+')
+
+########################################
+## <summary>
 ##	List unlabeled directories.
 ## </summary>
 ## <param name="domain">
@@ -2478,43 +2618,6 @@ interface(`kernel_list_unlabeled',`
 	')
 
 	allow $1 unlabeled_t:dir list_dir_perms;
-')
-
-########################################
-## <summary>
-##	Search unlabeled directories.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_search_unlabeled',`
-	gen_require(`
-		type unlabeled_t;
-	')
-
-	allow $1 unlabeled_t:dir search;
-')
-
-########################################
-## <summary>
-##	Delete unlabeled files
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_delete_unlabeled',`
-	gen_require(`
-		type unlabeled_t;
-	')
-
-	allow $1 unlabeled_t:dir delete_dir_perms;
-	allow $1 unlabeled_t:dir_file_class_set delete_file_perms;
 ')
 
 ########################################
@@ -2543,7 +2646,7 @@ interface(`kernel_read_unlabeled_state',`
 ## </summary>
 ## <param name="domain">
 ##	<summary>
-##	Domain to not audit.
+##	Domain allowed access.
 ##	</summary>
 ## </param>
 #
@@ -2575,6 +2678,78 @@ interface(`kernel_rw_unlabeled_dirs',`
 
 ########################################
 ## <summary>
+##	Delete unlabeled directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_delete_unlabeled_dirs',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	allow $1 unlabeled_t:dir delete_dir_perms;
+')
+
+########################################
+## <summary>
+##	Create, read, write, and delete unlabeled directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_manage_unlabeled_dirs',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	allow $1 unlabeled_t:dir manage_dir_perms;
+')
+
+########################################
+## <summary>
+##	Mount a filesystem on an unlabeled directory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_mounton_unlabeled_dirs',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	allow $1 unlabeled_t:dir { search_dir_perms mounton };
+')
+
+########################################
+## <summary>
+##	Read unlabeled files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_read_unlabeled_files',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	allow $1 unlabeled_t:file read_file_perms;
+')
+
+########################################
+## <summary>
 ##	Read and write unlabeled files.
 ## </summary>
 ## <param name="domain">
@@ -2589,6 +2764,42 @@ interface(`kernel_rw_unlabeled_files',`
 	')
 
 	allow $1 unlabeled_t:file rw_file_perms;
+')
+
+########################################
+## <summary>
+##	Delete unlabeled files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_delete_unlabeled_files',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	allow $1 unlabeled_t:file delete_file_perms;
+')
+
+########################################
+## <summary>
+##	Create, read, write, and delete unlabeled files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_manage_unlabeled_files',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	allow $1 unlabeled_t:file manage_file_perms;
 ')
 
 ########################################
@@ -2627,6 +2838,42 @@ interface(`kernel_dontaudit_read_unlabeled_files',`
 	')
 
 	dontaudit $1 unlabeled_t:file { getattr read };
+')
+
+########################################
+## <summary>
+##	Delete unlabeled symbolic links.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_delete_unlabeled_symlinks',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	delete_lnk_files_pattern($1, unlabeled_t, unlabeled_t)
+')
+
+########################################
+## <summary>
+##	Create, read, write, and delete unlabeled symbolic links.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_manage_unlabeled_symlinks',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	allow $1 unlabeled_t:lnk_file manage_lnk_file_perms;
 ')
 
 ########################################
@@ -2720,12 +2967,12 @@ interface(`kernel_rw_unlabeled_blk_files',`
 		type unlabeled_t;
 	')
 
-	allow $1 unlabeled_t:blk_file getattr;
+	allow $1 unlabeled_t:blk_file rw_blk_file_perms;
 ')
 
 ########################################
 ## <summary>
-##	Read and write unlabeled sockets.
+##	Delete unlabeled block device nodes.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -2733,12 +2980,30 @@ interface(`kernel_rw_unlabeled_blk_files',`
 ##	</summary>
 ## </param>
 #
-interface(`kernel_rw_unlabeled_socket',`
+interface(`kernel_delete_unlabeled_blk_files',`
 	gen_require(`
 		type unlabeled_t;
 	')
 
-	allow $1 unlabeled_t:socket rw_socket_perms;
+	delete_blk_files_pattern($1, unlabeled_t, unlabeled_t)
+')
+
+########################################
+## <summary>
+##	Create, read, write, and delete unlabeled block device nodes.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_manage_unlabeled_blk_files',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	allow $1 unlabeled_t:blk_file manage_blk_file_perms;
 ')
 
 ########################################
@@ -2762,6 +3027,62 @@ interface(`kernel_dontaudit_getattr_unlabeled_chr_files',`
 
 ########################################
 ## <summary>
+##	Do not audit attempts to
+##	write unlabeled character devices.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`kernel_dontaudit_write_unlabeled_chr_files',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	dontaudit $1 unlabeled_t:file write;
+')
+
+########################################
+## <summary>
+##	Delete unlabeled character device nodes.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_delete_unlabeled_chr_files',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	delete_chr_files_pattern($1, unlabeled_t, unlabeled_t)
+')
+
+
+########################################
+## <summary>
+##	Create, read, write, and delete unlabeled character device nodes.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_manage_unlabeled_chr_files',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	allow $1 unlabeled_t:chr_file manage_chr_file_perms;
+')
+
+########################################
+## <summary>
 ##	Allow caller to relabel unlabeled directories.
 ## </summary>
 ## <param name="domain">
@@ -2776,24 +3097,6 @@ interface(`kernel_relabelfrom_unlabeled_dirs',`
 	')
 
 	allow $1 unlabeled_t:dir { list_dir_perms relabelfrom };
-')
-
-########################################
-## <summary>
-##	Allow caller to relabel unlabeled filesystems.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_relabelfrom_unlabeled_fs',`
-	gen_require(`
-		type unlabeled_t;
-	')
-
-	allow $1 unlabeled_t:filesystem relabelfrom;
 ')
 
 ########################################
@@ -2855,6 +3158,24 @@ interface(`kernel_relabelfrom_unlabeled_pipes',`
 
 ########################################
 ## <summary>
+##	Delete unlabeled named pipes
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_delete_unlabeled_pipes',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	delete_fifo_files_pattern($1, unlabeled_t, unlabeled_t)
+')
+
+########################################
+## <summary>
 ##	Allow caller to relabel unlabeled named sockets.
 ## </summary>
 ## <param name="domain">
@@ -2872,6 +3193,23 @@ interface(`kernel_relabelfrom_unlabeled_sockets',`
 	allow $1 unlabeled_t:sock_file { getattr relabelfrom };
 ')
 
+########################################
+## <summary>
+##	Delete unlabeled named sockets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_delete_unlabeled_sockets',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	delete_sock_files_pattern($1, unlabeled_t, unlabeled_t)
+')
 ########################################
 ## <summary>
 ##	Send and receive messages from an
@@ -2940,24 +3278,6 @@ interface(`kernel_dontaudit_sendrecv_unlabeled_association',`
 
 ########################################
 ## <summary>
-##	Receive DCCP packets from an unlabeled connection.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_dccp_recvfrom_unlabeled',`
-	gen_require(`
-		type unlabeled_t;
-	')
-
-	allow $1 unlabeled_t:dccp_socket recvfrom;
-')
-
-########################################
-## <summary>
 ##	Receive TCP packets from an unlabeled connection.
 ## </summary>
 ## <desc>
@@ -2981,25 +3301,6 @@ interface(`kernel_tcp_recvfrom_unlabeled',`
 	')
 
 	allow $1 unlabeled_t:tcp_socket recvfrom;
-')
-
-########################################
-## <summary>
-##	Do not audit attempts to receive DCCP packets from an unlabeled
-##	connection.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain to not audit.
-##	</summary>
-## </param>
-#
-interface(`kernel_dontaudit_dccp_recvfrom_unlabeled',`
-	gen_require(`
-		type unlabeled_t;
-	')
-
-	dontaudit $1 unlabeled_t:dccp_socket recvfrom;
 ')
 
 ########################################
@@ -3113,33 +3414,6 @@ interface(`kernel_raw_recvfrom_unlabeled',`
 
 	allow $1 unlabeled_t:rawip_socket recvfrom;
 ')
-########################################
-## <summary>
-##	Read/Write Raw IP packets from an unlabeled connection.
-## </summary>
-## <desc>
-##	<p>
-##	Receive Raw IP packets from an unlabeled connection.
-##	</p>
-##	<p>
-##	The corenetwork interface corenet_raw_recv_unlabeled() should
-##	be used instead of this one.
-##	</p>
-## </desc>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_rw_unlabeled_rawip_socket',`
-	gen_require(`
-		type unlabeled_t;
-	')
-
-	allow $1 unlabeled_t:rawip_socket rw_socket_perms;
-')
-
 
 ########################################
 ## <summary>
@@ -3295,24 +3569,6 @@ interface(`kernel_relabelfrom_unlabeled_database',`
 
 ########################################
 ## <summary>
-##      Relabel to unlabeled context .
-## </summary>
-## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
-## </param>
-#
-interface(`kernel_relabelto_unlabeled',`
-	gen_require(`
-		type unlabeled_t;
-	')
-
-	allow $1 unlabeled_t:dir_file_class_set relabelto;
-')
-
-########################################
-## <summary>
 ##	Unconfined access to kernel module resources.
 ## </summary>
 ## <param name="domain">
@@ -3327,266 +3583,32 @@ interface(`kernel_unconfined',`
 	')
 
 	typeattribute $1 kern_unconfined;
-	kernel_load_module($1)	
+	kernel_load_module($1)
 ')
 
 ########################################
 ## <summary>
-##	Allow the specified domain to getattr on 
-##	the kernel with a unix socket.
+##	Read virtual memory overcommit sysctl.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
 ##	Domain allowed access.
 ##	</summary>
 ## </param>
+## <rolecap/>
 #
-interface(`kernel_stream_read',`
-	gen_require(`
-		type kernel_t;
-	')
-
-	allow $1 kernel_t:unix_stream_socket { read getattr };
-')
-
-#######################################
-## <summary>
-##  Allow the specified domain to write on 
-##  the kernel with a unix socket.
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-#
-interface(`kernel_stream_write',`
-    gen_require(`
-        type kernel_t;
-    ')
-
-    allow $1 kernel_t:unix_stream_socket { write getattr };
-')
-
-#######################################
-## <summary>
-##  Allow the specified domain to read/write on 
-##  the kernel with a unix socket.
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-#
-interface(`kernel_rw_stream_socket_perms',`
-    gen_require(`
-        type kernel_t;
-    ')
-
-    allow $1 kernel_t:unix_stream_socket rw_socket_perms;
-    allow $1 kernel_t:fd use;
-')
-
-########################################
-## <summary>
-##	Make the specified type usable for regular entries in proc
-## </summary>
-## <param name="type">
-##	<summary>
-##	Type to be used for /proc entries.
-##	</summary>
-## </param>
-#
-interface(`kernel_proc_type',`
-	gen_require(`
-		attribute proc_type;
-	')
-
-	typeattribute $1 proc_type;
-')
-
-########################################
-## <summary>
-##	Do not audit attempts by caller to get attributes on all sysctls.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain to not audit.
-##	</summary>
-## </param>
-#
-interface(`kernel_dontaudit_getattr_all_sysctls',`
-	gen_require(`
-		attribute sysctl_type;
-	')
-
-	dontaudit $1 sysctl_type:file getattr;
-')
-
-########################################
-## <summary>
-##	Read the process state (/proc/pid) of the kernel.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_read_state',`
-	gen_require(`
-		type kernel_t;
-	')
-
-	allow $1 kernel_t:dir search_dir_perms;
-	allow $1 kernel_t:file read_file_perms;
-	allow $1 kernel_t:lnk_file read_lnk_file_perms;
-')
-
-########################################
-## <summary>
-##	Dontaudit attempts to read the process state (/proc/pid) of the kernel.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_dontaudit_read_state',`
-	gen_require(`
-		type kernel_t;
-	')
-
-	dontaudit $1 kernel_t:dir search_dir_perms;
-	dontaudit $1 kernel_t:file read_file_perms;
-	dontaudit $1 kernel_t:lnk_file read_lnk_file_perms;
-')
-
-########################################
-## <summary>
-##	Allow searching of numa state directory.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-##
-#
-interface(`kernel_search_numa_state',`
-	gen_require(`
-		type proc_t, proc_numa_t;
-	')
-
-	search_dirs_pattern($1, proc_t, proc_numa_t)
-')
-
-########################################
-## <summary>
-##	Do not audit attempts to search the numa
-##	state directory.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain to not audit.
-##	</summary>
-## </param>
-##
-#
-interface(`kernel_dontaudit_search_numa_state',`
-	gen_require(`
-		type proc_numa_t;
-	')
-
-	dontaudit $1 proc_numa_t:dir search;
-')
-
-########################################
-## <summary>
-##	Allow caller to read the numa state information.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-##
-#
-interface(`kernel_read_numa_state',`
-	gen_require(`
-		type proc_t, proc_numa_t;
-	')
-
-	read_files_pattern($1, { proc_t proc_numa_t }, proc_numa_t)
-	read_lnk_files_pattern($1, { proc_t proc_numa_t }, proc_numa_t)
-
-	list_dirs_pattern($1, proc_t, proc_numa_t)
-')
-
-########################################
-## <summary>
-##	Allow caller to read the numa state symbolic links.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-##
-#
-interface(`kernel_read_numa_state_symlinks',`
-	gen_require(`
-		type proc_t, proc_numa_t;
-	')
-
-	read_lnk_files_pattern($1, { proc_t proc_numa_t }, proc_numa_t)
-
-	list_dirs_pattern($1, proc_t, proc_numa_t)
-')
-
-########################################
-## <summary>
-##	Allow caller to write numa state information.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-##
-#
-interface(`kernel_write_numa_state',`
-	gen_require(`
-		type proc_t, proc_numa_t;
-	')
-
-	write_files_pattern($1, { proc_t proc_numa_t }, proc_numa_t)
-')
-
-########################################
-## <summary>
-##	Allow caller to search virtual memory overcommit sysctls.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_search_vm_overcommit_sysctl',`
+interface(`kernel_read_vm_overcommit_sysctl',`
 	gen_require(`
 		type sysctl_vm_overcommit_t;
 	')
 
 	kernel_search_vm_sysctl($1)
-	search_dirs_pattern($1, sysctl_vm_overcommit_t, sysctl_vm_overcommit_t)
+	allow $1 sysctl_vm_overcommit_t:file read_file_perms;
 ')
 
 ########################################
 ## <summary>
-##	Allow caller to read virtual memory overcommit sysctls.
+##	Read and write virtual memory overcommit sysctl.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -3595,169 +3617,13 @@ interface(`kernel_search_vm_overcommit_sysctl',`
 ## </param>
 ## <rolecap/>
 #
-interface(`kernel_read_vm_overcommit_sysctls',`
+interface(`kernel_rw_vm_overcommit_sysctl',`
 	gen_require(`
 		type sysctl_vm_overcommit_t;
 	')
 
 	kernel_search_vm_sysctl($1)
-	read_files_pattern($1, sysctl_vm_overcommit_t, sysctl_vm_overcommit_t)
-')
-
-########################################
-## <summary>
-##	Read and write virtual memory overcommit sysctls.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
-interface(`kernel_rw_vm_overcommit_sysctls',`
-	gen_require(`
-		type sysctl_vm_overcommit_t;
-	')
-
-	kernel_search_vm_sysctl($1)
-	rw_files_pattern($1, sysctl_vm_overcommit_t, sysctl_vm_overcommit_t)
-	list_dirs_pattern($1, sysctl_vm_overcommit_t, sysctl_vm_overcommit_t)
-')
-
-########################################
-## <summary>
-##	Do not audit attempts to search the security
-##	state directory.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain to not audit.
-##	</summary>
-## </param>
-##
-#
-interface(`kernel_dontaudit_search_security_state',`
-	gen_require(`
-		type proc_security_t;
-	')
-
-	dontaudit $1 proc_security_t:dir search;
-')
-
-########################################
-## <summary>
-##	Do not audit attempts to getattr the security
-##	state.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain to not audit.
-##	</summary>
-## </param>
-##
-#
-interface(`kernel_dontaudit_getattr_security_state',`
-	gen_require(`
-		type proc_security_t;
-	')
-
-	dontaudit $1 proc_security_t:dir { getattr search };
-	dontaudit $1 proc_security_t:file getattr;
-')
-
-########################################
-## <summary>
-##	Allow searching of security state directory.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-##
-#
-interface(`kernel_search_security_state',`
-	gen_require(`
-		type proc_security_t;
-	')
-
-	search_dirs_pattern($1, proc_t, proc_security_t)
-')
-
-########################################
-## <summary>
-##	Read the security state information.
-## </summary>
-## <desc>
-##	<p>
-##	Allow the specified domain to read the security
-##	state information. 
-##	</p>
-## </desc>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <infoflow type="read" weight="10"/>
-## <rolecap/>
-#
-interface(`kernel_read_security_state',`
-	gen_require(`
-		type proc_t, proc_security_t;
-	')
-
-	read_files_pattern($1, { proc_t proc_security_t }, proc_security_t)
-	read_lnk_files_pattern($1, { proc_t proc_security_t }, proc_security_t)
-
-	list_dirs_pattern($1, proc_t, proc_security_t)
-')
-
-########################################
-## <summary>
-##	Write the security state information.
-## </summary>
-## <desc>
-##	<p>
-##	Allow the specified domain to write the security
-##	state information. 
-##	</p>
-## </desc>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <infoflow type="write" weight="10"/>
-## <rolecap/>
-#
-interface(`kernel_write_security_state',`
-	gen_require(`
-		type proc_t, proc_security_t;
-	')
-
-	write_files_pattern($1, { proc_t proc_security_t }, proc_security_t)
-')
-
-########################################
-## <summary>
-##	Allow caller to read the security state symbolic links.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_read_security_state_symlinks',`
-	gen_require(`
-		type proc_t, proc_security_t;
-	')
-
-	read_lnk_files_pattern($1, { proc_t proc_security_t }, proc_security_t)
-
-	list_dirs_pattern($1, proc_t, proc_security_t)
+	allow $1 sysctl_vm_overcommit_t:file rw_file_perms;
 ')
 
 ########################################
@@ -3780,7 +3646,7 @@ interface(`kernel_ib_access_unlabeled_pkeys',`
 
 ########################################
 ## <summary>
-##	Allow caller to read the security state symbolic links.
+##	Manage subnet on unlabeled Infiniband endports.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -3788,226 +3654,11 @@ interface(`kernel_ib_access_unlabeled_pkeys',`
 ##	</summary>
 ## </param>
 #
-interface(`kernel_rw_security_state',`
-	gen_require(`
-		type proc_t, proc_security_t;
-	')
-
-	rw_files_pattern($1, { proc_t proc_security_t }, proc_security_t)
-
-	list_dirs_pattern($1, proc_t, proc_security_t)
-')
-
-########################################
-## <summary>
-##	Dontaudit caller rw the security state symbolic links.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_dontaudit_rw_security_state',`
-	gen_require(`
-		type proc_t, proc_security_t;
-	')
-
-	dontaudit $1 proc_security_t:dir search;
-	dontaudit $1 proc_security_t:file { open read write };
-')
-
-########################################
-## <summary>
-##	Do not audit attempts to search the usermodehelper
-##	state directory.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain to not audit.
-##	</summary>
-## </param>
-##
-#
-interface(`kernel_dontaudit_search_usermodehelper_state',`
-	gen_require(`
-		type usermodehelper_t;
-	')
-
-	dontaudit $1 usermodehelper_t:dir search;
-')
-
-########################################
-## <summary>
-##	Allow searching of usermodehelper state directory.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-##
-#
-interface(`kernel_search_usermodehelper_state',`
-	gen_require(`
-		type usermodehelper_t;
-	')
-
-	search_dirs_pattern($1, proc_t, usermodehelper_t)
-')
-
-########################################
-## <summary>
-##	Read the usermodehelper state information.
-## </summary>
-## <desc>
-##	<p>
-##	Allow the specified domain to read the usermodehelpering
-##	state information. This includes several pieces
-##	of usermodehelpering information, such as usermodehelper interface
-##	names, usermodehelperfilter (iptables) statistics, protocol
-##	information, routes, and remote procedure call (RPC)
-##	information.
-##	</p>
-## </desc>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <infoflow type="read" weight="10"/>
-## <rolecap/>
-#
-interface(`kernel_read_usermodehelper_state',`
-	gen_require(`
-		type proc_t, usermodehelper_t;
-	')
-
-	read_files_pattern($1, { proc_t usermodehelper_t }, usermodehelper_t)
-	read_lnk_files_pattern($1, { proc_t usermodehelper_t }, usermodehelper_t)
-
-	list_dirs_pattern($1, proc_t, usermodehelper_t)
-')
-
-########################################
-## <summary>
-##	Allow caller to read the usermodehelper state symbolic links.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_read_usermodehelper_state_symlinks',`
-	gen_require(`
-		type proc_t, usermodehelper_t;
-	')
-
-	read_lnk_files_pattern($1, { proc_t usermodehelper_t }, usermodehelper_t)
-
-	list_dirs_pattern($1, proc_t, usermodehelper_t)
-')
-
-########################################
-## <summary>
-##	Read and write usermodehelper state
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
-interface(`kernel_rw_usermodehelper_state',`
-	gen_require(`
-		type proc_t, usermodehelper_t;
-	')
-
-	dev_search_sysfs($1)
-	rw_files_pattern($1, proc_t, usermodehelper_t)
-	list_dirs_pattern($1, proc_t, usermodehelper_t)
-')
-
-########################################
-## <summary>
-##      Relabel to usermodehelper context .
-## </summary>
-## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
-## </param>
-#
-interface(`kernel_relabelto_usermodehelper',`
-	gen_require(`
-		type usermodehelper_t;
-	')
-
-	allow $1 usermodehelper_t:file relabelto;
-')
-
-########################################
-## <summary>
-##      Execute an unlabeled file in the specified domain.
-## </summary>
-## <param name="domain">
-##      <summary>
-##      Domain allowed to transition.
-##      </summary>
-## </param>
-## <param name="target_domain">
-##      <summary>
-##      The type of the new process.
-##      </summary>
-## </param>
-#
-interface(`kernel_unlabeled_domtrans',`
-	gen_require(`
-		type unlabeled_t;
-        ')
-
-	read_lnk_files_pattern($1, unlabeled_t, unlabeled_t)
-	domain_transition_pattern($1, unlabeled_t, $2)
-	type_transition $1 unlabeled_t:process $2;
-')
-
-
-
-########################################
-## <summary>
-##      Make general progams without labeles an entrypoint for
-##      the specified domain.
-## </summary>
-## <param name="domain">
-##      <summary>
-##      The domain for which unlabeled_t is an entrypoint.
-##      </summary>
-## </param>
-#
-interface(`kernel_unlabeled_entry_type',`
+interface(`kernel_ib_manage_subnet_unlabeled_endports',`
 	gen_require(`
 		type unlabeled_t;
 	')
 
-	domain_entry_file($1, unlabeled_t)
+	allow $1 unlabeled_t:infiniband_endport manage_subnet;
 ')
 
-########################################
-## <summary>
-##      Allow view the kernel key ring.
-## </summary>
-## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
-## </param>
-#
-interface(`kernel_view_key',`
-        gen_require(`
-		type kernel_t;
-	')
-
-	allow $1 kernel_t:key view;
-')

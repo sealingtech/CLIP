@@ -1,4 +1,4 @@
-policy_module(consoletype, 1.10.0)
+policy_module(consoletype, 1.12.0)
 
 ########################################
 #
@@ -7,8 +7,8 @@ policy_module(consoletype, 1.10.0)
 
 type consoletype_t;
 type consoletype_exec_t;
-application_domain(consoletype_t, consoletype_exec_t)
-role system_r types consoletype_t;
+init_domain(consoletype_t, consoletype_exec_t)
+init_system_domain(consoletype_t, consoletype_exec_t)
 
 ########################################
 #
@@ -16,7 +16,7 @@ role system_r types consoletype_t;
 #
 
 allow consoletype_t self:capability { sys_admin sys_tty_config };
-allow consoletype_t self:process ~{ ptrace setcurrent setexec setfscreate setrlimit execmem execstack execheap };
+allow consoletype_t self:process { transition signal_perms getsched setsched getsession getpgid setpgid getcap setcap share getattr noatsecure siginh rlimitinh dyntransition setkeycreate setsockcreate getrlimit };
 allow consoletype_t self:fd use;
 allow consoletype_t self:fifo_file rw_fifo_file_perms;
 allow consoletype_t self:sock_file read_sock_file_perms;
@@ -47,26 +47,22 @@ fs_list_inotifyfs(consoletype_t)
 mls_file_read_all_levels(consoletype_t)
 mls_file_write_all_levels(consoletype_t)
 
-term_use_all_inherited_terms(consoletype_t)
-term_use_ptmx(consoletype_t)
+term_use_all_terms(consoletype_t)
 
 init_use_fds(consoletype_t)
 init_use_script_ptys(consoletype_t)
 init_use_script_fds(consoletype_t)
 init_rw_script_pipes(consoletype_t)
-init_rw_inherited_script_tmp_files(consoletype_t)
 
-optional_policy(`
-	userdom_use_inherited_user_terminals(consoletype_t)
-')
+userdom_use_user_terminals(consoletype_t)
 
 ifdef(`distro_redhat',`
 	fs_rw_tmpfs_chr_files(consoletype_t)
 ')
 
 optional_policy(`
-	apm_use_fds(consoletype_t)
-	apm_write_pipes(consoletype_t)
+	acpi_use_fds(consoletype_t)
+	acpi_write_pipes(consoletype_t)
 ')
 
 optional_policy(`
@@ -83,14 +79,16 @@ optional_policy(`
 ')
 
 optional_policy(`
-	devicekit_dontaudit_read_pid_files(consoletype_t)
-	devicekit_dontaudit_rw_log(consoletype_t)
-')
-
-optional_policy(`
 	files_read_etc_files(consoletype_t)
 	firstboot_use_fds(consoletype_t)
 	firstboot_rw_pipes(consoletype_t)
+')
+
+optional_policy(`
+	hal_dontaudit_use_fds(consoletype_t)
+	hal_dontaudit_rw_pipes(consoletype_t)
+	hal_dontaudit_rw_dgram_sockets(consoletype_t)
+	hal_dontaudit_write_log(consoletype_t)
 ')
 
 optional_policy(`
@@ -116,7 +114,6 @@ optional_policy(`
 
 optional_policy(`
 	userdom_use_unpriv_users_fds(consoletype_t)
-	userdom_dontaudit_rw_dgram_socket(consoletype_t)
 ')
 
 optional_policy(`

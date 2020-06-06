@@ -43,27 +43,6 @@ interface(`application_executable_file',`
 	corecmd_executable_file($1)
 ')
 
-#######################################
-## <summary>
-##      Make the specified type usable for files
-##      that are exectuables, such as binary programs.
-##      This does not include shared libraries.
-## </summary>
-## <param name="type">
-##      <summary>
-##      Type to be used for files.
-##      </summary>
-## </param>
-#
-interface(`application_executable_ioctl',`
-        gen_require(`
-                attribute application_exec_type;
-        ')
-
-        allow $1 application_exec_type:file ioctl;
-
-')
-
 ########################################
 ## <summary>
 ## Execute application executables in the caller domain.
@@ -97,26 +76,9 @@ interface(`application_exec_all',`
 	corecmd_dontaudit_exec_all_executables($1)
 	corecmd_exec_bin($1)
 	corecmd_exec_shell($1)
+	corecmd_exec_chroot($1)
 
 	application_exec($1)
-')
-
-########################################
-## <summary>
-##	Dontaudit execute all executable files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain to not audit.
-##	</summary>
-## </param>
-#
-interface(`application_dontaudit_exec',`
-	gen_require(`
-		attribute application_exec_type;
-	')
-
-	dontaudit $1 application_exec_type:file execute;
 ')
 
 ########################################
@@ -227,24 +189,6 @@ interface(`application_dontaudit_signal',`
 
 ########################################
 ## <summary>
-##	Send kill signals to all application domains.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`application_sigkill',`
-	gen_require(`
-		attribute application_domain_type;
-	')
-
-	allow $1 application_domain_type:process sigkill;
-')
-
-########################################
-## <summary>
 ##	Do not audit attempts to send kill signals
 ##	to all application domains.
 ## </summary>
@@ -260,22 +204,4 @@ interface(`application_dontaudit_sigkill',`
 	')
 
 	dontaudit $1 application_domain_type:process sigkill;
-')
-
-#######################################
-## <summary>
-##  Getattr all application sockets.
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-#
-interface(`application_getattr_socket',`
-    gen_require(`
-        attribute application_domain_type;
-    ')
-
-    allow $1 application_domain_type:socket_class_set getattr;
 ')

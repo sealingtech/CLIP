@@ -1,1 +1,1 @@
-system_u:system_r:qemu_t:s0
+system_u:system_r:svirt_t:s0

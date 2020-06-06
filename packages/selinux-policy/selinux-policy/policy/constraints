@@ -4,7 +4,7 @@
 #
 # constrain class_set perm_set expression ;
 #
-# expression : ( expression ) 
+# expression : ( expression )
 #	     | not expression
 #	     | expression and expression
 #	     | expression or expression
@@ -18,17 +18,12 @@
 #	     | t1 op names
 #	     | t2 op names
 #
-# op : == | != 
+# op : == | !=
 # role_op : == | != | eq | dom | domby | incomp
 #
 # names : name | { name_list }
-# name_list : name | name_list name		
+# name_list : name | name_list name
 #
-
-# SRS: uncomment once you have SECMARK rules in-place
-# only allow kernel_t to send and receive unlabeled packets
-#constrain packet { send recv }
-#          ((t1 == kernel_t) or ((t2 != unlabeled_t) ));
 
 define(`basic_ubac_conditions',`
 	ifdef(`enable_ubac',`
@@ -73,7 +68,7 @@ exempted_ubac_constraint(chr_file, ubacfile)
 exempted_ubac_constraint(blk_file, ubacfile)
 
 # SELinux object identity change constraint:
-constrain dir_file_class_set { create relabelto relabelfrom } 
+constrain dir_file_class_set { create relabelto relabelfrom }
 (
 	u1 == u2
 	or t1 == can_change_object_identity
@@ -103,36 +98,11 @@ constrain process { transition dyntransition noatsecure siginh rlimitinh }
 
 constrain process { transition dyntransition noatsecure siginh rlimitinh }
 (
-	r1 == r2 
+	r1 == r2
 	or ( t1 == can_change_process_role and t2 == process_user_target )
    	or ( t1 == cron_source_domain and t2 == cron_job_domain )
 	or ( t1 == can_system_change and r2 == system_r )
 	or ( t1 == process_uncond_exempt )
-);
-
-constrain process dyntransition
-(
-	u1 == u2
-	or ( t1 == can_change_process_identity and t2 == process_user_target )
-);
-
-constrain process dyntransition
-(
-	r1 == r2
-	or ( t1 == can_change_process_identity and t2 == process_user_target )
-);
-
-# Constrain access to memory mapping file objects
-# One scenario in which this is useful is for a series of 
-# filters where, once filterA is done processing/modifying it, it passes
-# it to filterB. If filterA had memory mapped the file, it
-# could make changes after filterB had begun processing the file giving filterA
-# the opporunity to send malicious or sensitive information compromising the security
-# goals of the system.
-# Use the "files_not_mappable_file(<type_name>)" interface call to prevent mapping of a file type.
-constrain { dir file blk_file chr_file fifo_file } { map }
-(
-	t2 != not_mappable_file_type
 );
 
 # These permissions do not have ubac constraints:
@@ -160,6 +130,7 @@ exempted_ubac_constraint(fd, ubacfd)
 
 exempted_ubac_constraint(socket, ubacsock)
 exempted_ubac_constraint(tcp_socket, ubacsock)
+exempted_ubac_constraint(sctp_socket, ubacsock)
 exempted_ubac_constraint(udp_socket, ubacsock)
 exempted_ubac_constraint(rawip_socket, ubacsock)
 exempted_ubac_constraint(netlink_socket, ubacsock)
@@ -168,20 +139,26 @@ exempted_ubac_constraint(key_socket, ubacsock)
 exempted_ubac_constraint(unix_stream_socket, ubacsock)
 exempted_ubac_constraint(unix_dgram_socket, ubacsock)
 exempted_ubac_constraint(netlink_route_socket, ubacsock)
-exempted_ubac_constraint(netlink_firewall_socket, ubacsock)
 exempted_ubac_constraint(netlink_tcpdiag_socket, ubacsock)
 exempted_ubac_constraint(netlink_nflog_socket, ubacsock)
 exempted_ubac_constraint(netlink_xfrm_socket, ubacsock)
 exempted_ubac_constraint(netlink_selinux_socket, ubacsock)
 exempted_ubac_constraint(netlink_audit_socket, ubacsock)
-exempted_ubac_constraint(netlink_ip6fw_socket, ubacsock)
 exempted_ubac_constraint(netlink_dnrt_socket, ubacsock)
 exempted_ubac_constraint(netlink_kobject_uevent_socket, ubacsock)
 exempted_ubac_constraint(appletalk_socket, ubacsock)
 exempted_ubac_constraint(dccp_socket, ubacsock)
 exempted_ubac_constraint(tun_socket, ubacsock)
+exempted_ubac_constraint(netlink_iscsi_socket, ubacsock)
+exempted_ubac_constraint(netlink_fib_lookup_socket, ubacsock)
+exempted_ubac_constraint(netlink_connector_socket, ubacsock)
+exempted_ubac_constraint(netlink_netfilter_socket, ubacsock)
+exempted_ubac_constraint(netlink_generic_socket, ubacsock)
+exempted_ubac_constraint(netlink_scsitransport_socket, ubacsock)
+exempted_ubac_constraint(netlink_rdma_socket, ubacsock)
+exempted_ubac_constraint(netlink_crypto_socket, ubacsock)
 
-constrain socket_class_set { create relabelto relabelfrom } 
+constrain socket_class_set { create relabelto relabelfrom }
 (
 	u1 == u2
 	or t1 == can_change_object_identity

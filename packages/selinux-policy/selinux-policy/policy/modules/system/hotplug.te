@@ -1,4 +1,4 @@
-policy_module(hotplug, 1.16.0)
+policy_module(hotplug, 1.20.1)
 
 ########################################
 #
@@ -14,20 +14,20 @@ type hotplug_etc_t;
 files_config_file(hotplug_etc_t)
 init_daemon_domain(hotplug_t, hotplug_etc_t)
 
-type hotplug_var_run_t;
-files_pid_file(hotplug_var_run_t)
+type hotplug_runtime_t alias hotplug_var_run_t;
+files_pid_file(hotplug_runtime_t)
 
 ########################################
 #
 # Local policy
 #
 
-allow hotplug_t self:capability { net_admin sys_tty_config mknod sys_rawio };
-dontaudit hotplug_t self:capability { sys_module sys_admin sys_tty_config };
+allow hotplug_t self:capability { mknod net_admin sys_rawio sys_tty_config };
+dontaudit hotplug_t self:capability { sys_admin sys_module sys_ptrace sys_tty_config };
 # for access("/etc/bashrc", X_OK) on Red Hat
 dontaudit hotplug_t self:capability { dac_override dac_read_search };
 allow hotplug_t self:process { setpgid getsession getattr signal_perms };
-allow hotplug_t self:fifo_file rw_file_perms;
+allow hotplug_t self:fifo_file rw_fifo_file_perms;
 allow hotplug_t self:netlink_route_socket r_netlink_socket_perms;
 allow hotplug_t self:udp_socket create_socket_perms;
 allow hotplug_t self:tcp_socket connected_stream_socket_perms;
@@ -39,9 +39,9 @@ allow hotplug_t hotplug_etc_t:dir list_dir_perms;
 
 can_exec(hotplug_t, hotplug_exec_t)
 
-manage_dirs_pattern(hotplug_t, hotplug_var_run_t, hotplug_var_run_t)
-manage_files_pattern(hotplug_t, hotplug_var_run_t, hotplug_var_run_t)
-files_pid_filetrans(hotplug_t, hotplug_var_run_t, { dir file })
+manage_dirs_pattern(hotplug_t, hotplug_runtime_t, hotplug_runtime_t)
+manage_files_pattern(hotplug_t, hotplug_runtime_t, hotplug_runtime_t)
+files_pid_filetrans(hotplug_t, hotplug_runtime_t, { dir file })
 
 kernel_sigchld(hotplug_t)
 kernel_setpgid(hotplug_t)
@@ -49,16 +49,17 @@ kernel_read_system_state(hotplug_t)
 kernel_read_network_state(hotplug_t)
 kernel_read_kernel_sysctls(hotplug_t)
 kernel_rw_net_sysctls(hotplug_t)
+# for when filesystems are not mounted early in the boot:
+kernel_dontaudit_search_unlabeled(hotplug_t)
 
 files_read_kernel_modules(hotplug_t)
 
+corenet_all_recvfrom_unlabeled(hotplug_t)
 corenet_all_recvfrom_netlabel(hotplug_t)
 corenet_tcp_sendrecv_generic_if(hotplug_t)
 corenet_udp_sendrecv_generic_if(hotplug_t)
 corenet_tcp_sendrecv_generic_node(hotplug_t)
 corenet_udp_sendrecv_generic_node(hotplug_t)
-corenet_tcp_sendrecv_all_ports(hotplug_t)
-corenet_udp_sendrecv_all_ports(hotplug_t)
 
 dev_rw_sysfs(hotplug_t)
 dev_read_usbfs(hotplug_t)
@@ -85,8 +86,6 @@ files_read_etc_files(hotplug_t)
 files_manage_etc_runtime_files(hotplug_t)
 files_etc_filetrans_etc_runtime(hotplug_t, file)
 files_exec_etc_files(hotplug_t)
-# for when filesystems are not mounted early in the boot:
-files_dontaudit_search_isid_type_dirs(hotplug_t)
 
 init_read_script_state(hotplug_t)
 # Allow hotplug (including /sbin/ifup-local) to start/stop services and
@@ -95,8 +94,6 @@ init_domtrans_script(hotplug_t)
 # kernel threads inherit from shared descriptor table used by init
 init_dontaudit_rw_initctl(hotplug_t)
 
-auth_use_nsswitch(hotplug_t)
-
 logging_send_syslog_msg(hotplug_t)
 logging_search_logs(hotplug_t)
 
@@ -104,6 +101,9 @@ logging_search_logs(hotplug_t)
 libs_read_lib_files(hotplug_t)
 
 miscfiles_read_hwdata(hotplug_t)
+miscfiles_read_localization(hotplug_t)
+
+seutil_dontaudit_search_config(hotplug_t)
 
 sysnet_read_config(hotplug_t)
 
@@ -149,7 +149,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	modutils_domtrans_insmod(hotplug_t)
+	modutils_domtrans(hotplug_t)
 	modutils_read_module_deps(hotplug_t)
 ')
 
@@ -159,6 +159,14 @@ optional_policy(`
 
 optional_policy(`
 	mta_send_mail(hotplug_t)
+')
+
+optional_policy(`
+	nis_use_ypbind(hotplug_t)
+')
+
+optional_policy(`
+	nscd_use(hotplug_t)
 ')
 
 optional_policy(`

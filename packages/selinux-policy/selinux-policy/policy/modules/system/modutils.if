@@ -17,23 +17,6 @@ interface(`modutils_getattr_module_deps',`
 
 	getattr_files_pattern($1, modules_object_t, modules_dep_t)
 ')
-########################################
-## <summary>
-##	Read the dependencies of kernel modules.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`modutils_read_module_deps_files',`
-	gen_require(`
-		type modules_dep_t;
-	')
-
-	allow $1 modules_dep_t:file { map read_file_perms };
-')
 
 ########################################
 ## <summary>
@@ -51,13 +34,12 @@ interface(`modutils_read_module_deps',`
 	')
 
 	files_list_kernel_modules($1)
-	files_read_kernel_modules($1)
-	allow $1 modules_dep_t:file read_file_perms;
+	allow $1 modules_dep_t:file { read_file_perms map };
 ')
 
 ########################################
 ## <summary>
-##	Read the dependencies of kernel modules.
+##	Read the kernel modules.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -65,32 +47,13 @@ interface(`modutils_read_module_deps',`
 ##	</summary>
 ## </param>
 #
-interface(`modutils_delete_module_deps',`
+interface(`modutils_read_module_objects',`
 	gen_require(`
-		type modules_dep_t;
+		type modules_object_t;
 	')
 
-	delete_files_pattern($1, modules_dep_t, modules_dep_t)
-')
-
-########################################
-## <summary>
-##	list the configuration options used when
-##	loading modules.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
-interface(`modutils_list_module_config',`
-	gen_require(`
-		type modules_conf_t;
-	')
-
-	list_dirs_pattern($1, modules_conf_t, modules_conf_t)
+	files_list_kernel_modules($1)
+	allow $1 modules_object_t:file { read_file_perms map };
 ')
 
 ########################################
@@ -179,7 +142,9 @@ interface(`modutils_manage_module_config',`
 
 ########################################
 ## <summary>
-##	Execute insmod in the kmod domain.
+##	Execute any modutil,
+##	like insmod, kmod, depmod or updates-modules,
+##	in the kmod domain.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -187,15 +152,63 @@ interface(`modutils_manage_module_config',`
 ##	</summary>
 ## </param>
 #
-interface(`modutils_domtrans_kmod',`
+interface(`modutils_domtrans',`
 	gen_require(`
 		type kmod_t, kmod_exec_t;
 	')
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, kmod_exec_t, kmod_t)
+')
 
-    allow $1 kmod_exec_t:file map;
+########################################
+## <summary>
+##	Execute any modutil,
+##	like insmod, kmod, depmod or updates-modules,
+##	in the kmod domain, and allow the specified role
+##	the kmod domain, and use the caller's terminal.
+##	Has a sigchld backchannel.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`modutils_run',`
+	gen_require(`
+		attribute_role kmod_roles;
+	')
+
+	modutils_domtrans($1)
+	roleattribute $2 kmod_roles;
+')
+
+########################################
+## <summary>
+##	Execute any modutil,
+##	like insmod, kmod, depmod or updates-modules,
+##	in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`modutils_exec',`
+	gen_require(`
+		type kmod_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	can_exec($1, kmod_exec_t)
 ')
 
 ########################################
@@ -211,8 +224,8 @@ interface(`modutils_domtrans_kmod',`
 # cjp: this is added for pppd, due to nested
 # conditionals not working.
 interface(`modutils_domtrans_insmod_uncond',`
-	refpolicywarn(`$0($*) has been deprecated, use modutils_domtrans_kmod() instead.')
-	modutils_domtrans_kmod($1)
+	refpolicywarn(`$0($*) has been deprecated, please use modutils_domtrans() instead.')
+	modutils_domtrans($1)
 ')
 
 ########################################
@@ -226,99 +239,8 @@ interface(`modutils_domtrans_insmod_uncond',`
 ## </param>
 #
 interface(`modutils_domtrans_insmod',`
-	refpolicywarn(`$0($*) has been deprecated, use modutils_domtrans_kmod() instead.')
-	modutils_domtrans_kmod($1)
-')
-
-########################################
-## <summary>
-##	Execute depmod in the depmod domain.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed to transition.
-##	</summary>
-## </param>
-#
-interface(`modutils_domtrans_depmod',`
-	refpolicywarn(`$0($*) has been deprecated, use modutils_domtrans_kmod() instead.')
-	modutils_domtrans_kmod($1)
-')
-
-########################################
-## <summary>
-##	Execute depmod in the depmod domain.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed to transition.
-##	</summary>
-## </param>
-#
-interface(`modutils_domtrans_update_mods',`
-	refpolicywarn(`$0($*) has been deprecated, use modutils_domtrans_kmod() instead.')
-	modutils_domtrans_kmod($1)
-')
-
-########################################
-## <summary>
-##	Allow send signal to insmod.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed to transition.
-##	</summary>
-## </param>
-#
-interface(`modutils_signal_kmod',`
-	gen_require(`
-		type kmod_t;
-	')
-
-    allow $1 kmod_t:process signal;
-')
-
-########################################
-## <summary>
-##	Allow send signal to insmod.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed to transition.
-##	</summary>
-## </param>
-#
-interface(`modutils_signal_insmod',`
-	refpolicywarn(`$0($*) has been deprecated, use modutils_signal_kmod() instead.')
-	modutils_signal_kmod($1)
-')
-
-########################################
-## <summary>
-##	Execute insmod in the insmod domain, and
-##	allow the specified role the insmod domain,
-##	and use the caller's terminal.  Has a sigchld
-##	backchannel.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed to transition.
-##	</summary>
-## </param>
-## <param name="role">
-##	<summary>
-##	Role allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
-interface(`modutils_run_kmod',`
-	gen_require(`
-		type kmod_t;
-	')
-
-	modutils_domtrans_kmod($1)
-	role $2 types kmod_t;
+	refpolicywarn(`$0($*) has been deprecated, please use modutils_domtrans() instead.')
+	modutils_domtrans($1)
 ')
 
 ########################################
@@ -341,8 +263,38 @@ interface(`modutils_run_kmod',`
 ## <rolecap/>
 #
 interface(`modutils_run_insmod',`
-	refpolicywarn(`$0($*) has been deprecated, use modutils_run_kmod() instead.')
-	modutils_run_kmod($1,$2)
+	refpolicywarn(`$0($*) has been deprecated, please use modutils_run() instead.')
+	modutils_run($1, $2)
+')
+
+########################################
+## <summary>
+##	Execute insmod in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`modutils_exec_insmod',`
+	refpolicywarn(`$0($*) has been deprecated, please use modutils_exec() instead.')
+	modutils_exec($1)
+')
+
+########################################
+## <summary>
+##	Execute depmod in the depmod domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition.
+##	</summary>
+## </param>
+#
+interface(`modutils_domtrans_depmod',`
+	refpolicywarn(`$0($*) has been deprecated, please use modutils_domtrans() instead.')
+	modutils_domtrans($1)
 ')
 
 ########################################
@@ -362,8 +314,38 @@ interface(`modutils_run_insmod',`
 ## <rolecap/>
 #
 interface(`modutils_run_depmod',`
-	refpolicywarn(`$0($*) has been deprecated, use modutils_run_kmod() instead.')
-	modutils_run_kmod($1,$2)
+	refpolicywarn(`$0($*) has been deprecated, please use modutils_run() instead.')
+	modutils_run($1, $2)
+')
+
+########################################
+## <summary>
+##	Execute depmod in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`modutils_exec_depmod',`
+	refpolicywarn(`$0($*) has been deprecated, please use modutils_exec() instead.')
+	modutils_exec($1)
+')
+
+########################################
+## <summary>
+##	Execute update_modules in the update_modules domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition.
+##	</summary>
+## </param>
+#
+interface(`modutils_domtrans_update_mods',`
+	refpolicywarn(`$0($*) has been deprecated, please use modutils_domtrans() instead.')
+	modutils_domtrans($1)
 ')
 
 ########################################
@@ -383,57 +365,8 @@ interface(`modutils_run_depmod',`
 ## <rolecap/>
 #
 interface(`modutils_run_update_mods',`
-	refpolicywarn(`$0($*) has been deprecated, use modutils_run_kmod() instead.')
-	modutils_run_kmod($1,$2)
-')
-
-#######################################
-## <summary>
-##	Execute insmod in the caller domain.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`modutils_exec_kmod',`
-	gen_require(`
-		type kmod_exec_t;
-	')
-
-	corecmd_search_bin($1)
-	can_exec($1, kmod_exec_t)
-')
-
-#######################################
-## <summary>
-##	Execute insmod in the caller domain.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`modutils_exec_insmod',`
-	refpolicywarn(`$0($*) has been deprecated, use modutils_exec_kmod() instead.')
-	modutils_exec_kmod($1)
-')
-
-########################################
-## <summary>
-##	Execute depmod in the caller domain.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`modutils_exec_depmod',`
-	refpolicywarn(`$0($*) has been deprecated, use modutils_exec_kmod() instead.')
-	modutils_exec_kmod($1)
+	refpolicywarn(`$0($*) has been deprecated, please use modutils_run() instead.')
+	modutils_run($1, $2)
 ')
 
 ########################################
@@ -447,61 +380,20 @@ interface(`modutils_exec_depmod',`
 ## </param>
 #
 interface(`modutils_exec_update_mods',`
-	refpolicywarn(`$0($*) has been deprecated, use modutils_exec_kmod() instead.')
-	modutils_exec_kmod($1)
-')
-
-#######################################
-## <summary>
-## Don't audit execute insmod in the caller domain.
-## </summary>
-## <param name="domain">
-## <summary>
-## Domain allowed access.
-## </summary>
-## </param>
-#
-interface(`modutils_dontaudit_exec_kmod',`
-    gen_require(`
-        type kmod_exec_t;
-    ')
-
-    dontaudit $1 kmod_exec_t:file exec_file_perms;
-')
-
-#######################################
-## <summary>
-## Don't audit execute insmod in the caller domain.
-## </summary>
-## <param name="domain">
-## <summary>
-## Domain allowed access.
-## </summary>
-## </param>
-#
-interface(`modutils_dontaudit_exec_insmod',`
-	refpolicywarn(`$0($*) has been deprecated, use modutils_dontaudit_exec_kmod() instead.')
-	modutils_dontaudit_exec_kmod($1)
+	refpolicywarn(`$0($*) has been deprecated, please use modutils_exec() instead.')
+	modutils_exec($1)
 ')
 
 ########################################
 ## <summary>
-##	Transition to modutils named content
+##	Read kmod lib files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
-##      Domain allowed access.
+##	Domain allowed access.
 ##	</summary>
 ## </param>
 #
-interface(`modules_filetrans_named_content',`
-	gen_require(`
-		type modules_dep_t;
-		type modules_conf_t;
-	')
-
-	files_etc_filetrans($1, modules_conf_t, file, "modprobe.conf")
-	files_etc_filetrans($1, modules_conf_t, file, "modules.conf")
-	files_kernel_modules_filetrans($1, modules_dep_t, file, "modules.dep")
-	files_kernel_modules_filetrans($1, modules_dep_t, file, "modules.dep.bin")
+interface(`modutils_read_var_run_files',`
+	refpolicywarn(`$0($*) has been deprecated.')
 ')

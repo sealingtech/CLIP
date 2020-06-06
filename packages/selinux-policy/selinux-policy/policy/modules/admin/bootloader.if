@@ -19,24 +19,6 @@ interface(`bootloader_domtrans',`
 	domtrans_pattern($1, bootloader_exec_t, bootloader_t)
 ')
 
-######################################
-## <summary>
-##  Execute bootloader in the caller domain.
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-#
-interface(`bootloader_exec',`
-    gen_require(`
-        type bootloader_exec_t;
-    ')
-
-    can_exec($1, bootloader_exec_t)
-')
-
 ########################################
 ## <summary>
 ##	Execute bootloader interactively and do
@@ -56,13 +38,30 @@ interface(`bootloader_exec',`
 #
 interface(`bootloader_run',`
 	gen_require(`
-		type bootloader_t;
 		attribute_role bootloader_roles;
 	')
 
 	bootloader_domtrans($1)
 	roleattribute $2 bootloader_roles;
+')
 
+########################################
+## <summary>
+##	Execute bootloader in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`bootloader_exec',`
+	gen_require(`
+		type bootloader_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	can_exec($1, bootloader_exec_t)
 ')
 
 ########################################
@@ -105,26 +104,6 @@ interface(`bootloader_rw_config',`
 
 ########################################
 ## <summary>
-##	Manage the bootloader
-##	configuration file.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
-interface(`bootloader_manage_config',`
-	gen_require(`
-		type bootloader_etc_t;
-	')
-
-	manage_files_pattern($1, bootloader_etc_t, bootloader_etc_t)
-')
-
-########################################
-## <summary>
 ##	Read and write the bootloader
 ##	temporary data in /tmp.
 ## </summary>
@@ -140,13 +119,13 @@ interface(`bootloader_rw_tmp_files',`
 	')
 
 	files_search_tmp($1)
-	allow $1 bootloader_tmp_t:file rw_inherited_file_perms;
+	allow $1 bootloader_tmp_t:file rw_file_perms;
 ')
 
 ########################################
 ## <summary>
-##	Read and write the bootloader
-##	temporary data in /tmp.
+##	Create, read and write the bootloader
+##	runtime data.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -161,25 +140,4 @@ interface(`bootloader_create_runtime_file',`
 
 	allow $1 boot_runtime_t:file { create_file_perms rw_file_perms };
 	files_boot_filetrans($1, boot_runtime_t, file)
-')
-
-########################################
-## <summary>
-##	Type transition files created in /etc
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`bootloader_filetrans_config',`
-	gen_require(`
-		type bootloader_etc_t;
-	')
-
-	files_etc_filetrans($1,bootloader_etc_t,file, "grub")
-	files_etc_filetrans($1,bootloader_etc_t,file, "lilo.conf")
-	files_etc_filetrans($1,bootloader_etc_t,file, "yaboot.conf")
-	files_etc_filetrans($1,bootloader_etc_t,file, "zipl.conf")
 ')

@@ -1,9 +1,6 @@
 #
 # /etc
 #
-/etc/init\.d/.*		--	gen_context(system_u:object_r:initrc_exec_t,s0)
-/etc/machine-id		--	gen_context(system_u:object_r:machineid_t,s0)
-
 /etc/rc\.d/rc		--	gen_context(system_u:object_r:initrc_exec_t,s0)
 /etc/rc\.d/rc\.[^/]+	--	gen_context(system_u:object_r:initrc_exec_t,s0)
 
@@ -23,78 +20,70 @@ ifdef(`distro_gentoo',`
 /dev/initctl		-p	gen_context(system_u:object_r:initctl_t,s0)
 
 #
-# /lib
-#
-ifdef(`distro_gentoo', `
-/lib/rc/init\.d(/.*)?		gen_context(system_u:object_r:initrc_state_t,s0)
-')
-
-#
-# /sbin
-#
-/bin/systemd		--	gen_context(system_u:object_r:init_exec_t,s0)
-
-#
-# /sbin
-#
-/sbin/init(ng)?		--	gen_context(system_u:object_r:init_exec_t,s0)
-# because nowadays, /sbin/init is often a symlink to /sbin/upstart
-/sbin/upstart		--	gen_context(system_u:object_r:init_exec_t,s0)
-
-ifdef(`distro_gentoo', `
-/sbin/rc		--	gen_context(system_u:object_r:rc_exec_t,s0)
-')
-
-#
 # /usr
 #
+/usr/bin/init(ng)?	--	gen_context(system_u:object_r:init_exec_t,s0)
+/usr/bin/open_init_pty	--	gen_context(system_u:object_r:initrc_exec_t,s0)
 /usr/bin/sepg_ctl	--	gen_context(system_u:object_r:initrc_exec_t,s0)
+/usr/bin/systemd	--	gen_context(system_u:object_r:init_exec_t,s0)
+/usr/bin/upstart	--	gen_context(system_u:object_r:init_exec_t,s0)
 
-/usr/sbin/init(ng)?		--	gen_context(system_u:object_r:init_exec_t,s0)
-# because nowadays, /sbin/init is often a symlink to /sbin/upstart
-/usr/sbin/upstart		--	gen_context(system_u:object_r:init_exec_t,s0)
-
-/usr/lib/systemd/[^/]*		--	gen_context(system_u:object_r:init_exec_t,s0)
-/usr/lib/systemd/fedora[^/]* 	--	gen_context(system_u:object_r:initrc_exec_t,s0)
-/usr/lib/systemd/system-generators/[^/]*	--	gen_context(system_u:object_r:init_exec_t,s0)
+/usr/lib/systemd/systemd --	gen_context(system_u:object_r:init_exec_t,s0)
+/usr/lib/systemd/systemd-shutdown	--	gen_context(system_u:object_r:init_exec_t,s0)
+/usr/lib/systemd/system-preset(/.*)? gen_context(system_u:object_r:systemd_unit_t,s0)
+/usr/lib/systemd/user-preset(/.*)? gen_context(system_u:object_r:systemd_unit_t,s0)
+/usr/lib/systemd/ntp-units\.d -d gen_context(system_u:object_r:systemd_unit_t,s0)
+/usr/lib/systemd/system(/.*)?	gen_context(system_u:object_r:systemd_unit_t,s0)
+/run/systemd/transient(/.*)?	gen_context(system_u:object_r:systemd_unit_t,s0)
 
 /usr/libexec/dcc/start-.* --	gen_context(system_u:object_r:initrc_exec_t,s0)
 /usr/libexec/dcc/stop-.* --	gen_context(system_u:object_r:initrc_exec_t,s0)
 
-/usr/sbin/apachectl	-- 	gen_context(system_u:object_r:initrc_exec_t,s0)
+/usr/sbin/init(ng)?	--	gen_context(system_u:object_r:init_exec_t,s0)
 /usr/sbin/open_init_pty	--	gen_context(system_u:object_r:initrc_exec_t,s0)
-/usr/sbin/startx	-- 	gen_context(system_u:object_r:initrc_exec_t,s0)
-/usr/bin/systemd	--	gen_context(system_u:object_r:init_exec_t,s0)
+/usr/sbin/upstart	--	gen_context(system_u:object_r:init_exec_t,s0)
 
-/usr/share/system-config-services/system-config-services-mechanism\.py  --	gen_context(system_u:object_r:initrc_exec_t,s0)
+ifdef(`distro_gentoo', `
+/usr/lib/rc/init\.d(/.*)?		gen_context(system_u:object_r:initrc_state_t,s0)
+/usr/sbin/rc		--	gen_context(system_u:object_r:rc_exec_t,s0)
+')
+
+ifdef(`distro_redhat',`
+/usr/lib/systemd/rhel[^/]* 	--	gen_context(system_u:object_r:initrc_exec_t,s0)
+')
 
 #
 # /var
 #
-/var/lib/systemd(/.*)?	gen_context(system_u:object_r:init_var_lib_t,s0)
-/var/run/initctl	-p	gen_context(system_u:object_r:initctl_t,s0)
-/var/run/systemd/initctl/fifo	-p	gen_context(system_u:object_r:initctl_t,s0)
-/var/run/utmp		--	gen_context(system_u:object_r:initrc_var_run_t,s0)
-/var/run/runlevel\.dir		gen_context(system_u:object_r:initrc_var_run_t,s0)
-/var/run/random-seed	--	gen_context(system_u:object_r:initrc_var_run_t,s0)
-/var/run/setmixer_flag	--	gen_context(system_u:object_r:initrc_var_run_t,s0)
-/var/run/systemd/machine-id	--	gen_context(system_u:object_r:machineid_t,s0)
+/var/lib/systemd(/.*)?		gen_context(system_u:object_r:init_var_lib_t,s0)
+
+/run/initctl	-p	gen_context(system_u:object_r:initctl_t,s0)
+/run/kerneloops\.pid	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
+/run/utmp		--	gen_context(system_u:object_r:initrc_runtime_t,s0)
+/run/runlevel\.dir		gen_context(system_u:object_r:initrc_runtime_t,s0)
+/run/random-seed	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
+/run/setmixer_flag	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
+/run/systemd(/.*)?		gen_context(system_u:object_r:init_runtime_t,s0)
+/run/wd_keepalive\.pid	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
 
 ifdef(`distro_debian',`
-/var/run/hotkey-setup	--	gen_context(system_u:object_r:initrc_var_run_t,s0)
-/var/run/kdm/.*		--	gen_context(system_u:object_r:initrc_var_run_t,s0)
+/run/hotkey-setup	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
+/run/kdm/.*		--	gen_context(system_u:object_r:initrc_runtime_t,s0)
+/etc/network/if-pre-up\.d/.* --	gen_context(system_u:object_r:initrc_exec_t,s0)
+/etc/network/if-up\.d/.* --	gen_context(system_u:object_r:initrc_exec_t,s0)
+/etc/network/if-down\.d/.* --	gen_context(system_u:object_r:initrc_exec_t,s0)
+/etc/network/if-post-down\.d/.* -- gen_context(system_u:object_r:initrc_exec_t,s0)
 ')
 
 ifdef(`distro_gentoo', `
 /var/lib/init\.d(/.*)?		gen_context(system_u:object_r:initrc_state_t,s0)
-/var/run/svscan\.pid	--	gen_context(system_u:object_r:initrc_var_run_t,s0)
+/run/svscan\.pid	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
 ')
 
 ifdef(`distro_suse', `
-/var/run/bootsplashctl	-p	gen_context(system_u:object_r:initrc_var_run_t,s0)
-/var/run/keymap		--	gen_context(system_u:object_r:initrc_var_run_t,s0)
-/var/run/numlock-on	--	gen_context(system_u:object_r:initrc_var_run_t,s0)
-/var/run/setleds-on	--	gen_context(system_u:object_r:initrc_var_run_t,s0)
-/var/run/sysconfig(/.*)?	gen_context(system_u:object_r:initrc_var_run_t,s0)
+/run/bootsplashctl	-p	gen_context(system_u:object_r:initrc_runtime_t,s0)
+/run/keymap		--	gen_context(system_u:object_r:initrc_runtime_t,s0)
+/run/numlock-on	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
+/run/setleds-on	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
+/run/sysconfig(/.*)?	gen_context(system_u:object_r:initrc_runtime_t,s0)
 ')
-/var/run/systemd(/.*)?		gen_context(system_u:object_r:init_var_run_t,s0)

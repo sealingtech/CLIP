@@ -81,7 +81,7 @@ define(`interface',` dnl
 	`define(`$1',` dnl
 	pushdef(`policy_call_depth',incr(policy_call_depth)) dnl
 	policy_m4_comment(policy_call_depth,begin `$1'(dollarsstar)) dnl
-	$2
+	$2 dnl
 	popdef(`policy_call_depth') dnl
 	policy_m4_comment(policy_call_depth,end `$1'(dollarsstar)) dnl
 	'')
@@ -140,7 +140,7 @@ define(`tunable_policy',`
 	')
 	if (`$1') {
 		$2
-	ifelse(`$3',`',`',`} else {
+	ifelse(`$3',`',`',`} else { # else $1
 		$3
-	')}
+	')} # end $1
 ')

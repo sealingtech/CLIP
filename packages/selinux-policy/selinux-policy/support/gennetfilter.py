@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 # Author: Chris PeBenito <cpebenito@tresys.com>
 #
@@ -7,9 +7,9 @@
 #      it under the terms of the GNU General Public License as published by
 #      the Free Software Foundation, version 2.
 
-import sys,string,getopt,re
+import sys,getopt,re
 
-NETPORT = re.compile("^network_port\(\s*\w+\s*(\s*,\s*\w+\s*,\s*\w+\s*,\s*\w+\s*)+\s*\)\s*(#|$)")
+NETPORT = re.compile(r"^network_port\(\s*\w+\s*(\s*,\s*\w+\s*,\s*[-0-9]+\s*,\s*\w+\s*)+\s*\)\s*(#|$)")
 
 DEFAULT_INPUT_PACKET = "server_packet_t"
 DEFAULT_OUTPUT_PACKET = "client_packet_t"
@@ -18,9 +18,10 @@ DEFAULT_MLS = "s0"
 
 PACKET_INPUT = "_server_packet_t"
 PACKET_OUTPUT = "_client_packet_t"
+ICMP_PACKET = "icmp_packet_t"
 
 class Port:
-	def __init__(self, proto, num, mls_sens, mcs_cats=""):
+	def __init__(self, proto, num, mls_sens):
 		# protocol of the port
 		self.proto = proto
 
@@ -42,6 +43,47 @@ class Packet:
 		# A list of Ports
 		self.ports = ports
 
+def print_nft_secmarks(packets,mls,mcs):
+	line = '\tsecmark default_input_packet {\n\t\t"system_u:object_r:'+DEFAULT_INPUT_PACKET
+	if mcs:
+		line += ":"+DEFAULT_MCS
+	elif mls:
+		line += ":"+DEFAULT_MLS
+	line += '"\n\t}\n\tsecmark default_output_packet {\n\t\t"system_u:object_r:'+DEFAULT_OUTPUT_PACKET
+	if mcs:
+		line += ":"+DEFAULT_MCS
+	elif mls:
+		line += ":"+DEFAULT_MLS
+	line += '"\n\t}'
+	print(line)
+	line = '\tsecmark icmp_packet {\n\t\t"system_u:object_r:'+ICMP_PACKET
+	if mcs:
+		line += ":"+DEFAULT_MCS
+	elif mls:
+		line += ":"+DEFAULT_MLS
+	line += '"\n\t}'
+	print(line)
+	for i in packets:
+		line = "\tsecmark "+i.prefix+'_input {\n\t\t"system_u:object_r:'+i.prefix+PACKET_INPUT
+		if mcs:
+			line += ":"+DEFAULT_MCS
+		elif mls:
+			line += ":"+DEFAULT_MLS
+		line += '"\n\t}\n\tsecmark '+i.prefix+'_output {\n\t\t"system_u:object_r:'+i.prefix+PACKET_OUTPUT
+		if mcs:
+			line += ":"+DEFAULT_MCS
+		elif mls:
+			line += ":"+DEFAULT_MLS
+		line += '"\n\t}'
+		print(line)
+
+def print_nft_rules(packets,mls,mcs,direction):
+	for i in packets:
+		for j in i.ports:
+			print("\t\tct state new "+j.proto+" dport "+j.num+' meta secmark set "'+i.prefix+'_'+direction+'"')
+	print('\t\tip protocol icmp meta secmark set "icmp_packet"')
+	print('\t\tip6 nexthdr icmpv6 meta secmark set "icmp_packet"')
+
 def print_input_rules(packets,mls,mcs):
 	line = "base -A selinux_new_input -j SECMARK --selctx system_u:object_r:"+DEFAULT_INPUT_PACKET
 	if mls:
@@ -49,19 +91,33 @@ def print_input_rules(packets,mls,mcs):
 	elif mcs:
 		line += ":"+DEFAULT_MCS
 
-	print line
+	print(line)
+
+	line = "base -A selinux_new_input -p icmp -j SECMARK --selctx system_u:object_r:"+ICMP_PACKET
+	if mls:
+		line += ":"+DEFAULT_MLS
+	elif mcs:
+		line += ":"+DEFAULT_MCS
+	print(line)
+
+	line = "base -A selinux_new_input -p icmpv6 -j SECMARK --selctx system_u:object_r:"+ICMP_PACKET
+	if mls:
+		line += ":"+DEFAULT_MLS
+	elif mcs:
+		line += ":"+DEFAULT_MCS
+	print(line)
 
 	for i in packets:
 		for j in i.ports:
-			line="base -A selinux_new_input -p "+j.proto+" --dport "+j.num+" -j SECMARK --selctx system_u:object_r:"+i.prefix+PACKET_INPUT
+			line="base -A selinux_new_input -p "+j.proto+" --dport "+re.sub('-', ':', j.num)+" -j SECMARK --selctx system_u:object_r:"+i.prefix+PACKET_INPUT
 			if mls:
 				line += ":"+j.mls_sens
 			elif mcs:
 				line += ":"+j.mcs_cats
-			print line
+			print(line)
 
-	print "post -A selinux_new_input -j CONNSECMARK --save"
-	print "post -A selinux_new_input -j RETURN"
+	print("post -A selinux_new_input -j CONNSECMARK --save")
+	print("post -A selinux_new_input -j RETURN")
 
 def print_output_rules(packets,mls,mcs):
 	line = "base -A selinux_new_output -j SECMARK --selctx system_u:object_r:"+DEFAULT_OUTPUT_PACKET
@@ -69,19 +125,33 @@ def print_output_rules(packets,mls,mcs):
 		line += ":"+DEFAULT_MLS
 	elif mcs:
 		line += ":"+DEFAULT_MCS
-	print line
+	print(line)
+
+	line = "base -A selinux_new_output -p icmp -j SECMARK --selctx system_u:object_r:"+ICMP_PACKET
+	if mls:
+		line += ":"+DEFAULT_MLS
+	elif mcs:
+		line += ":"+DEFAULT_MCS
+	print(line)
+
+	line = "base -A selinux_new_output -p icmpv6 -j SECMARK --selctx system_u:object_r:"+ICMP_PACKET
+	if mls:
+		line += ":"+DEFAULT_MLS
+	elif mcs:
+		line += ":"+DEFAULT_MCS
+	print(line)
 
 	for i in packets:
 		for j in i.ports:
-			line = "base -A selinux_new_output -p "+j.proto+" --dport "+j.num+" -j SECMARK --selctx system_u:object_r:"+i.prefix+PACKET_OUTPUT
+			line = "base -A selinux_new_output -p "+j.proto+" --dport "+re.sub('-', ':', j.num)+" -j SECMARK --selctx system_u:object_r:"+i.prefix+PACKET_OUTPUT
 			if mls:
 				line += ":"+j.mls_sens
 			elif mcs:
 				line += ":"+j.mcs_cats
-			print line
+			print(line)
 
-	print "post -A selinux_new_output -j CONNSECMARK --save"
-	print "post -A selinux_new_output -j RETURN"
+	print("post -A selinux_new_output -j CONNSECMARK --save")
+	print("post -A selinux_new_output -j RETURN")
 
 def parse_corenet(file_name):
 	packets = []
@@ -96,14 +166,14 @@ def parse_corenet(file_name):
 			break
 
 		if NETPORT.match(corenet_line):
-			corenet_line = corenet_line.strip();
+			corenet_line = corenet_line.strip()
 
 			# parse out the parameters
-			openparen = string.find(corenet_line,'(')+1
-			closeparen = string.find(corenet_line,')',openparen)
-			parms = re.split('\W+',corenet_line[openparen:closeparen])
+			openparen = corenet_line.find('(')+1
+			closeparen = corenet_line.find(')',openparen)
+			parms = re.split(r'[^-a-zA-Z0-9_]+',corenet_line[openparen:closeparen])
 			name = parms[0]
-			del parms[0];
+			del parms[0]
 
 			ports = []
 			while len(parms) > 0:
@@ -112,39 +182,64 @@ def parse_corenet(file_name):
 				del parms[:3]
 
 			packets.append(Packet(name,ports))
-		
+
 	corenet_te_in.close()
 
 	return packets
 
-def print_netfilter_config(packets,mls,mcs):
-	print "pre *mangle"
-	print "pre :PREROUTING ACCEPT [0:0]"
-	print "pre :INPUT ACCEPT [0:0]"
-	print "pre :FORWARD ACCEPT [0:0]"
-	print "pre :OUTPUT ACCEPT [0:0]"
-	print "pre :POSTROUTING ACCEPT [0:0]"
-	print "pre :selinux_input - [0:0]"
-	print "pre :selinux_output - [0:0]"
-	print "pre :selinux_new_input - [0:0]"
-	print "pre :selinux_new_output - [0:0]"
-	print "pre -A INPUT -j selinux_input"
-	print "pre -A OUTPUT -j selinux_output"
-	print "pre -A selinux_input -m state --state NEW -j selinux_new_input"
-	print "pre -A selinux_input -m state --state RELATED,ESTABLISHED -j CONNSECMARK --restore"
-	print "pre -A selinux_output -m state --state NEW -j selinux_new_output"
-	print "pre -A selinux_output -m state --state RELATED,ESTABLISHED -j CONNSECMARK --restore"
+def print_netfilter_config_nft(packets,mls,mcs):
+	print("#!/usr/sbin/nft -f")
+	print("flush ruleset")
+	print("table inet security {")
+	print_nft_secmarks(packets,mls,mcs)
+	print("\tchain INPUT {")
+	print("\t\ttype filter hook input priority 0; policy accept;")
+	print('\t\tct state new meta secmark set "default_input_packet"')
+	print_nft_rules(packets,mls,mcs,'input')
+	print("\t\tct state new ct secmark set meta secmark")
+	print("\t\tct state established,related meta secmark set ct secmark")
+	print("\t}")
+	print("\tchain FORWARD {")
+	print("\t\ttype filter hook forward priority 0; policy accept;")
+	print("\t}")
+	print("\tchain OUTPUT {")
+	print("\t\ttype filter hook output priority 0; policy accept;")
+	print('\t\tct state new meta secmark set "default_output_packet"')
+	print_nft_rules(packets,mls,mcs,'output')
+	print("\t\tct state new ct secmark set meta secmark")
+	print("\t\tct state established,related meta secmark set ct secmark")
+	print("\t}")
+	print("}")
+
+def print_netfilter_config_iptables(packets,mls,mcs):
+	print("pre *mangle")
+	print("pre :PREROUTING ACCEPT [0:0]")
+	print("pre :INPUT ACCEPT [0:0]")
+	print("pre :FORWARD ACCEPT [0:0]")
+	print("pre :OUTPUT ACCEPT [0:0]")
+	print("pre :POSTROUTING ACCEPT [0:0]")
+	print("pre :selinux_input - [0:0]")
+	print("pre :selinux_output - [0:0]")
+	print("pre :selinux_new_input - [0:0]")
+	print("pre :selinux_new_output - [0:0]")
+	print("pre -A INPUT -j selinux_input")
+	print("pre -A OUTPUT -j selinux_output")
+	print("pre -A selinux_input -m state --state NEW -j selinux_new_input")
+	print("pre -A selinux_input -m state --state RELATED,ESTABLISHED -j CONNSECMARK --restore")
+	print("pre -A selinux_output -m state --state NEW -j selinux_new_output")
+	print("pre -A selinux_output -m state --state RELATED,ESTABLISHED -j CONNSECMARK --restore")
 	print_input_rules(packets,mls,mcs)
 	print_output_rules(packets,mls,mcs)
-	print "post COMMIT"
+	print("post COMMIT")
 
 mls = False
 mcs = False
+nft = False
 
 try:
-	opts, paths = getopt.getopt(sys.argv[1:],'mc',['mls','mcs'])
-except getopt.GetoptError, error:
-	print "Invalid options."
+	opts, paths = getopt.getopt(sys.argv[1:],'mcn',['mls','mcs','nft'])
+except getopt.GetoptError:
+	print("Invalid options.")
 	sys.exit(1)
 
 for o, a in opts:
@@ -152,6 +247,8 @@ for o, a in opts:
 		mcs = True
 	if o in ("-m","--mls"):
 		mls = True
+	if o in ("-n","--nft"):
+		nft = True
 
 if len(paths) == 0:
 	sys.stderr.write("Need a path for corenetwork.te.in!\n")
@@ -160,4 +257,7 @@ elif len(paths) > 1:
 	sys.stderr.write("Ignoring extra specified paths\n")
 
 packets=parse_corenet(paths[0])
-print_netfilter_config(packets,mls,mcs)
+if nft:
+        print_netfilter_config_nft(packets,mls,mcs)
+else:
+        print_netfilter_config_iptables(packets,mls,mcs)

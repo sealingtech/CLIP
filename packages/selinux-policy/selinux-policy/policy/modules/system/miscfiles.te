@@ -1,10 +1,12 @@
-policy_module(miscfiles, 1.11.0)
+policy_module(miscfiles, 1.17.2)
 
 ########################################
 #
 # Declarations
 #
+
 attribute cert_type;
+attribute tls_privkey_type;
 
 #
 # cert_t is the type of files in the system certs directories.
@@ -40,6 +42,10 @@ files_type(locale_t)
 type man_t alias catman_t;
 files_type(man_t)
 
+optional_policy(`
+	systemd_tmpfilesd_managed(man_t, dir)
+')
+
 type man_cache_t;
 files_type(man_cache_t)
 
@@ -47,10 +53,10 @@ files_type(man_cache_t)
 # Types for public content
 #
 type public_content_t; #, customizable;
-files_mountpoint(public_content_t)
+files_type(public_content_t)
 
 type public_content_rw_t; #, customizable;
-files_mountpoint(public_content_rw_t)
+files_type(public_content_rw_t)
 
 #
 # Base type for the tests directory.
@@ -63,3 +69,9 @@ files_type(test_file_t)
 #
 type tetex_data_t;
 files_tmp_file(tetex_data_t)
+
+#
+# tls_privkey_t is the type of files for the SSL/TLS private keys.
+#
+type tls_privkey_t;
+miscfiles_tls_privkey_type(tls_privkey_t)
