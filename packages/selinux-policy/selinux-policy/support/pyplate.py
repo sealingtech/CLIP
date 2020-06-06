@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """PyPlate : a simple Python-based templating program
 
 PyPlate parses a file and replaces directives (in double square brackets [[ ... ]])
@@ -44,23 +46,22 @@ PyPlate defines the following directives:
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
-from __future__ import nested_scopes
-import sys, string, re, io
+import sys, re, io
 
-re_directive = re.compile("\[\[(.*)\]\]")
-re_for_loop = re.compile("for (.*) in (.*)")
-re_if = re.compile("if (.*)")
-re_elif = re.compile("elif (.*)")
-re_def = re.compile("def (.*?)\((.*)\)")
-re_call = re.compile("call (.*?)\((.*)\)")
-re_exec = re.compile("exec (.*)")
-re_comment = re.compile("#(.*)#")
+re_directive = re.compile(r"\[\[(.*)\]\]")
+re_for_loop = re.compile(r"for (.*) in (.*)")
+re_if = re.compile(r"if (.*)")
+re_elif = re.compile(r"elif (.*)")
+re_def = re.compile(r"def (.*?)\((.*)\)")
+re_call = re.compile(r"call (.*?)\((.*)\)")
+re_exec = re.compile(r"exec (.*)")
+re_comment = re.compile(r"#(.*)#")
 
 ############################################################
 # Template parser
@@ -273,7 +274,7 @@ class FunctionTemplateNode(TemplateNode):
     TemplateNode.execute(self, stream, data)
     for key, value in remember_vars.items():
       data[key] = value
-      
+
 class LeafTemplateNode(TemplateNode):
   def __init__(self, parent, s):
     self.parent = parent
@@ -307,8 +308,7 @@ class ExecTemplateNode(LeafTemplateNode):
 
   def execute(self, stream, data):
     exec(self.s, globals(), data)
-    pass
-    
+
 class CallTemplateNode(LeafTemplateNode):
   def __init__(self, parent, s):
     LeafTemplateNode.__init__(self, parent, s)
@@ -318,7 +318,7 @@ class CallTemplateNode(LeafTemplateNode):
         "[[%s]] is not a valid function call" % self.s)
     self.function_name = match.group(1)
     self.vars = "(" + match.group(2).strip() + ",)"
-  
+
   def execute(self, stream, data):
     self.parent.functions[self.function_name].call(
       eval(self.vars, globals(), data), stream, data)
@@ -363,7 +363,7 @@ def TemplateNodeFactory(parent):
 
 def is_sequence(object):
   try:
-    test = object[0:0]
+    object[0:0]
   except:
     return False
   else:

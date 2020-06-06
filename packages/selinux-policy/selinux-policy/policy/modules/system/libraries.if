@@ -66,25 +66,6 @@ interface(`libs_exec_ldconfig',`
 
 ########################################
 ## <summary>
-##	Make ldconfig_exec_t entrypoint for
-##	the specified domain.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	The domain for which bin_t is an entrypoint.
-##	</summary>
-## </param>
-#
-interface(`libs_ldconfig_exec_entry_type',`
-	gen_require(`
-		type ldconfig_exec_t;
-	')
-
-	domain_entry_file($1, ldconfig_exec_t)
-')
-
-########################################
-## <summary>
 ##	Use the dynamic link/loader for automatic loading
 ##	of shared libraries.
 ## </summary>
@@ -103,7 +84,7 @@ interface(`libs_use_ld_so',`
 	allow $1 lib_t:dir list_dir_perms;
 
 	read_lnk_files_pattern($1, lib_t, { lib_t ld_so_t })
-	mmap_exec_files_pattern($1, lib_t, { lib_t ld_so_t })
+	mmap_exec_files_pattern($1, lib_t, ld_so_t)
 
 	allow $1 ld_so_cache_t:file { map read_file_perms };
 ')
@@ -166,7 +147,6 @@ interface(`libs_manage_ld_so',`
 		type lib_t, ld_so_t;
 	')
 
-	read_lnk_files_pattern($1, lib_t, lib_t)
 	manage_files_pattern($1, lib_t, ld_so_t)
 ')
 
@@ -225,25 +205,7 @@ interface(`libs_search_lib',`
 		type lib_t;
 	')
 
-	read_lnk_files_pattern($1, lib_t, lib_t)
 	allow $1 lib_t:dir search_dir_perms;
-')
-########################################
-## <summary>
-##	dontaudit attempts to setattr on library files
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain to not audit.
-##	</summary>
-## </param>
-#
-interface(`libs_dontaudit_setattr_lib_files',`
-	gen_require(`
-		type lib_t;
-	')
-
-	dontaudit $1 lib_t:file setattr;
 ')
 
 ########################################
@@ -286,8 +248,25 @@ interface(`libs_manage_lib_dirs',`
 		type lib_t;
 	')
 
-	read_lnk_files_pattern($1, lib_t, lib_t)
 	allow $1 lib_t:dir manage_dir_perms;
+')
+
+########################################
+## <summary>
+##	dontaudit attempts to setattr on library files
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`libs_dontaudit_setattr_lib_files',`
+	gen_require(`
+		type lib_t;
+	')
+
+	dontaudit $1 lib_t:file setattr;
 ')
 
 ########################################
@@ -335,22 +314,6 @@ interface(`libs_exec_lib_files',`
 
 ########################################
 ## <summary>
-##	Load and execute functions from generic
-##	lib files as shared libraries.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`libs_use_lib_files',`
-	refpolicywarn(`$0($*) has been deprecated, use libs_use_shared_libs() instead.')
-	libs_use_shared_libs($1)
-')
-
-########################################
-## <summary>
 ##	Create, read, write, and delete generic
 ##	files in library directories.
 ## </summary>
@@ -366,7 +329,6 @@ interface(`libs_manage_lib_files',`
 		type lib_t;
 	')
 
-	read_lnk_files_pattern($1, lib_t, lib_t)
 	manage_files_pattern($1, lib_t, lib_t)
 ')
 
@@ -443,8 +405,7 @@ interface(`libs_manage_shared_libs',`
 		type lib_t, textrel_shlib_t;
 	')
 
-	read_lnk_files_pattern($1, lib_t, lib_t)
-	manage_files_pattern($1, { textrel_shlib_t lib_t }, { lib_t textrel_shlib_t })
+	manage_files_pattern($1, lib_t, { lib_t textrel_shlib_t })
 ')
 
 ########################################
@@ -463,10 +424,9 @@ interface(`libs_use_shared_libs',`
 	')
 
 	files_search_usr($1)
-	allow $1 { textrel_shlib_t lib_t }:dir list_dir_perms;
-	read_lnk_files_pattern($1, { textrel_shlib_t lib_t }, { lib_t textrel_shlib_t })
-	mmap_files_pattern($1, { textrel_shlib_t lib_t }, { lib_t textrel_shlib_t })
-#	allow $1 lib_t:file execmod;
+	allow $1 lib_t:dir list_dir_perms;
+	read_lnk_files_pattern($1, lib_t, { lib_t textrel_shlib_t })
+	mmap_exec_files_pattern($1, lib_t, { lib_t textrel_shlib_t })
 	allow $1 textrel_shlib_t:file execmod;
 ')
 
@@ -507,79 +467,5 @@ interface(`libs_relabel_shared_libs',`
 		type lib_t, textrel_shlib_t;
 	')
 
-	relabel_files_pattern($1, { textrel_shlib_t lib_t }, { lib_t textrel_shlib_t })
-')
-
-########################################
-## <summary>
-##	Create an object in lib directories, with
-##	the shared libraries type using a type transition.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <param name="object">
-##	<summary>
-##	The object class of the object being created.
-##	</summary>
-## </param>
-#
-interface(`lib_filetrans_shared_lib',`
-	refpolicywarn(`$0($*) has been deprecated.')
-')
-
-########################################
-## <summary>
-##	Create an object in lib directories, with
-##	the shared libraries type using a type transition.  (Deprecated)
-## </summary>
-## <desc>
-##	<p>
-##	Create an object in lib directories, with
-##	the shared libraries type using a type transition.  (Deprecated)
-##	</p>
-##	<p>
-##	lib_filetrans_shared_lib() should be used instead.
-##	</p>
-## </desc>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <param name="object">
-##	<summary>
-##	The object class of the object being created.
-##	</summary>
-## </param>
-#
-interface(`files_lib_filetrans_shared_lib',`
-	refpolicywarn(`$0($*) has been deprecated.')
-')
-
-########################################
-## <summary>
-##	Transition to lib named content
-## </summary>
-## <param name="domain">
-##	<summary>
-##      Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`libs_filetrans_named_content',`
-	gen_require(`
-        type lib_t;
-		type ld_so_cache_t;
-		type ldconfig_cache_t;
-	')
-
-    files_var_lib_filetrans($1,ldconfig_cache_t, dir, "debug")
-	files_var_filetrans($1, ldconfig_cache_t, dir, "ldconfig")
-	files_etc_filetrans($1, ld_so_cache_t, file, "ld.so.cache")
-	files_etc_filetrans($1, ld_so_cache_t, file, "ld.so.cache~")
-	files_etc_filetrans($1, ld_so_cache_t, file, "ld.so.preload")
-	files_etc_filetrans($1, ld_so_cache_t, file, "ld.so.preload~")
+	relabel_files_pattern($1, lib_t, { lib_t textrel_shlib_t })
 ')

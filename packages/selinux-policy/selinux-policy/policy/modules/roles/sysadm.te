@@ -1,96 +1,61 @@
-policy_module(sysadm, 2.6.1)
+policy_module(sysadm, 2.16.2)
 
 ########################################
 #
 # Declarations
 #
 
-role sysadm_r;
+## <desc>
+## <p>
+## Allow sysadm to debug or ptrace all processes.
+## </p>
+## </desc>
+gen_tunable(allow_ptrace, false)
+
+## <desc>
+## <p>
+## Allow sysadm to read/write to fifo files inherited from
+## a domain allowed to change role.
+## </p>
+## </desc>
+gen_tunable(sysadm_allow_rw_inherited_fifo, false)
+
+#role sysadm_r;
 
 userdom_admin_user_template(sysadm)
-allow sysadm_t self:netlink_tcpdiag_socket create_netlink_socket_perms;
 
+ifndef(`enable_mls',`
+	userdom_security_admin_template(sysadm_t, sysadm_r)
+')
 
 ########################################
 #
 # Local policy
 #
-kernel_read_fs_sysctls(sysadm_t)
-# SRS: removing for CLIP - gives access to kcore
-#kernel_read_all_proc(sysadm_t)
 
 corecmd_exec_shell(sysadm_t)
 
-dev_filetrans_all_named_dev(sysadm_t)
+corenet_ib_access_unlabeled_pkeys(sysadm_t)
+corenet_ib_manage_subnet_unlabeled_endports(sysadm_t)
 
-domain_dontaudit_read_all_domains_state(sysadm_t)
+dev_read_kmsg(sysadm_t)
 
-files_read_kernel_modules(sysadm_t)
-files_filetrans_named_content(sysadm_t)
-files_status_etc(sysadm_t)
+mls_process_read_all_levels(sysadm_t)
 
-fs_mount_fusefs(sysadm_t)
+selinux_read_policy(sysadm_t)
 
-# SRS: removing for CLIP
-#storage_filetrans_all_named_dev(sysadm_t)
+ubac_process_exempt(sysadm_t)
+ubac_file_exempt(sysadm_t)
+ubac_fd_exempt(sysadm_t)
 
-#term_filetrans_all_named_dev(sysadm_t)
-
-mls_process_read_up(sysadm_t)
-mls_file_read_all_levels(sysadm_t)
-mls_file_write_all_levels(sysadm_t)
-mls_file_read_to_clearance(sysadm_t)
-mls_process_write_to_clearance(sysadm_t)
-
-# SRS: removing for CLIP
-#storage_setattr_fixed_disk_dev(sysadm_t)
-
-# SRS: removing for CLIP
-#ubac_process_exempt(sysadm_t)
-#ubac_file_exempt(sysadm_t)
-#ubac_fd_exempt(sysadm_t)
-
-application_exec(sysadm_t)
-
-init_filetrans_named_content(sysadm_t)
-init_disable_services(sysadm_t)
-init_enable_services(sysadm_t)
-init_reload_services(sysadm_t)
 init_exec(sysadm_t)
-init_exec_script_files(sysadm_t)
-init_dbus_chat(sysadm_t)
-init_script_role_transition(sysadm_r)
-init_status(sysadm_t)
-init_reboot(sysadm_t)
-init_halt(sysadm_t)
-init_undefined(sysadm_t)
+init_admin(sysadm_t)
 
-logging_filetrans_named_content(sysadm_t)
-
-miscfiles_filetrans_named_content(sysadm_t)
-miscfiles_read_hwdata(sysadm_t)
-
-sysnet_filetrans_named_content(sysadm_t)
+selinux_read_policy(sysadm_t)
 
 # Add/remove user home directories
-userdom_manage_user_tmp_chr_files(sysadm_t)
 userdom_manage_user_home_dirs(sysadm_t)
 userdom_home_filetrans_user_home_dir(sysadm_t)
-userdom_manage_tmp_role(sysadm_r, sysadm_t)
-userdom_exec_admin_home_files(sysadm_t)
-
-optional_policy(`
-	abrt_filetrans_named_content(sysadm_t)
-')
-
-optional_policy(`
-	alsa_filetrans_named_content(sysadm_t)
-')
-
-optional_policy(`
-	ssh_filetrans_admin_home_content(sysadm_t)
-	ssh_filetrans_keys(sysadm_t)
-')
 
 ifdef(`direct_sysadm_daemon',`
 	optional_policy(`
@@ -108,25 +73,77 @@ ifdef(`distro_gentoo',`
 	init_exec_rc(sysadm_t)
 ')
 
-# SRS: removing for CLIP
-#tunable_policy(`deny_ptrace',`',`
-#	domain_ptrace_all_domains(sysadm_t)
-#')
+ifndef(`enable_mls',`
+	logging_manage_audit_log(sysadm_t)
+	logging_manage_audit_config(sysadm_t)
+	logging_run_auditctl(sysadm_t, sysadm_r)
+')
+
+ifdef(`init_systemd',`
+	# Allow sysadm to resolve the username of dynamic users by calling
+	# LookupDynamicUserByUID on org.freedesktop.systemd1.
+	init_dbus_chat(sysadm_t)
+')
+
+tunable_policy(`allow_ptrace',`
+	domain_ptrace_all_domains(sysadm_t)
+')
+
+optional_policy(`
+	abrt_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	accountsd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	acct_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	acpi_admin(sysadm_t, sysadm_r)
+	acpi_run_client(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	afs_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	aiccu_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	aide_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	aisexecd_admin(sysadm_t, sysadm_r)
+')
 
 optional_policy(`
 	amanda_run_recover(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	apache_run_helper(sysadm_t, sysadm_r)
-	apache_filetrans_named_content(sysadm_t)
-	#apache_run_all_scripts(sysadm_t, sysadm_r)
-	#apache_domtrans_sys_script(sysadm_t)
+	amavis_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	# cjp: why is this not apm_run_client
-	apm_domtrans_client(sysadm_t)
+	amtu_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	apache_admin(sysadm_t, sysadm_r)
+	apache_run_helper(sysadm_t, sysadm_r)
+	#apache_run_all_scripts(sysadm_t, sysadm_r)
+	#apache_domtrans_sys_script(sysadm_t)
+	apache_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
+	apcupsd_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -134,13 +151,29 @@ optional_policy(`
 ')
 
 optional_policy(`
-	asterisk_stream_connect(sysadm_t)
-	asterisk_exec(sysadm_t)
+	aptcacher_run_acngtool(sysadm_t, sysadm_r)
 ')
 
-#optional_policy(`
-#	auditadm_role_change(sysadm_r)
-#')
+optional_policy(`
+	arpwatch_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	asterisk_admin(sysadm_t, sysadm_r)
+	asterisk_stream_connect(sysadm_t)
+')
+
+optional_policy(`
+	auditadm_role_change(sysadm_r)
+')
+
+optional_policy(`
+	automount_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	avahi_admin(sysadm_t, sysadm_r)
+')
 
 optional_policy(`
 	backup_run(sysadm_t, sysadm_r)
@@ -148,10 +181,28 @@ optional_policy(`
 
 optional_policy(`
 	bacula_run_admin(sysadm_t, sysadm_r)
+	bacula_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
+	bcfg2_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	bind_admin(sysadm_t, sysadm_r)
 	bind_run_ndc(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	bird_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	bitlbee_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	boinc_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -159,7 +210,35 @@ optional_policy(`
 ')
 
 optional_policy(`
-	certmonger_dbus_chat(sysadm_t)
+	bugzilla_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	cachefilesd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	calamaris_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	callweaver_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	canna_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	ccs_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	certmaster_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	certmonger_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -167,9 +246,31 @@ optional_policy(`
 ')
 
 optional_policy(`
+	cfengine_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	cgroup_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	chkrootkit_run(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	chronyd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	cipe_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	clamav_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
 	clock_run(sysadm_t, sysadm_r)
-	clock_manage_adjtime(sysadm_t)
-	clock_filetrans_named_content(sysadm_t)
 ')
 
 optional_policy(`
@@ -177,27 +278,60 @@ optional_policy(`
 ')
 
 optional_policy(`
-	cron_admin_role(sysadm_r, sysadm_t)
+	cmirrord_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	consoletype_exec(sysadm_t)
+	cobbler_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-    daemonstools_run_start(sysadm_t, sysadm_r)
+	collectd_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	dbus_role_template(sysadm, sysadm_r, sysadm_t)
+	condor_admin(sysadm_t, sysadm_r)
+')
 
-	dontaudit sysadm_dbusd_t self:capability net_admin;
+optional_policy(`
+	consoletype_run(sysadm_t, sysadm_r)
+')
 
-    optional_policy(`
-        systemd_dbus_chat_timedated(sysadm_t)
-        systemd_dbus_chat_hostnamed(sysadm_t)
-        systemd_dbus_chat_localed(sysadm_t)
-    ')
+optional_policy(`
+	corosync_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	couchdb_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	cron_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	ctdb_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	cups_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	cvs_admin(sysadm_t, sysadm_r)
+	cvs_exec(sysadm_t)
+')
+
+optional_policy(`
+	cyphesis_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	cyrus_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	dante_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -207,11 +341,39 @@ optional_policy(`
 ')
 
 optional_policy(`
+	ddclient_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
 	ddcprobe_run(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	devicekit_filetrans_named_content(sysadm_t)
+	denyhosts_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	devicekit_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	dhcpd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	dictd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	dirmngr_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	distcc_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	dkim_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -223,7 +385,55 @@ optional_policy(`
 ')
 
 optional_policy(`
+	dnsmasq_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	dnssectrigger_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	dovecot_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	dphysswapfile_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
 	dpkg_run(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	drbd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	dspam_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	entropyd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	exim_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	fail2ban_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	fcoe_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	fetchmail_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	firewalld_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -231,15 +441,39 @@ optional_policy(`
 ')
 
 optional_policy(`
-	firewalld_dbus_chat(sysadm_t)
-')
-
-optional_policy(`
 	fstools_run(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	hostname_run(sysadm_t, sysadm_r)
+	ftp_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	gatekeeper_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	gdomap_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	glance_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	glusterfs_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	gpm_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	gpsd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	gssproxy_admin(sysadm_t)
 ')
 
 optional_policy(`
@@ -247,41 +481,139 @@ optional_policy(`
 ')
 
 optional_policy(`
-	# allow system administrator to use the ipsec script to look
-	# at things (e.g., ipsec auto --status)
-	# probably should create an ipsec_admin role for this kind of thing
-	ipsec_exec_mgmt(sysadm_t)
-	ipsec_stream_connect(sysadm_t)
-	# for lsof
-	ipsec_getattr_key_sockets(sysadm_t)
-	ipsec_run_setkey(sysadm_t, sysadm_r)
-	ipsec_run_racoon(sysadm_t, sysadm_r)
-	ipsec_stream_connect_racoon(sysadm_t)
-
-	optional_policy(`
-		ipsec_mgmt_dbus_chat(sysadm_t)
-	')
+	hddtemp_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
+	hostname_run(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	hwloc_admin(sysadm_t)
+	hwloc_run_dhwd(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	howl_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	hypervkvp_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	i18n_input_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	icecast_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	ifplugd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	inn_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	iodine_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	ipsec_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	iptables_admin(sysadm_t, sysadm_r)
 	iptables_run(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	irc_role(sysadm_r, sysadm_t)
+	irqbalance_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	kerberos_exec_kadmind(sysadm_t)
-	kerberos_filetrans_named_content(sysadm_t)
+	iscsi_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
+	isnsd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	jabber_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	kdump_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	kerberos_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	kerneloops_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	keystone_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	knot_admin(sysadm_t, sysadm_r)
+	knot_run_client(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	kismet_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	ksmtuned_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	kudzu_admin(sysadm_t, sysadm_r)
 	kudzu_run(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
+	l2tp_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	ldap_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	libmtp_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
 	libs_run_ldconfig(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	lightsquid_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	likewise_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	lircd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	lldpad_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	lockdev_role(sysadm_r, sysadm_t)
 ')
 
 optional_policy(`
@@ -294,27 +626,76 @@ optional_policy(`
 ')
 
 optional_policy(`
+	lsmd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	lvm_admin(sysadm_t, sysadm_r)
 	lvm_run(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	modutils_run_depmod(sysadm_t, sysadm_r)
-	modutils_run_insmod(sysadm_t, sysadm_r)
-	modutils_run_update_mods(sysadm_t, sysadm_r)
-	modutils_read_module_deps(sysadm_t)
-	modules_filetrans_named_content(sysadm_t)
+	mandb_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	mcelog_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	memcached_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	minidlna_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	minissdpd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	modutils_run(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	mongodb_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	monit_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	monop_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
 	mount_run(sysadm_t, sysadm_r)
-	mount_run_showmount(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	mozilla_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
+	mpd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	mplayer_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
+	mrtg_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	mscan_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
 	mta_role(sysadm_r, sysadm_t)
-	# this is defined in userdom_common_user_template
-	#mta_filetrans_home_content(sysadm_t)
-	mta_filetrans_admin_home_content(sysadm_t)
 ')
 
 optional_policy(`
@@ -322,11 +703,16 @@ optional_policy(`
 ')
 
 optional_policy(`
+	mysql_admin(sysadm_t, sysadm_r)
 	mysql_stream_connect(sysadm_t)
 ')
 
 optional_policy(`
-	ncftool_run(sysadm_t, sysadm_r)
+	nagios_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	nessus_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -336,18 +722,40 @@ optional_policy(`
 ')
 
 optional_policy(`
-	networkmanager_filetrans_named_content(sysadm_t)
-	networkmanager_stream_connect(sysadm_t)
+	networkmanager_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	ntp_stub()
-	corenet_udp_bind_ntp_port(sysadm_t)
+	nis_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	nscd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+        nsd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	nslcd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	ntop_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
 	ntp_admin(sysadm_t, sysadm_r)
+	corenet_udp_bind_ntp_port(sysadm_t)
 ')
 
 optional_policy(`
-	nx_filetrans_named_content(sysadm_t)
+	numad_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	nut_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -355,7 +763,35 @@ optional_policy(`
 ')
 
 optional_policy(`
-	openvpn_run(sysadm_t, sysadm_r)
+	oident_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	ooffice_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
+	openct_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	openhpi_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	openvpn_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	openvswitch_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	pacemaker_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	pads_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -363,9 +799,31 @@ optional_policy(`
 ')
 
 optional_policy(`
-	polipo_role(sysadm_r, sysadm_t)
-	polipo_named_filetrans_admin_cache_home_dirs(sysadm_t)
-	polipo_named_filetrans_admin_config_home_files(sysadm_t)
+	pcscd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	pegasus_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	perdition_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	pingd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	pkcs_admin_slotd(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	plymouthd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	polipo_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -376,6 +834,11 @@ optional_policy(`
 
 optional_policy(`
 	portmap_run_helper(sysadm_t, sysadm_r)
+	portmap_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	portreserve_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -383,40 +846,151 @@ optional_policy(`
 ')
 
 optional_policy(`
-	postgresql_admin(sysadm_t, sysadm_r)
+	postfixpolicyd_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	prelink_run(sysadm_t, sysadm_r)
+	postgrey_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	puppet_run_puppetca(sysadm_t, sysadm_r)
+	ppp_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	quota_filetrans_named_content(sysadm_t)
+	prelude_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	raid_domtrans_mdadm(sysadm_t)
+	privoxy_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
+	psad_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	puppet_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	pxe_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	pyicqt_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	pyzor_admin(sysadm_t, sysadm_r)
+	pyzor_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
+	qpidd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	quantum_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	quota_run(sysadm_t, sysadm_r)
+	quota_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	rabbitmq_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	radius_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	radvd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	raid_run_mdadm(sysadm_r, sysadm_t)
+	raid_admin_mdadm(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	razor_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
+	redis_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	resmgr_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	rgmanager_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	rhcs_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	rhsmcertd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	ricci_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	rkhunter_run(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	rngd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	roundup_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	rpc_admin(sysadm_t, sysadm_r)
 	rpc_domtrans_nfsd(sysadm_t)
 ')
 
 optional_policy(`
+	rpcbind_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	rpm_run(sysadm_t, sysadm_r)
 	rpm_admin(sysadm_t, sysadm_r)
-	rpm_dbus_chat(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
+	rssh_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
+	rsync_admin(sysadm_t, sysadm_r)
 	rsync_exec(sysadm_t)
-	rsync_filetrans_named_content(sysadm_t)
 ')
 
 optional_policy(`
+	rtkit_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	rwho_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	samba_admin(sysadm_t, sysadm_r)
+	samba_run_smbcontrol(sysadm_t, sysadm_r)
+	samba_run_smbmount(sysadm_t, sysadm_r)
 	samba_run_net(sysadm_t, sysadm_r)
 	samba_run_winbind_helper(sysadm_t, sysadm_r)
 ')
@@ -426,8 +1000,19 @@ optional_policy(`
 ')
 
 optional_policy(`
+	sanlock_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	sasl_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	sblim_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
 	screen_role_template(sysadm, sysadm_r, sysadm_t)
-    allow sysadm_screen_t self:capability dac_override;
 ')
 
 optional_policy(`
@@ -435,21 +1020,61 @@ optional_policy(`
 ')
 
 optional_policy(`
-	setroubleshoot_stream_connect(sysadm_t)
-	setroubleshoot_dbus_chat(sysadm_t)
-	setroubleshoot_dbus_chat_fixit(sysadm_t)
+	sensord_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	seutil_run_semanage(sysadm_t, sysadm_r)
+	setrans_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	setroubleshoot_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
 	seutil_run_setfiles(sysadm_t, sysadm_r)
 	seutil_run_runinit(sysadm_t, sysadm_r)
-	seutil_dbus_chat_semanage(sysadm_t)
-	seutil_read_login_config(sysadm_t)
 ')
 
 optional_policy(`
-	shutdown_run(sysadm_t, sysadm_r)
+	shorewall_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	shutdown_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
+	slpd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	smartmon_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	smokeping_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	smstools_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	snmp_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	snort_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	soundserver_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	spamassassin_admin(sysadm_t, sysadm_r)
+	spamassassin_role(sysadm_r, sysadm_t)
 ')
 
 optional_policy(`
@@ -457,7 +1082,15 @@ optional_policy(`
 ')
 
 optional_policy(`
+	sssd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
 	staff_role_change(sysadm_r)
+')
+
+optional_policy(`
+	stapserver_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -466,7 +1099,10 @@ optional_policy(`
 
 optional_policy(`
 	sudo_role_template(sysadm, sysadm_r, sysadm_t)
-	sudo_manage_sudoers(sysadm_t)
+')
+
+optional_policy(`
+	svnserve_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -475,18 +1111,39 @@ optional_policy(`
 ')
 
 optional_policy(`
-	systemd_passwd_agent_run(sysadm_t, sysadm_r)
-	systemd_config_all_services(sysadm_t)
-	systemd_manage_all_unit_files(sysadm_t)
-	systemd_manage_all_unit_lnk_files(sysadm_t)
-	systemd_login_status(sysadm_t)
-	systemd_login_reboot(sysadm_t)
-	systemd_login_halt(sysadm_t)
-	systemd_login_undefined(sysadm_t)
+	sysstat_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	tftp_filetrans_named_content(sysadm_t)
+	systemd_dbus_chat_hostnamed(sysadm_t)
+')
+
+optional_policy(`
+	tboot_run_txtstat(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	tcsd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	tftp_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	tgtd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	thunderbird_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
+	tor_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	transproxy_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -497,11 +1154,27 @@ optional_policy(`
 ')
 
 optional_policy(`
+	tvtime_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
 	tzdata_domtrans(sysadm_t)
 ')
 
 optional_policy(`
-	udev_run(sysadm_t, sysadm_r)
+	udevadm_run(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	ulogd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	uml_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
+	unconfined_domtrans(sysadm_t)
 ')
 
 optional_policy(`
@@ -509,21 +1182,50 @@ optional_policy(`
 ')
 
 optional_policy(`
+	uptime_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
 	usbmodules_run(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
+	userhelper_role_template(sysadm, sysadm_r, sysadm_t)
+')
+
+optional_policy(`
 	usermanage_run_admin_passwd(sysadm_t, sysadm_r)
-	usermanage_run_chage(sysadm_t, sysadm_r)
 	usermanage_run_groupadd(sysadm_t, sysadm_r)
 	usermanage_run_useradd(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
+	uucp_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	uuidd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	varnishd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	varnishd_admin_varnishlog(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	vdagent_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	vhostmd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	virt_admin(sysadm_t, sysadm_r)
 	virt_stream_connect(sysadm_t)
-	virt_filetrans_home_content(sysadm_t)
-	virt_manage_pid_dirs(sysadm_t)
-	virt_transition_svirt_sandbox(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -531,7 +1233,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	vlock_run(sysadm_t, sysadm_r)
+	vnstatd_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -539,12 +1241,40 @@ optional_policy(`
 ')
 
 optional_policy(`
+	watchdog_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	wdmd_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
 	webalizer_run(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
+	wireguard_admin(sysadm_t, sysadm_r)
+	wireguard_run(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	wireshark_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
+	vlock_run(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	xscreensaver_role(sysadm_r, sysadm_t)
+')
+
+optional_policy(`
 	xserver_role(sysadm_r, sysadm_t)
-	miscfiles_map_fonts(sysadm_t)
+')
+
+optional_policy(`
+	xfs_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -552,18 +1282,24 @@ optional_policy(`
 ')
 
 optional_policy(`
-	zebra_stream_connect(sysadm_t)
+	zabbix_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	zarafa_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	zebra_admin(sysadm_t, sysadm_r)
 ')
 
 ifndef(`distro_redhat',`
-	optional_policy(`
-		apache_role(sysadm_r, sysadm_t)
-	')
 	optional_policy(`
 		auth_role(sysadm_r, sysadm_t)
 	')
 
 	optional_policy(`
+		bluetooth_admin(sysadm_t, sysadm_r)
 		bluetooth_role(sysadm_r, sysadm_t)
 	')
 
@@ -572,11 +1308,31 @@ ifndef(`distro_redhat',`
 	')
 
 	optional_policy(`
+		chromium_role(sysadm_r, sysadm_t)
+	')
+
+	optional_policy(`
+		cron_admin_role(sysadm_r, sysadm_t)
+	')
+
+	optional_policy(`
+		cryfs_role(sysadm_r, sysadm_t)
+	')
+
+	optional_policy(`
 		dbus_role_template(sysadm, sysadm_r, sysadm_t)
 
 		optional_policy(`
 			gnome_role_template(sysadm, sysadm_r, sysadm_t)
 		')
+
+		optional_policy(`
+			wm_role_template(sysadm, sysadm_r, sysadm_t)
+		')
+	')
+
+	optional_policy(`
+		dirmngr_role(sysadm_r, sysadm_t)
 	')
 
 	optional_policy(`
@@ -592,79 +1348,19 @@ ifndef(`distro_redhat',`
 	')
 
 	optional_policy(`
-		gnome_role_template(sysadm, sysadm_r, sysadm_t)
-		gnome_filetrans_admin_home_content(sysadm_t)
+		gpg_role(sysadm_r, sysadm_t)
 	')
 
 	optional_policy(`
-		gpg_role(sysadm_r, sysadm_t)
+		irc_role(sysadm_r, sysadm_t)
+	')
+
+	optional_policy(`
+		ircd_admin(sysadm_t, sysadm_r)
 	')
 
 	optional_policy(`
 		java_role(sysadm_r, sysadm_t)
 	')
-
-	optional_policy(`
-		lockdev_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		mock_admin(sysadm_t)
-	')
-
-	optional_policy(`
-		mozilla_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		mplayer_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		pyzor_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		razor_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		rssh_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		spamassassin_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		thunderbird_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		tvtime_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		uml_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		userhelper_role_template(sysadm, sysadm_r, sysadm_t)
-	')
-
-    optional_policy(`
-        vmtools_run_helper(sysadm_t, sysadm_r)
-    ')
-
-	optional_policy(`
-		vmware_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		wireshark_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		xserver_role(sysadm_r, sysadm_t)
-	')
 ')
+

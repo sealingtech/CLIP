@@ -1,11 +1,4 @@
-policy_module(unprivuser, 2.4.0)
-
-## <desc>
-## <p>
-## Allow unprivileged user to create and transition to svirt domains.
-## </p>
-## </desc>
-gen_tunable(unprivuser_use_svirt, false)
+policy_module(unprivuser, 2.10.0)
 
 # this module should be named user, but that is
 # a compile error since user is a keyword.
@@ -15,102 +8,20 @@ gen_tunable(unprivuser_use_svirt, false)
 # Declarations
 #
 
-role user_r;
+#role user_r;
 
 userdom_unpriv_user_template(user)
-
-kernel_read_numa_state(user_t)
-kernel_write_numa_state(user_t)
-
-fs_exec_noxattr(user_t)
-fs_read_hugetlbfs_files(user_t)
-
-storage_read_scsi_generic(user_t)
-storage_write_scsi_generic(user_t)
-
-seutil_read_module_store(user_t)
-
-init_dbus_chat(user_t)
-init_status(user_t)
-
-tunable_policy(`selinuxuser_execmod',`
-	userdom_execmod_user_home_files(user_t)
-')
-
-optional_policy(`
-	abrt_read_cache(user_t)
-')
 
 optional_policy(`
 	apache_role(user_r, user_t)
 ')
 
 optional_policy(`
-	blueman_dbus_chat(user_t)
+	git_role(user_r, user_t)
 ')
 
 optional_policy(`
-	bluetooth_role(user_r, user_t)
-')
-
-optional_policy(`
-	colord_dbus_chat(user_t)
-')
-
-optional_policy(`
-	chrome_role(user_r, user_t)
-')
-
-optional_policy(`
-	journalctl_role(user_r, user_t)
-')
-
-optional_policy(`
-	irc_role(user_r, user_t)
-')
-
-optional_policy(`
-	oident_manage_user_content(user_t)
-	oident_relabel_user_content(user_t)
-')
-
-optional_policy(`
-	mozilla_run_plugin(user_t, user_r)
-')
-
-optional_policy(`
-	mta_role(user_r, user_t)
-')
-
-optional_policy(`
-	netutils_run_ping_cond(user_t, user_r)
-	netutils_run_traceroute_cond(user_t, user_r)
-')
-
-optional_policy(`
-	polipo_role(user_r, user_t)
-	polipo_named_filetrans_cache_home_dirs(user_t)
-	polipo_named_filetrans_config_home_files(user_t)
-')
-
-optional_policy(`
-	rpm_dontaudit_dbus_chat(user_t)
-')
-
-optional_policy(`
-	rtkit_scheduled(user_t)
-')
-
-optional_policy(`
-	sandbox_transition(user_t, user_r)
-')
-
-optional_policy(`
-	sandbox_x_transition(user_t, user_r)
-')
-
-optional_policy(`
-	ssh_role_template(user, user_r, user_t)
+	modemmanager_dbus_chat(user_t)
 ')
 
 optional_policy(`
@@ -118,19 +29,15 @@ optional_policy(`
 ')
 
 optional_policy(`
-	setroubleshoot_dontaudit_stream_connect(user_t)
-')
-
-#optional_policy(`
-#	telepathy_dbus_session_role(user_r, user_t)
-#')
-
-optional_policy(`
-	usbmuxd_stream_connect(user_t)
-')
-
-optional_policy(`
 	vlock_run(user_t, user_r)
+')
+
+optional_policy(`
+	xscreensaver_role(user_r, user_t)
+')
+
+optional_policy(`
+	xserver_role(user_r, user_t)
 ')
 
 ifndef(`distro_redhat',`
@@ -147,6 +54,10 @@ ifndef(`distro_redhat',`
 	')
 
 	optional_policy(`
+		chromium_role(user_r, user_t)
+	')
+
+	optional_policy(`
 		cron_role(user_r, user_t)
 	')
 
@@ -156,6 +67,18 @@ ifndef(`distro_redhat',`
 		optional_policy(`
 			gnome_role_template(user, user_r, user_t)
 		')
+
+		optional_policy(`
+			telepathy_role_template(user, user_r, user_t)
+		')
+
+		optional_policy(`
+			wm_role_template(user, user_r, user_t)
+		')
+	')
+
+	optional_policy(`
+		dirmngr_role(user_r, user_t)
 	')
 
 	optional_policy(`
@@ -187,6 +110,10 @@ ifndef(`distro_redhat',`
 	')
 
 	optional_policy(`
+		libmtp_role(user_r, user_t)
+	')
+
+	optional_policy(`
 		lockdev_role(user_r, user_t)
 	')
 
@@ -203,7 +130,19 @@ ifndef(`distro_redhat',`
 	')
 
 	optional_policy(`
+		mta_role(user_r, user_t)
+	')
+
+	optional_policy(`
+		ooffice_role(user_r, user_t)
+	')
+
+	optional_policy(`
 		postgresql_role(user_r, user_t)
+	')
+
+	optional_policy(`
+		pulseaudio_role(user_r, user_t)
 	')
 
 	optional_policy(`
@@ -219,18 +158,27 @@ ifndef(`distro_redhat',`
 	')
 
 	optional_policy(`
+		sigrok_run(user_r, user_t)
+	')
+
+	optional_policy(`
 		spamassassin_role(user_r, user_t)
 	')
 
 	optional_policy(`
 		ssh_role_template(user, user_r, user_t)
 	')
+
 	optional_policy(`
 		su_role_template(user, user_r, user_t)
 	')
 
 	optional_policy(`
 		sudo_role_template(user, user_r, user_t)
+	')
+
+	optional_policy(`
+		syncthing_role(user_r, user_t)
 	')
 
 	optional_policy(`
@@ -256,25 +204,4 @@ ifndef(`distro_redhat',`
 	optional_policy(`
 		wireshark_role(user_r, user_t)
 	')
-')
-
-optional_policy(`
-    vmtools_run_helper(user_t, user_r)
-')
-
-
-optional_policy(`
-	virt_transition_svirt(user_t, user_r)
-	virt_filetrans_home_content(user_t)
-')
-
-optional_policy(`
-	tunable_policy(`unprivuser_use_svirt',`
-		virt_manage_images(user_t)
-	')
-')
-
-optional_policy(`
-        xserver_role(user_r, user_t)
-        miscfiles_map_fonts(user_t)
 ')

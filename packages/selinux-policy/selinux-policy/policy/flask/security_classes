@@ -1,7 +1,7 @@
 # FLASK
 
 #
-# Define the security object classes 
+# Define the security object classes
 #
 
 # Classes marked as userspace are classes
@@ -66,13 +66,13 @@ class x_extension		# userspace
 
 # extended netlink sockets
 class netlink_route_socket
-class netlink_firewall_socket
+class obsolete_netlink_firewall_socket
 class netlink_tcpdiag_socket
 class netlink_nflog_socket
 class netlink_xfrm_socket
 class netlink_selinux_socket
 class netlink_audit_socket
-class netlink_ip6fw_socket
+class obsolete_netlink_ip6fw_socket
 class netlink_dnrt_socket
 
 class dbus			# userspace
@@ -103,6 +103,8 @@ class db_procedure		# userspace
 class db_column			# userspace
 class db_tuple			# userspace
 class db_blob			# userspace
+class db_exception		# userspace
+class db_datatype		# userspace
 
 # network peer labels
 class peer
@@ -117,7 +119,7 @@ class x_synthetic_event		# userspace
 class x_application_data	# userspace
 
 # kernel services that need to override task security, e.g. cachefiles
-class kernel_service 
+class kernel_service
 
 class tun_socket
 
@@ -147,18 +149,11 @@ class db_view			# userspace
 class db_sequence		# userspace
 class db_language		# userspace
 
-# systemd services 
-class service 
-
-# gssd services 
-class proxy
-
+class service			# userspace
 
 # Capability checks when on a non-init user namespace
 class cap_userns
 class cap2_userns
-
-class process2
 
 # New socket classes introduced by extended_socket_class policy capability.
 # These two were previously mapped to rawip_socket.
@@ -168,7 +163,6 @@ class icmp_socket
 class ax25_socket
 class ipx_socket
 class netrom_socket
-class bridge_socket
 class atmpvc_socket
 class x25_socket
 class rose_socket
@@ -178,8 +172,6 @@ class rds_socket
 class irda_socket
 class pppox_socket
 class llc_socket
-class ib_socket
-class mpls_socket
 class can_socket
 class tipc_socket
 class bluetooth_socket
@@ -196,8 +188,14 @@ class kcm_socket
 class qipcrtr_socket
 class smc_socket
 
-class bpf 
+class process2
+
+class bpf
 
 class xdp_socket
+
+class perf_event
+
+class lockdown
 
 # FLASK

@@ -1,9 +1,10 @@
-policy_module(udev, 1.16.2)
+policy_module(udev, 1.27.1)
 
 ########################################
 #
 # Declarations
 #
+attribute_role udevadm_roles;
 
 type udev_t;
 type udev_exec_t;
@@ -13,6 +14,13 @@ domain_obj_id_change_exemption(udev_t)
 domain_entry_file(udev_t, udev_helper_exec_t)
 domain_interactive_fd(udev_t)
 init_daemon_domain(udev_t, udev_exec_t)
+init_named_socket_activation(udev_t, udev_runtime_t)
+
+type udevadm_t;
+type udevadm_exec_t;
+init_system_domain(udevadm_t, udevadm_exec_t)
+application_domain(udevadm_t, udevadm_exec_t)
+role udevadm_roles types udevadm_t;
 
 type udev_etc_t alias etc_udev_t;
 files_config_file(udev_etc_t)
@@ -20,13 +28,12 @@ files_config_file(udev_etc_t)
 type udev_rules_t;
 files_type(udev_rules_t)
 
-type udev_var_run_t;
-files_pid_file(udev_var_run_t)
-typealias udev_var_run_t alias udev_tbl_t;
-init_daemon_run_dir(udev_var_run_t, "udev")
+type udev_runtime_t alias udev_var_run_t;
+files_pid_file(udev_runtime_t)
+init_daemon_pid_file(udev_runtime_t, dir, "udev")
 
-type udev_tmp_t;
-files_tmp_file(udev_tmp_t)
+type udev_tbl_t alias udev_tdb_t;
+files_type(udev_tbl_t)
 
 ifdef(`enable_mcs',`
 	kernel_ranged_domtrans_to(udev_t, udev_exec_t, s0 - mcs_systemhigh)
@@ -35,14 +42,13 @@ ifdef(`enable_mcs',`
 
 ########################################
 #
-# Local policy
+# udev Local policy
 #
 
-allow udev_t self:capability { chown dac_override dac_read_search fowner fsetid sys_admin mknod net_raw net_admin sys_nice sys_rawio sys_resource setuid setgid sys_nice };
-allow udev_t self:capability2 { block_suspend };
+allow udev_t self:capability { chown dac_override dac_read_search fowner fsetid mknod net_admin net_raw setgid setuid sys_admin sys_nice sys_ptrace sys_rawio sys_resource };
 dontaudit udev_t self:capability sys_tty_config;
-allow udev_t self:process ~{ ptrace setcurrent setexec setfscreate setrlimit execmem execstack execheap };
-allow udev_t self:process { execmem setfscreate };
+allow udev_t self:capability2 { wake_alarm block_suspend };
+allow udev_t self:process { transition signal_perms ptrace getsched setsched getsession getpgid setpgid getcap setcap share getattr setfscreate noatsecure siginh rlimitinh dyntransition execmem setkeycreate setsockcreate getrlimit };
 allow udev_t self:fd use;
 allow udev_t self:fifo_file rw_fifo_file_perms;
 allow udev_t self:sock_file read_sock_file_perms;
@@ -54,11 +60,12 @@ allow udev_t self:unix_stream_socket { listen accept };
 allow udev_t self:unix_dgram_socket sendto;
 allow udev_t self:unix_stream_socket connectto;
 allow udev_t self:netlink_kobject_uevent_socket create_socket_perms;
+allow udev_t self:netlink_generic_socket create_socket_perms;
 allow udev_t self:rawip_socket create_socket_perms;
-allow udev_t self:rawip_socket create_socket_perms;
-allow udev_t self:udp_socket create_socket_perms;
 
-allow udev_t udev_exec_t:file write;
+# for systemd-udevd to rename interfaces
+allow udev_t self:netlink_route_socket nlmsg_write;
+
 can_exec(udev_t, udev_exec_t)
 
 allow udev_t udev_helper_exec_t:dir list_dir_perms;
@@ -67,23 +74,18 @@ can_exec(udev_t, udev_helper_exec_t)
 # read udev config
 allow udev_t udev_etc_t:file read_file_perms;
 
-allow udev_t udev_tmp_t:dir manage_dir_perms;
-allow udev_t udev_tmp_t:file manage_file_perms;
-files_tmp_filetrans(udev_t, udev_tmp_t, { file dir })
+allow udev_t udev_tbl_t:file manage_file_perms;
+dev_filetrans(udev_t, udev_tbl_t, file)
 
 list_dirs_pattern(udev_t, udev_rules_t, udev_rules_t)
 manage_files_pattern(udev_t, udev_rules_t, udev_rules_t)
 manage_lnk_files_pattern(udev_t, udev_rules_t, udev_rules_t)
 
-manage_dirs_pattern(udev_t, udev_var_run_t, udev_var_run_t)
-manage_files_pattern(udev_t, udev_var_run_t, udev_var_run_t)
-manage_lnk_files_pattern(udev_t, udev_var_run_t, udev_var_run_t)
-manage_sock_files_pattern(udev_t, udev_var_run_t, udev_var_run_t)
-files_pid_filetrans(udev_t, udev_var_run_t, dir, "udev")
-allow udev_t udev_var_run_t:file mounton;
-allow udev_t udev_var_run_t:dir mounton;
-allow udev_t udev_var_run_t:lnk_file relabel_lnk_file_perms;
-dev_filetrans(udev_t, udev_var_run_t, { file lnk_file } )
+manage_dirs_pattern(udev_t, udev_runtime_t, udev_runtime_t)
+manage_files_pattern(udev_t, udev_runtime_t, udev_runtime_t)
+manage_lnk_files_pattern(udev_t, udev_runtime_t, udev_runtime_t)
+manage_sock_files_pattern(udev_t, udev_runtime_t, udev_runtime_t)
+files_pid_filetrans(udev_t, udev_runtime_t, dir, "udev")
 
 kernel_load_module(udev_t)
 kernel_read_system_state(udev_t)
@@ -91,26 +93,26 @@ kernel_request_load_module(udev_t)
 kernel_getattr_core_if(udev_t)
 kernel_use_fds(udev_t)
 kernel_read_device_sysctls(udev_t)
-kernel_read_fs_sysctls(udev_t)
+kernel_read_hotplug_sysctls(udev_t)
+kernel_read_modprobe_sysctls(udev_t)
 kernel_read_kernel_sysctls(udev_t)
-kernel_rw_usermodehelper_state(udev_t)
+kernel_rw_hotplug_sysctls(udev_t)
 kernel_rw_unix_dgram_sockets(udev_t)
-kernel_dgram_send(udev_t)
-kernel_search_debugfs(udev_t)
-kernel_setsched(udev_t)
-kernel_stream_connect(udev_t)
 kernel_signal(udev_t)
+kernel_search_debugfs(udev_t)
+kernel_search_key(udev_t)
 
 #https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=235182
 kernel_rw_net_sysctls(udev_t)
+kernel_read_crypto_sysctls(udev_t)
 kernel_read_network_state(udev_t)
 kernel_read_software_raid_state(udev_t)
+kernel_dontaudit_search_unlabeled(udev_t)
 
 corecmd_exec_all_executables(udev_t)
 
 dev_rw_sysfs(udev_t)
 dev_manage_all_dev_nodes(udev_t)
-dev_rw_generic_usb_dev(udev_t)
 dev_rw_generic_files(udev_t)
 dev_delete_generic_files(udev_t)
 dev_search_usbfs(udev_t)
@@ -119,38 +121,31 @@ dev_relabel_all_dev_nodes(udev_t)
 # preserved, instead of short circuiting the relabel
 dev_relabel_generic_symlinks(udev_t)
 dev_manage_generic_symlinks(udev_t)
-dev_filetrans_all_named_dev(udev_t)
 
 domain_read_all_domains_state(udev_t)
+domain_dontaudit_ptrace_all_domains(udev_t) #pidof triggers these
 
 files_read_usr_files(udev_t)
 files_read_etc_runtime_files(udev_t)
+files_read_etc_files(udev_t)
 files_read_kernel_modules(udev_t)
-files_read_system_conf_files(udev_t)
-
-
-# console_init manages files in /etc/sysconfig
-files_manage_etc_files(udev_t)
 files_exec_etc_files(udev_t)
-files_exec_usr_files(udev_t)
-files_dontaudit_search_isid_type_dirs(udev_t)
 files_getattr_generic_locks(udev_t)
 files_search_mnt(udev_t)
-files_list_tmp(udev_t)
 
 fs_getattr_all_fs(udev_t)
-fs_list_all(udev_t)
 fs_list_inotifyfs(udev_t)
-fs_rw_anon_inodefs_files(udev_t)
-fs_list_auto_mountpoints(udev_t)
-fs_list_hugetlbfs(udev_t)
 fs_read_cgroup_files(udev_t)
+fs_rw_anon_inodefs_files(udev_t)
+fs_search_tracefs(udev_t)
+
+mcs_ptrace_all(udev_t)
 
 mls_file_read_all_levels(udev_t)
 mls_file_write_all_levels(udev_t)
 mls_file_upgrade(udev_t)
 mls_file_downgrade(udev_t)
-mls_process_write_down(udev_t)
+mls_process_write_all_levels(udev_t)
 
 selinux_get_fs_mount(udev_t)
 selinux_validate_context(udev_t)
@@ -159,28 +154,35 @@ selinux_compute_create_context(udev_t)
 selinux_compute_relabel_context(udev_t)
 selinux_compute_user_contexts(udev_t)
 
+storage_watch_fixed_disk(udev_t)
+
 auth_read_pam_console_data(udev_t)
 auth_domtrans_pam_console(udev_t)
 auth_use_nsswitch(udev_t)
 
 init_read_utmp(udev_t)
+init_domtrans_script(udev_t)
+# systemd-udevd searches /run/systemd
+init_search_run(udev_t)
 init_dontaudit_write_utmp(udev_t)
 init_getattr_initctl(udev_t)
-init_stream_connect(udev_t)
+init_start_all_units(udev_t)
+init_stop_all_units(udev_t)
+# for hdparm init script run by udev
+init_get_script_status(udev_t)
 
 logging_search_logs(udev_t)
 logging_send_syslog_msg(udev_t)
 logging_send_audit_msgs(udev_t)
-logging_stream_connect_syslog(udev_t)
 
+miscfiles_read_localization(udev_t)
 miscfiles_read_hwdata(udev_t)
 
-modutils_domtrans_insmod(udev_t)
+modutils_domtrans(udev_t)
+modutils_read_module_config(udev_t)
 # read modules.inputmap:
 modutils_read_module_deps(udev_t)
-modutils_list_module_config(udev_t)
-modutils_read_module_config(udev_t)
-files_map_kernel_modules(udev_t)
+modutils_read_module_objects(udev_t)
 
 seutil_read_config(udev_t)
 seutil_read_default_contexts(udev_t)
@@ -194,20 +196,15 @@ sysnet_read_dhcpc_pid(udev_t)
 sysnet_delete_dhcpc_pid(udev_t)
 sysnet_signal_dhcpc(udev_t)
 sysnet_manage_config(udev_t)
-sysnet_filetrans_named_content(udev_t)
-#sysnet_etc_filetrans_config(udev_t)
+sysnet_etc_filetrans_config(udev_t)
 
-systemd_login_read_pid_files(udev_t)
-systemd_getattr_unit_files(udev_t)
-systemd_notify_write_socket(udev_t)
-systemd_hwdb_manage_config(udev_t)
-
-optional_policy(`
-	userdom_dontaudit_search_user_home_content(udev_t)
-')
+userdom_dontaudit_search_user_home_content(udev_t)
 
 ifdef(`distro_debian',`
-	files_pid_filetrans(udev_t, udev_var_run_t, dir, "xen-hotplug")
+	# for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=851933
+	files_read_default_files(udev_t)
+
+	files_pid_filetrans(udev_t, udev_runtime_t, dir, "xen-hotplug")
 
 	optional_policy(`
 		# for /usr/lib/avahi/avahi-daemon-check-dns.sh
@@ -217,20 +214,34 @@ ifdef(`distro_debian',`
 		avahi_create_pid_dirs(udev_t)
 		avahi_initrc_domtrans(udev_t)
 		avahi_manage_pid_files(udev_t)
+		avahi_setattr_pid_dirs(udev_t)
 		avahi_filetrans_pid(udev_t, dir, "avahi-daemon")
+	')
+
+	optional_policy(`
+		consolesetup_exec_conf(udev_t)
+		consolesetup_manage_runtime(udev_t)
+		consolesetup_pid_filetrans_runtime(udev_t)
 	')
 ')
 
 ifdef(`distro_gentoo',`
 	# during boot, init scripts use /dev/.rcsysinit
-	# existance to determine if we are in early booting
+	# existence to determine if we are in early booting
 	init_getattr_script_status_files(udev_t)
 ')
 
 ifdef(`distro_redhat',`
-	fs_manage_hugetlbfs_dirs(udev_t)
+	fs_manage_tmpfs_dirs(udev_t)
+	fs_manage_tmpfs_files(udev_t)
+	fs_manage_tmpfs_symlinks(udev_t)
+	fs_manage_tmpfs_sockets(udev_t)
+	fs_manage_tmpfs_blk_files(udev_t)
+	fs_manage_tmpfs_chr_files(udev_t)
+	fs_relabel_tmpfs_blk_file(udev_t)
+	fs_relabel_tmpfs_chr_file(udev_t)
 
-	term_use_generic_ptys(udev_t)
+	term_search_ptys(udev_t)
 
 	# for arping used for static IP addresses on PCMCIA ethernet
 	netutils_domtrans(udev_t)
@@ -240,10 +251,32 @@ ifdef(`distro_redhat',`
 	')
 ')
 
+ifdef(`init_systemd',`
+	files_search_kernel_modules(udev_t)
+
+	fs_read_cgroup_files(udev_t)
+
+	init_dgram_send(udev_t)
+	init_get_generic_units_status(udev_t)
+	init_stream_connect(udev_t)
+
+	systemd_map_hwdb(udev_t)
+	systemd_read_hwdb(udev_t)
+	systemd_read_logind_sessions_files(udev_t)
+	systemd_read_logind_pids(udev_t)
+
+	optional_policy(`
+		init_dbus_chat(udev_t)
+	')
+',`
+	fs_manage_tmpfs_dirs(udev_t)
+	fs_manage_tmpfs_files(udev_t)
+')
+
 optional_policy(`
 	alsa_domtrans(udev_t)
 	alsa_read_lib(udev_t)
-	alsa_read_rw_config(udev_t)
+	alsa_read_config(udev_t)
 ')
 
 optional_policy(`
@@ -268,7 +301,7 @@ optional_policy(`
 
 optional_policy(`
 	cups_domtrans_config(udev_t)
-	cups_read_config(udev_t)
+	cups_domtrans_hplip(udev_t)
 ')
 
 optional_policy(`
@@ -276,31 +309,13 @@ optional_policy(`
 	dbus_use_system_bus_fds(udev_t)
 
 	optional_policy(`
-		systemd_dbus_chat_logind(udev_t)
-    ')
+		consolekit_dbus_chat(udev_t)
+	')
 ')
 
 optional_policy(`
 	devicekit_read_pid_files(udev_t)
 	devicekit_dgram_send(udev_t)
-	devicekit_domtrans_disk(udev_t)
-')
-
-optional_policy(`
-	gnome_read_home_config(udev_t)
-')
-
-optional_policy(`
-	gpsd_domtrans(udev_t)
-')
-
-optional_policy(`
-	kdump_systemctl(udev_t)
-')
-
-optional_policy(`
-	lvm_domtrans(udev_t)
-	lvm_dgram_send(udev_t)
 ')
 
 optional_policy(`
@@ -322,15 +337,15 @@ optional_policy(`
 ')
 
 optional_policy(`
+	iptables_domtrans(udev_t)
+')
+
+optional_policy(`
 	lvm_domtrans(udev_t)
 ')
 
 optional_policy(`
 	mount_domtrans(udev_t)
-')
-
-optional_policy(`
-	networkmanager_dbus_chat(udev_t)
 ')
 
 optional_policy(`
@@ -348,15 +363,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	radvd_read_pid_files(udev_t)
-')
-
-optional_policy(`
-	usbmuxd_domtrans(udev_t)
-	usbmuxd_stream_connect(udev_t)
-')
-
-optional_policy(`
 	unconfined_signal(udev_t)
 ')
 
@@ -365,13 +371,55 @@ optional_policy(`
 ')
 
 optional_policy(`
+	# for systemd-udevd when starting xen domu
+	virt_read_config(udev_t)
+')
+
+optional_policy(`
 	kernel_write_xen_state(udev_t)
 	kernel_read_xen_state(udev_t)
 	xen_manage_log(udev_t)
 	xen_read_image_files(udev_t)
-	xen_stream_connect_xenstore(udev_t)
+	fs_manage_xenfs_files(udev_t)
 ')
 
 optional_policy(`
 	xserver_read_xdm_pid(udev_t)
 ')
+
+########################################
+#
+# udevadm Local policy
+#
+
+allow udevadm_t self:capability dac_read_search;
+allow udevadm_t self:netlink_kobject_uevent_socket create_socket_perms;
+allow udevadm_t self:unix_stream_socket create_socket_perms;
+
+stream_connect_pattern(udevadm_t, udev_runtime_t, udev_runtime_t, udev_t)
+
+delete_dirs_pattern(udevadm_t, udev_runtime_t, udev_runtime_t)
+delete_files_pattern(udevadm_t, udev_runtime_t, udev_runtime_t)
+delete_lnk_files_pattern(udevadm_t, udev_runtime_t, udev_runtime_t)
+list_dirs_pattern(udevadm_t, udev_runtime_t, udev_runtime_t)
+read_files_pattern(udevadm_t, udev_runtime_t, udev_runtime_t)
+allow udevadm_t udev_runtime_t:dir watch;
+
+list_dirs_pattern(udevadm_t, udev_tbl_t, udev_tbl_t)
+read_files_pattern(udevadm_t, udev_tbl_t, udev_tbl_t)
+read_lnk_files_pattern(udevadm_t, udev_tbl_t, udev_tbl_t)
+
+dev_rw_sysfs(udevadm_t)
+dev_read_urand(udevadm_t)
+
+files_read_etc_files(udevadm_t)
+files_read_usr_files(udevadm_t)
+
+init_list_pids(udevadm_t)
+init_read_state(udevadm_t)
+
+kernel_read_kernel_sysctls(udevadm_t)
+kernel_read_system_state(udevadm_t)
+
+seutil_read_file_contexts(udevadm_t)
+

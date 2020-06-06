@@ -11,4 +11,3 @@ attribute mcssetcats;
 attribute mcswriteall;
 attribute mcsreadall;
 attribute mcs_constrained_type;
-attribute mcsnetwrite;

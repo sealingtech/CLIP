@@ -7,7 +7,7 @@ define(`shiftn',`ifelse($1,0,`shift($*)',`shiftn(decr($1),shift(shift($*)))')')
 
 ########################################
 #
-# Network Interface generated macros 
+# Network Interface generated macros
 #
 ########################################
 
@@ -28,7 +28,7 @@ interface(`corenet_tcp_sendrecv_$1_if',`
 		$3 $1_$2;
 	')
 
-	allow dollarsone $1_$2:netif { tcp_send tcp_recv egress ingress };
+	allow dollarsone $1_$2:netif { egress ingress };
 ')
 
 ########################################
@@ -47,7 +47,7 @@ interface(`corenet_udp_send_$1_if',`
 		$3 $1_$2;
 	')
 
-	allow dollarsone $1_$2:netif { udp_send egress };
+	allow dollarsone $1_$2:netif { egress };
 ')
 
 ########################################
@@ -66,7 +66,7 @@ interface(`corenet_udp_receive_$1_if',`
 		$3 $1_$2;
 	')
 
-	allow dollarsone $1_$2:netif { udp_recv ingress };
+	allow dollarsone $1_$2:netif { ingress };
 ')
 
 ########################################
@@ -101,7 +101,7 @@ interface(`corenet_raw_send_$1_if',`
 		$3 $1_$2;
 	')
 
-	allow dollarsone $1_$2:netif { rawip_send egress };
+	allow dollarsone $1_$2:netif { egress };
 ')
 
 ########################################
@@ -120,7 +120,7 @@ interface(`corenet_raw_receive_$1_if',`
 		$3 $1_$2;
 	')
 
-	allow dollarsone $1_$2:netif { rawip_recv ingress };
+	allow dollarsone $1_$2:netif { ingress };
 ')
 
 ########################################
@@ -160,7 +160,7 @@ interface(`corenet_tcp_sendrecv_$1_if',`
 	')
 
 	if (network_enabled) {
-		allow dollarsone $1_$2:netif { tcp_send tcp_recv egress ingress };
+		allow dollarsone $1_$2:netif { egress ingress };
 	}
 ')
 
@@ -181,7 +181,7 @@ interface(`corenet_udp_send_$1_if',`
 	')
 
 	if (network_enabled) {
-		allow dollarsone $1_$2:netif { udp_send egress };
+		allow dollarsone $1_$2:netif { egress };
 	}
 ')
 
@@ -202,7 +202,7 @@ interface(`corenet_udp_receive_$1_if',`
 	')
 
 	if (network_enabled) {
-		allow dollarsone $1_$2:netif { udp_recv ingress };
+		allow dollarsone $1_$2:netif { ingress };
 	}
 ')
 
@@ -239,7 +239,7 @@ interface(`corenet_raw_send_$1_if',`
 	')
 
 	if (network_enabled) {
-		allow dollarsone $1_$2:netif { rawip_send egress };
+		allow dollarsone $1_$2:netif { egress };
 	}
 ')
 
@@ -260,7 +260,7 @@ interface(`corenet_raw_receive_$1_if',`
 	')
 
 	if (network_enabled) {
-		allow dollarsone $1_$2:netif { rawip_recv ingress };
+		allow dollarsone $1_$2:netif { ingress };
 	}
 ')
 
@@ -283,7 +283,7 @@ interface(`corenet_raw_sendrecv_$1_if',`
 
 ########################################
 #
-# Network node generated macros 
+# Network node generated macros
 #
 ########################################
 
@@ -304,7 +304,7 @@ interface(`corenet_tcp_sendrecv_$1_node',`
 		$3 $1_$2;
 	')
 
-	allow dollarsone $1_$2:node { tcp_send tcp_recv sendto recvfrom };
+	allow dollarsone $1_$2:node { sendto recvfrom };
 ')
 
 ########################################
@@ -323,7 +323,7 @@ interface(`corenet_udp_send_$1_node',`
 		$3 $1_$2;
 	')
 
-	allow dollarsone $1_$2:node { udp_send sendto };
+	allow dollarsone $1_$2:node { sendto };
 ')
 
 ########################################
@@ -342,7 +342,7 @@ interface(`corenet_udp_receive_$1_node',`
 		$3 $1_$2;
 	')
 
-	allow dollarsone $1_$2:node { udp_recv recvfrom };
+	allow dollarsone $1_$2:node { recvfrom };
 ')
 
 ########################################
@@ -377,7 +377,7 @@ interface(`corenet_raw_send_$1_node',`
 		$3 $1_$2;
 	')
 
-	allow dollarsone $1_$2:node { rawip_send sendto };
+	allow dollarsone $1_$2:node { sendto };
 ')
 
 ########################################
@@ -396,7 +396,7 @@ interface(`corenet_raw_receive_$1_node',`
 		$3 $1_$2;
 	')
 
-	allow dollarsone $1_$2:node { rawip_recv recvfrom };
+	allow dollarsone $1_$2:node { recvfrom };
 ')
 
 ########################################
@@ -456,7 +456,7 @@ interface(`corenet_udp_bind_$1_node',`
 
 ########################################
 #
-# Network port generated macros 
+# Network port generated macros
 #
 ########################################
 
@@ -473,11 +473,7 @@ define(`create_port_interfaces',``
 ## <infoflow type="both" weight="10"/>
 #
 interface(`corenet_tcp_sendrecv_$1_port',`
-	gen_require(`
-		$3 $1_$2;
-	')
-
-	allow dollarsone $1_$2:tcp_socket { send_msg recv_msg };
+	refpolicywarn(`dollarszero() has been deprecated, please remove.')
 ')
 
 ########################################
@@ -492,11 +488,7 @@ interface(`corenet_tcp_sendrecv_$1_port',`
 ## <infoflow type="write" weight="10"/>
 #
 interface(`corenet_udp_send_$1_port',`
-	gen_require(`
-		$3 $1_$2;
-	')
-
-	allow dollarsone $1_$2:udp_socket send_msg;
+	refpolicywarn(`dollarszero() has been deprecated, please remove.')
 ')
 
 ########################################
@@ -511,11 +503,7 @@ interface(`corenet_udp_send_$1_port',`
 ## <infoflow type="none"/>
 #
 interface(`corenet_dontaudit_udp_send_$1_port',`
-	gen_require(`
-		$3 $1_$2;
-	')
-
-	dontaudit dollarsone $1_$2:udp_socket send_msg;
+	refpolicywarn(`dollarszero() has been deprecated, please remove.')
 ')
 
 ########################################
@@ -530,11 +518,7 @@ interface(`corenet_dontaudit_udp_send_$1_port',`
 ## <infoflow type="read" weight="10"/>
 #
 interface(`corenet_udp_receive_$1_port',`
-	gen_require(`
-		$3 $1_$2;
-	')
-
-	allow dollarsone $1_$2:udp_socket recv_msg;
+	refpolicywarn(`dollarszero() has been deprecated, please remove.')
 ')
 
 ########################################
@@ -549,11 +533,7 @@ interface(`corenet_udp_receive_$1_port',`
 ## <infoflow type="none"/>
 #
 interface(`corenet_dontaudit_udp_receive_$1_port',`
-	gen_require(`
-		$3 $1_$2;
-	')
-
-	dontaudit dollarsone $1_$2:udp_socket recv_msg;
+	refpolicywarn(`dollarszero() has been deprecated, please remove.')
 ')
 
 ########################################
@@ -568,8 +548,7 @@ interface(`corenet_dontaudit_udp_receive_$1_port',`
 ## <infoflow type="both" weight="10"/>
 #
 interface(`corenet_udp_sendrecv_$1_port',`
-	corenet_udp_send_$1_port(dollarsone)
-	corenet_udp_receive_$1_port(dollarsone)
+	refpolicywarn(`dollarszero() has been deprecated, please remove.')
 ')
 
 ########################################
@@ -585,8 +564,7 @@ interface(`corenet_udp_sendrecv_$1_port',`
 ## <infoflow type="none"/>
 #
 interface(`corenet_dontaudit_udp_sendrecv_$1_port',`
-	corenet_dontaudit_udp_send_$1_port(dollarsone)
-	corenet_dontaudit_udp_receive_$1_port(dollarsone)
+	refpolicywarn(`dollarszero() has been deprecated, please remove.')
 ')
 
 ########################################
@@ -611,27 +589,6 @@ interface(`corenet_tcp_bind_$1_port',`
 
 ########################################
 ## <summary>
-##	Dont audit bind TCP sockets to the $1 port.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain dont audited.
-##	</summary>
-## </param>
-## <infoflow type="none"/>
-#
-interface(`corenet_dontaudit_tcp_bind_$1_port',`
-	gen_require(`
-		$3 $1_$2;
-	')
-
-	dontaudit dollarsone $1_$2:tcp_socket name_bind;
-	$4
-')
-
-
-########################################
-## <summary>
 ##	Bind UDP sockets to the $1 port.
 ## </summary>
 ## <param name="domain">
@@ -652,26 +609,6 @@ interface(`corenet_udp_bind_$1_port',`
 
 ########################################
 ## <summary>
-##	Do not audit attempts to sbind to $1 port.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain to not audit.
-##	</summary>
-## </param>
-## <infoflow type="none"/>
-#
-interface(`corenet_dontaudit_udp_bind_$1_port',`
-	gen_require(`
-		$3 $1_$2;
-	')
-
-	dontaudit dollarsone $1_$2:udp_socket name_bind;
-	$4
-')
-
-########################################
-## <summary>
 ##	Make a TCP connection to the $1 port.
 ## </summary>
 ## <param name="domain">
@@ -686,23 +623,6 @@ interface(`corenet_tcp_connect_$1_port',`
 	')
 
 	allow dollarsone $1_$2:tcp_socket name_connect;
-')
-########################################
-## <summary>
-##	Do not audit attempts to make a TCP connection to $1 port.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`corenet_dontaudit_tcp_connect_$1_port',`
-	gen_require(`
-		$3 $1_$2;
-	')
-
-	dontaudit dollarsone $1_$2:tcp_socket name_connect;
 ')
 '') dnl end create_port_interfaces
 
@@ -834,6 +754,48 @@ interface(`corenet_relabelto_$1_packets',`
 ')
 '') dnl end create_port_interfaces
 
+define(`create_ibpkey_interfaces',``
+########################################
+## <summary>
+##	Access the infiniband fabric on the $1 ibpkey.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="both" weight="10"/>
+#
+interface(`corenet_ib_access_$1_pkey',`
+	gen_require(`
+		$3 $1_$2;
+	')
+
+	allow dollarsone $1_$2:infiniband_pkey access;
+')
+'') dnl end create_ibpkey_interfaces
+
+define(`create_ibendport_interfaces',``
+########################################
+## <summary>
+##	Manage the subnet on $1 ibendport.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <infoflow type="both" weight="10"/>
+#
+interface(`corenet_ib_manage_subnet_$1_endport',`
+	gen_require(`
+		$3 $1_$2;
+	')
+
+	allow dollarsone $1_$2:infiniband_endport manage_subnet;
+')
+'') dnl end create_ibendport_interfaces
+
 #
 # create_netif_*_interfaces(linux_interfacename)
 #
@@ -878,7 +840,7 @@ define(`network_node',`
 create_node_type_interfaces($1)
 ')
 
-# These next three macros have formatting, and should not me indented
+# These next three macros have formatting, and should not be indented
 define(`determine_reserved_capability',`dnl
 ifelse($2,`',`',`dnl
 ifelse(eval($2 < 1024),1,``allow' dollarsone self:capability net_bind_service;',`dnl
@@ -908,4 +870,33 @@ create_packet_interfaces($1_server)
 define(`network_packet',`
 create_packet_interfaces($1_client)
 create_packet_interfaces($1_server)
+')
+
+#
+# network_packet_simple(packet_name)
+#
+define(`network_packet_simple',`
+create_packet_interfaces($1)
+')
+
+# create_ibpkey_*_interfaces(name, subnet_prefix, pkeynum,mls_sensitivity)
+# (these wrap create_port_interfaces to handle attributes and types)
+define(`create_ibpkey_type_interfaces',`create_ibpkey_interfaces($1,ibpkey_t,type,determine_reserved_capability(shift($*)))')
+
+#
+# ib_pkey(name,subnet_prefix pkeynum mls_sensitivity)
+#
+define(`ib_pkey',`
+create_ibpkey_type_interfaces($*)
+')
+
+# create_ibendport_*_interfaces(name, devname, portnum,mls_sensitivity)
+# (these wrap create_port_interfaces to handle attributes and types)
+define(`create_ibendport_type_interfaces',`create_ibendport_interfaces($1,ibendport_t,type,determine_reserved_capability(shift($*)))')
+
+#
+# ib_endport(name,device_name, portnum mls_sensitivity)
+#
+define(`ib_endport',`
+create_ibendport_type_interfaces($*)
 ')

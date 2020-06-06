@@ -83,6 +83,24 @@ interface(`fstools_signal',`
 
 ########################################
 ## <summary>
+##	Inherit fstools file descriptors.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	The type of the process performing this action.
+##	</summary>
+## </param>
+#
+interface(`fstools_use_fds',`
+	gen_require(`
+		type fsadm_t;
+	')
+
+	allow $1 fsadm_t:fd use;
+')
+
+########################################
+## <summary>
 ##	Read fstools unnamed pipes.
 ## </summary>
 ## <param name="domain">
@@ -139,6 +157,43 @@ interface(`fstools_manage_entry_files',`
 
 ########################################
 ## <summary>
+##	Write to fsadm_log_t
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`fstools_write_log',`
+	gen_require(`
+		type fsadm_log_t;
+	')
+
+	allow $1 fsadm_log_t:file write_file_perms;
+')
+
+########################################
+## <summary>
+##	Create, read, write, and delete filesystem tools
+##	runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`fstools_manage_runtime_files',`
+	gen_require(`
+		type fsadm_run_t;
+	')
+
+	manage_files_pattern($1, fsadm_run_t, fsadm_run_t)
+')
+
+########################################
+## <summary>
 ##	Getattr swapfile
 ## </summary>
 ## <param name="domain">
@@ -157,7 +212,25 @@ interface(`fstools_getattr_swap_files',`
 
 ########################################
 ## <summary>
-##	Create, read, write, and delete the FSADM pid files.
+##	Ignore access to a swapfile.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`fstools_dontaudit_getattr_swap_files',`
+	gen_require(`
+		type swapfile_t;
+	')
+
+	dontaudit $1 swapfile_t:file getattr;
+')
+
+########################################
+## <summary>
+##	Relabel to swapfile.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -165,13 +238,28 @@ interface(`fstools_getattr_swap_files',`
 ##	</summary>
 ## </param>
 #
-interface(`fsadm_manage_pid',`
+interface(`fstools_relabelto_swap_files',`
 	gen_require(`
-		type fsadm_var_run_t;
+		type swapfile_t;
 	')
 
-	files_search_pids($1)
-	manage_dirs_pattern($1, fsadm_var_run_t, fsadm_var_run_t)
-	manage_files_pattern($1, fsadm_var_run_t, fsadm_var_run_t)
-	files_pid_filetrans($1, fsadm_var_run_t, dir, "blkid")
+	allow $1 swapfile_t:file relabelto;
+')
+
+########################################
+## <summary>
+##	Manage swapfile.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`fstools_manage_swap_files',`
+	gen_require(`
+		type swapfile_t;
+	')
+
+	allow $1 swapfile_t:file manage_file_perms;
 ')

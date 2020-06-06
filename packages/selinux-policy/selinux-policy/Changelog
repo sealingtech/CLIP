@@ -1,3 +1,2023 @@
+* Sat Feb 29 2020 Chris PeBenito <pebenito@ieee.org> - 2.20200229
+Alexander Miroshnichenko (1):
+      Add knot module
+
+Chris PeBenito (174):
+      knot: Whitespace changes.
+      knot: Move lines.
+      devices, storage: Add fc entries for mtd char devices and ndctl devices.
+      devices: Add types for trusted execution environment interfaces.
+      ulogd: Rename ulogd_var_run_t to ulogd_runtime_t.
+      INSTALL: Fix build requirements.
+         fishilico/systemd-read-netlink_kobject_uevent_socket
+      Rename *_var_run_t types to *_runtime_t.
+      Reorder declarations based on *_runtime_t renaming.
+      Remove old aliases.
+         fishilico/filesystem-fs_rw_cgroup_files-follow-symlink
+      fc_sort.py: Use "==" for comparing integers.
+      xserver: Remove duplicate colord rule.
+      xserver: Move XDM dbus chats under main dbus optional.
+      Move open, audit_access, and execmod to file common.
+      Add file and filesystem watch access vectors.
+      Fix file common ordering and kernel version from previous commit.
+      init: Whitespace change.
+      unconfined: Add namespaced capabilities.
+      unconfined: Fix systemd --user rule.
+      Remove incorrect usages of "is" operator from Python scripts.
+      logging: Reorder lines.
+      systemd: Logind removes /run/user/* user temp files.
+      unconfined: Add watch permission for files.
+      systemd: Add filesystem watches.
+      dbus: Add directory watches.
+      udev: Watch devices.
+      init: Revise systemd bind mounts.
+      Add perf_event access vectors.
+      systemd: Whitespace fix.
+      logging: Whitespace fix.
+      Bump module versions for release.
+
+Christian Göttsche (6):
+      fix Makefile for policy-module directories with same ending
+      segenxml.py: fix format usage in warning message
+      travis: force the use of python3.5
+      travis: run check_fc_files linter with python 3.7
+      re-implement fc_sort in python
+      Add genfs_seclabel_symlinks policy capability
+
+Daniel Burgener (4):
+      Add requires to interfaces that reference types or attributes without
+         requiring them
+      Remove uneeded types from interfaces where types were added
+      Fix situations where require blocks in interfaces listed types not
+         actually referenced by that interface
+      Remove unneeded semicolons after interface and macro calls
+
+Dominick Grift (2):
+      domain: unconfined access to bpf
+      Remove shell automatic domain transitions to unconfined_t from various pam
+         login programs
+
+Guido Trentalancia (4):
+      Update the pulseaudio application module with a few user domain file read
+         and management permissions.
+      Allow userdomain to read and write the wireless devices (for example for
+         querying their state, enabling and/or disabling them using userspace
+         tools such as "rfkill" from util-linux).
+      Add an interface to allow watch permission on generic device directories.
+      Allow pulseaudio to watch generic device directories.
+
+Jason Zaman (16):
+      udev: Allow udevadm access to udev_tbl_t
+      xserver: ICEauthority can be in /run/user
+      devicekit: udisks needs access to /run/mount/utab.lock
+      dirmngr: accept unix stream socket
+      chromium: allow dbus chat to inhibit power
+      virt: Add unix socket for virtlogd/virtlockd
+      virt: allow lvm_control access
+      fstools: add zfs-auto-snapshot
+      udev: Add watch perms
+      accountsd: Add watch perms
+      cron: watch cron spool
+      colord: add watch perms
+      policykit devicekit: Add watch perms
+      dbus: add watch perms
+      chromium: watch etc dirs
+      gpg: add watch perms for agent
+
+Laurent Bigonville (9):
+      Makefile: Avoid regenerating the iftemplates at everyrun
+      Allow systemd_modules_load_t to module_request and map modules_object_t
+         files
+      Allow udevadm to read files in /run/udev/data
+      Allow udevadm_t to use dac_read_search capability
+      Allow the systemd dbus-daemon to talk to systemd
+      Allow geoclue to log in syslog
+      Allow realmd_t to read localization files
+      Allow alsa_t to create alsa_runtime_t file as well
+      Allow alsa_t to set scheduling priority and send signal to itself
+
+Luca Boccassi (2):
+      journald: allow to remove /run/log/journal
+      logging: add interface to start/stop syslog units
+
+Nicolas Iooss (75):
+      ulogd: add Debian's log directory
+      ulogd: allow creating a netlink-netfilter socket
+      ulogd: allow starting on a Debian system
+      entropyd: label the unit file of haveged
+      entropyd: allow haveged to create a Unix socket to received commands
+      ulogd: fix pattern for /run/ulog directory
+      monit: use s0 instead of s9
+      java: reduce the scope of the pattern in for java entry points
+      libraries: match a digit in Adobe Reader directories
+      drbd: fix pattern for /usr/lib/ocf/resource.d/linbit/drbd
+      rpcbind: remove redundant file context for /run/rpc.statd.pid
+      files: reduce the scope of the pattern matching /usr/include
+      Remove unescaped single dot from the policy
+      Fix use of buggy pattern (.*)?
+      libraries: drop a pattern specific to Python 2.4
+      systemd: introduce an interface for services using PrivateDevices=yes
+      Vagrantfile: upgrade VM to Fedora 30
+      Allow Debian to generate a dynamic motd when users log in
+      entropyd: haveged service uses PrivateDevices=yes
+      Check the .fc files for common typos
+      corecommands: no longer use \d
+      libraries: fix some misspellings in patterns
+      java: remove unnecessary parentheses in pattern
+      cups: add a slash to match /opt/brother/Printers/
+      Vagrantfile: build and install refpolicy on Fedora VM
+      Vagrantfile: add a Debian virtual machine
+      ntp: allow systemd-timesyncd to read network status
+      cups: use ([^/]+/)? to match a subdirectory of CUPS configuration
+      portage: really make consoletype module optional
+      Label programs in /usr/bin like /usr/sbin
+      apt: allow transition from apt_t to dpkg_t with NNP
+      apt: allow preventing shutdown by calling a systemd-logind D-Bus method
+      authlogin: label utempter correctly on Debian
+      irc: add WeeChat policy
+      systemd: allow systemd --user to receive messages from
+         netlink_kobject_uevent_socket
+      Add a policy module for WireGuard VPN
+      modutils: allow depmod to read /boot/System.map
+      modutils: allow depmod and modprobe to use the I/O provided by apt
+      systemd: allow systemd-modules-load.service to read sysfs
+      sudo: allow using use_pty flag
+      Allow using /([^/]+/)? and (/[^/]+)?/ in patterns
+      ulogd: adjust policy for Debian
+      bitlbee: allow using GetDynamicUser on Debian
+      chromium: remove distro-specific ifdef
+      systemd-networkd: allow creating a generic netlink socket
+      systemd-networkd: allow communicating with hostnamed
+      sudo: allow transmitting SIGWINCH to its child
+      sudo: allow using CAP_KILL for SIGWINCH
+      systemd: allow detecting Windows Subsystem for Linux
+      systemd: allow more accesses to systemd --user
+      systemd: remove unnecessary init_write_runtime_socket()
+      .travis.yml: update distro to Ubuntu 18.04 LTS (Bionic Beaver)
+      filesystem: allow following symlinks with fs_rw_cgroup_files()
+      systemd: allow user environment helpers to communicate with systemd --user
+      .travis.yml: check the .fc files in CI
+      systemd: make the kernel spawn systemd-coredump with a context transition
+      gpg: allow gpg-agent to read crypto.fips_enabled sysctl
+      testing/check_fc_files: allow @ character in file context patterns
+      mount: allow callers of mount to search /usr/bin
+      sysadm: allow using hostnamectl
+      init: allow systemd to mount over /dev/kmsg and /proc/kmsg
+      Add policy for CryFS, encfs and gocryptfs
+      Vagrantfile: fix configuration
+      Vagrantfile: remove sudo
+      Vagrantfile: add a specific SELinux policy module
+      systemd: allow reading options from EFI variable SystemdOptions
+      virt: allow more accesses to libvirt_leaseshelper
+      systemd-logind: allow using BootLoaderEntries DBUS property
+      storage: introduce storage_raw_read_fixed_disk_cond
+      Vagrantfile: allow unconfined and sysadm SSH login
+      Vagrant: allow VirtualBox provisionning to use dhclient and ip
+      Associate role unconfined_r to wine_t
+      systemd: add an interface to use nss-systemd
+      usermanage: allow groupadd to lookup dynamic users from systemd
+      mount: label fusermount3 like fusermount
+
+Peter Morrow (1):
+      systemd_tmpfiles_t: Allow systemd_tempfiles_t to change permissions in
+         sysfs
+
+Petr Lautrbach (1):
+      newrole: allow newrole to use setcap to drop capabilities
+
+Stephen Smalley (4):
+      access_vectors: Remove unused permissions
+      access_vectors: Remove entrypoint and execute_no_trans from chr_file
+      access_vectors: remove flow_in and flow_out permissions from packet class
+      Rename obsolete netlink_firewall_socket and netlink_ip6fw_socket classes
+
+Sugar, David (13):
+      grant rpm permission to map rpm_var_lib_t
+      grant permission for rpm to write to audit log
+      grant rpm permissions to map locale_t
+      Allow rpm to map file contexts
+      Allow rpm scripts to alter systemd services
+      grant rpm_t permission to map security_t
+      Module for tpm2
+      Add missing gen_require for init_t in init_script_domain
+      resolve syslog imuxsock denial
+      Add interface to read efivarfs_t directory
+      Fix indent to match the rest of the file (space -> tab)
+      Allow systemd to getattr all files
+      audit daemon can halt system, allow this to happen.
+
+Topi Miettinen (2):
+      Consider jitterentropy to belong to entropyd family
+      Consider iwd equivalent to NetworkManager etc.
+
+Vilgot Fredenberg (1):
+      Remove obsolete gentoo specific rule
+
+bauen1 (16):
+      fix: sudo can't determine default type for sysadm_r
+      fix ifupdown2 executable mislabeled as lib_t
+      added bpf_t filesystem label
+      netutils: allow mtr to communicate with mtr-packet
+      kernel/corecommands: fix the label of xfce4 helpers (on debian)
+      systemd: remove whitespace
+      init: add interfaces for managing /run/systemd
+      systemd: add policy for systemd-fstab-generator
+      udev: remove console-setup
+      consolesetup: add policy for console-setup
+      udev: run consolesetup
+      loadkeys: remove redundant ifdef
+      init: split init_create_pid_files interface
+      ntp: watch systemd networkd runtime dirs This is required for correct
+         function after linux 5.4
+      systemd-user-runtime-dir: add policy
+      sysadm: add sysadm_allow_rw_inherited_fifo tunable to allow writing to
+         fifo_files inherited from domains allowed to change role to sysadm_r.
+
+* Sun Jun 09 2019 Chris PeBenito <pebenito@ieee.org> - 2.20190609
+Chris PeBenito (70):
+      systemd: Module version bump.
+      Merge branch 'sysadm-dynamic-users' of
+         git://github.com/fishilico/selinux-refpolicy
+      sysadm: Module version bump.
+      Merge branch 'stubby-daemon' of
+         git://github.com/fishilico/selinux-refpolicy
+      corenetwork: Module version bump.
+      systemd: Remove unnecessary brackets.
+      init, systemd, cdrecord: Module version bump.
+      logging, miscfiles, authlogin: Module version bump.
+      Merge branch 'systemd-journald-signull' of
+         git://github.com/fishilico/selinux-refpolicy
+      Merge branch 'restorecond-no-read-all' of
+         git://github.com/fishilico/selinux-refpolicy
+      logging, selinuxutil: Module version bump.
+      Merge branch 'systemd-update-done' of
+         git://github.com/fishilico/selinux-refpolicy
+      systemd: Module version bump.
+      aide, clamav: Module version bump.
+      filesystem, cron, authlogin: Module version bump.
+      Remove incorrect comment about capability2:mac_admin.
+      usermanage: Move kernel_dgram_send(passwd_t) to systemd block.
+      systemd, udev, usermanage: Module version bump.
+      genhomedircon.py: Fix top-level exception handling.
+      udev: Whitespace fix.
+      udev: Move one line and remove a redundant line.
+      sysadm, udev: Module version bump.
+      Merge pull request #35 from pebenito/master
+      systemd: Drop unconfined kernel access for systemd_nspawn.
+      udev: Drop write by udev to its executable.
+      init: Remove duplicate setenforce rule for init scripts.
+      authlogin, dbus, ntp: Module version bump.
+      ntp, init, lvm: Module version bump.
+      Merge pull request #37 from pebenito/master
+      kernel, init, systemd, udev: Module version bump.
+      init: Revise conditions in init_startstop_service().
+      Merge pull request #39 from pebenito/revise-init-stopstart
+      init: Module version bump.
+      kernel: Module version bump.
+      Merge pull request #40 from gtrentalancia/master
+      xserver: Module version bump.
+      various: Module version bump
+      apache: Make MTA optional.
+      systemd: Remove unnecessary names in systemd-update-done filetrans.
+      Merge pull request #42 from dsugar100/master
+      kernel, devices, plymouthd, xserver: Module version bump.
+      storage: Label /dev/mmcblk* character nodes.
+      devices: Label /dev/tpmrm[0-9].
+      devices: Add type for GPIO chips, /dev/gpiochip[0-9]
+      devices: Change netcontrol devices to pmqos.
+      systemd: Add initial policy for systemd --user.
+      Merge pull request #43 from pebenito/various-device-labels
+      Merge pull request #44 from pebenito/http-mta-optional
+      Merge pull request #45 from pebenito/systemd-update-done-tweak
+      Merge pull request #46 from pebenito/systemd-user
+      various: Module version bump.
+      Merge pull request #47 from dsugar100/master
+      Merge pull request #48 from bigon/dovecot_lmtp
+      Merge pull request #49 from bigon/fail2ban_logrotate
+      dovecot, logrotate: Module version bump.
+      logrotate: Make MTA optional.
+      Merge pull request #51 from pebenito/logrotate-optional-mta
+      Merge pull request #53 from WOnder93/makefile-fix
+      logrotate: Module version bump.
+      init: Add systemd block to init_script_domain().
+      systemd: modules-load updates.
+      apache: Web content rules simplification.
+      storage: Add fc entry for /dev/pmem*
+      devices: Add type for /dev/daxX.Y.
+      Merge pull request #54 from pebenito/init-script-systemd
+      Merge pull request #55 from pebenito/modules-load
+      Merge pull request #56 from pebenito/apache-simplify
+      Merge pull request #57 from pebenito/pmem-dax
+      various: Module version bump.
+      Bump module versions for release.
+
+Dave Sugar (3):
+      Allow xdm (lightdm) start plymouth
+      Changes to support plymouth working in enforcing
+      create interfaces for NetworkManager units
+
+Guido Trentalancia (1):
+      The Qt library version 5 requires to write xserver_tmp_t files upon
+         starting up applications (tested on version 5.12.1).
+
+Laurent Bigonville (2):
+      Add dovecot to listen to LMTP port
+      Allow logrotate to execute fail2ban-client
+
+Lukas Vrabec (1):
+      Label /sys/kernel/ns_last_pid as sysctl_kernel_ns_last_pid_t
+
+Nicolas Iooss (6):
+      sysadm: allow resolving dynamic users
+      Add policy for stubby DNS resolver
+      Allow systemd-journald to use kill(pid, 0) on its clients
+      Allow restorecond to read customizable_types
+      Remove a broad read-files rule for restorecond
+      Update systemd-update-done policy
+
+Ondrej Mosnacek (1):
+      Fix find commands in Makefiles
+
+Sugar, David (26):
+      Allow systemd-networkd to get IP address from dhcp server
+      Separate domain for systemd-modules-load
+      Allow init_t to read net_conf_t
+      Allow systemd-hostnamed to set the hostname
+      Add interface to run cdrecord in caller domain
+      Add interface to get status of rsyslog service
+      New interface to dontaudit access to cert_t
+      Fix incorrect type in clamav_enableddisable_clamd interface
+      Allow freshclam to read sysctl_crypto_t
+      Add interfaces to run freshclam
+      Allow AIDE to sendto kernel datagram socket
+      Allow AIDE to read kernel sysctl_crypto_t
+      Allow AIDE to mmap files
+      Add interface to allow relabeling of iso 9660 filesystems.
+      Update cron use to pam interface
+      Allow additional map permission when reading hwdb
+      Resolve denial while changing password
+      Separate out udevadm into a new domain
+      Add interface ntp_dbus_chat
+      Allow ntpd to update chronyd service
+      Allow ntpd to update timezone symlink
+      Resolve denial about logging to journal from chkpwd
+      Resolve denial about logging to journal from dbus
+      Allow ntpd to read unit files
+      Denial of cryptsetup reading cracklib database
+      Add kernel_dgram_send() into logging_send_syslog_msg()
+
+* Fri Feb 01 2019 Chris PeBenito <pebenito@ieee.org> - 2.20190201
+Alexander Miroshnichenko (16):
+      Add signal_perms setpgid setsched permissions to syncthing_t.
+      Add corecmd_exec_bin permissions to syncthing_t.
+      Allow syncthing_t to read network state.
+      Allow syncthing_t to execute ifconfig/iproute2.
+      Add required permissions for nsd_t to be able running.
+      Add nsd_admin interface to sysadm.te.
+      Add map permission to lvm_t on lvm_metadata_t.
+      Add comment for map on lvm_metadata_t.
+      Remove syncthing tunable_policy.
+      Remove unneeded braces from nsd.te.
+      Add new interface fs_rmw_hugetlbfs_files.
+      Add map permission for postgresql_t to postgresql_tmp_t files.
+      Add dovecot_can_connect_db boolean.
+      fs_mmap_rw_hugetlbfs_files is a more appropriate name for the interface
+      Add hostapd service module
+      minor updates redis module to be able to start the app
+
+Chris PeBenito (85):
+      mozilla, devices, selinux, xserver, init, iptables: Module version bump.
+      devices: Module version bump.
+      misc_patterns.spt: Remove unnecessary brackets.
+      ipsec: Module version bump.
+      fstools: Module version bump.
+      corecommands: Module version bump.
+      xserver: Module version bump.
+      Merge pull request #1 from bigon/fix-sepolgen-ifgen
+      Remove unused translate permission in context userspace class.
+      logrotate: Module version bump.
+      miscfiles: Module version bump.
+      Merge pull request #3 from bigon/xdp-socket
+      obj_perm_sets.spt: Add xdp_socket to socket_class_set.
+      clamav, ssh, init: Module version bump.
+      amavis, apache, clamav, exim, mta, udev: Module version bump.
+      dnsmasq: Whitespace fix in file contexts.
+      dnsmasq: Reorder lines in file contexts.
+      Merge branch 'master' of https://github.com/bigon/refpolicy
+      Merge branch 'resolved' of https://github.com/bigon/refpolicy
+      Merge branch 'iscsi' of https://github.com/bigon/refpolicy
+      Various modules: Version bump.
+      dnsmasq: Module version bump.
+      Merge branch 'minissdpd' of https://github.com/bigon/refpolicy
+      cron, minissdpd, ntp, systemd: Module version bump.
+      dbus, xserver, init, logging, modutils: Module version bump.
+      Merge branch 'syncthing' of https://github.com/alexminder/refpolicy
+      syncthing: Whitespace change
+      Merge branch 'lvm' of https://github.com/alexminder/refpolicy
+      lvm, syncthing: Module version bump.
+      sigrok: Remove extra comments.
+      networkmanager: Add ICMPv6 comment
+      sysnetwork: Move optional block in sysnet_dns_name_resolve().
+      sysnetwork: Move lines.
+      dpkg: Rename dpkg_read_script_tmp_links().
+      apt, rpm: Remove and move lines to fix fc conflicts.
+      sudo: Whitespace fix.
+      many: Module version bumps for changes from Russell Coker.
+      systemd: Rename systemd_list_netif() to systemd_list_networkd_runtime().
+      init: Remove inadvertent merge.
+      Merge branch 'nsd' of https://github.com/alexminder/refpolicy
+      nsd: Merge two rules into one.
+      Merge branch 'ssh_dac_read_search' of
+         git://github.com/fishilico/selinux-refpolicy
+      Merge branch 'restorecond_getattr_cgroupfs' of
+         git://github.com/fishilico/selinux-refpolicy
+      Merge branch 'systemd-logind-getutxent' of
+         git://github.com/fishilico/selinux-refpolicy
+      various: Module version bump.
+      iptables: Module version bump.
+      Add CONTRIBUTING file.
+      kernel, systemd: Move lines.
+      kernel, jabber, ntp, init, logging, systemd: Module version bump.
+      Merge branch 'systemd-journald_units_symlinks' of
+         git://github.com/fishilico/selinux-refpolicy
+      init, logging: Module version bump.
+      Merge branch 'services_single_usr_bin' of
+         git://github.com/fishilico/selinux-refpolicy
+      Merge branch 'init_rename_pid_interfaces' of
+         git://github.com/fishilico/selinux-refpolicy
+      various: Module name bump.
+      Merge branch 'systemd-rfkill' of
+         git://github.com/fishilico/selinux-refpolicy
+      systemd: Whitespace change
+      systemd: Module version bump.
+      Merge branch 'restorecond-symlinks' of
+         git://github.com/fishilico/selinux-refpolicy
+      Merge branch 'add_comment' of git://github.com/DefenSec/refpolicy
+      usermanage, cron, selinuxutil: Module version bump.
+      logging, sysnetwork, systemd: Module version bump.
+      Merge branch 'restorecond-dontaudit-symlinks' of
+         git://github.com/fishilico/selinux-refpolicy
+      selinuxutil: Module version bump.
+      Merge branch 'dbus-dynamic-uid' of
+         git://github.com/fishilico/selinux-refpolicy
+      xserver: Move line
+      systemd: Move interface implementation.
+      various: Module version bump.
+      dpkg: Rename dpkg_nnp_transition() to dpkg_nnp_domtrans().
+      dpkg: Move interface implementations.
+      init: Rename init_read_generic_units_links() to
+         init_read_generic_units_symlinks().
+      init: Drop unnecessary userspace class dependence in
+         init_read_generic_units_symlinks().
+      chromium: Whitespace fixes.
+      chromium: Move line.
+      Merge branch 'dovecot' of git://github.com/alexminder/refpolicy
+      dovecot: Move lines.
+      various: Module version bump.
+      Merge branch 'postgres' of git://github.com/alexminder/refpolicy
+      filesystem, postgresql: Module version bump.
+      hostapd: Whitespace change.
+      hostapd: Move line.
+      various: Module version bump.
+      redis: Move line.
+      redis: Module version bump.
+      corecommands, staff, unprivuser, ssh, locallogin, systemd: Module version
+         bump.
+      Bump module versions for release.
+
+David Sugar (15):
+      Interface to allow reading of virus signature files.
+      Update CUSTOM_BUILDOPT
+      Add interface udev_run_domain
+      Allow clamd_t to read /proc/sys/crypt/fips_enabled
+      Interface to add domain allowed to be read by ClamAV for scanning.
+      Add interfaces to control clamav_unit_t systemd services
+      Allow clamd to use sent file descriptor
+      Add interfaces to control ntpd_unit_t systemd services
+      interface to enable/disable systemd_networkd service
+      Interface to read cron_system_spool_t
+      Allow X (xserver_t) to read /proc/sys/crypto/fips_enabled
+      Allow kmod to read /proc/sys/crypto/fips_enabled
+      Allow dbus to access /proc/sys/crypto/fips_enabled
+      Add missing require for 'daemon' attribute.
+      Allow auditctl_t to read bin_t symlinks.
+
+Dominick Grift (1):
+      unconfined: add a note about DBUS
+
+Guido Trentalancia (1):
+      Add sigrok contrib module
+
+Jagannathan Raman (1):
+      vhost: Add /dev/vhost-scsi device of type vhost_device_t.
+
+Jason Zaman (10):
+      selinux: compute_access_vector requires creating netlink_selinux_sockets
+      mozilla: xdg updates
+      xserver: label .cache/fontconfig as user_fonts_cache_t
+      Allow map xserver_misc_device_t for nvidia driver
+      iptables: fcontexts for 1.8.0
+      devices: introduce dev_dontaudit_read_sysfs
+      files: introduce files_dontaudit_read_etc_files
+      kernel: introduce kernel_dontaudit_read_kernel_sysctl
+      userdomain: introduce userdom_user_home_dir_filetrans_user_cert
+      Add chromium policy upstreamed from Gentoo
+
+Laurent Bigonville (10):
+      policy/support/obj_perm_sets.spt: modify indentation of mmap_file_perms to
+         make sepolgen-ifgen happy
+      Add xdp_socket security class and access vectors
+      irqbalance now creates an abstract socket
+      Allow semanage_t to connect to system D-Bus bus
+      Allow ntpd_t to read init state
+      Add systemd_dbus_chat_resolved() interface
+      Allow sysnet_dns_name_resolve() to use resolved to resolve DNS names
+      Allow systemd_resolved_t to bind to port 53 and use net_raw
+      Allow iscsid_t to create a netlink_iscsi_socket
+      Allow minissdpd_t to create a unix_stream_socket
+
+Luis Ressel (7):
+      corecommands: Fix /usr/share/apr* fc
+      xserver: Allow user fonts (and caches) to be mmap()ed.
+      Add fc for /var/lib/misc/logrotate.status
+      Realign logrotate.fc, remove an obvious comment
+      miscfiles: Label /usr/share/texmf*/fonts/ as fonts_t
+      services/ssh: Don't audit accesses from ssh_t to /dev/random
+      system/init: Give init_spec_daemon_domain()s the "daemon" attribute
+
+Lukas Vrabec (1):
+      Improve domain_transition_pattern to allow mmap entrypoint bin file.
+
+Nicolas Iooss (11):
+      fstools: label e2mmpstatus as fsadm_exec_t
+      ssh: use dac_read_search instead of dac_override
+      selinuxutil: allow restorecond to try counting the number of files in
+         cgroup fs
+      systemd: allow systemd-logind to use getutxent()
+      Allow systemd-journald to read systemd unit symlinks
+      Label service binaries in /usr/bin like /usr/sbin
+      init: rename *_pid_* interfaces to use "runtime"
+      systemd: add policy for systemd-rfkill
+      selinuxutil: allow restorecond to read symlinks
+      selinuxutil: restorecond is buggy when it dereferencies symlinks
+      dbus: allow using dynamic UID
+
+Petr Vorel (1):
+      dnsmasq: Require log files to have .log suffix
+
+Russell Coker (19):
+      misc services patches
+      misc interfaces
+      last misc stuff
+      systemd related interfaces
+      systemd misc
+      missing from previous
+      cron trivial
+      mls stuff
+      logging
+      some little stuff
+      trivial system cronjob
+      another trivial
+      more tiny stuff
+      map systemd private dirs
+      tiny stuff for today
+      yet more tiny stuff
+      yet another little patch
+      chromium
+      more misc stuff
+
+Sugar, David (9):
+      Allow greeter to start dbus
+      pam_faillock creates files in /run/faillock
+      Add interface to get status of iptables service
+      Add interface to start/stop iptables service
+      label journald configuraiton files syslog_conf_t
+      Interface with systemd_hostnamed over dbus to set hostname
+      Modify type for /etc/hostname
+      Add interface clamav_run
+      Add interface to read journal files
+
+Yuli Khodorkovskiy (1):
+      ipsec: add missing permissions for pluto
+
+* Sun Jul 01 2018 Chris PeBenito <pebenito@ieee.org> - 2.20180701
+Chris PeBenito (28):
+      Enable cgroup_seclabel and nnp_nosuid_transition.
+      Misc dbus fixes from Russell Coker.
+      Simple map patch from Russell Coker.
+      another trivial dbus patch from Russell Coker.
+      Merge branch 'xtable-proc' of https://github.com/bigon/refpolicy
+      iptables: Module version bump.
+      Update contrib.
+      .travis.yml: Change to master branch for sctp support.
+      corenetwork, init: Module version bump.
+      Module version bumps for patches from James Carter.
+      Update contrib.
+      init, logging, sysnetwork, systemd, udev: Module version bump.
+      sysnetwork: Move lines in sysnet_read_config().
+      sysnetwork: Module version bump.
+      init: Module version bump.
+      Remove deprecated flask.py script.
+      Switch all remaining Python references to the Python 3 interpreter.
+      systemd: Move lines.
+      corecommands: Module version bump.
+      Makefile: Tweak cli output.
+      XDG: Module version bump.
+      Remove refpolicy-contrib submodule.
+      Re-add policy modules from old refpolicy-contrib submodule.
+      Move all files out of the old contrib directory.
+      Changelog.contrib: Add note about refpolicy-contrib removal.
+      sysnetwork: Module version bump.
+      xdg, xserver, mplayer, games: Module version bump.
+      Bump module versions for release.
+
+Christian Göttsche (1):
+      add definition of bpf class and systemd perms
+
+Dave Sugar (8):
+      Fix problems booting with fips=1
+      Interface to read /run/systemd/resolve/resolv.conf
+      Allow systemd-resolved to read sysctl
+      Allow systemd_resolved to read systemd_networkd runtime files
+      Allow systemd-resolved to connect to system dbusd
+      systemd-resolved uses notify to indicate status
+      policy for systemd-update-done
+      policy for systemd-hwdb
+
+James Carter (8):
+      Removed unnecessary semicolons
+      Mark unused parameters as unused
+      Move the use of var_log_t from authlogin.fc to logging.fc
+      Move the use of initrc_var_run_t from files.fc to init.fc
+      Move use of systemd_unit_t from systemd.fc to init.fc
+      Move use of user_devpts_t from terminal.fc to userdomain.fc
+      Remove undeclared identifiers from interfaces
+      Remove undeclared identifiers from xserver interface
+
+Jason Zaman (9):
+      sysnetwork: put systemd_read_resolved_runtime in an ifdef
+      init: Add filetrans for /run/initctl
+      corecommands: adjust gcc fcontext to also work on musl
+      userdom: remove filetrans from userdom_user_content_access_template
+      xdg: Add map perms, also make lnk_file, dirs consistent
+      xdg: filetrans should not add filetrans from user_home_dir
+      xdg: Introduce xdg_search_cache_dirs
+      xserver: Add mesa_shader_cache for GLSL in ~/.cache/mesa_shader_cache/
+      apps: rw mesa_shader_cache
+
+Laurent Bigonville (1):
+      Label /etc/hosts.allow as net_conf_t
+
+Miroslav Grepl (1):
+      xtables-multi wants to getattr of the proc fs
+
+Richard Haines (1):
+      refpolicy: Update for kernel sctp support
+
+Sven Vermeulen (7):
+      Add gentemplates.sh to extract template content
+      Update segenxml to include support for templated booleans and tunables
+      Generate template code and update genxml call for documentation generation
+      freedesktop location support
+      Allow X server users to manage all xdg resources
+      helper interfaces to read/manage all user content
+      tunable-managed user content access template
+
+* Sun Jan 14 2018 Chris PeBenito <pebenito@ieee.org> - 2.20180114
+Adam Duskett (1):
+      fix regex escape sequence error.
+
+Anthony PERARD (1):
+      Update for Xen 4.7
+
+Chad Hanson (1):
+      Fix implementation of MLS file relabel attributes
+
+Chris PeBenito (74):
+      Module version bump for patches from Guido Trentalancia and Anthony
+         PERARD.
+      Rules.modular: Fix file context verification.
+      Remove deprecated interfaces older than one year old.
+      .travis.yml: Use git tag instead of release tarball for selinux userspace.
+      kernel: Module version bump for patch from Nicolas Iooss.
+      Remove complement and wildcard in allow rules.
+      logging: Move line.
+      Module version bump for patches from Nicolas Iooss.
+      Module version bump for fixes from Nicolas Iooss.
+      Update contrib.
+      dbus: move comments out of the file context definitions
+      Update contrib.
+      systemd, udev: Module version bump.
+      systemd: Whitespace fix.
+      Module version bump for patches from Nicolas Iooss.
+      init: Move fc lines.
+      init: Module version bump for patch from Dave Sugar.
+      files: Move files_check_write_pid_dirs interface.
+      terminal: Rename term_create_devpts.
+      Several module version bumps.
+      init: Move init_spec_daemon_domain implementation.
+      Module version bumps.
+      init: Rename init_rlimit_inherit to init_inherit_rlimit.
+      init: Whitespace fix.
+      Module version bumps.
+      spamassassin: Fix build error.
+      init: Fix XML error.
+      spamassassin: Add missing requirement in spamassassin_admin().
+      sysadm,fstools: Module version bump.
+      authlogin, logging, udev: Module version bump.
+      init: Remove sm-notify.pid fc entry which collides with the rpc module.
+      corecommands, xserver, systemd, userdomain: Version bumps.
+      Update contrib.
+      Update contrib.
+      corecommands: Module version bump.
+      init: Module version bump.
+      Merge pull request #125 from lalozano/master
+      devices: Module version bump.
+      Module version bumps.
+      Merge branch 'master' of git://github.com/davidgraz/refpolicy
+      ipsec: Module version bump.
+      Merge branch 'master' of git://github.com/aduskett/refpolicy
+      init: Clean up line placement in init_systemd blocks.
+      files: Whitespace fix.
+      Merge branch 'systemd-networkd'
+      files, init, sysnetwork, systemd: Module version bumps.
+      Merge pull request #128 from williamcroberts/fc-sort-fixups
+      Update contrib.
+      files, netutils: Module version bump.
+      miscfiles: Module version bump.
+      Update contrib.
+      files, userdomain: Module version bump.
+      kernel, mls, sysadm, ssh, xserver, authlogin, locallogin, userdomain:
+         Module version bumps.
+      Several module version bumps.
+      Module version bumps.
+      dmesg, locallogin, modutils: Module version bump.
+      loadable_module.spt: Add debugging comments for tunable_policy blocks.
+      networkmanager: Grant access to unlabeled PKeys
+      filesystem: Rename fs_relabel_cgroup_lnk_files.
+      corcmd, fs, xserver, init, systemd, userdomain: Module version bump.
+      xserver, sysnetwork, systemd: Module version bump.
+      xserver: Module version bump.
+      init: Module version bump.
+      Update contrib.
+      mls, xserver, systemd, userdomain: Module version bump.
+      storage, userdomain: Module version bump.
+      Add new mmap permission set and pattern support macros.
+      Add missing mmap_*_files_pattern macros.
+      Revise mmap_file_perms deprecation warning message.
+      Update contrib.
+      hostname: Module version bump.
+      Update contrib.
+      init: Module version bump.
+      Bump module versions for release.
+
+Christian Göttsche (6):
+      update travis
+      rkhunter: add interfaces for var_run and lock dir access check
+      dphysswapfile: add interfaces and sysadm access
+      hostname: cmdline usage + signal perms sort
+      filesystem: add fs_rw_inherited_hugetlbfs_files for apache module
+      init: add init_rw_inherited_stream_socket
+
+David Graziano (1):
+      system/ipsec: Add signull access for strongSwan
+
+David Sugar (20):
+      Strip spaces from NAME
+      Separate read and write interface for tun_tap_device_t
+      Label RHEL specific systemd binaries
+      Label /etc/rsyslog.d as syslog_conf_t
+      Add init_spec_daemon_domain interface
+      Add status into init_startstop_service interface
+      Add int_rlimit_inherit interface
+      remove interface init_inherit_rlimit
+      Fix problem labeling /run/log/journal/*
+      Denial relabeling /run/systemd/private
+      policy for systemd-networkd
+      Label /var/lib/lightdm-data
+      Change label for ~/.xsession-errors
+      Work around systemd-logind patch not in RHEL 7.x yet
+      RHEL 7.4 has moved the location of /usr/libexec/sesh to
+         /usr/libexec/sudo/sesh
+      Create interfaces to write to inherited xserver log files.
+      label systemd-shutdown so shutdown works
+      Make an attribute for objects in /run/user/%{USERID}/*
+      Make xdm directories created in /run/user/%{USERID}/ xdm_runtime_t
+         (user_runtime_content_type)
+      Allow systemd_logind to delete user_runtime_content_type files
+
+David Sugar via refpolicy (2):
+      label /etc/mcelog/mcelog.setup correctly (for RHEL)
+      Allow xdm_t to read /proc/sys/crypto/fips_enabled
+
+Guido Trentalancia (4):
+      userdomain: allow netlink_kobject_uvent_socket creation
+      xserver: do not audit ioctl operations on log files
+      fc_sort: memory leakages
+      base: create a type for SSL private keys
+
+Jason Zaman (8):
+      Allow sysadm to map all non auth files
+      userdomain: allow admin to rw tape storage
+      files: fcontext for /etc/zfs/zpool.cache
+      mls mcs: Add constraints for key class
+      Add key interfaces and perms
+      gssproxy: Allow others to stream connect
+      userdomain: Allow public content access
+      storage: Add fcontexts for NVMe disks
+
+Jason Zaman via refpolicy (3):
+      udev: map module objects to load kernel modules
+      syslog: allow map persist file
+      sudo: add fcontext for /run/sudo/ts/USERNAME
+
+Konrad Rzeszutek Wilk (2):
+      kernel/xen: Update for Xen 4.6
+      kernel/xen: Add map permission to the dev_rw_xen
+
+Krzysztof Nowicki (2):
+      Add policy for systemd GPT generator
+      Allow systemd to relabel cgroupfs legacy symlinks
+
+Laurent Bigonville (2):
+      Allow domains using sysnet_dns_name_resolve() interface to access NSS
+         mymachines files
+      Add private type for systemd logind inhibit files and pipes
+
+Luis A. Lozano (1):
+      Avoid memory leak warning.
+
+Luis Ressel (15):
+      modutils: libkmod mmap()s modules.dep and *.ko's
+      libraries: ldconfig maps its "aux-cache" during cache updates
+      userdomain: Add various interfaces granting the map permission
+      files: Create files_map_usr_files interface
+      selinuxutil: Add map permissions neccessary for semanage
+      kernel: Add map permission to the dev_{read, write}_sound* interfaces
+      miscfiles: Allow libfontconfig consumers to map the fonts cache
+      userdomain: man-db needs to map its 'index.db' cache
+      logging: Various audit tools (auditctl, ausearch, etc) map their config
+         and logs
+      Grant all permissions neccessary for Xorg and basic X clients
+      libraries: Add fc entry for musl's ld.so config
+      xserver: Allow xdm_t to map usr_t files
+      locallogin: Grant local_login_t the dac_read_search capability
+      dmesg: Grant read access to /usr/share/terminfo
+      modutils: Dontaudit CAP_SYS_ADMIN checks for modprobe
+
+Luis Ressel via refpolicy (2):
+      kernel/files.if: files_list_kernel_modules should grant read perms for
+         symlinks
+      netutils: Grant netutils_t map perms for the packet_socket class
+
+Nicolas Iooss (9):
+      Add module_load permission to self when loading modules is allowed
+      audit: allow reading /etc/localtime
+      corecommands: label dhcpcd hook scripts bin_t
+      Add "/usr/(.*/)?bin(/.*)?" pattern back
+      Allow dhcpcd to use generic netlink and raw IP sockets
+      corecommands: label Arch Linux pacman's scripts as bin_t
+      init: allow systemd to create /dev/pts as devpts_t
+      init: allow systemd to relabel /dev and /run
+      corecommands: label systemd script directories bin_t
+
+Nicolas Iooss via refpolicy (1):
+      terminal: /dev/pts exists in /dev filesystem
+
+Russell Coker (4):
+      systemd nspawn and backlight
+      udev and dhcpd
+      minor nspawn, dnsmasq, and mon patches
+      refpolicy and certs
+
+William Roberts (1):
+      fc_sort: use calloc instead of malloc
+
+* Sat Aug 05 2017 Chris PeBenito <pebenito@ieee.org> - 2.20170805
+Chris PeBenito (134):
+      Create / to /usr equivalence for bin, sbin, and lib, from Russell Coker.
+      usrmerge FC fixes from Russell Coker.
+      Systemd tmpfiles fix for kmod.conf from Russell Coker.
+      Update contrib.
+      mon policy from Russell Coker.
+      Fix contrib commit.
+      Revert "bootloader: stricter permissions and more tailored file contexts"
+      Module version bump for bootloader patch revert.  Plus compat alias.
+      Update contrib.
+      Sort capabilities permissions from Russell Coker.
+      Update contrib.
+      Little misc patches from Russell Coker.
+      Implement WERROR build option to treat warnings as errors.
+      Fix Travis-CI WERROR support.
+      Travis-CI: Terminate build immediately on error.
+      mon: Fix deprecated interface usage.
+      Merge branch 'setfiles_getattr' of git://github.com/cgzones/refpolicy
+      Merge branch 'sysadm_fixes' of git://github.com/cgzones/refpolicy
+      Merge branch 'corecmd_module' of git://github.com/cgzones/refpolicy
+      Merge branch 'var_and_run' of git://github.com/cgzones/refpolicy
+      Module version bump for changes from cgzones.
+      Merge pull request #98 from cgzones/admin_process_pattern
+      Merge branch 'hostname_module' of git://github.com/cgzones/refpolicy
+      Module version bump for hostname fix from cgzones.
+      Only display the WERROR notice if there actually are errors.
+      Merge branch 'master' of github.com:TresysTechnology/refpolicy
+      dpkg: Updates from Russell Coker.
+      Monit policy from Russell Coker and cgzones.
+      monit: Fix build error.
+      fetchmail, mysql, tor: Misc fixes from Russell Coker.
+      Merge branch 'systemd_transient' of git://github.com/cgzones/refpolicy
+      Merge branch 'selinuxutil_module' of git://github.com/cgzones/refpolicy
+      Module version bump for selinuxutil and systmd changes from cgzones.
+      Merge branch 'cgroups_fix' of git://github.com/cgzones/refpolicy
+      Module version bump for cgroups systemd fix from cgzones.
+      alsa, vnstat: Updates from cgzones.
+      Merge branch 'init_ntp_interface' of git://github.com/cgzones/refpolicy
+      Module version bump for ntp fixes from cgzones.
+      Systemd fixes from Russell Coker.
+      Fix CI errors.
+      Module version bump for CI fixes.
+      Xen fixes from Russell Coker.
+      mailman: Fixes from Russell Coker.
+      init: Rename init_search_pid_dirs() to init_search_pids().
+      init: Move interface and whitespace change.
+      systemd: Further revisions from Russell Coker.
+      Fix typo in README.
+      Network daemon patches from Russell Coker.
+      apache: Fix CI error.
+      devices: Fix docs for dev_write_generic_sock_files().
+      Merge branch 'su_module' of git://github.com/cgzones/refpolicy
+      Merge branch 'newrole_fixes' of git://github.com/cgzones/refpolicy
+      auth: Move optional out of auth_use_pam_systemd() to callers.
+      Merge branch 'locallogin_module' of git://github.com/cgzones/refpolicy
+      Module version bump for patches from cgzones.
+      Merge branch 'userdom_terminals_permit_open' of
+         git://github.com/cgzones/refpolicy
+      Module version bump for user terminal improvments from cgzones.
+      Merge branch 'monit_depend' of git://github.com/cgzones/refpolicy
+      Module version bump for misc fixes from cgzones.
+      Merge pull request #103 from fishilico/validate_modular_fc
+      Merge branch 'getty_module' of git://github.com/cgzones/refpolicy
+      Module version bump for getty patch from cgzones.
+      Merge branch 'modutils_module' of git://github.com/cgzones/refpolicy
+      Merge branch 'fix_usr_bin_merge' of git://github.com/cgzones/refpolicy
+      Module version bumps for fixes from cgzones.
+      Merge branch 'lvm' of git://github.com/cgzones/refpolicy
+      Merge branch 'macros' of git://github.com/cgzones/refpolicy
+      Module version bump for fixes from cgzones.
+      Module version bump for fixes from cgzones.
+      dontaudit net_admin for SO_SNDBUFFORCE
+      /var/run -> /run again
+      Merge branch 'var_run' of git://github.com/cgzones/refpolicy
+      Module version bump from /var/run fixes from cgzones.
+      Merge branch 'monit' of git://github.com/cgzones/refpolicy
+      Module version bump for monit patch from cgzones
+      another version of systemd cgroups hostnamed and logind
+      Merge pull request #109 from cgzones/python3
+      systemd-resolvd, sessions, and tmpfiles take2
+      systemd-nspawn again
+      Merge pull request #112 from cgzones/remove_support/pyplate
+      Misc fc changes from Russell Coker.
+      Systemd-related changes from Russell Coker.
+      Merge pull request #115 from fishilico/python_raw_strings
+      Module version bump for misc fixes from Guido Trentalancia.
+      systemd init from Russell Coker
+      more systemd stuff from Russell Coker
+      misc daemons from Russell Coker.
+      bootloader from Russell Coker.
+      kmod, lvm, brctl patches from Russell Coker
+      devicekit, mount, xserver, and selinuxutil from Russell Coker
+      another bootloader patch from Russell Coker
+      some userdomain patches from Russell Coker
+      corecommands: Add fc escaping for previous patch.
+      Module version bump for patch from Guido Trentalancia
+      Module version bump from fixes from Guido Trentalancia.
+      xdm sigchld interface from Russell Coker.
+      Further strict systemd fixes from Russell Coker.
+      Update contrib.
+      locallogin: Move two sulogin lines.
+      Login take 4 from Russell Coker.
+      Rename apm to acpi from Russell Coker.
+      Module version bump for patches from Russell Coker and Guido Trentalancia.
+      some little misc things from Russell Coker.
+      apt/dpkg strict patches from Russell Coker.
+      little misc strict from Russell Coker.
+      locallogin: Move one line.
+      Module version bump for locallogin patch from Guido Trentalancia.
+      Module version bump for minor fixes from Guido Trentalancia.
+      Merge branch 'usr_bin_fc' of
+         git://github.com/fishilico/selinux-refpolicy-patched
+      Module version bump for /usr/bin fc fixes from Nicolas Iooss.
+      Module version bump for changes from Jason Zaman and Luis Ressel.
+      init: add comment for ProtectSystem.
+      Module version bump for systemd fix from Krzysztof Nowicki.
+      Update contrib
+      Module version bump for libmtp from Guido Trentalancia.
+      corenet/sysadm: Move lines.
+      Module version bump for infiniband policy from Daniel Jurgens.
+      Module version bump for mmap fixes from Stephen Smalley.
+      Update contrib.
+      Module version bumps for patches from Jason Zaman.
+      filesystem: Fix error in fs_cgroup_filetrans().
+      Module version bumps for patches from Jason Zaman.
+      gpg: Module version bump for patch from Guido Trentalancia.
+      miscfiles: Module version bump for patch from Luis Ressel.
+      Module version bump for patches from cgzones.
+      Module version bump for patches from cgzones.
+      netutils: Module version bump for patch from Luis Ressel.
+      README: Update build requirements.
+      travis-ci: Update to 2.7 userspace release.
+      Enable extended_socket_class policy capability;
+      Add nnp_nosuid_transition policycap and related class/perm definitions.
+      Add cgroup_seclabel policycap.
+      init: Add NoNewPerms support for systemd.
+      Bump module versions for release.
+
+Daniel Jurgens (1):
+      refpolicy: Infiniband pkeys and endports
+
+Guido Trentalancia (8):
+      userdomain: do not audit netlink socket creation attempts
+      corecommands: new file contexts for Gnome applications
+      locallogin: fix the sulogin submodule (emergency shell!)
+      locallogin: fine tune DAC override permissions
+      kernel: low-priority update
+      init: smoother system boot
+      base: role changes for the new libmtp module
+      fc_sort: avoid compiler warning/error
+
+Guido Trentalancia via refpolicy (1):
+      xserver: fix iceauth_home_t file context creation
+
+Jason Zaman (6):
+      authlogin: put interface properly inside optional
+      libraries: update wildcard /usr/lib fcontext
+      appconfig: Add openrc_contexts file
+      corecommands: add consolekit fcontexts
+      dirmngr: add to roles
+      filesystem: introduce fs_cgroup_filetrans interface
+
+Krzysztof Nowicki (1):
+      Enable /etc directory protection using ProtectSystem
+
+Luis Ressel (5):
+      system/selinuxutil: Allow semanage to execute its tmp files
+      system/miscfiles: Generalize the man_t fc's
+      netutils: Mix nmap perms in with the other traceroute_t perms
+      netutils: Add some permissions required by nmap to traceroute_t
+      netutils: Allow tcpdump to reduce its capability bounding set
+
+Nicolas Iooss (5):
+      Make "validate" target verify file contexts
+      devices: fix Debian file contexts
+      Use raw strings in regular expressions
+      Synchronize file patterns for /usr/bin/mount... and /usr/sbin/mount...
+      Support systems with a single /usr/bin directory
+
+Russell Coker (4):
+      inherited file and fifo perms
+      tiny mon patch
+      rw_inherited_file_perms
+      new init interfaces for systemd
+
+Stephen Smalley (3):
+      refpolicy: Define getrlimit permission for class process
+      refpolicy: Define smc_socket security class
+      refpolicy: Define and allow map permission
+
+cgzones (40):
+      systemd: label /run/systemd/transient as systemd_unit_t
+      setfiles: allow getattr to kernel pseudo fs
+      sysadm: fix denials
+      hostname: small adjustments
+      selinuxutil: adjustments
+      corecommands: label some binaries as bin_t
+      files: no default types for /run and /var/lock
+      add admin_process_pattern macro
+      systemd_cgroups_t: fix denials
+      locallogin: adjustments
+      authlogin: introduce auth_use_pam_systemd
+      su: some adjustments
+      newrole: fix denials
+      add corecmd_check_exec_bin_files()
+      add fs_getattr_dos_dirs()
+      update init_ACTION_all_units
+      add init_daemon_lock_file()
+      improve documentation for user_user_(inherited_)?user_terminals
+      getty: overlook module
+      modutils: format filecontexts
+      modutils: adjust interfaces after recent binaries merge
+      systemd-tmpfiles: refactor runtime configs
+      corecommands: fix corecmd_*_bin() for usr merged systems
+      corecmd_read_bin_symlinks(): remove deprecated and redundant calls
+      modutils: adopt callers to new interfaces
+      m4 errprint: add __program__ info
+      domtrans_pattern: use inherited fifo perms
+      sysadm: add monit admin permissions
+      lvm: small adjustments
+      convert build scripts to python3
+      travis: run make xml, html and install(-.*)? targets
+      fix travis and genhomedircon
+      remove /var/run file context leftovers
+      travis: move after_success tests into script section
+      clean up python3 cache on make bare
+      rkhunter: add interfaces for rkhunter module and sysadm permit
+      iptables: align file contexts
+      chkrootkit: add interfaces and sysadm permit
+      netutils: update
+      iptables: update
+
+* Sat Feb 04 2017 Chris PeBenito <pebenito@ieee.org> - 2.20170204
+Chris PeBenito (55):
+      Module version bumps for patches from Guido Trentalancia.
+      Update contrib.
+      Remove unneeded system_u seusers mapping.
+      Update contrib.
+      Merge pull request #45 from cgzones/travis2
+      Merge pull request #46 from cgzones/update_readme
+      Merge pull request #47 from cgzones/spelling
+      Module version bump for xserver patch from Guido Trentalancia
+      Update contrib.
+      Merge pull request #50 from cgzones/macros
+      Merge pull request #48 from cgzones/makefile
+      xserver: Rearrange lines
+      Module version bump for xserver changes from Guido Trentalancia.
+      Merge branch 'dhcp_avahi' of https://github.com/cgzones/refpolicy
+      Module version bumps for patches from cgzones.
+      Update contrib.
+      Merge branch 'syslogd' of git://github.com/cgzones/refpolicy
+      Module version bump for journald fixes from cgzones.
+      Merge pull request #57 from cgzones/trailing_whitespaces
+      modutils: Move lines.
+      Module version bumps for openoffice patches from Guido Trentalancia.
+      Module version bump for kernel sysctl patch from Luis Ressel
+      Update contrib.
+      Module version bump for netutils patch from Luis Ressel.
+      Module version bump for xserver patch from Guido Trentalancia.
+      Module version bumps for patches from Guido Trentalancia.
+      rtkit: enable dbus chat with xdm
+      xserver: Move interface definition.
+      Module version bump for patches from Guido Trentalancia.
+      Module version bump for xscreensaver patch from Guido Trentalancia.
+      Merge branch 'run_transition' of git://github.com/cgzones/refpolicy
+      Module version bumps for /run fc changes from cgzones.
+      Module version bump for patches from Guido Trentalancia.
+      Merge branch '2016-12-27_systemd' of
+         git://github.com/fishilico/selinux-refpolicy-patched
+      Module version bump for systemd patch from Nicolas Iooss.
+      Merge branch 'usr-fc' of
+         git://github.com/fishilico/selinux-refpolicy-patched
+      Module version bump for fc updates from Nicolas Iooss.
+      Module version bump for patches from Guido Trentalancia.
+      xserver: Update from Russell Coker for boinc.
+      Module version bump for patches from Guido Trentalancia.
+      Merge pull request #62 from cgzones/fix_permission_segenxml
+      Merge pull request #94 from cgzones/travis
+      Merge branch 'corenetork_module' of git://github.com/cgzones/refpolicy
+      Merge branch 'mount_module' of git://github.com/cgzones/refpolicy
+      Merge branch 'terminal_module' of git://github.com/cgzones/refpolicy
+      Merge branch 'files_search_src' of git://github.com/cgzones/refpolicy
+      Merge branch 'unconfined_module' of git://github.com/cgzones/refpolicy
+      Merge branch 'auditd_fixes' of git://github.com/cgzones/refpolicy
+      Module version bumps for patches from cgzones.
+      Module version bump for cpu_online genfscon from Laurent Bigonville.
+      Update contrib.
+      Fix contrib.
+      Module version bump for cups patch from Guido Trentalancia.
+      Module version bump for xkb fix from Jason Zaman.
+      Bump module versions for release.
+
+Guido Trentalancia (19):
+      xserver: remove unneeded user content permissions
+      xserver: remove unneeded user content permissions
+      Apache OpenOffice module (base policy part)
+      xserver: enable dbus messaging with devicekit power
+      authlogin: indentation/whitespace fix
+      wm: update the window manager (wm) module and enable its role template
+         (v7)
+      userdomain: separate optional conditionals for gnome and wm role templates
+      udev: manage tmpfs files and directories
+      udev: always enable kernel module loading
+      base: enable the xscreensaver role
+      bootloader: stricter permissions and more tailored file contexts
+      modutils: update to run in confined mode
+      base: use new genhomedircon template for username
+      kernel: missing permissions for confined execution
+      xserver: introduce new fc and interface to manage X session logs
+      kernel: add missing plymouth interface
+      xserver: restrict executable memory permissions
+      init: support sysvinit
+      udev: execute HPLIP applications in their own domain
+
+Guido Trentalancia via refpolicy (4):
+      Let users read/manage symlinks on fs that do not support xattr
+      Let unprivileged users list mounted filesystems
+      Let the user list noxattr fs directories
+      sysadm: add the shutdown role
+
+Jason Zaman (1):
+      xserver: allow X roles to read xkb libs to set keymaps
+
+Laurent Bigonville (1):
+      Use genfscon to label /sys/devices/system/cpu/online as cpu_online_t
+
+Luis Ressel (3):
+      system/modutils: Add kernel_search_key(kmod_t)
+      kernel.if: Allow listing /proc/sys/net/unix
+      netutils: Label iptstate as netutils_t
+
+Nicolas Iooss (4):
+      systemd: add systemd-backlight policy
+      systemd: add systemd-binfmt policy
+      Allow searching /proc/sys/fs when using /proc/sys/fs/binfmt_misc
+      Add file contexts in /usr for /bin, /usr/sbin and /usr/lib
+
+Russell Coker (1):
+      single binary modutils
+
+Stephen Smalley (2):
+      refpolicy: Define extended_socket_class policy capability and socket
+         classes
+      refpolicy: drop unused socket security classes
+
+cgzones (21):
+      update .travis.yml
+      update README
+      fix spelling
+      update Makefile
+      update policy/support macros
+      review
+      keep 2 empty lines in front of a new section
+      using intermediate target instead of splitting up conf files generation
+      define filecontext for /run/agetty.reload
+      allow dhcp_t to domtrans into avahi
+      fix syslogd audits
+      remove trailing whitespaces
+      transition file contexts to /run
+      fix permission of installed segenxml.py by install-headers
+      auditd / auditctl: fix audits
+      add files_search_src()
+      update unconfined module * grant capability2:wake_alarm * remove
+         deprecated interfaces
+      update terminal module
+      update corenetwork module
+      use travis cache
+      update mount module
+
+* Sun Oct 23 2016 Chris PeBenito <pebenito@ieee.org> - 2.20161023
+Chris PeBenito (94):
+      Module version bump for systemd-user-sessions fc entry from Dominick Grift
+      Module version bumps for 2 patches from Dominick Grift.
+      Module version bump for vm overcommit sysctl interfaces from Laurent
+         Bigonville.
+      Update contrib.
+      Module version bump for Xorg and SSH patches from Nicolas Iooss.
+      Add neverallow for mac_override capability. It is not used by SELinux.
+      Merge branch 'overcommit-1' of git://github.com/bigon/refpolicy into
+         bigon-overcommit-1
+      Merge branch 'bigon-overcommit-1'
+      Merge branch 'systemd-1' of git://github.com/bigon/refpolicy into
+         bigon-systemd-1
+      Merge branch 'bigon-systemd-1'
+      Module version bump for syslog and systemd changes from Laurent Bigonville
+      Merge pull request #19 from shootingatshadow/fc_sort
+      Merge branch 'xorg-1' of git://github.com/bigon/refpolicy into
+         bigon-xorg-1
+      Merge branch 'bigon-xorg-1'
+      Module version bump for Debian Xorg fc fixes from Laurent Bigonville
+      Add a type and genfscon for nsfs.
+      Module version bump for systemd PrivateNetwork patch from Nicolas Iooss
+      Module version bump for systemd audit_read capability from Laurent
+         Bigonville
+      Merge pull request #21 from fishilico/typos
+      Module version bump for patches from Nicolas Iooss and Grant Ridder.
+      Update contrib.
+      Module version bump for efivarfs patches from Dan Walsh, Vit Mojzis, and
+         Laurent Bigonville
+      Module version bump for ipset fc entry from Laurent Bigonville.
+      Update contrib.
+      Whitespace fix in iptables.fc.
+      Module version bump for iptables fc entries from Laurent Bigonville and
+         Lukas Vrabec.
+      Update contrib.
+      Module version bump for iptables/firewalld patch from Laurent Bigonville.
+      Merge pull request #29 from bigon/appconfig-lxc
+      Module version bump for getty patch from Luis Ressel.
+      Module version bump for tboot utils from Luis Ressel and systemd fix from
+         Jason Zaman.
+      Merge branch 'corecommands-archlinux' of
+         https://github.com/fishilico/selinux-refpolicy-patched
+      Merge branch 'dev_setattr_dlm_control-typo' of
+         https://github.com/fishilico/selinux-refpolicy-patched
+      Merge branch 'kdevtmpfs-unlink' of
+         https://github.com/fishilico/selinux-refpolicy-patched
+      Module version bump for several Arch fixes from Nicolas Iooss.
+      Update contrib.
+      Reduce broad entrypoints for unconfined domains.
+      Update Travis-CI build to newest SELinux userspace release.
+      Update su for libselinux-2.5 changes.
+      Merge branch 'selinux-1' of https://github.com/bigon/refpolicy
+      Module version bump for Debian fc entries from Laurent Bigonville.
+      Module version bump for patches from Dominick Grift and Lukas Vrabec.
+      Add user namespace capability object classes.
+      Module version bump for hwloc-dump-hwdata from Dominick Grift and Grzegorz
+         Andrejczuk.
+      Module version bump for nftables fc entry from Jason Zaman.
+      Update contrib.
+      Module version bump for LMNR port from Laurent Bigonville.
+      Module version bump for systemd-resolved patch from Laurent BIgonville.
+      Merge branch 'master' of https://github.com/qqo/refpolicy into qqo-master
+      Merge branch 'qqo-master'
+      Module version bump for mlstrustedsocket from qqo.
+      Module version bumps + contrib update for user_runtime from Jason Zaman.
+      Update contrib.
+      Module version bump for corecommands update from Garrett Holmstrom.
+      Module version bump for MLS relabeling patch from Lukas Vrabec.
+      Get attributes of generic ptys, from Russell Coker.
+      Module version bump for user_udp_server tunable from Russell Coker.
+      libraries: Move libsystemd fc entry.
+      libraries: Module version bump for libsystemd fc entry from Lukas Vrabec.
+      Update contrib.
+      Systemd units from Russell Coker.
+      corenetwork: Add port labeling for Global Catalog over LDAPS.
+      corenetwork: Missed version bump for previous commit.
+      Update contrib.
+      Allow the system user domains to chat over dbus with a few other domains
+         (e.g. gnome session).
+      Update alsa module use from Guido Trentalancia.
+      Update the sysnetwork module to add some permissions needed by the dhcp
+         client (another separate patch makes changes to the ifconfig part).
+      Ifconfig should be able to read firmware files in /lib (i.e. some network
+         cards need to load their firmware) and it should not audit attempts to
+         load kernel modules directly.
+      Remove redundant libs_read_lib_files() for ifconfig_t.
+      Module version bump for various patches from Guido Trentalancia.
+      Update contrib.
+      Update for the xserver module:
+      userdomain: Fix compile errors.
+      Update contrib.
+      Merge pull request #38 from fishilico/travis-nosudo
+      Module version bump for module_load perm use from Guido Trentalancia.
+      Update contrib.
+      Merge pull request #39 from rfkrocktk/feature/vagrant
+      Merge pull request #40 from jer-gentoo/patch-1
+      userdomain: Move enable_mls block in userdom_common_user_template().
+      Module version bumps for LVM and useromain patches from Guido
+         Trentalancia.
+      Update contrib.
+      Additional change from Guido Trentalancia related to evolution.
+      Module version bump for selinuxutil fix from Jason Zaman.
+      Update contrib.
+      Update contrib.
+      Merge branch 'feature/syncthing' of https://github.com/rfkrocktk/refpolicy
+         into rfkrocktk-feature/syncthing
+      Merge branch 'rfkrocktk-feature/syncthing'
+      Module version bumps for syncthing from Naftuli Tzvi Kay.
+      Merge pull request #41 from SeanPlacchetti/patch-1
+      Merge pull request #42 from SeanPlacchetti/patch-1
+      Merge pull request #43 from williamcroberts/google-patch
+      Update contrib.
+      Bump module versions for release.
+
+Dan Walsh (1):
+      Add label for efivarfs
+
+Dominick Grift (5):
+      systemd: add missing file context spec for systemd-user-sessions
+         executable file
+      authlogin: remove duplicate files_list_var_lib(nsswitch_domain)
+      kernel: implement sysctl_vm_overcommit_t for
+         /proc/sys/vm/overcommit_memory
+      systemd: Add support for --log-target
+      Update refpolicy to handle hwloc
+
+Garrett Holmstrom (1):
+      corecmd: Remove fcontext for /etc/sysconfig/libvirtd
+
+Grant Ridder (1):
+      Add redis-sentinel port to redis network_port def
+
+Guido Trentalancia (6):
+      Add module_load permission to class system
+      Add module_load permission to can_load_kernmodule
+      Remove deprecated semodule options from Makefile
+      Update the lvm module
+      Improve tunable support for rw operations on noxattr fs / removable media
+      userdomain: introduce the user certificate file context (was miscfiles:
+         introduce the user certificate file context)
+
+Jason Zaman (6):
+      system/init: move systemd_ interfaces into optional_policy
+      iptables: add fcontext for nftables
+      authlogin: remove fcontext for /var/run/user
+      userdomain: Introduce types for /run/user
+      userdomain: user_tmp requires searching /run/user
+      userdomain: introduce interfaces for user runtime
+
+Jason Zaman via refpolicy (1):
+      selinuxutil: allow setfiles to read semanage store
+
+Jeroen Roovers (1):
+      Use $(AWK) not plain awk
+
+Laurent Bigonville (15):
+      Add interfaces to read/write /proc/sys/vm/overcommit_memory
+      Give some systemd domain access to /proc/sys/kernel/random/boot_id
+      On Debian, systemd binaries are installed in / not /usr
+      Allow syslogd_t to read sysctl_vm_overcommit_t
+      Label Xorg server binary correctly on Debian
+      Allow systemd the audit_read capability
+      Allow logind to read efivarfs files
+      Add label for /sbin/ipset
+      Label /var/run/ebtables.lock as iptables_var_run_t.
+      Allow {eb,ip,ip6}tables-restore to read files in /run/firewalld
+      Add lxc_contexts config file
+      Add some labels for SELinux tools path in Debian
+      Add the validate_trans access vector to the security class
+      Add llmnr/5355 (Link-local Multicast Name Resolution)
+      Add policy for systemd-resolved
+
+Luis Ressel (2):
+      Allow getty the sys_admin capability
+      Allow sysadm to run txt-stat.
+
+Lukas Vrabec (4):
+      Label /var/run/xtables.lock as iptables_var_run_t.
+      SELinux support for cgroup2 filesystem.
+      Add new MLS attribute to allow relabeling objects higher than system low.
+         This exception is needed for package managers when processing sensitive
+         data.
+      Systemd by version 231 starts using shared library and systemd daemons
+         execute it. For this reason lib_t type is needed.
+
+Mike Palmiotto (1):
+      Add mls support for some db classes
+
+Naftuli Tzvi Kay (2):
+      Add Syncthing Support to Policy
+      Add Vagrant box for development.
+
+Nicolas Iooss (18):
+      Label Xorg server binary correctly on Arch Linux
+      Label OpenSSH files correctly on Arch Linux
+      Label OpenSSH systemd unit files
+      Allow systemd services to use PrivateNetwork feature
+      Fix typo in init_dbus_chat requirements
+      Fix typos in comments from corenetwork module
+      man: Spelling fixes
+      Fix interface descriptions when duplicate ones are found
+      Label /sys/kernel/debug/tracing filesystem
+      Label TexLive scripts bin_t
+      Label system-config-printer applet properly on Arch Linux
+      Label gedit plugins properly on Arch Linux
+      Label some user session DBus services as bin_t
+      Do not label /usr/lib/gvfs/libgvfscommon.so as bin_t
+      Fix typo in dev_setattr_dlm_control interface requirements
+      Allow kdevtmpfs to unlink fixed disk devices
+      Fix typo in module compilation message
+      Make Travis-CI build without using sudo
+
+Rahul Chaudhry (1):
+      fc_sort: cleanup warnings caught by clang tidy / static analyzer.
+
+Russell Coker (2):
+      user_udp_server tunable
+      getattr on unlabeled blk devs
+
+Sean Placchetti (2):
+      Update to refpolicy spec file
+      Update specfile
+
+Vit Mojzis (1):
+      Add interface to allow reading files in efivarfs - contains Linux Kernel
+         configuration options for UEFI systems (UEFI Runtime Variables)
+
+William Roberts (1):
+      fc_sort: strip whitespace errors
+
+qqo (1):
+      Adds attribute mlstrustedsocket, along with the interface.
+
+* Tue Dec 08 2015 Chris PeBenito <selinux@tresys.com> - 2.20151208
+Alexander Wetzel (1):
+      adds vfio device support to base policy
+
+Chris PeBenito (48):
+      Module version bump for optional else block removal from Steve Lawrence.
+      Add always_check_network policy capability.
+      Update contrib.
+      Fix domain_mmap_low() to be a proper tunable.
+      Add initial Travis CI configuration.
+      Travis CI already exports variables.
+      Add validate target for monolithic policy.
+      Update contrib.
+      Use matrix keyword to simplify travis-ci build definitions.
+      Undo last commit.
+      Simplify travis-ci build handling of SELinux toolchain.
+      Update contrib.
+      Module version bump for fstools blkid fix from Jason Zaman
+      Update contrib.
+      Module version bump for debufs mount point fc entry from Laurent
+         Bigonville.
+      Module version bump for updated netlink sockets from Stephen Smalley
+      Update contrib.
+      Module version bump for init_startstop_service from Jason Zaman.
+      Update contrib.
+      Change CI tests to drop DIRECT_INITRC.
+      Module version bumps for further init_startstop_service() changes from
+         Jason Zaman.
+      Module version bump for admin interface changes from Jason Zaman.
+      Update contrib.
+      Module version bumps for admin interfaces from Jason Zaman.
+      Module version bump for cron_admin for sysadm from Jason Zaman.
+      Module version bump for ssh-agent -k fix from Luis Ressel.
+      Module version bump for APR build script labeling from Luis Ressel.
+      Module version bump for vfio device from Alexander Wetzel.
+      Update contrib.
+      Rearrange lines in ipsec.te.
+      Module version bump for patches from Jason Zaman/Matthias Dahl.
+      Add systemd build option.
+      Add systemd access vectors.
+      Implement core systemd policy.
+      Add supporting rules for domains tightly-coupled with systemd.
+      Add rules for sysadm_r to manage the services.
+      Add systemd units for core refpolicy services.
+      Add sysfs_types attribute.
+      Add refpolicy core socket-activated services.
+      Change policy_config_t to a security file type.
+      Merge branch 'pebenito-master'
+      Module version bump for systemd additions.
+      Update contrib for dbus systemd fix.
+      Revise selinux module interfaces for perms protected by neverallows.
+      Remove bad interface in systemd.if.
+      Module version bump for utempter Debian helper from Laurent Bigonville.
+      Update contrib.
+      Bump module versions for release.
+
+Jason Zaman (13):
+      fstools: add in filetrans for /run dir
+      Introduce init_startstop_service interface
+      logging: use init_startstop_service in _admin interface
+      postgresql: use init_startstop_service in _admin interface
+      Add openrc support to init_startstop_service
+      Introduce iptables_admin
+      Add all the missing _admin interfaces to sysadm
+      Introduce lvm_admin interface
+      Introduce ipsec_admin interface
+      Introduce setrans_admin interface
+      add new cron_admin interface to sysadm
+      Add overlayfs as an XATTR capable fs
+      system/ipsec: Add policy for StrongSwan
+
+Laurent Bigonville (4):
+      Add fc for /sys/kernel/debug as debugfs_t
+      Add "binder" security class and access vectors
+      Properly label utempter helper on debian
+      Allow the user cronjobs to run in their userdomain
+
+Luis Ressel (2):
+      Allow ssh-agent to send signals to itself
+      Mark APR build scripts as bin_t
+
+Stephen Smalley (1):
+      Update netlink socket classes.
+
+Steve Lawrence (1):
+      Remove optional else block for dhcp ping
+
+* Wed Dec 03 2014 Chris PeBenito <selinux@tresys.com> - 2.20141203
+Artyom Smirnov (3):
+      New database object classes
+      Fixes for db_domain and db_exception
+      Renamed db_type to db_datatype, to avoid confusion with SELinux "type"
+
+Chris PeBenito (69):
+      Whitespace fix in postgresql.fc
+      Module version bump for postgresql fc entries from Luis Ressel.
+      Add symlink to contrib Changelog for easy reference.
+      Move lightdm line in xserver.fc.
+      Whitespace fix in xserver.fc.
+      Update contrib.
+      Module version bump for userdomain kernel symbol table fix from Nicolas
+         Iooss.
+      Module version bump for 2 Gentoo patches from Sven Vermeulen.
+      Update contrib.
+      Module version bump for 2 patch sets from Laurent Bigonville.
+      Update contrib.
+      Module version bump for gnome keyring fix from Laurent Bigonville.
+      Update contrib.
+      Module version bump for /sys/fs/selinux support from Sven Vermeulen.
+      Module version bump for fixes from Laurent Bigonville.
+      Update contrib.
+      Module version bumps for fc fixes from Nicolas Iooss.
+      Update contrib.
+      Add file for placing default_* statements.
+      Fix error in default_user example.
+      Module version bump for unconfined->lvm transition from Nicolas Iooss.
+      Need the __future__ import for python2 if using print().
+      Module version bump for ifconfig fc entry from Sven Vermeulen.
+      Module version bump for deprecated interface usage removal from Nicolas
+         Iooss.
+      Update contrib.
+      Module version bump for rcs2log and xserver updates from Sven Vermeulen.
+      Module version bump for shutdown transitions from Luis Ressel.
+      Remove firstboot_rw_t as FC5 has been gone for a long time.
+      Module version bump for firstboot_rw_t alias removal.
+      Module version bump for dropbox port from Sven Vermeulen.
+      Module version bump for unconfined syslog cap from Nicolas Iooss.
+      Always use the unknown permissions handling build option.
+      Merge pull request #1 from artyom-smirnov/master
+      Module version bump for zram fc entry from Jason Zaman.
+      Update contrib.
+      Module version bump for init_daemon_pid_file from Sven Vermeulen.
+      Move tumblerd fc entry
+      Module version bump for tumblerd fc entry from Jason Zaman.
+      Module version bump for libraries fc fix from Nicolas Iooss.
+      Update contrib.
+      Module version bump for fstools fc entries from Luis Ressel.
+      Module version bump for missing unlabeled interfaces from Sven Vermeulen.
+      Module version bump for ping rawip socket fix from Luis Ressel.
+      Module version bump for full IRC ports from Luis Ressel.
+      Move losetup addition in fstools.
+      Module version bump for losetup fixes from Luis Ressel.
+      Update contrib.
+      Module version bump for postgres fc revisions from Luis Ressel.
+      Module version bump for FUSE fix for mount from Luis Ressel.
+      Module version bump for misc fixes from Nicolas Iooss.
+      Move systemd fc entry.
+      Whitespace change in logging.fc.
+      Add comment for journald ring buffer reading.
+      Module version bumps for systemd/journald patches from Nicolas Iooss.
+      Update contrib.
+      /dev/log symlinks are not labeled devlog_t.
+      Module version bump for CIL fixes from Yuli Khodorkovskiy.
+      Drop RHEL4 and RHEL5 support.
+      Merge pull request #3 from bigon/arping
+      Merge pull request #4 from fishilico/minor-typo
+      Module version bump for Debian arping fc entries from Laurent Bigonville.
+      Add comment for iw generic netlink socket usage
+      Module version bump for /sbin/iw support from Nicolas Iooss.
+      Merge pull request #5 from bigon/audit_read
+      Update contrib.
+      Module version bump for misc fixes from Sven Vermeulen.
+      Update contrib.
+      Module version bump for module store move from Steve Lawrence.
+      Bump module versions for release.
+
+Elia Pinto (1):
+      Fix misspelling
+
+Jason Zaman (2):
+      File contexts for zram
+      File Context for tumbler
+
+Laurent Bigonville (14):
+      Properly label git-shell and other git commands for Debian
+      Label /usr/sbin/lightdm as xdm_exec_t
+      Create new xattrfs attribute and fs_getattr_all_xattr_fs() interface
+      Associate the new xattrfs attribute to fs_t and some pseudo-fs
+      Use new fs_getattr_all_xattr_fs interface for setfiles_t and restorecond_t
+      Add telepathy role for user_r and staff_r
+      Properly label the manpages installed by postgresql
+      Label /usr/local/share/ca-certificates(/.*)? as cert_t
+      Allow the xdm_t domain to enter all the gkeyringd ones
+      Label /etc/locale.alias as locale_t on Debian
+      Allow hugetlbfs_t to be associated to /dev
+      On Debian iputils-arping is installed in /usr/bin/arping
+      Debian also ship a different arping implementation
+      Add new audit_read access vector in capability2 class
+
+Luis Ressel (13):
+      Add two postgresql file contexts from gentoo policy
+      Allow init to execute shutdown
+      Allow xdm_t to transition to shutdown_t domain
+      Some of the fsadm tools can also be in /usr/sbin instead of /sbin
+      Label /usr/sbin/{add, del}part as fsadm_exec_t
+      Grant ping_t getattr on rawip_socket
+      kernel/corenetwork.te: Add all registered IRC ports
+      system/mount.if: Add mount_rw_loopback_files interface
+      system/fstools.if: Add fstools_use_fds interface
+      Add neccessary permissions for losetup
+      Only label administrative postgres commands as postgresql_exec_t
+      Also apply the new postgres labeling scheme on Debian
+      Grant mount permission to access /dev/fuse
+
+Nicolas Iooss (31):
+      Fix parallel build of the policy
+      fc_sort: fix typos in comments
+      fc_sort: initialize allocated memory to fix execution on an empty file
+      fc_sort: make outfile argument optional
+      userdomain: no longer allow unprivileged users to read kernel symbols
+      Label syslog-ng.pid as syslogd_var_run_t
+      filesystem: label cgroup symlinks
+      Label /usr/lib/getconf as bin_t
+      Label /usr/share/virtualbox/VBoxCreateUSBNode.sh as udev_helper_exec_t
+      Make support/policyvers.py compatible with Python 3
+      Make unconfined user run lvm programs in confined domain
+      No longer use deprecated MLS interfaces
+      Allow unconfined domains to use syslog capability
+      Label /lib symlink as lib_t for every distro
+      Label /usr/lib/networkmanager/ like /usr/lib/NetworkManager/
+      Add ioctl and lock to manage_lnk_file_perms
+      Label (/var)?/tmp/systemd-private-.../tmp like /tmp
+      Fix typo in fs_getattr_all_fs description
+      Label systemd files in init module
+      Introduce init_search_run interface
+      Label systemd-journald files and directories
+      Support logging with /run/systemd/journal/dev-log
+      Allow journald to read the kernel ring buffer and to use /dev/kmsg
+      Allow journald to access to the state of all processes
+      Remove redundant Gentoo-specific term_append_unallocated_ttys(syslogd_t)
+      Fix minor typo in init.if
+      Label /sbin/iw as ifconfig_exec_t
+      Allow iw to create generic netlink sockets
+      Use create_netlink_socket_perms when allowing netlink socket creation
+      Update Python requirement in INSTALL
+      Create tmp directory when compiling a .mod.fc file in a modular way
+
+Steve Lawrence (1):
+      Update policy for selinux userspace moving the policy store to
+         /var/lib/selinux
+
+Sven Vermeulen (24):
+      Hide getattr denials upon sudo invocation
+      Support /sys/devices/system/cpu/online
+      The security_t file system can be at /sys/fs/selinux
+      Dontaudit access on security_t file system at /sys/fs/selinux
+      ifconfig can also be in /bin
+      xserver_t needs to ender dirs labeled xdm_var_run_t
+      Enable rcs2log location for all distributions
+      Add dropbox_port_t support
+      Support initrc_t generated pid files with file transition
+      Deprecate init_daemon_run_dir interface
+      Use init_daemon_pid_file instead of init_daemon_run_dir
+      Introduce kernel_delete_unlabeled_symlinks
+      Introduce kernel_delete_unlabeled_pipes
+      Introduce kernel_delete_unlabeled_sockets
+      Introduce kernel_delete_unlabeled_blk_files
+      Introduce kernel_delete_unlabeled_chr_files
+      Run grub(2)-mkconfig in bootloader domain
+      Add auth_pid_filetrans_pam_var_run
+      New sudo manages timestamp directory in /var/run/sudo
+      xfce4-notifyd is an executable
+      Mark f2fs as a SELinux capable file system
+      Add in LightDM contexts
+      Add gfisk and efibootmgr as fsadm_exec_t
+      Add /var/lib/racoon as runtime directory for ipsec
+
+Yuli Khodorkovskiy (1):
+      Remove duplicate role declarations
+
+cgarst (1):
+      Updating submodule URL to github
+
+* Tue Mar 11 2014 Chris PeBenito <selinux@tresys.com> - 2.20140311
+Chris PeBenito (96):
+      Update contrib to pull in minidlna.
+      Remove general unlabeled packet usage.
+      Update contrib.
+      Use python libselinux bindings to determine policy version.
+      Add MLS constraints for x_pointer and x_keyboard.
+      Add label for parted.
+      Fix support/policyvers.py not to error if building policy on a
+         SELinux-disabled system.
+      Module version bump for kerberos keytab changes for ssh from Dominick
+         Grift.
+      Module version bump for pstore filesystem support from Dominick Grift.
+      Module version bump for redis port from Dominick Grift.
+      Update contrib.
+      Add comment for setfiles using /dev/console when it needs to be relabeled.
+      Module version bump for xserver and selinuxutil updates from Dominick
+         Grift.
+      Module version bump for tmpfs associate to device_t from Dominick Grift.
+      Module version bump for syslog reading overcommit_memory from Dominick
+         Grift.
+      Module version bump for ethtool reading pm-powersave.lock from Dominick
+         Grift.
+      Module version bump for sysadm fix for git role usage from Dominick Grift.
+      Module version bump for lvm update from Dominick Grift.
+      Module version bump for fc fix in authlogin from Dominick Grift.
+      Module version bump for restricted x user template fix from Dominick
+         Grift.
+      Add comment for debian avahi-daemon-check-dns.sh usage by udev
+      Module version bump for udev Debian fixes from Dominick Grift.
+      Module version bump for selinuxfs location change from Dominick Grift.
+      Update contrib.
+      Module version bump for unconfined dbus fixes from Dominick Grift.
+      Whitespace fix in terminal.te.
+      Module version bump for virtio console from Dominick Grift.
+      Module version bump for init interface and corecommand fc from Dominick
+         Grift.
+      Module version bump for ping capabilities from Sven Vermeulen.
+      Module version bump for slim fc entries from Sven Vermeulen.
+      Module version bump for xdm dbus access from Dominick Grift.
+      Rearrange sysnet if blocks.
+      Module version bump for debian ifstate changes from Dominick Grift.
+      Module version bump for xserver console and fc fixes from Dominick Grift.
+      Module version bump for gdomap port from Dominick Grift.
+      Module version bumps for dhcpc leaked fds to hostname.
+      Module version bump for ssh server caps for Debian from Dominick Grift.
+      Move stray Debian rule in udev.
+      Update contrib
+      Module version bumps for Debian udev updates from Dominick Grift.
+      Module version bump for mount updates from Dominick Grift.
+      Silence symlink reading by setfiles since it doesn't follow symlinks
+         anyway.
+      Reorder dhcpc additions.
+      Module version bump for dhcpc fixes from Dominick Grift.
+      Add comments about new capabilities for syslogd_t.
+      Module version bumps for syslog-ng and semodule updates.
+      Update contrib.
+      Module version bump for first batch of patches from Dominick Grift.
+      Update contrib.
+      Rearrage userdom_delete_user_tmpfs_files() interface.
+      setrans: needs to be able to get attributes of selinuxfs, else fails to
+         start in Debian
+      Whitespace fix in fstools.
+      Add comment in policy for lvm sysfs write.
+      Module version bump for second lot of patches from Dominick Grift.
+      Whitespace fix in usermanage.
+      Whitespace fix in libraries.
+      Module version bump for patches from Dominick Grift.
+      Whitespace fix in init.te.
+      init: init_script_domain() allow system_r role the init script domain type
+      init: creates /run/utmp
+      Module version bump for 4 init patches from Dominick Grift.
+      Fix Debian compile issue.
+      Module version bump for 2 patches from Dominick Grift.
+      Module version bump for patch from Laurent Bigonville.
+      Update contrib.
+      Module version bump for patch from Laurent Bigonville.
+      Module version bump for xserver change from Dominick Grift.
+      Merge file_t into unlabeled_t, as they are security equivalent.
+      Update modules for file_t merge into unlabeled_t.
+      Make the QUIET build option apply to clean and bare targets.
+      Module version bump for direct initrc fixes from Dominick Grift.
+      Module version bump for module store labeling fixes from Laurent
+         Bigonville.
+      Remove ZFS symlink labeling.
+      Fix ZFS fc escaping in mount.
+      Rearrange ZFS fc entries.
+      Module version bump for ZFS tools fc entries from Matthew Thode.
+      Module version bump for unconfined transition to dpkg from Laurent
+         Bigonville.
+      Module version bump for logging fc patch from Laurent Bigonville.
+      Update contrib.
+      Module version bump for pid file directory from Russell Coker/Laurent
+         Bigonville.
+      Rename gpg_agent_connect to gpg_stream_connect_agent.
+      Rearrange gpg agent calls.
+      Module version bump for ssh use of gpg-agent from Luis Ressel.
+      Module version bump for files_dontaudit_list_var() interface from Luis
+         Ressel.
+      Move bin_t fc from couchdb to corecommands.
+      Update contrib.
+      Module version bump for sesh fc from Nicolas Iooss.
+      Move loop control interface definition.
+      Rename mount_read_mount_loopback() to mount_read_loopback_file().
+      Module version bump for loopback file mounting fixes from Luis Ressel.
+      Fix read loopback file interface.
+      Update contrib.
+      Module version bump for bootloader fc fixes from Luis Ressel.
+      Update contrib.
+      Update contrib.
+      Bump module versions for release.
+
+Dominick Grift (58):
+      The kerberos_keytab_template() template is deprecated: Breaks monolithic
+         built (out-of-scope)
+      Initial pstore support
+      Support redis port tcp,6379
+      These regular expressions were not matched
+      Restorecon reads, and writes /dev/console before it is properly labeled
+      filesystem: associate tmpfs_t (shm) to device_t (devtmpfs) file systems
+      logging: syslog (rs:main Q:Reg) reading sysctl_vm files
+         (overcommit_memory) in Debian
+      sysnetwork: ethtool reads /run/pm-utils/locks/pm-powersave.lock
+      sysadm: Doesnt work with direct_initrc = y
+      lvm: lvm and udisks-lvm-pv-e read /run/udev/queue.bin
+      authlogin: Sudo file context specification did not catch paths (squash me)
+      userdomain: restricted xwindows user (squash me)
+      udev: This is specific to debian i think. Some how the
+         /usr/lib/avahi/avahi-daemon-check-dns\.sh ends up in the udev_t domain
+      selinux: selinuxfs is now mounted under /sys/fs/selinux instead of
+         /selinux, so we need to allow domains that use selinuxfs to interface
+         with SELinux to traverse /sys/fs to be able to get to /sys/fs/selinux
+      Unconfined domains have unconfined access to all of dbus rather than only
+         system bus
+      Initial virtio console device
+      init: create init_use_inherited_script_ptys() for tmpreaper (Debian)
+      corecmd: avahi-daemon executes /usr/lib/avahi/avahi-daemon-check-dns.sh
+      xdm: is a system bus client and acquires service on the system bus xdm:
+         dbus chat with accounts-daemon
+      sysnetwork: Debian stores network interface configuration in /run/network
+         (ifstate), That directory is created by the /etc/init.d/networking
+         script.
+      xserver: catch /run/gdm3
+      xserver: associate xconsole_device_t (/dev/xconsole) to device_t
+         (devtmpfs)
+      corenetwork: Declare gdomap port, tcp/udp:538
+      hostname: do not audit attempts by hostname to read and write dhcpc udp
+         sockets (looks like a leaked fd)
+      ssh: Debian sshd is configured to use capabilities
+      udev-acl.ck lists /run/udev/tags/udev-acl udev blocks suspend, and
+         compromises kernel
+      udev: runs: /usr/lib/avahi/avahi-daemon-check-dns.sh which creates
+         /run/avahi-daemon directory
+      mount: sets kernel thread priority mount: mount reads
+         /lib/modules/3.10-2-amd64/modules.dep mount: mount lists all mount
+         points
+      sysnetwork: dhcpc binds socket to random high udp ports sysnetwork: do not
+         audit attempts by ifconfig to read, and write dhcpc udp sockets (looks
+         like a leaked fd)
+      mount: fs_list_auto_mountpoint() is now redundant because autofs_t is
+         covered by files_list_all_mountpoints()
+      udev: this fc spec does not make sense, as there is no corresponding file
+         type transition for it
+      udev: the avahi dns check script run by udev in Debian chmods
+         /run/avahi-daemon
+      authlogin: unix_chkpwd traverses / on sysfs device on Debian
+      setrans: mcstransd reads filesystems file in /proc
+      udev: reads modules config: /etc/modprobe.d/alsa-base-blacklist.conf
+      fstools: hdparm append (what seems inherited from devicekit )
+         /var/log/pm-powersave.log fstools: hdparm reads
+         /run/pm-utils/locks/pm-powersave.lock
+      sysnetwork: dhcpc: networkmanager interface calls from Fedora. In Debian i
+         was able to confirm the need for
+         networkmanager_manage_lib_files(dhcpc_t) since dhclient reads
+         /var/lib/NetworkManager/dhclient-eth0.conf
+      sysbnetwork: dhclient searches /var/lib/ntp
+      sshd/setrans: make respective init scripts create pid dirs with proper
+         contexts
+      kernel: cryptomgr_test (kernel_t) requests kernel to load
+         cryptd(__driver-ecb-aes-aesni
+      xserver: already allowed by auth_login_pgm_domain(xdm_t)
+      unconfined: Do not domain transition to xserver_t (unconfined_t is
+         xserver_unconfined)
+      userdomain: add userdom_delete_user_tmpfs_files() for pulseaudio clients
+      These { read write } tty_device_t chr files on boot up in Debian
+      udev: udevd executable location changed
+      lvm: lvm writes read_ahead_kb
+      udev: in debian udevadm is located in /bin/udevadm
+      usermanage: Run /etc/cron\.daily/cracklib-runtime in the crack_t domain in
+         Debian
+      iptables: calls to firewalld interfaces from Fedora. The
+         firewalld_dontaudit_rw_tmp_files(iptables_t) was confirmed on Debian.
+      libraries: for now i can only confirm mmap, might need to be changed to
+         bin_t later if it turns out to need execute_no_trans
+      users: calls pulseaudio_role() for restricted xwindows users and
+         staff_t/user_t
+      init: for a specified automatic role transition to work. the source role
+         must be allowed to change manually to the target role
+      init: this is a bug in debian where tmpfs is mounted on /run, and so early
+         on in the boot process init creates /run/utmp and /run/initctl in a
+         tmpfs directory (/) tmpfs
+      init: exim init script runs various helper apps that create and manage
+         /var/lib/exim4/config.autogenerated.tmp file
+      init: the gdomap and minissdpd init scripts read the respective environ
+         files in /etc/default. We need to give them a private type so that we
+         can give the gdomap_admin() and minissdpd_admin() access to it, but it
+         seems overengineering to create private environ types for these files
+      xserver: These are no longer needed
+      Change behavior of init_run_daemon()
+      Apply direct_initrc to unconfined_r:unconfined_t
+
+Laurent Bigonville (7):
+      Label /bin/fusermount like /usr/bin/fusermount
+      Allow udev to write in /etc/udev/rules.d
+      Label /etc/selinux/([^/]*/)?modules(/.*)? as semanage_store_t
+      Allow unconfined users to transition to dpkg_t domain
+      Add fcontext for rsyslog pidfile
+      Add fcontext for sshd pidfile and directory used for privsep
+      Move the ifdef at the end of the declaration block
+
+Luis Ressel (10):
+      Conditionally allow ssh to use gpg-agent
+      kernel/files.if: Add files_dontaudit_list_var interface
+      kernel/devices.if: Add dev_rw_loop_control interface
+      system/mount.if: Add mount_read_mount_loopback interface
+      Allow mount_t usage of /dev/loop-control
+      Grant kernel_t necessary permissions for loopback mounts
+      Use xattr-labeling for squashfs.
+      Label fatsort as fsadm_exec_t.
+      Generalize grub2 pattern
+      Label grub2-install as bootloader_exec_t
+
+Matthew Thode (1):
+      Extending support for SELinux on ZFS
+
+Nicolas Iooss (2):
+      Label /usr/lib/sudo/sesh as shell_exec_t
+      Create .gitignore
+
+Sven Vermeulen (7):
+      Add trivnet1 port (8200)
+      Get grub2-install to work properly
+      Support named file transition for fixed_disk_device_t
+      Allow ping to get/set capabilities
+      Extend slim /var/run expression
+      Allow semodule to create symlink in semanage_store_t
+      Allow capabilities for syslog-ng
+
 * Wed Apr 24 2013 Chris PeBenito <selinux@tresys.com> - 2.20130424
 Chris PeBenito (78):
       Mcelog update from Guido Trentalancia.

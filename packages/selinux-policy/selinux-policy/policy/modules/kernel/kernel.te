@@ -1,4 +1,4 @@
-policy_module(kernel, 1.17.1)
+policy_module(kernel, 1.27.1)
 
 ########################################
 #
@@ -25,9 +25,6 @@ attribute kern_unconfined;
 # regular entries in proc
 attribute proc_type;
 
-# attribute for domains which read proc_t
-attribute kernel_system_state_reader;
-
 # sysctls
 attribute sysctl_type;
 
@@ -50,17 +47,9 @@ ifdef(`enable_mls',`
 #
 type kernel_t, can_load_kernmodule;
 domain_base_type(kernel_t)
-mls_process_set_level(kernel_t)
-mls_rangetrans_source(kernel_t)
-mls_trusted_object(kernel_t)
 role system_r types kernel_t;
-# Allow the kernel to run ranged on an MCS system
-ifdef(`enable_mcs',`
-sid kernel gen_context(system_u:system_r:kernel_t,,mcs_systemhighrange)
-')
-ifndef(`enable_mcs',`
 sid kernel gen_context(system_u:system_r:kernel_t,mls_systemhigh)
-')
+
 #
 # DebugFS
 #
@@ -68,7 +57,6 @@ sid kernel gen_context(system_u:system_r:kernel_t,mls_systemhigh)
 type debugfs_t;
 files_mountpoint(debugfs_t)
 fs_type(debugfs_t)
-
 allow debugfs_t self:filesystem associate;
 genfscon debugfs / gen_context(system_u:object_r:debugfs_t,s0)
 
@@ -96,7 +84,11 @@ genfscon proc /fs/openafs gen_context(system_u:object_r:proc_afs_t,s0)
 # kernel message interface
 type proc_kmsg_t, proc_type;
 genfscon proc /kmsg gen_context(system_u:object_r:proc_kmsg_t,mls_systemhigh)
-neverallow ~{ can_receive_kernel_messages kern_unconfined } proc_kmsg_t:file ~getattr;
+neverallow ~{ can_receive_kernel_messages kern_unconfined } proc_kmsg_t:file read;
+
+optional_policy(`
+	init_mountpoint(proc_kmsg_t)
+')
 
 # /proc kcore: inaccessible
 type proc_kcore_t, proc_type;
@@ -106,31 +98,8 @@ genfscon proc /kcore gen_context(system_u:object_r:proc_kcore_t,mls_systemhigh)
 type proc_mdstat_t, proc_type;
 genfscon proc /mdstat gen_context(system_u:object_r:proc_mdstat_t,s0)
 
-type proc_numa_t, proc_type;
-genfscon proc /numatools gen_context(system_u:object_r:proc_numa_t,s0)
-mls_trusted_object(proc_numa_t)
-
 type proc_net_t, proc_type;
 genfscon proc /net gen_context(system_u:object_r:proc_net_t,s0)
-
-type proc_security_t, proc_type;
-genfscon proc /sys/fs/protected_hardlinks gen_context(system_u:object_r:proc_security_t,s0)
-genfscon proc /sys/fs/protected_symlinks gen_context(system_u:object_r:proc_security_t,s0)
-genfscon proc /sys/fs/suid_dumpable gen_context(system_u:object_r:proc_security_t,s0)
-genfscon proc /sys/kernel/dmesg_restrict gen_context(system_u:object_r:proc_security_t,s0)
-genfscon proc /sys/kernel/kptr_restrict gen_context(system_u:object_r:proc_security_t,s0)
-genfscon proc /sys/kernel/modules_disabled gen_context(system_u:object_r:proc_security_t,s0)
-genfscon proc /sys/kernel/randomize_va_space gen_context(system_u:object_r:proc_security_t,s0)
-
-type usermodehelper_t, proc_type, sysctl_type;
-typealias usermodehelper_t alias sysctl_hotplug_t;
-typealias usermodehelper_t alias sysctl_modprobe_t;
-dev_associate_sysfs(usermodehelper_t)
-genfscon proc /sys/kernel/core_pattern gen_context(system_u:object_r:usermodehelper_t,s0)
-genfscon proc /sys/kernel/hotplug gen_context(system_u:object_r:usermodehelper_t,s0)
-genfscon proc /sys/kernel/modprobe gen_context(system_u:object_r:usermodehelper_t,s0)
-genfscon proc /sys/kernel/poweroff_cmd gen_context(system_u:object_r:usermodehelper_t,s0)
-genfscon proc /sys/kernel/usermodehelper gen_context(system_u:object_r:usermodehelper_t,s0)
 
 type proc_xen_t, proc_type;
 files_mountpoint(proc_xen_t)
@@ -167,6 +136,18 @@ genfscon proc /sys/fs gen_context(system_u:object_r:sysctl_fs_t,s0)
 type sysctl_kernel_t, sysctl_type;
 genfscon proc /sys/kernel gen_context(system_u:object_r:sysctl_kernel_t,s0)
 
+# /sys/kernel/ns_last_pid file
+type sysctl_kernel_ns_last_pid_t, sysctl_type;
+genfscon proc /sys/kernel/ns_last_pid gen_context(system_u:object_r:sysctl_kernel_ns_last_pid_t,s0)
+
+# /proc/sys/kernel/modprobe file
+type sysctl_modprobe_t, sysctl_type;
+genfscon proc /sys/kernel/modprobe gen_context(system_u:object_r:sysctl_modprobe_t,s0)
+
+# /proc/sys/kernel/hotplug file
+type sysctl_hotplug_t, sysctl_type;
+genfscon proc /sys/kernel/hotplug gen_context(system_u:object_r:sysctl_hotplug_t,s0)
+
 # /proc/sys/net directory and files
 type sysctl_net_t, sysctl_type;
 genfscon proc /sys/net gen_context(system_u:object_r:sysctl_net_t,s0)
@@ -179,7 +160,6 @@ genfscon proc /sys/net/unix gen_context(system_u:object_r:sysctl_net_unix_t,s0)
 type sysctl_vm_t, sysctl_type;
 genfscon proc /sys/vm gen_context(system_u:object_r:sysctl_vm_t,s0)
 
-# /proc/sys/vm/overcommit_memory
 type sysctl_vm_overcommit_t, sysctl_type;
 genfscon proc /sys/vm/overcommit_memory gen_context(system_u:object_r:sysctl_vm_overcommit_t,s0)
 
@@ -192,17 +172,17 @@ genfscon proc /sys/dev gen_context(system_u:object_r:sysctl_dev_t,s0)
 # Objects that have no known labeling information or that
 # have labels that are no longer valid are treated as having this type.
 #
+# Mountpoint permissions are for the case when a file has been assigned
+# an extended attribute for the first time (old file_t).  Directories
+# where filesystems are mounted may never get relabeled.
+#
 type unlabeled_t;
-fs_associate(unlabeled_t)
-sid unlabeled gen_context(system_u:object_r:unlabeled_t,mls_systemhigh)
-allow unlabeled_t self:filesystem associate;
-
-# Need the following because we are type alias of file_t.
-files_mountpoint(unlabeled_t)
-#files_base_file(unlabeled_t)
 kernel_rootfs_mountpoint(unlabeled_t)
+files_mountpoint(unlabeled_t)
+fs_associate(unlabeled_t)
 sid file gen_context(system_u:object_r:unlabeled_t,s0)
-typealias unlabeled_t alias file_t;
+sid unlabeled gen_context(system_u:object_r:unlabeled_t,mls_systemhigh)
+neverallow * unlabeled_t:file entrypoint;
 
 # These initial sids are no longer used, and can be removed:
 sid any_socket		gen_context(system_u:object_r:unlabeled_t,mls_systemhigh)
@@ -227,9 +207,8 @@ sid tcp_socket		gen_context(system_u:object_r:unlabeled_t,mls_systemhigh)
 # kernel local policy
 #
 
-allow kernel_t self:capability2 mac_admin;
-allow kernel_t self:capability ~sys_module;
-allow kernel_t self:process ~{ ptrace setcurrent setexec setfscreate setrlimit execmem execstack execheap };
+allow kernel_t self:capability { chown dac_override dac_read_search fowner fsetid kill setgid setuid setpcap linux_immutable net_bind_service net_broadcast net_admin net_raw ipc_lock ipc_owner sys_rawio sys_chroot sys_ptrace sys_pacct sys_admin sys_boot sys_nice sys_resource sys_time sys_tty_config mknod lease audit_write audit_control setfcap };
+allow kernel_t self:process { transition signal_perms getsched setsched getsession getpgid setpgid getcap setcap share getattr noatsecure siginh rlimitinh dyntransition setkeycreate setsockcreate getrlimit };
 allow kernel_t self:shm create_shm_perms;
 allow kernel_t self:sem create_sem_perms;
 allow kernel_t self:msg { send receive };
@@ -261,17 +240,23 @@ allow kernel_t sysctl_kernel_t:dir list_dir_perms;
 allow kernel_t sysctl_kernel_t:file read_file_perms;
 allow kernel_t sysctl_t:dir list_dir_perms;
 
+allow kernel_t sysctl_kernel_ns_last_pid_t:file read_file_perms;
+
 # Other possible mount points for the root fs are in files
 allow kernel_t unlabeled_t:dir mounton;
 # Kernel-generated traffic e.g., TCP resets on
 # connections with invalidated labels:
 allow kernel_t unlabeled_t:packet send;
 
-# Allow unlabeled network traffic
-#allow unlabeled_t unlabeled_t:packet { forward_in forward_out };
-#corenet_in_generic_if(unlabeled_t)
-#corenet_in_generic_node(unlabeled_t)
+kernel_mounton_proc_dirs(kernel_t)
+kernel_request_load_module(kernel_t)
 
+# Allow unlabeled network traffic
+allow unlabeled_t unlabeled_t:packet { forward_in forward_out };
+corenet_in_generic_if(unlabeled_t)
+corenet_in_generic_node(unlabeled_t)
+
+corenet_all_recvfrom_unlabeled(kernel_t)
 corenet_all_recvfrom_netlabel(kernel_t)
 # Kernel-generated traffic e.g., ICMP replies:
 corenet_raw_sendrecv_all_if(kernel_t)
@@ -282,31 +267,55 @@ corenet_tcp_sendrecv_all_if(kernel_t)
 corenet_tcp_sendrecv_all_nodes(kernel_t)
 corenet_raw_send_generic_node(kernel_t)
 corenet_send_all_packets(kernel_t)
-corenet_filetrans_all_named_dev(kernel_t)
 
+corenet_ib_access_all_pkeys(kernel_t)
+corenet_ib_access_unlabeled_pkeys(kernel_t)
+corenet_ib_manage_subnet_all_endports(kernel_t)
+corenet_ib_manage_subnet_unlabeled_endports(kernel_t)
+
+dev_mounton_sysfs(kernel_t)
 dev_read_sysfs(kernel_t)
 dev_search_usbfs(kernel_t)
 # devtmpfs handling:
 dev_create_generic_dirs(kernel_t)
 dev_delete_generic_dirs(kernel_t)
-dev_create_all_blk_files(kernel_t)
-dev_delete_all_blk_files(kernel_t)
-dev_create_all_chr_files(kernel_t)
-dev_delete_all_chr_files(kernel_t)
+dev_create_generic_blk_files(kernel_t)
+dev_delete_generic_blk_files(kernel_t)
+dev_create_generic_chr_files(kernel_t)
+dev_delete_generic_chr_files(kernel_t)
 dev_mounton(kernel_t)
-dev_filetrans_all_named_dev(kernel_t)
-storage_filetrans_all_named_dev(kernel_t)
-term_filetrans_all_named_dev(kernel_t)
+dev_delete_generic_symlinks(kernel_t)
+dev_rw_generic_chr_files(kernel_t)
+dev_setattr_generic_blk_files(kernel_t)
+dev_setattr_generic_chr_files(kernel_t)
+dev_getattr_fs(kernel_t)
+dev_getattr_sysfs(kernel_t)
+dev_write_kmsg(kernel_t)
 
 # Mount root file system. Used when loading a policy
 # from initrd, then mounting the root filesystem
 fs_mount_all_fs(kernel_t)
 fs_unmount_all_fs(kernel_t)
 
+fs_getattr_tmpfs(kernel_t)
+fs_getattr_tmpfs_dirs(kernel_t)
+fs_manage_tmpfs_dirs(kernel_t)
+fs_manage_tmpfs_files(kernel_t)
+fs_manage_tmpfs_sockets(kernel_t)
+fs_delete_tmpfs_symlinks(kernel_t)
+
+mls_rangetrans_source(kernel_t)
+mls_process_set_level(kernel_t)
+
+selinux_getattr_fs(kernel_t)
 selinux_load_policy(kernel_t)
 
-term_use_all_terms(kernel_t)
-term_use_ptmx(kernel_t)
+term_getattr_pty_fs(kernel_t)
+term_use_console(kernel_t)
+term_use_generic_ptys(kernel_t)
+
+# for kdevtmpfs
+term_setattr_unlink_unallocated_ttys(kernel_t)
 
 corecmd_exec_shell(kernel_t)
 corecmd_list_bin(kernel_t)
@@ -316,44 +325,52 @@ corecmd_exec_bin(kernel_t)
 domain_signal_all_domains(kernel_t)
 domain_search_all_domains_state(kernel_t)
 
+files_getattr_rootfs(kernel_t)
+files_manage_root_dir(kernel_t)
+files_delete_root_files(kernel_t)
+files_exec_root_files(kernel_t)
+files_delete_root_symlinks(kernel_t)
+files_delete_root_chr_files(kernel_t)
 files_list_root(kernel_t)
 files_list_etc(kernel_t)
+files_getattr_etc_runtime_dirs(kernel_t)
+files_mounton_etc_runtime_dirs(kernel_t)
 files_list_home(kernel_t)
 files_read_usr_files(kernel_t)
-files_manage_mounttab(kernel_t)
-files_manage_generic_spool_dirs(kernel_t)
 
 mcs_process_set_categories(kernel_t)
-mcs_file_read_all(kernel_t)
-mcs_file_write_all(kernel_t)
-mcs_socket_write_all_levels(kernel_t)
 
-mls_process_read_up(kernel_t)
-mls_process_write_down(kernel_t)
-mls_file_downgrade(kernel_t)
+mls_process_read_all_levels(kernel_t)
+mls_process_write_all_levels(kernel_t)
 mls_file_write_all_levels(kernel_t)
 mls_file_read_all_levels(kernel_t)
-mls_socket_write_all_levels(kernel_t) 
-mls_fd_share_all_levels(kernel_t) 
-mls_fd_use_all_levels(kernel_t)
-mls_process_set_level(kernel_t)
 
 ifdef(`distro_redhat',`
 	# Bugzilla 222337
 	fs_rw_tmpfs_chr_files(kernel_t)
 ')
 
+ifdef(`init_systemd',`
+	optional_policy(`
+		dev_manage_input_dev(kernel_t)
+		dev_filetrans_input_dev(kernel_t)
+	')
 
-optional_policy(`
-	apache_filetrans_home_content(kernel_t)
+	optional_policy(`
+		selinux_compute_create_context(kernel_t)
+	')
+
+	optional_policy(`
+		storage_dev_filetrans_fixed_disk(kernel_t)
+		storage_setattr_fixed_disk_dev(kernel_t)
+		storage_create_fixed_disk_dev(kernel_t)
+		storage_delete_fixed_disk_dev(kernel_t)
+	')
 ')
 
 optional_policy(`
-	gnome_filetrans_home_content(kernel_t)
-')
-
-optional_policy(`
-	kerberos_filetrans_home_content(kernel_t)
+	# loop devices
+	fstools_use_fds(kernel_t)
 ')
 
 optional_policy(`
@@ -362,7 +379,6 @@ optional_policy(`
 
 optional_policy(`
 	init_sigchld(kernel_t)
-	init_dyntrans(kernel_t)
 ')
 
 optional_policy(`
@@ -371,20 +387,13 @@ optional_policy(`
 ')
 
 optional_policy(`
-	logging_send_syslog_msg(kernel_t)
 	logging_manage_generic_logs(kernel_t)
+	logging_send_syslog_msg(kernel_t)
 ')
 
 optional_policy(`
-	mta_filetrans_home_content(kernel_t)
-')
-
-optional_policy(`
-	ssh_filetrans_home_content(kernel_t)
-')
-
-optional_policy(`
-	userdom_user_home_dir_filetrans_user_home_content(kernel_t, { file dir })
+	mount_use_fds(kernel_t)
+	mount_read_loopback_files(kernel_t)
 ')
 
 optional_policy(`
@@ -392,8 +401,15 @@ optional_policy(`
 ')
 
 optional_policy(`
-    plymouthd_create_log(kernel_t)
-    plymouthd_filetrans_named_content(kernel_t)
+	dev_ioctl_dri_dev(kernel_t)
+
+	plymouthd_delete_pid_files(kernel_t)
+	plymouthd_read_pid_files(kernel_t)
+	plymouthd_read_spool_files(kernel_t)
+	plymouthd_rw_lib_files(kernel_t)
+
+	term_use_ptmx(kernel_t)
+	term_use_unallocated_ttys(kernel_t)
 ')
 
 optional_policy(`
@@ -406,7 +422,6 @@ optional_policy(`
 	# to just give it everything.
 	corenet_udp_sendrecv_generic_if(kernel_t)
 	corenet_udp_sendrecv_generic_node(kernel_t)
-	corenet_udp_sendrecv_all_ports(kernel_t)
 	corenet_udp_bind_generic_node(kernel_t)
 	corenet_sendrecv_portmap_client_packets(kernel_t)
 	corenet_sendrecv_generic_server_packets(kernel_t)
@@ -417,7 +432,14 @@ optional_policy(`
 
 	sysnet_read_config(kernel_t)
 
+	rpc_manage_nfs_ro_content(kernel_t)
+	rpc_manage_nfs_rw_content(kernel_t)
+	rpc_tcp_rw_nfs_sockets(kernel_t)
 	rpc_udp_rw_nfs_sockets(kernel_t)
+
+	optional_policy(`
+		gssproxy_stream_connect(kernel_t)
+	')
 
 	tunable_policy(`nfs_export_all_ro',`
 		fs_getattr_noxattr_fs(kernel_t)
@@ -425,7 +447,9 @@ optional_policy(`
 		fs_read_noxattr_fs_files(kernel_t)
 		fs_read_noxattr_fs_symlinks(kernel_t)
 
-		files_read_non_security_files(kernel_t)
+		files_list_non_auth_dirs(kernel_t)
+		files_read_non_auth_files(kernel_t)
+		files_read_non_auth_symlinks(kernel_t)
 	')
 
 	tunable_policy(`nfs_export_all_rw',`
@@ -434,26 +458,18 @@ optional_policy(`
 		fs_read_noxattr_fs_files(kernel_t)
 		fs_read_noxattr_fs_symlinks(kernel_t)
 
-		files_manage_non_security_files(kernel_t)
+		files_manage_non_auth_files(kernel_t)
 	')
 ')
 
 optional_policy(`
 	seutil_read_config(kernel_t)
 	seutil_read_bin_policy(kernel_t)
+	seutil_domtrans_setfiles(kernel_t)
 ')
 
 optional_policy(`
 	unconfined_domain_noaudit(kernel_t)
-')
-
-optional_policy(`
-	virt_filetrans_home_content(kernel_t)
-')
-
-optional_policy(`
-	xserver_xdm_manage_spool(kernel_t)
-	xserver_filetrans_home_content(kernel_t)
 ')
 
 ########################################
@@ -476,9 +492,14 @@ optional_policy(`
 
 if( ! secure_mode_insmod ) {
 	allow can_load_kernmodule self:capability sys_module;
+	allow can_load_kernmodule self:system module_load;
+
+	files_load_kernel_modules(can_load_kernmodule)
 
 	# load_module() calls stop_machine() which
 	# calls sched_setscheduler()
+	# gt: there seems to be no trace of the above, at
+	# least in kernel versions greater than 2.6.37...
 	allow can_load_kernmodule self:capability sys_nice;
 	kernel_setsched(can_load_kernmodule)
 }
@@ -488,35 +509,23 @@ if( ! secure_mode_insmod ) {
 # Rules for unconfined acccess to this module
 #
 
-allow kern_unconfined proc_type:{ dir file lnk_file } *;
+allow kern_unconfined proc_type:dir { manage_dir_perms relabelfrom relabelto append map execute quotaon mounton audit_access execmod watch };
+allow kern_unconfined proc_type:lnk_file { manage_lnk_file_perms relabelfrom relabelto append map execute quotaon mounton open audit_access execmod watch };
+allow kern_unconfined proc_type:file { manage_file_perms relabelfrom relabelto map execute quotaon mounton execute_no_trans audit_access watch };
 
-allow kern_unconfined sysctl_type:{ dir file } *;
+allow kern_unconfined sysctl_type:dir { manage_dir_perms relabelfrom relabelto append map execute quotaon mounton audit_access execmod watch };
+allow kern_unconfined sysctl_type:file { manage_file_perms relabelfrom relabelto map execute quotaon mounton execute_no_trans audit_access watch };
 
-allow kern_unconfined kernel_t:system *;
+allow kern_unconfined kernel_t:system { ipc_info syslog_read syslog_mod syslog_console module_request module_load halt reboot status start stop enable disable reload };
 
-allow kern_unconfined unlabeled_t:dir_file_class_set *;
-allow kern_unconfined unlabeled_t:filesystem *;
-allow kern_unconfined unlabeled_t:association *;
-allow kern_unconfined unlabeled_t:packet *;
-allow kern_unconfined unlabeled_t:process ~{ ptrace transition dyntransition execmem execstack execheap };
-
-gen_require(`
-	bool secure_mode_insmod;
-')
-
-if( ! secure_mode_insmod ) {
-    allow can_load_kernmodule self:capability sys_module;
-    # load_module() calls stop_machine() which
-    # calls sched_setscheduler()
-    allow can_load_kernmodule self:capability sys_nice;
-    kernel_setsched(can_load_kernmodule)
-}
-
-#######################################
-#
-# Kernel system state reader policy
-#
-
-read_files_pattern(kernel_system_state_reader, proc_t, proc_t)
-read_lnk_files_pattern(kernel_system_state_reader, proc_t, proc_t)
-list_dirs_pattern(kernel_system_state_reader, proc_t, proc_t)
+allow kern_unconfined unlabeled_t:file { manage_file_perms relabelfrom relabelto map execute quotaon mounton execute_no_trans audit_access watch };
+allow kern_unconfined unlabeled_t:lnk_file  { manage_lnk_file_perms relabelfrom relabelto append map execute quotaon mounton open audit_access execmod watch };
+allow kern_unconfined unlabeled_t:sock_file { manage_sock_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
+allow kern_unconfined unlabeled_t:fifo_file { manage_fifo_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
+allow kern_unconfined unlabeled_t:blk_file { manage_blk_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
+allow kern_unconfined unlabeled_t:chr_file { manage_chr_file_perms relabelfrom relabelto map execute quotaon mounton audit_access watch };
+allow kern_unconfined unlabeled_t:dir { manage_dir_perms relabelfrom relabelto append map execute quotaon mounton add_name remove_name reparent search rmdir audit_access execmod watch };
+allow kern_unconfined unlabeled_t:filesystem { mount remount unmount getattr relabelfrom relabelto associate quotamod quotaget watch };
+allow kern_unconfined unlabeled_t:association { sendto recvfrom setcontext polmatch };
+allow kern_unconfined unlabeled_t:packet { send recv relabelto forward_in forward_out };
+allow kern_unconfined unlabeled_t:process { fork signal_perms ptrace getsched setsched getsession getpgid setpgid getcap setcap share getattr setexec setfscreate noatsecure siginh setrlimit rlimitinh setcurrent setkeycreate setsockcreate getrlimit };

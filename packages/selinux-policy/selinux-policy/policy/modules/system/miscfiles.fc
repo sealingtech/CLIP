@@ -9,15 +9,16 @@ ifdef(`distro_gentoo',`
 # /etc
 #
 /etc/avahi/etc/localtime --	gen_context(system_u:object_r:locale_t,s0)
-/etc/docker/certs\.d(/.*)?          gen_context(system_u:object_r:cert_t,s0)
-/etc/httpd/alias(/.*)?	        gen_context(system_u:object_r:cert_t,s0)
-/etc/localtime			gen_context(system_u:object_r:locale_t,s0)
-/etc/locale.conf	--	gen_context(system_u:object_r:locale_t,s0)
+/etc/httpd/alias/[^/]*\.db(\.[^/]*)* -- gen_context(system_u:object_r:cert_t,s0)
+/etc/localtime		--	gen_context(system_u:object_r:locale_t,s0)
 /etc/pki(/.*)?			gen_context(system_u:object_r:cert_t,s0)
+/etc/pki/.*/private(/.*)?	gen_context(system_u:object_r:tls_privkey_t,s0)
 /etc/ssl(/.*)?			gen_context(system_u:object_r:cert_t,s0)
-/etc/ipa/nssdb(/.*)?		gen_context(system_u:object_r:cert_t,s0)
 /etc/timezone		--	gen_context(system_u:object_r:locale_t,s0)
-/etc/vconsole.conf	--	gen_context(system_u:object_r:locale_t,s0)
+
+ifdef(`distro_debian',`
+/etc/locale\.alias	--	gen_context(system_u:object_r:locale_t,s0)
+')
 
 ifdef(`distro_redhat',`
 /etc/sysconfig/clock	--	gen_context(system_u:object_r:locale_t,s0)
@@ -37,28 +38,28 @@ ifdef(`distro_redhat',`
 #
 # /usr
 #
+/usr/(.*/)?man		-d	gen_context(system_u:object_r:man_t,s0)
+/usr/(.*/)?man/.*		gen_context(system_u:object_r:man_t,s0)
+
 /usr/lib/locale(/.*)?		gen_context(system_u:object_r:locale_t,s0)
 
 /usr/lib/perl5/man(/.*)?	gen_context(system_u:object_r:man_t,s0)
 
-/usr/man(/.*)?			gen_context(system_u:object_r:man_t,s0)
+/usr/local/share/fonts(/.*)?	gen_context(system_u:object_r:fonts_t,s0)
 
-/usr/share/ca-certificates(/.*)?	gen_context(system_u:object_r:cert_t,s0)
 /usr/share/fonts(/.*)?		gen_context(system_u:object_r:fonts_t,s0)
 /usr/share/ghostscript/fonts(/.*)? gen_context(system_u:object_r:fonts_t,s0)
-/usr/share/locale(/.*)?		gen_context(system_u:object_r:locale_t,s0)
-/usr/share/man(/.*)?		gen_context(system_u:object_r:man_t,s0)
-/usr/share/pki/ca-certificates(/.*)?	gen_context(system_u:object_r:cert_t,s0)
-/usr/share/pki/ca-trust-source(/.*)?    gen_context(system_u:object_r:cert_t,s0)
-/usr/share/ssl/certs(/.*)?	gen_context(system_u:object_r:cert_t,s0)
-/usr/share/ssl/private(/.*)?	gen_context(system_u:object_r:cert_t,s0)
+/usr/share/texmf[^/]*/fonts(/.*)? gen_context(system_u:object_r:fonts_t,s0)
 /usr/share/X11/fonts(/.*)?	gen_context(system_u:object_r:fonts_t,s0)
+
+/usr/share/locale(/.*)?		gen_context(system_u:object_r:locale_t,s0)
 /usr/share/X11/locale(/.*)?	gen_context(system_u:object_r:locale_t,s0)
 /usr/share/zoneinfo(/.*)?	gen_context(system_u:object_r:locale_t,s0)
 
-/usr/X11R6/lib/X11/fonts(/.*)?	gen_context(system_u:object_r:fonts_t,s0)
+/usr/share/ssl/certs(/.*)?	gen_context(system_u:object_r:cert_t,s0)
+/usr/share/ssl/private(/.*)?	gen_context(system_u:object_r:cert_t,s0)
 
-/usr/X11R6/man(/.*)?		gen_context(system_u:object_r:man_t,s0)
+/usr/X11R6/lib/X11/fonts(/.*)?	gen_context(system_u:object_r:fonts_t,s0)
 
 ifdef(`distro_gentoo',`
 /usr/share/misc/(pci|usb)\.ids -- gen_context(system_u:object_r:hwdata_t,s0)
@@ -77,7 +78,7 @@ ifdef(`distro_redhat',`
 
 /var/cache/fontconfig(/.*)?	gen_context(system_u:object_r:fonts_cache_t,s0)
 /var/cache/fonts(/.*)?		gen_context(system_u:object_r:tetex_data_t,s0)
-
+/var/cache/man(/.*)?		gen_context(system_u:object_r:man_cache_t,s0)
 
 /var/named/chroot/etc/pki(/.*)? gen_context(system_u:object_r:cert_t,s0)
 
@@ -90,7 +91,6 @@ ifdef(`distro_debian',`
 ')
 
 ifdef(`distro_redhat',`
-/var/named/chroot/etc/localtime	--	gen_context(system_u:object_r:locale_t,s0)
 /var/empty/sshd/etc/localtime -- gen_context(system_u:object_r:locale_t,s0)
 /var/spool/postfix/etc/localtime -- gen_context(system_u:object_r:locale_t,s0)
 ')

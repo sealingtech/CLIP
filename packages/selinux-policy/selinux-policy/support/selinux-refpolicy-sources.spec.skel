@@ -3,7 +3,7 @@
 %define FILE_CON ${POLICYDIR}/contexts/files/file_contexts
 %define FC_PRE ${FILE_CON}.pre
 
-Summary: SELinux Reference Policy configuration source files 
+Summary: SELinux Reference Policy configuration source files
 Name: selinux-refpolicy-sources
 Version: REFPOL_VERSION
 Release: 1
@@ -11,8 +11,10 @@ License: GPL
 Group: System Environment/Base
 PreReq: m4 make policycoreutils kernel gcc
 Requires: checkpolicy >= 1.33.1
-Requires: python make m4
-BuildRequires: make m4 python
+Requires: python >= 3.4
+Requires: make m4
+BuildRequires: make m4
+BuildRequires: python >= 3.4
 Obsoletes: policy-sources
 Source: refpolicy-%{version}.tar.bz2
 Url: http://oss.tresys.com/projects/refpolicy

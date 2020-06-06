@@ -40,7 +40,7 @@ CONFIG_BUILD_SELINUX_POL_TYPE ?= mcs
 # e.g., selinux-policy-apache
 # Listing a module here will also cause it to be enabled even if it
 # disabled in modules.conf.
-SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser ec2ssh cyrus snmp ntp bind sasl amavis denyhosts postgresql rhsmcertd logwatch raid sssd openvpn rpcbind gssproxy rpc kerberos sendmail oddjob certmonger freeipmi vmtools apcupsd nagios nut mrtg rhnsd xserver devicekit rtkit accountsd colord container geoclue rngd
+SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser cyrus snmp ntp bind sasl amavis denyhosts postgresql rhsmcertd logwatch raid sssd openvpn rpcbind gssproxy rpc kerberos sendmail oddjob certmonger apcupsd nagios nut mrtg xserver devicekit rtkit accountsd colord geoclue rngd
 
 # the filename of the tarball
 TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
@@ -113,7 +113,7 @@ endif
 # include or exclude by adding or removing
 # selinux-policy-$(CONFIG_BUILD_SELINUX_POL_TYPE)-toor
 # from the kickstart, or in kickstart/includes/standard-packages.
-SEPARATE_PKGS += toor
+#SEPARATE_PKGS += toor
 
 ENABLE_MODULES := $(ENABLE_MODULES) $(SEPARATE_PKGS)
 

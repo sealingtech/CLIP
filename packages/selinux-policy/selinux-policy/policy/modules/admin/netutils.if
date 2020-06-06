@@ -42,7 +42,6 @@ interface(`netutils_run',`
 	')
 
 	netutils_domtrans($1)
-	allow $1 netutils_t:process { signal sigkill };
 	role $2 types netutils_t;
 ')
 
@@ -100,7 +99,6 @@ interface(`netutils_domtrans_ping',`
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, ping_exec_t, ping_t)
-    allow $1 ping_exec_t:file map;
 ')
 
 ########################################
@@ -163,7 +161,6 @@ interface(`netutils_run_ping',`
 
 	netutils_domtrans_ping($1)
 	role $2 types ping_t;
-	allow $1 ping_t:process { signal sigkill };
 ')
 
 ########################################
@@ -186,14 +183,13 @@ interface(`netutils_run_ping',`
 interface(`netutils_run_ping_cond',`
 	gen_require(`
 		type ping_t;
-		bool selinuxuser_ping;
+		bool user_ping;
 	')
 
 	role $2 types ping_t;
 
-	if ( selinuxuser_ping ) {
+	if ( user_ping ) {
 		netutils_domtrans_ping($1)
-		allow $1 ping_t:process { signal sigkill };
 	}
 ')
 
@@ -258,7 +254,6 @@ interface(`netutils_run_traceroute',`
 	')
 
 	netutils_domtrans_traceroute($1)
-	allow $1 traceroute_t:process { signal sigkill };
 	role $2 types traceroute_t;
 ')
 
@@ -282,14 +277,13 @@ interface(`netutils_run_traceroute',`
 interface(`netutils_run_traceroute_cond',`
 	gen_require(`
 		type traceroute_t;
-		bool selinuxuser_ping;
+		bool user_ping;
 	')
 
 	role $2 types traceroute_t;
 
-	if( selinuxuser_ping ) {
+	if( user_ping ) {
 		netutils_domtrans_traceroute($1)
-		allow $1 traceroute_t:process { signal sigkill };
 	}
 ')
 

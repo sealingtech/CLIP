@@ -5,10 +5,10 @@ INSTALL ?= install
 M4 ?= m4
 SED ?= sed
 EINFO ?= echo
-PYTHON ?= python
+PYTHON ?= python3
 CUT ?= cut
 
-NAME ?= $(shell $(AWK) -F= '/^SELINUXTYPE/{ print $$2 }' /etc/selinux/config)
+NAME ?= $(strip $(shell $(AWK) -F= '/^SELINUXTYPE/{ print $$2 }' /etc/selinux/config))
 SHAREDIR ?= /usr/share/selinux
 HEADERDIR ?= $(SHAREDIR)/$(NAME)/include
 
@@ -26,6 +26,7 @@ XMLLINT := $(BINDIR)/xmllint
 # set default build options if missing
 TYPE ?= standard
 DIRECT_INITRC ?= n
+POLY ?= n
 QUIET ?= y
 
 genxml := $(PYTHON) $(HEADERDIR)/support/segenxml.py
@@ -57,12 +58,20 @@ ifneq ($(DISTRO),)
 	M4PARAM += -D distro_$(DISTRO)
 endif
 
+ifeq "$(SYSTEMD)" "y"
+	M4PARAM += -D init_systemd
+endif
+
 ifeq ($(DIRECT_INITRC),y)
 	M4PARAM += -D direct_sysadm_daemon
 endif
 
 ifeq "$(UBAC)" "y"
 	M4PARAM += -D enable_ubac
+endif
+
+ifneq "$(CUSTOM_BUILDOPT)" ""
+	M4PARAM += $(foreach opt,$(CUSTOM_BUILDOPT),-D $(opt))
 endif
 
 # default MLS/MCS sensitivity and category settings.
@@ -79,11 +88,11 @@ M4PARAM += -D hide_broken_symptoms -D mls_num_sens=$(MLS_SENS) -D mls_num_cats=$
 # policy headers
 m4support = $(wildcard $(HEADERDIR)/support/*.spt)
 
-header_layers := $(filter-out $(HEADERDIR)/support,$(shell find $(wildcard $(HEADERDIR)/*) -maxdepth 0 -type d))
+header_layers := $(filter-out $(HEADERDIR)/support,$(shell find $(HEADERDIR)/* -maxdepth 0 -type d))
 header_xml := $(addsuffix .xml,$(header_layers))
 header_interfaces := $(foreach layer,$(header_layers),$(wildcard $(layer)/*.if))
 
-local_layers := $(filter-out CVS tmp $(docs),$(shell find $(wildcard *) -maxdepth 0 -type d))
+local_layers := $(filter-out CVS tmp $(docs),$(shell find * -maxdepth 0 -type d))
 local_xml := $(addprefix tmp/, $(addsuffix .xml,$(local_layers)))
 
 all_layer_names := $(sort $(notdir $(header_layers) $(local_layers)))
@@ -157,6 +166,7 @@ tmp/%.mod: $(m4support) tmp/all_interfaces.conf %.te
 	$(verbose) $(CHECKMODULE) -m $(@:.mod=.tmp) -o $@
 
 tmp/%.mod.fc: $(m4support) %.fc
+	@test -d $(@D) || mkdir -p $(@D)
 	$(verbose) $(M4) $(M4PARAM) $^ > $@
 
 %.pp: tmp/%.mod tmp/%.mod.fc
@@ -173,7 +183,7 @@ tmp/all_interfaces.conf: $(m4support) $(header_interfaces) $(detected_ifs)
 # so users dont have to make empty .fc and .if files
 $(detected_fcs):
 	@touch $@
-	
+
 $(detected_ifs):
 	@echo "## <summary>$(basename $(@D))</summary>" > $@
 

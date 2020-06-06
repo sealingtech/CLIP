@@ -1,4 +1,4 @@
-policy_module(devices, 1.15.0)
+policy_module(devices, 1.26.5)
 
 ########################################
 #
@@ -9,18 +9,22 @@ attribute device_node;
 attribute memory_raw_read;
 attribute memory_raw_write;
 attribute devices_unconfined_type;
+attribute sysfs_types;
 
 #
 # device_t is the type of /dev.
 #
 type device_t;
 fs_associate_tmpfs(device_t)
-files_base_file(device_t)
+files_type(device_t)
 files_mountpoint(device_t)
 files_associate_tmp(device_t)
-fs_type(device_t)
+fs_xattr_type(device_t)
 fs_use_trans devtmpfs gen_context(system_u:object_r:device_t,s0);
-dev_node(device_t)
+
+optional_policy(`
+	systemd_tmpfilesd_managed(device_t, fifo_file)
+')
 
 #
 # Type for /dev/agpgart
@@ -31,8 +35,8 @@ dev_node(agp_device_t)
 #
 # Type for /dev/apm_bios
 #
-type apm_bios_t;
-dev_node(apm_bios_t)
+type acpi_bios_t;
+dev_node(acpi_bios_t)
 
 #
 # Type for /dev/autofs
@@ -43,6 +47,9 @@ dev_node(autofs_device_t)
 type cardmgr_dev_t;
 dev_node(cardmgr_dev_t)
 files_tmp_file(cardmgr_dev_t)
+
+type cachefiles_device_t;
+dev_node(cachefiles_device_t)
 
 #
 # clock_device_t is the type of
@@ -58,17 +65,28 @@ type cpu_device_t;
 dev_node(cpu_device_t)
 
 #
+# /sys/devices/system/cpu/online device
+#
+type cpu_online_t, sysfs_types;
+files_type(cpu_online_t)
+dev_associate_sysfs(cpu_online_t)
+genfscon sysfs /devices/system/cpu/online gen_context(system_u:object_r:cpu_online_t,s0)
+
+#
 # Type for /dev/crash
 #
 type crash_device_t;
 dev_node(crash_device_t)
 
-type ecryptfs_device_t;
-dev_node(ecryptfs_device_t)
-
 # for the IBM zSeries z90crypt hardware ssl accelorator
 type crypt_device_t;
 dev_node(crypt_device_t)
+
+#
+# Type for /dev/dax*.*
+#
+type dax_device_t;
+dev_node(dax_device_t)
 
 #
 # dlm_misc_device_t is the type of /dev/misc/dlm.*
@@ -89,22 +107,32 @@ type framebuf_device_t;
 dev_node(framebuf_device_t)
 
 #
+# Type for Dell (others?) freefall detection device /dev/freefall
+#
+type freefall_device_t;
+dev_node(freefall_device_t)
+
+#
+# Type for GPIO chip /dev/gpiochip*
+#
+type gpiochip_device_t;
+dev_node(gpiochip_device_t)
+
+#
 # Type for /dev/ipmi/0
 #
 type ipmi_device_t;
 dev_node(ipmi_device_t)
 
 #
-# Type for /dev/infiniband
-#
-type infiniband_device_t;
-dev_node(infiniband_device_t)
-
-#
 # Type for /dev/kmsg
 #
 type kmsg_device_t;
 dev_node(kmsg_device_t)
+
+optional_policy(`
+	init_mountpoint(kmsg_device_t)
+')
 
 #
 # ksm_device_t is the type of /dev/ksm
@@ -118,7 +146,6 @@ dev_node(ksm_device_t)
 #
 type kvm_device_t;
 dev_node(kvm_device_t)
-mls_trusted_object(kvm_device_t)
 
 #
 # Type for /dev/lirc
@@ -126,9 +153,6 @@ mls_trusted_object(kvm_device_t)
 type lirc_device_t;
 dev_node(lirc_device_t)
 
-#
-# Type for /dev/mapper/control
-#
 type loop_control_device_t;
 dev_node(loop_control_device_t)
 
@@ -161,12 +185,6 @@ type modem_device_t;
 dev_node(modem_device_t)
 
 #
-# A general type for monitor devices.
-#
-type monitor_device_t;
-dev_node(monitor_device_t)
-
-#
 # A more general type for mouse devices.
 #
 type mouse_device_t;
@@ -178,12 +196,6 @@ dev_node(mouse_device_t)
 type mtrr_device_t;
 dev_node(mtrr_device_t)
 genfscon proc /mtrr gen_context(system_u:object_r:mtrr_device_t,s0)
-
-#
-# network control devices
-#
-type netcontrol_device_t;
-dev_node(netcontrol_device_t)
 
 #
 # null_device_t is the type of /dev/null.
@@ -200,16 +212,17 @@ type nvram_device_t;
 dev_node(nvram_device_t)
 
 #
-# Type for controller device nodes
-#
-type nvme_device_t;
-dev_node(nvme_device_t)
-
-#
 # Type for /dev/pmu
 #
 type power_device_t;
 dev_node(power_device_t)
+
+#
+# PM QoS Interface, /dev/cpu_dma_latency, network_latency,
+# network_throughput, and memory_bandwidth
+#
+type pmqos_device_t alias netcontrol_device_t;
+dev_node(pmqos_device_t)
 
 type printer_device_t;
 dev_node(printer_device_t)
@@ -243,22 +256,40 @@ type sound_device_t;
 dev_node(sound_device_t)
 
 #
+# Type for sysdig device
+#
+type sysdig_device_t;
+dev_node(sysdig_device_t)
+
+#
 # sysfs_t is the type for the /sys pseudofs
 #
-type sysfs_t;
+type sysfs_t, sysfs_types;
 files_mountpoint(sysfs_t)
-fs_type(sysfs_t)
+fs_xattr_type(sysfs_t)
 genfscon sysfs / gen_context(system_u:object_r:sysfs_t,s0)
 
-type cpu_online_t;
-files_type(cpu_online_t)
-dev_associate_sysfs(cpu_online_t)
+#
+# Types for trusted execution environment interface
+#
+type tee_device_t;
+dev_node(tee_device_t)
+
+type tee_priv_device_t;
+dev_node(tee_priv_device_t)
 
 #
 # Type for /dev/tpm
 #
 type tpm_device_t;
 dev_node(tpm_device_t)
+
+#
+# uhid_device_t is the thpe of /dev/uhid - 
+# User-space I/O driver support for HID subsystem
+#
+type uhid_device_t;
+dev_node(uhid_device_t)
 
 #
 # urandom_device_t is the type of /dev/urandom
@@ -269,7 +300,7 @@ dev_node(urandom_device_t)
 #
 # usbfs_t is the type for the /proc/bus/usb pseudofs
 #
-type usbfs_t alias usbdevfs_t;
+type usbfs_t;
 files_mountpoint(usbfs_t)
 fs_noxattr_type(usbfs_t)
 genfscon usbfs / gen_context(system_u:object_r:usbfs_t,s0)
@@ -293,12 +324,6 @@ dev_node(usbmon_device_t)
 type userio_device_t;
 dev_node(userio_device_t)
 
-#
-# uhid_device_t is the type for /dev/uhid
-#
-type uhid_device_t;
-dev_node(uhid_device_t)
-
 type vfio_device_t;
 dev_node(vfio_device_t)
 
@@ -306,11 +331,11 @@ type v4l_device_t;
 dev_node(v4l_device_t)
 
 #
-# vhost_device_t is the type for /dev/vhost-net
+# vhost_device_t is the type for vhost devices like
+# /dev/vhost-net and /dev/vhost-scsi
 #
 type vhost_device_t;
 dev_node(vhost_device_t)
-mls_trusted_object(vhost_device_t)
 
 # Type for vmware devices.
 type vmware_device_t;
@@ -356,6 +381,6 @@ files_associate_tmp(device_node)
 #
 
 allow devices_unconfined_type self:capability sys_rawio;
-allow devices_unconfined_type device_node:{ blk_file lnk_file } *;
-allow devices_unconfined_type device_node:{ file chr_file } ~{ execmod entrypoint };
-allow devices_unconfined_type mtrr_device_t:file ~{ execmod entrypoint };
+allow devices_unconfined_type device_node:blk_file { manage_blk_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
+allow devices_unconfined_type device_node:chr_file { manage_chr_file_perms relabelfrom relabelto map execute quotaon mounton execmod audit_access watch };
+allow devices_unconfined_type mtrr_device_t:file { manage_file_perms relabelfrom relabelto map execute quotaon mounton execute_no_trans entrypoint execmod audit_access watch };

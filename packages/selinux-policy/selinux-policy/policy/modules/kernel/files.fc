@@ -18,7 +18,6 @@ ifdef(`distro_redhat',`
 /fsckoptions 		--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /halt			--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /poweroff		--	gen_context(system_u:object_r:etc_runtime_t,s0)
-/[^/]+			--	gen_context(system_u:object_r:etc_runtime_t,s0)
 ')
 
 ifdef(`distro_suse',`
@@ -28,7 +27,7 @@ ifdef(`distro_suse',`
 #
 # /boot
 #
-/boot				gen_context(system_u:object_r:boot_t,s0)
+/boot			-d	gen_context(system_u:object_r:boot_t,s0)
 /boot/.*			gen_context(system_u:object_r:boot_t,s0)
 /boot/\.journal			<<none>>
 /boot/efi(/.*)?/System\.map(-.*)? -- gen_context(system_u:object_r:system_map_t,s0)
@@ -39,36 +38,27 @@ ifdef(`distro_suse',`
 #
 # /emul
 #
-/emul				gen_context(system_u:object_r:usr_t,s0)
+/emul			-d	gen_context(system_u:object_r:usr_t,s0)
 /emul/.*			gen_context(system_u:object_r:usr_t,s0)
 
 #
 # /etc
 #
-/etc				gen_context(system_u:object_r:etc_t,s0)
+/etc			-d	gen_context(system_u:object_r:etc_t,s0)
 /etc/.*				gen_context(system_u:object_r:etc_t,s0)
 /etc/\.fstab\.hal\..+	--	gen_context(system_u:object_r:etc_runtime_t,s0)
-/etc/\.updated		--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/blkid(/.*)?		gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/cmtab		--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/fstab\.REVOKE	--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/ioctl\.save	--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/killpower		--	gen_context(system_u:object_r:etc_runtime_t,s0)
-/etc/mtab.*		--	gen_context(system_u:object_r:etc_runtime_t,s0)
+/etc/localtime		-l	gen_context(system_u:object_r:etc_t,s0)
+/etc/mtab		--	gen_context(system_u:object_r:etc_runtime_t,s0)
+/etc/mtab~[0-9]*	--	gen_context(system_u:object_r:etc_runtime_t,s0)
+/etc/mtab\.tmp		--	gen_context(system_u:object_r:etc_runtime_t,s0)
+/etc/mtab\.fuselock	--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/nohotplug		--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/nologin.*		--	gen_context(system_u:object_r:etc_runtime_t,s0)
-/etc/securetty  	--  	gen_context(system_u:object_r:etc_runtime_t,s0)
-
-/etc/sysctl\.conf(\.old)?               --      gen_context(system_u:object_r:system_conf_t,s0)
-/etc/sysconfig/ebtables.*				--      gen_context(system_u:object_r:system_conf_t,s0)
-/etc/sysconfig/ip6?tables.*             --      gen_context(system_u:object_r:system_conf_t,s0)
-/etc/sysconfig/ipvsadm.*                --      gen_context(system_u:object_r:system_conf_t,s0)
-/etc/sysconfig/system-config-firewall.* --      gen_context(system_u:object_r:system_conf_t,s0)
-/etc/yum\.repos\.d(/.*)?                        gen_context(system_u:object_r:system_conf_t,s0)
-/etc/ostree/remotes.d(/.*)?                      gen_context(system_u:object_r:system_conf_t,s0)
-
-/ostree/repo(/.*)?                      gen_context(system_u:object_r:system_conf_t,s0)
-/ostree/deploy/rhel-atomic-host/deploy(/.*)?                      gen_context(system_u:object_r:system_conf_t,s0)
 
 /etc/cups/client\.conf	--	gen_context(system_u:object_r:etc_t,s0)
 
@@ -80,15 +70,18 @@ ifdef(`distro_suse',`
 
 /etc/sysconfig/hwconf	--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/sysconfig/iptables\.save -- gen_context(system_u:object_r:etc_runtime_t,s0)
+/etc/sysconfig/firstboot --	gen_context(system_u:object_r:etc_runtime_t,s0)
 
-/etc/xorg\.conf\.d/00-system-setup-keyboard\.conf --	gen_context(system_u:object_r:etc_runtime_t,s0)
-/etc/X11/xorg\.conf\.d/00-system-setup-keyboard\.conf --    gen_context(system_u:object_r:etc_runtime_t,s0)
-
+/etc/zfs/zpool\.cache	--	gen_context(system_u:object_r:etc_runtime_t,s0)
 
 ifdef(`distro_gentoo', `
 /etc/profile\.env	--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/csh\.env		--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/env\.d/.*		--	gen_context(system_u:object_r:etc_runtime_t,s0)
+')
+
+ifdef(`distro_redhat',`
+/etc/rhgb(/.*)?		-d	gen_context(system_u:object_r:mnt_t,s0)
 ')
 
 ifdef(`distro_suse',`
@@ -113,17 +106,6 @@ HOME_ROOT/lost\+found/.*	<<none>>
 /initrd			-d	gen_context(system_u:object_r:root_t,s0)
 
 #
-# /lib
-#
-/lib/modules(/.*)?		gen_context(system_u:object_r:modules_object_t,s0)
-
-ifdef(`distro_debian',`
-# on Debian /lib/init/rw is a tmpfs used like /var/run but
-# before /var is mounted
-/lib/init/rw(/.*)?		gen_context(system_u:object_r:var_run_t,s0-mls_systemhigh)
-')
-
-#
 # /lost+found
 #
 /lost\+found		-d	gen_context(system_u:object_r:lost_found_t,mls_systemhigh)
@@ -134,13 +116,10 @@ ifdef(`distro_debian',`
 #
 # Mount points; do not relabel subdirectories, since
 # we don't want to change any removable media by default.
-/media(/[^/]*)?		-l	gen_context(system_u:object_r:mnt_t,s0)
+/media(/[^/]*)		-l	gen_context(system_u:object_r:mnt_t,s0)
 /media(/[^/]*)?		-d	gen_context(system_u:object_r:mnt_t,s0)
 /media/[^/]*/.*			<<none>>
 /media/\.hal-.*		--	gen_context(system_u:object_r:mnt_t,s0)
-/var/run/media(/[^/]*)?	-d	gen_context(system_u:object_r:mnt_t,s0)
-/var/run/media/.*		<<none>>
-/var/\.updated		--	gen_context(system_u:object_r:etc_runtime_t,s0)
 
 #
 # /misc
@@ -150,7 +129,7 @@ ifdef(`distro_debian',`
 #
 # /mnt
 #
-/mnt(/[^/]*)?		-l	gen_context(system_u:object_r:mnt_t,s0)
+/mnt(/[^/]*)		-l	gen_context(system_u:object_r:mnt_t,s0)
 /mnt(/[^/]*)?		-d	gen_context(system_u:object_r:mnt_t,s0)
 /mnt/[^/]*/.*			<<none>>
 
@@ -162,10 +141,10 @@ ifdef(`distro_debian',`
 #
 # /opt
 #
-/opt				gen_context(system_u:object_r:usr_t,s0)
+/opt			-d	gen_context(system_u:object_r:usr_t,s0)
 /opt/.*				gen_context(system_u:object_r:usr_t,s0)
 
-/opt/(.*/)?var/lib(/.*)?	gen_context(system_u:object_r:var_lib_t,s0)
+/opt/(.*/)?var/lib(64)?(/.*)?	gen_context(system_u:object_r:var_lib_t,s0)
 
 #
 # /proc
@@ -173,21 +152,14 @@ ifdef(`distro_debian',`
 /proc			-d	<<none>>
 /proc/.*			<<none>>
 
-ifdef(`distro_redhat',`
-/rhev			-d	gen_context(system_u:object_r:mnt_t,s0)
-/rhev(/[^/]*)?		-d	gen_context(system_u:object_r:mnt_t,s0)
-/rhev/[^/]*/.*			<<none>>
-')
-
 #
 # /run
 #
 /run			-d	gen_context(system_u:object_r:var_run_t,s0-mls_systemhigh)
-/run/.*				gen_context(system_u:object_r:var_run_t,s0)
-/run/.*\.*pid			<<none>>
-/run/lock(/.*)?			gen_context(system_u:object_r:var_lock_t,s0)
+/run			-l	gen_context(system_u:object_r:var_run_t,s0)
+/run/shm		-l	gen_context(system_u:object_r:var_run_t,s0)
+/run/.*				<<none>>
 
-/sandbox(/.*)?                  gen_context(system_u:object_r:tmp_t,s0)
 #
 # /selinux
 #
@@ -197,45 +169,62 @@ ifdef(`distro_redhat',`
 #
 # /srv
 #
-/srv				gen_context(system_u:object_r:var_t,s0)
+/srv			-d	gen_context(system_u:object_r:var_t,s0)
 /srv/.*				gen_context(system_u:object_r:var_t,s0)
 
 #
 # /tmp
 #
-/tmp				gen_context(system_u:object_r:tmp_t,s0-mls_systemhigh)
-/tmp-inst			gen_context(system_u:object_r:tmp_t,s0-mls_systemhigh)
+/tmp			-d	gen_context(system_u:object_r:tmp_t,s0-mls_systemhigh)
 /tmp/.*				<<none>>
 /tmp/\.journal			<<none>>
 
 /tmp/lost\+found	-d	gen_context(system_u:object_r:lost_found_t,mls_systemhigh)
 /tmp/lost\+found/.*		<<none>>
 
+/tmp/systemd-private-[^/]+	-d	gen_context(system_u:object_r:tmp_t,s0-mls_systemhigh)
+/tmp/systemd-private-[^/]+/tmp	-d	gen_context(system_u:object_r:tmp_t,s0-mls_systemhigh)
+/tmp/systemd-private-[^/]+/tmp/.*	<<none>>
+
 #
 # /usr
 #
-/usr				gen_context(system_u:object_r:usr_t,s0)
+/usr			-d	gen_context(system_u:object_r:usr_t,s0)
 /usr/.*				gen_context(system_u:object_r:usr_t,s0)
 /usr/\.journal			<<none>>
-/export(/.*)?			gen_context(system_u:object_r:usr_t,s0)
-/ostree(/.*)?           gen_context(system_u:object_r:usr_t,s0)
 
 /usr/doc(/.*)?/lib(/.*)?	gen_context(system_u:object_r:usr_t,s0)
 
 /usr/etc(/.*)?			gen_context(system_u:object_r:etc_t,s0)
 
-/usr/inclu.e(/.*)?		gen_context(system_u:object_r:usr_t,s0)
+# Avoid calling m4's include by using en empty string
+/usr/include`'(/.*)?		gen_context(system_u:object_r:usr_t,s0)
+
+/usr/local/\.journal		<<none>>
+
+/usr/local/etc(/.*)?		gen_context(system_u:object_r:etc_t,s0)
+
+/usr/local/lost\+found	-d	gen_context(system_u:object_r:lost_found_t,mls_systemhigh)
+/usr/local/lost\+found/.*	<<none>>
 
 /usr/lost\+found	-d	gen_context(system_u:object_r:lost_found_t,mls_systemhigh)
 /usr/lost\+found/.*		<<none>>
-/usr/lib/modules(/.*)?		gen_context(system_u:object_r:modules_object_t,s0)
 
-/usr/share/doc(/.*)?/README.*	gen_context(system_u:object_r:usr_t,s0)
+/usr/share/doc(/.*)?/README.*		gen_context(system_u:object_r:usr_t,s0)
+/usr/share/docbook2X/xslt/man(/.*)?	gen_context(system_u:object_r:usr_t,s0)
 
 /usr/tmp		-d	gen_context(system_u:object_r:tmp_t,s0-mls_systemhigh)
 /usr/tmp/.*			<<none>>
 
+ifdef(`distro_debian',`
+# on Debian /lib/init/rw is a tmpfs used like /run
+/usr/lib/init/rw(/.*)?		gen_context(system_u:object_r:var_run_t,s0-mls_systemhigh)
+/run/resolvconf(/.*)? -d	gen_context(system_u:object_r:etc_t,s0)
+')
+
 ifndef(`distro_redhat',`
+/usr/local/src(/.*)?		gen_context(system_u:object_r:src_t,s0)
+
 /usr/src(/.*)?			gen_context(system_u:object_r:src_t,s0)
 /usr/src/kernels/.+/lib(/.*)?	gen_context(system_u:object_r:usr_t,s0)
 ')
@@ -243,7 +232,7 @@ ifndef(`distro_redhat',`
 #
 # /var
 #
-/var				gen_context(system_u:object_r:var_t,s0)
+/var			-d	gen_context(system_u:object_r:var_t,s0)
 /var/.*				gen_context(system_u:object_r:var_t,s0)
 /var/\.journal			<<none>>
 
@@ -251,24 +240,13 @@ ifndef(`distro_redhat',`
 
 /var/ftp/etc(/.*)?		gen_context(system_u:object_r:etc_t,s0)
 
-/var/named/chroot/etc(/.*)? 	gen_context(system_u:object_r:etc_t,s0)
-
 /var/lib(/.*)?			gen_context(system_u:object_r:var_lib_t,s0)
 
 /var/lib/nfs/rpc_pipefs(/.*)?	<<none>>
 
-/var/lib/stickshift/.stickshift-proxy.d(/.*)?   gen_context(system_u:object_r:etc_t,s0)
-/var/lib/stickshift/.limits.d(/.*)?        gen_context(system_u:object_r:etc_t,s0)
-
-/var/lib/openshift/.openshift-proxy.d(/.*)?   gen_context(system_u:object_r:etc_t,s0)
-/var/lib/openshift/.stickshift-proxy.d(/.*)?   gen_context(system_u:object_r:etc_t,s0)
-/var/lib/openshift/.limits.d(/.*)?        gen_context(system_u:object_r:etc_t,s0)
-
-/var/lib/servicelog/servicelog\.db    --  gen_context(system_u:object_r:system_db_t,s0)
-/var/lib/servicelog/servicelog\.db-journal  --  gen_context(system_u:object_r:system_db_t,s0)
-
-/var/lock			-d	gen_context(system_u:object_r:var_lock_t,s0)
-/var/lock			-l	gen_context(system_u:object_r:var_lock_t,s0)
+/var/lock		-d	gen_context(system_u:object_r:var_lock_t,s0-mls_systemhigh)
+/var/lock		-l	gen_context(system_u:object_r:var_lock_t,s0)
+/var/lock/subsys	-d	gen_context(system_u:object_r:var_lock_t,s0-mls_systemhigh)
 /var/lock/.*			<<none>>
 
 /var/log/lost\+found	-d	gen_context(system_u:object_r:lost_found_t,mls_systemhigh)
@@ -280,26 +258,18 @@ ifndef(`distro_redhat',`
 /var/lost\+found	-d	gen_context(system_u:object_r:lost_found_t,mls_systemhigh)
 /var/lost\+found/.*		<<none>>
 
-/var/run		-d	gen_context(system_u:object_r:var_run_t,s0-mls_systemhigh)
 /var/run		-l	gen_context(system_u:object_r:var_run_t,s0)
-/var/run/.*			gen_context(system_u:object_r:var_run_t,s0)
-/var/run/.*\.*pid		<<none>>
-/var/run/lock/.*		<<none>>
 
 /var/spool(/.*)?		gen_context(system_u:object_r:var_spool_t,s0)
 /var/spool/postfix/etc(/.*)?	gen_context(system_u:object_r:etc_t,s0)
+/var/spool/postfix/pid	-d	gen_context(system_u:object_r:var_run_t,s0)
 
 /var/tmp		-d	gen_context(system_u:object_r:tmp_t,s0-mls_systemhigh)
 /var/tmp		-l	gen_context(system_u:object_r:tmp_t,s0)
-/var/tmp-inst		-d	gen_context(system_u:object_r:tmp_t,s0-mls_systemhigh)
 /var/tmp/.*			<<none>>
 /var/tmp/lost\+found	-d	gen_context(system_u:object_r:lost_found_t,mls_systemhigh)
 /var/tmp/lost\+found/.*		<<none>>
+/var/tmp/systemd-private-[^/]+	-d	gen_context(system_u:object_r:tmp_t,s0-mls_systemhigh)
+/var/tmp/systemd-private-[^/]+/tmp	-d	gen_context(system_u:object_r:tmp_t,s0-mls_systemhigh)
+/var/tmp/systemd-private-[^/]+/tmp/.*	<<none>>
 /var/tmp/vi\.recover	-d	gen_context(system_u:object_r:tmp_t,s0)
-
-ifdef(`distro_debian',`
-/var/run/motd		--	gen_context(system_u:object_r:initrc_var_run_t,s0)
-/var/run/motd\.dynamic	--	gen_context(system_u:object_r:initrc_var_run_t,s0)
-')
-/nsr(/.*)?			gen_context(system_u:object_r:var_t,s0)
-/nsr/logs(/.*)?			gen_context(system_u:object_r:var_log_t,s0)

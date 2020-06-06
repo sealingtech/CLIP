@@ -7,15 +7,27 @@
 #
 # It does not perform substitutions as done by sed(1), for
 # example, but aliasing.
-# 
+#
+/bin /usr/bin
+/lib /usr/lib
+/lib32 /usr/lib
+/lib64 /usr/lib
+/libx32 /usr/lib
+/sbin /usr/sbin
 /etc/init.d /etc/rc.d/init.d
-/lib32 /lib
-/lib64 /lib
-/run /var/run
+/lib/systemd /usr/lib/systemd
 /run/lock /var/lock
 /usr/lib32 /usr/lib
 /usr/lib64 /usr/lib
+/usr/libx32 /usr/lib
 /usr/local/lib32 /usr/lib
 /usr/local/lib64 /usr/lib
 /usr/local/lib /usr/lib
-/var/run/lock /var/lock
+/var/lib/private /var/lib
+/var/cache/private /var/cache
+/var/log/private /var/log
+
+# backward compatibility
+# not for refpolicy intern, but for /var/run using applications,
+# like systemd tmpfiles or systemd socket configurations
+/var/run /run

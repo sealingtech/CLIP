@@ -1,4 +1,4 @@
-policy_module(mls, 1.8.0)
+policy_module(mls, 1.11.0)
 
 ########################################
 #
@@ -10,6 +10,8 @@ attribute mlsfilereadtoclr;
 attribute mlsfilewrite;
 attribute mlsfilewritetoclr;
 attribute mlsfilewriteinrange;
+attribute mlsfilerelabel;
+attribute mlsfilerelabeltoclr;
 attribute mlsfileupgrade;
 attribute mlsfiledowngrade;
 
@@ -28,6 +30,9 @@ attribute mlsipcread;
 attribute mlsipcreadtoclr;
 attribute mlsipcwrite;
 attribute mlsipcwritetoclr;
+
+attribute mlskeywrite;
+attribute mlskeywritetoclr;
 
 attribute mlsprocread;
 attribute mlsprocreadtoclr;
@@ -56,14 +61,13 @@ attribute mlsdbupgrade;
 attribute mlsdbdowngrade;
 
 attribute mlstrustedobject;
+attribute mlstrustedsocket;
 
 attribute privrangetrans;
 attribute mlsrangetrans;
 
-attribute mlsfduse; 
+attribute mlsfduse;
 attribute mlsfdshare;
-
-attribute mlstranslate;
 
 attribute mlsdbusrecv;
 attribute mlsdbussend;
