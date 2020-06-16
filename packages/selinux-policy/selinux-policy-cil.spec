@@ -17,6 +17,7 @@ BuildRequires: python3 gawk checkpolicy >= %{CHECKPOLICYVER} m4 policycoreutils-
 Requires(pre): policycoreutils >= %{POLICYCOREUTILSVER}
 Requires(post): /bin/awk /usr/bin/sha512sum
 Requires: libsemanage >= %{LIBSEMANAGEVER}
+Requires: platform-python
 Provides: selinux-policy-devel
 
 %description 
@@ -26,9 +27,6 @@ selinux-policy-%{type}
 
 %files 
 %defattr(-,root,root,-)
-#%{_mandir}/man*/*
-# policycoreutils owns these manpage directories, we only own the files within them
-%{_mandir}/ru/*/*
 %dir %{_usr}/share/selinux
 %dir %{_usr}/share/selinux/devel
 %dir %{_sysconfdir}/selinux
@@ -158,20 +156,9 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %dir %{_sysconfdir}/selinux/%1/contexts \
 %config %{_sysconfdir}/selinux/%1/contexts/customizable_types \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/securetty_types \
-%config(noreplace) %{_sysconfdir}/selinux/%1/contexts/dbus_contexts \
-%config %{_sysconfdir}/selinux/%1/contexts/x_contexts \
-%config %{_sysconfdir}/selinux/%1/contexts/default_contexts \
-%config %{_sysconfdir}/selinux/%1/contexts/virtual_domain_context \
-%config %{_sysconfdir}/selinux/%1/contexts/virtual_image_context \
-%config %{_sysconfdir}/selinux/%1/contexts/lxc_contexts \
-%config %{_sysconfdir}/selinux/%1/contexts/systemd_contexts \
-%config %{_sysconfdir}/selinux/%1/contexts/sepgsql_contexts \
-%config %{_sysconfdir}/selinux/%1/contexts/snapperd_contexts \
+%config(noreplace) %{_sysconfdir}/selinux/%1/contexts/*_contexts \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/default_type \
-%config(noreplace) %{_sysconfdir}/selinux/%1/contexts/failsafe_context \
-%config(noreplace) %{_sysconfdir}/selinux/%1/contexts/initrc_context \
-%config(noreplace) %{_sysconfdir}/selinux/%1/contexts/removable_context \
-%config(noreplace) %{_sysconfdir}/selinux/%1/contexts/userhelper_context \
+%config(noreplace) %{_sysconfdir}/selinux/%1/contexts/*_context \
 %dir %{_sysconfdir}/selinux/%1/contexts/files \
 %verify(not md5 size mtime) %{_sysconfdir}/selinux/%1/contexts/files/file_contexts \
 %verify(not md5 size mtime) /var/lib/selinux/%1/active/file_contexts \
@@ -185,8 +172,6 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %dir %{_sysconfdir}/selinux/%1/contexts/users \
 %config(noreplace) %{_sysconfdir}/selinux/%1/setrans.conf \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/users/* \
-#%{_mandir}/man*/* \
-%{_mandir}/ru/*/* \
 %{_usr}/share/selinux/%1/*.pp \
 %{_usr}/share/selinux/%1/modules.lst \
 %dir %{_usr}/share/selinux/%1/include \
@@ -199,8 +184,6 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 
 %install
 %{__rm} -fR %{buildroot}
-mkdir -p %{buildroot}%{_mandir}
-cp -R  man/* %{buildroot}%{_mandir}
 mkdir -p %{buildroot}%{_sysconfdir}/selinux
 mkdir -p %{buildroot}%{_sysconfdir}/sysconfig
 touch %{buildroot}%{_sysconfdir}/selinux/config
@@ -218,7 +201,6 @@ make %{?_smp_mflags} clean
 %installCmds %{type} %{type}  n y deny
 
 make %{?_smp_mflags} UNK_PERMS=deny NAME=%{type} TYPE=%{type}  DISTRO=%{distro} UBAC=y DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name}-%{version} POLY=y MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" install-headers install-docs
-cp -R  man/* %{buildroot}%{_mandir}
 make UNK_PERMS=allow NAME=%{type} TYPE=%{type} DISTRO=%{distro} UBAC=n DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name} MLS_CATS=1024 MCS_CATS=1024 install-headers
 mkdir %{buildroot}%{_usr}/share/selinux/devel/
 install -m 644 selinux_config/Makefile.devel %{buildroot}%{_usr}/share/selinux/devel/Makefile
