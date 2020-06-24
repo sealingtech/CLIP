@@ -311,7 +311,7 @@ interface(`sssd_stream_connect',`
 		type sssd_t, sssd_var_lib_t;
 	')
 
-	files_search_pids($1)
+	files_search_var_lib($1)
 	stream_connect_pattern($1, sssd_var_lib_t, sssd_var_lib_t, sssd_t)
 ')
 

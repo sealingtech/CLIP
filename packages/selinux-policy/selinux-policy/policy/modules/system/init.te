@@ -54,6 +54,7 @@ domain_type(init_t)
 domain_entry_file(init_t, init_exec_t)
 kernel_domtrans_to(init_t, init_exec_t)
 role system_r types init_t;
+permissive init_t;
 
 #
 # init_runtime_t is the type for /var/run/shutdown.pid and /var/run/systemd.

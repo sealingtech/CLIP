@@ -248,6 +248,7 @@ allow kernel_t unlabeled_t:dir mounton;
 # connections with invalidated labels:
 allow kernel_t unlabeled_t:packet send;
 
+kernel_change_ring_buffer_level(kernel_t)
 kernel_mounton_proc_dirs(kernel_t)
 kernel_request_load_module(kernel_t)
 

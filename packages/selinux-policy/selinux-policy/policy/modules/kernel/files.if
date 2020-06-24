@@ -1915,6 +1915,25 @@ interface(`files_root_filetrans',`
 
 ########################################
 ## <summary>
+##	Getattr files in
+##	the root directory.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to allow access.
+##	</summary>
+## </param>
+#
+interface(`files_getattr_root_files',`
+	gen_require(`
+		type root_t;
+	')
+
+	allow $1 root_t:file { getattr };
+')
+
+########################################
+## <summary>
 ##	Do not audit attempts to read files in
 ##	the root directory.
 ## </summary>
