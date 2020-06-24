@@ -28,13 +28,9 @@ selinux-policy-%{type}
 %files 
 %defattr(-,root,root,-)
 %dir %{_usr}/share/selinux
-%dir %{_usr}/share/selinux/devel
 %dir %{_sysconfdir}/selinux
 %ghost %config(noreplace) %{_sysconfdir}/selinux/config
 %ghost %{_sysconfdir}/sysconfig/selinux
-%{_usr}/share/selinux/devel/Makefile
-%{_usr}/share/selinux/devel/example.*
-%{_usr}/share/selinux/devel/policy.*
 
 %package doc
 Summary: SELinux policy documentation
@@ -199,9 +195,6 @@ make %{?_smp_mflags} clean
 
 make %{?_smp_mflags} UNK_PERMS=deny NAME=%{type} TYPE=%{type}  DISTRO=%{distro} UBAC=y DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name}-%{version} POLY=y MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" install-headers install-docs
 make UNK_PERMS=allow NAME=%{type} TYPE=%{type} DISTRO=%{distro} UBAC=n DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name} MLS_CATS=1024 MCS_CATS=1024 install-headers
-mkdir %{buildroot}%{_usr}/share/selinux/devel/
-install -m 644 doc/example.* %{buildroot}%{_usr}/share/selinux/devel/
-install -m 644 doc/policy.* %{buildroot}%{_usr}/share/selinux/devel/
 touch %{buildroot}/var/lib/selinux/%{type}/active/seusers.linked
 #echo  "xdg-open file://usr/share/doc/selinux-policy/html/index.html"> %{buildroot}%{_usr}/share/selinux/devel/policyhelp
 #chmod +x %{buildroot}%{_usr}/share/selinux/devel/policyhelp
@@ -307,8 +300,6 @@ if [ %1 -eq 1 ]; then \
 else \
 %relabel %2 \
 fi; \
-rm -f /usr/share/selinux/devel/include \
-ln -s /usr/share/selinux/%2/include /usr/share/selinux/devel \
 echo -n " -F " > /.autorelabel 
 
 
