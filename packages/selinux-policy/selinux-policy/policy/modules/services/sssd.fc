@@ -15,3 +15,4 @@
 /var/log/sssd(/.*)?	gen_context(system_u:object_r:sssd_var_log_t,s0)
 
 /run/sssd\.pid	--	gen_context(system_u:object_r:sssd_runtime_t,s0)
+/run/\.heim_org\.h5l\.kcm-socket    -s      gen_context(system_u:object_r:sssd_runtime_t,s0)

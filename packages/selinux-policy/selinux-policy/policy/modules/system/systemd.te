@@ -302,6 +302,16 @@ fs_register_binary_executable_type(systemd_binfmt_t)
 
 corecmd_search_bin(systemd_generator_type)
 
+# for /usr/lib/systemd/system-generators/selinux-autorelabel-generator.sh
+corecmd_exec_shell(systemd_generator_type)
+# runs selinuxenabled which checks for the selinuxfs and /etc/selinux/config
+corecmd_exec_bin(systemd_generator_type)
+selinux_getattr_fs(systemd_generator_type)
+seutil_read_config(systemd_generator_type)
+# also checks for /.autorelabel which could be labeled etc_runtime_t or root_t
+files_read_etc_runtime_files(systemd_generator_type)
+files_getattr_root_files(systemd_generator_type)
+
 dev_read_sysfs(systemd_generator_type)
 dev_write_kmsg(systemd_generator_type)
 
@@ -610,6 +620,7 @@ term_setattr_unallocated_ttys(systemd_logind_t)
 term_use_unallocated_ttys(systemd_logind_t)
 
 auth_manage_faillog(systemd_logind_t)
+#auth_use_nsswitch(systemd_logind_t)
 
 init_dbus_send_script(systemd_logind_t)
 init_get_all_units_status(systemd_logind_t)
@@ -1357,9 +1368,15 @@ selinux_compute_create_context(systemd_user_session_type)
 
 storage_getattr_fixed_disk_dev(systemd_user_session_type)
 
+miscfiles_read_localization(systemd_user_session_type)
+
 # for systemd to read udev status
 udev_read_pid_files(systemd_user_session_type)
 udev_list_pids(systemd_user_session_type)
+
+optional_policy(`
+	xserver_read_xdm_lib_files(systemd_user_session_type)
+')
 
 #########################################
 #
@@ -1391,6 +1408,7 @@ seutil_libselinux_linked(systemd_user_runtime_dir_t)
 
 userdom_search_user_runtime_root(systemd_user_runtime_dir_t)
 userdom_user_runtime_root_filetrans_user_runtime(systemd_user_runtime_dir_t, dir)
+userdom_user_run_filetrans_user_runtime(systemd_user_runtime_dir_t, dir)
 userdom_manage_user_runtime_dirs(systemd_user_runtime_dir_t)
 userdom_mounton_user_runtime_dirs(systemd_user_runtime_dir_t)
 userdom_relabelto_user_runtime_dirs(systemd_user_runtime_dir_t)

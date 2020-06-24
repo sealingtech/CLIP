@@ -182,28 +182,28 @@ template(`userdom_user_content_access_template',`
 	##	Grant the $1 domains read access to generic user content
 	##	</p>
 	## </desc>
-	gen_tunable(`$1_read_generic_user_content', true)
+	gen_tunable($1_read_generic_user_content, true)
 
 	## <desc>
 	##	<p>
 	##	Grant the $1 domains read access to all user content
 	##	</p>
 	## </desc>
-	gen_tunable(`$1_read_all_user_content', false)
+	gen_tunable($1_read_all_user_content, false)
 
 	## <desc>
 	##	<p>
 	##	Grant the $1 domains manage rights on generic user content
 	##	</p>
 	## </desc>
-	gen_tunable(`$1_manage_generic_user_content', false)
+	gen_tunable($1_manage_generic_user_content, false)
 
 	## <desc>
 	##	<p>
 	##	Grant the $1 domains manage rights on all user content
 	##	</p>
 	## </desc>
-	gen_tunable(`$1_manage_all_user_content', false)
+	gen_tunable($1_manage_all_user_content, false)
 
 	tunable_policy(`$1_read_generic_user_content',`
 		userdom_list_user_tmp($2)
@@ -1474,6 +1474,24 @@ template(`userdom_security_admin_template',`
 	optional_policy(`
 		samhain_run($1, $2)
 	')
+')
+
+#####################################
+## <summary>
+##	Allow domain dyntrans to unpriv userdomain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`userdom_dyntransition_unpriv_users',`
+	gen_require(`
+		attribute unpriv_userdomain;
+	')
+
+	allow $1 unpriv_userdomain:process dyntransition;
 ')
 
 ########################################

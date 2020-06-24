@@ -60,6 +60,9 @@ template(`systemd_role_template',`
 	# Allow using file descriptors for user environment generators
 	allow $3 $1_systemd_t:fd use;
 
+	# Allow the use of systemctl --user
+	allow $3 $1_systemd_t:unix_stream_socket connectto;
+
 	can_exec($3, { systemd_run_exec_t systemd_analyze_exec_t })
 ')
 

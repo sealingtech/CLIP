@@ -323,6 +323,8 @@ manage_files_pattern(xdm_t, xdm_rw_etc_t, xdm_rw_etc_t)
 # files in /run/user/%{USERID}/*
 manage_dirs_pattern(xdm_t, xdm_runtime_t, xdm_runtime_t)
 manage_files_pattern(xdm_t, xdm_runtime_t, xdm_runtime_t)
+# gsettings tries to map /run/user/42/dconf/user
+allow xdm_t xdm_runtime_t:file map;
 
 manage_dirs_pattern(xdm_t, xdm_tmp_t, xdm_tmp_t)
 manage_files_pattern(xdm_t, xdm_tmp_t, xdm_tmp_t)
@@ -543,6 +545,7 @@ optional_policy(`
 
 	optional_policy(`
 		systemd_read_logind_pids(xdm_t)
+		systemd_read_logind_sessions_files(xdm_t)
 	')
 ')
 
