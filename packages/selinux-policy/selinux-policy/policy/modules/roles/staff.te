@@ -72,7 +72,7 @@ optional_policy(`
 	xserver_role(staff_r, staff_t)
 ')
 
-ifndef(`distro_redhat',`
+#ifndef(`distro_redhat',`
 	optional_policy(`
 		auth_role(staff_r, staff_t)
 	')
@@ -216,4 +216,4 @@ ifndef(`distro_redhat',`
 	optional_policy(`
 		wireshark_role(staff_r, staff_t)
 	')
-')
+#')
