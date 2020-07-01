@@ -1,4 +1,4 @@
-policy_module(init, 2.8.8)
+policy_module(init, 2.8.11)
 
 gen_require(`
 	class passwd rootok;
@@ -285,6 +285,8 @@ ifdef(`init_systemd',`
 	manage_lnk_files_pattern(init_t, init_runtime_t, init_runtime_t)
 	manage_sock_files_pattern(init_t, init_runtime_t, init_runtime_t)
 	manage_dirs_pattern(init_t, init_runtime_t, init_runtime_t)
+	# /memfd:systemd-state
+	fs_tmpfs_filetrans(init_t, init_runtime_t, file)
 
 	manage_files_pattern(init_t, systemd_unit_t, systemdunit)
 
@@ -318,7 +320,6 @@ ifdef(`init_systemd',`
 	dev_manage_input_dev(init_t)
 	dev_relabel_all_sysfs(init_t)
 	dev_relabel_generic_symlinks(init_t)
-	dev_read_urand(init_t)
 	dev_write_kmsg(init_t)
 	dev_write_urand(init_t)
 	dev_rw_lvm_control(init_t)
@@ -333,6 +334,11 @@ ifdef(`init_systemd',`
 	dev_manage_sysfs_dirs(init_t)
 	dev_relabel_sysfs_dirs(init_t)
 	dev_read_usbfs(initrc_t)
+	# sandbox
+	dev_create_null_dev(init_t)
+	dev_create_zero_dev(init_t)
+	dev_create_rand_dev(init_t)
+	dev_create_urand_dev(init_t)
 	# systemd writes to /dev/watchdog on shutdown
 	dev_write_watchdog(init_t)
 
@@ -404,6 +410,7 @@ ifdef(`init_systemd',`
 	fs_relabel_tmpfs_dirs(init_t)
 	fs_relabel_tmpfs_files(init_t)
 	fs_relabelfrom_tmpfs_sockets(init_t)
+	fs_manage_tmpfs_symlinks(init_t)
 	# mount-setup
 	fs_unmount_autofs(init_t)
 	fs_getattr_pstore_dirs(init_t)
@@ -436,12 +443,13 @@ ifdef(`init_systemd',`
 	auth_manage_var_auth(init_t)
 	auth_relabel_login_records(init_t)
 	auth_relabel_pam_console_data_dirs(init_t)
+	auth_domtrans_chk_passwd(init_t)
 
 	logging_manage_pid_sockets(init_t)
-	logging_send_audit_msgs(init_t)
 	logging_relabelto_devlog_sock_files(init_t)
 	logging_relabel_generic_log_dirs(init_t)
 	logging_audit_socket_activation(init_t)
+	logging_use_syslogd_fd(init_t)
 
 	# lvm2-activation-generator checks file labels
 	seutil_read_file_contexts(init_t)
@@ -459,6 +467,8 @@ ifdef(`init_systemd',`
 	systemd_rw_networkd_netlink_route_sockets(init_t)
 
 	term_create_devpts_dirs(init_t)
+	term_create_ptmx(init_t)
+	term_create_controlling_term(init_t)
 
 	# udevd is a "systemd kobject uevent socket activated daemon"
 	udev_create_kobject_uevent_sockets(init_t)
@@ -650,7 +660,6 @@ files_setattr_lock_dirs(initrc_t)
 
 corecmd_exec_all_executables(initrc_t)
 
-corenet_all_recvfrom_unlabeled(initrc_t)
 corenet_all_recvfrom_netlabel(initrc_t)
 corenet_tcp_sendrecv_all_if(initrc_t)
 corenet_udp_sendrecv_all_if(initrc_t)
