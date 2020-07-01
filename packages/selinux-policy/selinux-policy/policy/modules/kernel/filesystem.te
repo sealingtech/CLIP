@@ -1,4 +1,4 @@
-policy_module(filesystem, 1.27.3)
+policy_module(filesystem, 1.27.4)
 
 ########################################
 #
@@ -180,6 +180,10 @@ genfscon v7 / gen_context(system_u:object_r:sysv_t,s0)
 type tracefs_t;
 fs_type(tracefs_t)
 genfscon tracefs / gen_context(system_u:object_r:tracefs_t,s0)
+
+optional_policy(`
+	init_mountpoint(tracefs_t)
+')
 
 type vmblock_t;
 fs_noxattr_type(vmblock_t)

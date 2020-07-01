@@ -60,36 +60,12 @@ template(`systemd_role_template',`
 	# Allow using file descriptors for user environment generators
 	allow $3 $1_systemd_t:fd use;
 
-	# Allow the use of systemctl --user
-	allow $3 $1_systemd_t:unix_stream_socket connectto;
+	# systemctl --user
+	stream_connect_pattern($3, systemd_user_runtime_t, systemd_user_runtime_t, $1_systemd_t)
 
 	can_exec($3, { systemd_run_exec_t systemd_analyze_exec_t })
-')
 
-######################################
-## <summary>
-##   Make the specified type usable as a
-##   systemd generator
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Type to be used as a systemd generator type.
-##	</summary>
-## </param>
-## <param name="entry_point">
-##	<summary>
-##	Type of the program to be used as an entry point to the generator domain.
-##	</summary>
-## </param>
-#
-interface(`systemd_unit_generator',`
-	gen_require(`
-		attribute systemd_generator_type;
-	')
-
-	typeattribute $1 systemd_generator_type;
-
-	init_system_domain($1, $2)
+	dbus_system_bus_client($1_systemd_t)
 ')
 
 ######################################
@@ -1128,4 +1104,49 @@ interface(`systemd_write_all_user_keys',`
 	')
 
 	allow $1 systemd_user_session_type:key write;
+')
+
+########################################
+## <summary>
+##  Execute systemd-sysusers in the
+##  systemd sysusers domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`systemd_domtrans_sysusers', `
+	gen_require(`
+		type systemd_sysusers_t, systemd_sysusers_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	domtrans_pattern($1, systemd_sysusers_exec_t, systemd_sysusers_t)
+')
+
+########################################
+## <summary>
+##  Run systemd-sysusers with a domain transition.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="role">
+##  <summary>
+##  Role allowed access.
+##  </summary>
+## </param>
+## <rolecap/>
+#
+interface(`systemd_run_sysusers', `
+	gen_require(`
+		attribute_role systemd_sysusers_roles;
+	')
+
+	systemd_domtrans_sysusers($1)
+	roleattribute $2 systemd_sysusers_roles;
 ')
