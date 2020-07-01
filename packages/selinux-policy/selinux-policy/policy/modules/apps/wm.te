@@ -140,6 +140,10 @@ optional_policy(`
 ')
 
 optional_policy(`
+	systemd_dbus_chat_logind(wm_domain)
+')
+
+optional_policy(`
 	telepathy_mission_control_dbus_chat(wm_domain)
 ')
 
