@@ -565,6 +565,24 @@ interface(`xdg_relabel_all_config',`
 
 ########################################
 ## <summary>
+##	Read the xdg data home dirs
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`xdg_read_data_dirs',`
+	gen_require(`
+		type xdg_data_t;
+	')
+
+	allow $1 xdg_data_t:dir list_dir_perms;
+')
+
+########################################
+## <summary>
 ##	Read the xdg data home files
 ## </summary>
 ## <param name="domain">

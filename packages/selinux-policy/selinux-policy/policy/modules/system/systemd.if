@@ -49,6 +49,15 @@ template(`systemd_role_template',`
 	allow $3 systemd_user_runtime_t:sock_file { manage_sock_file_perms relabel_sock_file_perms };
 
 	allow $3 systemd_user_runtime_notify_t:sock_file { manage_sock_file_perms relabel_sock_file_perms };
+	allow $1_systemd_t systemd_user_runtime_notify_t:sock_file { manage_sock_file_perms relabel_sock_file_perms };
+
+	# MJM: not sure why this is not in upstream
+	allow $3 $1_systemd_t:fifo_file write;
+	allow $3 $1_systemd_t:unix_dgram_socket sendto;
+	allow $3 $1_systemd_t:unix_stream_socket { getattr ioctl read write };
+
+	# allow the user to reboot the system.  this could be excessive for some roles
+	allow $3 $1_systemd_t:system halt;
 
 	# This domain is per-role because of the below transitions.
 	# See the sytemd --user section of systemd.te for the
@@ -66,6 +75,12 @@ template(`systemd_role_template',`
 	can_exec($3, { systemd_run_exec_t systemd_analyze_exec_t })
 
 	dbus_system_bus_client($1_systemd_t)
+	dbus_session_run($1, $2, $1_systemd_t)
+
+	# MJM: these might belong in xserver_role
+	systemd_write_inherited_logind_inhibit_pipes($3)
+	systemd_read_logind_pids($3)
+	systemd_read_logind_sessions_files($3)
 ')
 
 ######################################
@@ -131,6 +146,24 @@ interface(`systemd_PrivateDevices',`
 	# tmpfs filesystem for the /dev, which gets label tmpfs_t.
 	# Allow to traverse /dev and to read symlinks in /dev (for example /dev/log)
 	fs_read_tmpfs_symlinks($1)
+')
+
+#######################################
+## <summary>
+##  Allow domain to read udev hwdb file
+## </summary>
+## <param name="domain">
+## <summary>
+##  domain allowed access
+## </summary>
+## </param>
+#
+interface(`systemd_write_user_runtime_sock_files',`
+	gen_require(`
+		type systemd_user_runtime_t;
+	')
+
+	write_sock_files_pattern($1, systemd_user_runtime_t, systemd_user_runtime_t)
 ')
 
 #######################################

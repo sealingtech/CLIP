@@ -106,6 +106,7 @@ ubac_constrained(user_devpts_t)
 type user_tmp_t;
 files_tmp_file(user_tmp_t)
 userdom_user_home_content(user_tmp_t)
+userdom_user_runtime_content(user_tmp_t)
 
 type user_tmpfs_t;
 files_tmpfs_file(user_tmpfs_t)

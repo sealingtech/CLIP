@@ -1323,8 +1323,10 @@ allow systemd_user_session_type self:netlink_kobject_uevent_socket { bind create
 
 allow systemd_user_session_type systemd_user_runtime_t:dir manage_dir_perms;
 allow systemd_user_session_type systemd_user_runtime_t:lnk_file manage_lnk_file_perms;
-allow systemd_user_session_type systemd_user_runtime_t:sock_file { create write };
+allow systemd_user_session_type systemd_user_runtime_t:sock_file { create write getattr };
 userdom_user_runtime_filetrans(systemd_user_session_type, systemd_user_runtime_t, dir)
+# MJM: systemd user instances create /run/user/UID/bus and /run/user/UID/pipewire-0
+userdom_user_runtime_filetrans(systemd_user_session_type, systemd_user_runtime_t, sock_file)
 
 allow systemd_user_session_type systemd_user_runtime_notify_t:sock_file create;
 type_transition systemd_user_session_type systemd_user_runtime_t:sock_file systemd_user_runtime_notify_t "notify";
@@ -1414,5 +1416,8 @@ userdom_user_run_filetrans_user_runtime(systemd_user_runtime_dir_t, dir)
 userdom_manage_user_runtime_dirs(systemd_user_runtime_dir_t)
 userdom_mounton_user_runtime_dirs(systemd_user_runtime_dir_t)
 userdom_relabelto_user_runtime_dirs(systemd_user_runtime_dir_t)
+userdom_delete_all_user_runtime_files(systemd_user_runtime_dir_t)
+userdom_delete_all_user_runtime_dirs(systemd_user_runtime_dir_t)
+userdom_delete_all_user_runtime_named_sockets(systemd_user_runtime_dir_t)
 
 dbus_system_bus_client(systemd_user_runtime_dir_t)

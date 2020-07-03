@@ -31,6 +31,8 @@ template(`wm_role_template',`
 	gen_require(`
 		attribute wm_domain;
 		type wm_exec_t;
+		type wm_tmp_t;
+		type wm_tmpfs_t;
 	')
 
 	########################################
@@ -51,6 +53,11 @@ template(`wm_role_template',`
 
 	allow $1_wm_t $3:unix_stream_socket connectto;
 	allow $3 $1_wm_t:unix_stream_socket connectto;
+	# MJM: not sure why this is not in upstream
+	allow $3 $1_wm_t:unix_stream_socket { getattr read write };
+
+	allow $3 wm_tmp_t:file { map read write };
+	allow $3 wm_tmpfs_t:file { map read write };
 
 	allow $3 $1_wm_t:process { ptrace signal_perms };
 	ps_process_pattern($3, $1_wm_t)
@@ -147,6 +154,25 @@ interface(`wm_dbus_chat',`
 
 	allow $2 $1_wm_t:dbus send_msg;
 	allow $1_wm_t $2:dbus send_msg;
+')
+
+########################################
+## <summary>
+##	Allow map on
+##	wm tmp files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`wm_map_tmp_files',`
+	gen_require(`
+		type wm_tmp_t;
+	')
+
+	allow $1 wm_tmp_t:file map;
 ')
 
 ########################################

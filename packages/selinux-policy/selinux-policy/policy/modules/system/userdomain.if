@@ -3417,6 +3417,26 @@ interface(`userdom_delete_user_runtime_files',`
 
 ########################################
 ## <summary>
+##	Create, read, write, and delete user
+##	runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`userdom_manage_user_runtime_files',`
+	gen_require(`
+		type user_runtime_t;
+	')
+
+	allow $1 user_runtime_t:file manage_file_perms;
+	userdom_search_user_runtime_root($1)
+')
+
+########################################
+## <summary>
 ##	Search users runtime directories.
 ## </summary>
 ## <param name="domain">

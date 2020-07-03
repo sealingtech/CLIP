@@ -83,6 +83,9 @@ template(`dbus_role_template',`
 	#
 
 	allow $3 $1_dbusd_t:unix_stream_socket connectto;
+	# MJM: i saw staff_systemd_t require these, but not sure why
+	allow $3 $1_dbusd_t:unix_stream_socket { bind listen setopt };
+
 	allow $3 $1_dbusd_t:dbus { send_msg acquire_svc };
 	allow $3 $1_dbusd_t:fd use;
 
@@ -101,6 +104,80 @@ template(`dbus_role_template',`
 
 	corecmd_bin_domtrans($1_dbusd_t, $3)
 	corecmd_shell_domtrans($1_dbusd_t, $3)
+
+	auth_use_nsswitch($1_dbusd_t)
+
+	# MJM: this should only get used for users that are allowed to login to X
+	xdg_read_data_dirs($1_dbusd_t)
+
+	ifdef(`hide_broken_symptoms',`
+		dontaudit $3 $1_dbusd_t:netlink_selinux_socket { read write };
+	')
+
+	optional_policy(`
+		systemd_read_logind_pids($1_dbusd_t)
+	')
+')
+
+########################################
+## <summary>
+##	Role access for dbus.
+##	This is a copy of dbus_role_template but without
+##	the type declarations and transitions to the user
+##	domain.
+## </summary>
+## <param name="role_prefix">
+##	<summary>
+##	The prefix of the user role (e.g., user
+##	is the prefix for user_r).
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access
+##	</summary>
+## </param>
+## <param name="domain">
+##	<summary>
+##	User domain for the role
+##	</summary>
+## </param>
+#
+template(`dbus_session_run',`
+	gen_require(`
+		class dbus { send_msg acquire_svc };
+		attribute session_bus_type;
+		type system_dbusd_t, dbusd_exec_t;
+		type session_dbusd_tmp_t, session_dbusd_home_t;
+		type $1_dbusd_t;
+	')
+
+	##############################
+	#
+	# Local policy
+	#
+
+	allow $3 $1_dbusd_t:unix_stream_socket connectto;
+	# MJM: i saw staff_systemd_t require these, but not sure why
+	allow $3 $1_dbusd_t:unix_stream_socket { create bind listen setopt };
+
+	allow $3 $1_dbusd_t:dbus { send_msg acquire_svc };
+	allow $3 $1_dbusd_t:fd use;
+
+	allow $3 system_dbusd_t:dbus { send_msg acquire_svc };
+
+	allow $3 { session_dbusd_home_t session_dbusd_tmp_t }:dir { manage_dir_perms relabel_dir_perms };
+	allow $3 { session_dbusd_home_t session_dbusd_tmp_t }:file { manage_file_perms relabel_file_perms };
+	userdom_user_home_dir_filetrans($3, session_dbusd_home_t, dir, ".dbus")
+
+	domtrans_pattern($3, dbusd_exec_t, $1_dbusd_t)
+
+	ps_process_pattern($3, $1_dbusd_t)
+	allow $3 $1_dbusd_t:process { ptrace signal_perms };
+
+	allow $1_dbusd_t $3:process sigkill;
+
+	allow $1_dbusd_t $3:unix_stream_socket { read write };
 
 	auth_use_nsswitch($1_dbusd_t)
 

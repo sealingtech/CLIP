@@ -307,6 +307,7 @@ optional_policy(`
 	xserver_rw_xsession_log(session_bus_type)
 	xserver_use_xdm_fds(session_bus_type)
 	xserver_rw_xdm_pipes(session_bus_type)
+	xserver_stream_rw_xdm(session_bus_type)
 ')
 
 ########################################
