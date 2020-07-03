@@ -35,6 +35,9 @@ interface(`xserver_restricted_role',`
 
 	allow xserver_t $2:shm rw_shm_perms;
 
+	# MJM: why is this not in upstream?
+	allow xserver_t $2:unix_stream_socket { accept getopt read shutdown write };
+
 	allow $2 user_fonts_t:dir list_dir_perms;
 	allow $2 user_fonts_t:file read_file_perms;
 
@@ -93,8 +96,13 @@ interface(`xserver_restricted_role',`
 	dev_dontaudit_rw_dri($2)
 	# GNOME checks for usb and other devices:
 	dev_rw_usbfs($2)
+	dev_rw_dri($2)
 
 	miscfiles_read_fonts($2)
+
+	logging_send_syslog_msg($2)
+
+	udev_read_pid_files($2)
 
 	xserver_common_x_domain_template(user, $2)
 	xserver_domtrans($2)
@@ -112,6 +120,12 @@ interface(`xserver_restricted_role',`
 	# for the .xsession-errors log file
 	xserver_user_home_dir_filetrans_user_xsession_log($2)
 	xserver_manage_xsession_log($2)
+
+	# MJM: if the userdom does not have this then the first login
+	# succeeds but subsequent ones fail
+	tunable_policy(`xserver_gnome_xdm',`
+		allow $2 self:process execmem;
+	')
 
 	# Client write xserver shm
 	tunable_policy(`allow_write_xshm',`
@@ -182,6 +196,9 @@ interface(`xserver_role',`
 	xserver_user_home_dir_filetrans_user_iceauth($2, ".ICEauthority")
 
 	xserver_read_xkb_libs($2)
+	xserver_map_xkb_libs($2)
+
+	xserver_stream_rw_xdm($2)
 
 	optional_policy(`
 		xdg_manage_all_cache($2)
@@ -928,6 +945,25 @@ interface(`xserver_stream_connect_xdm',`
 
 ########################################
 ## <summary>
+##	Connect to XDM over a unix domain
+##	stream socket.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`xserver_stream_rw_xdm',`
+	gen_require(`
+		type xdm_t;
+	')
+
+	allow $1 xdm_t:unix_stream_socket { getattr ioctl read write };
+')
+
+########################################
+## <summary>
 ##	Read xdm-writable configuration files.
 ## </summary>
 ## <param name="domain">
@@ -1230,6 +1266,24 @@ interface(`xserver_delete_log',`
 	allow $1 xserver_log_t:dir list_dir_perms;
 	delete_files_pattern($1, xserver_log_t, xserver_log_t)
 	delete_fifo_files_pattern($1, xserver_log_t, xserver_log_t)
+')
+
+########################################
+## <summary>
+##	Map X keyboard extension libraries.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`xserver_map_xkb_libs',`
+	gen_require(`
+		type xkb_var_lib_t;
+	')
+
+	allow $1 xkb_var_lib_t:file map;
 ')
 
 ########################################
@@ -1551,6 +1605,24 @@ interface(`xserver_read_tmp_files',`
 
 	allow $1 xserver_tmp_t:file read_file_perms;
 	files_search_tmp($1)
+')
+
+########################################
+## <summary>
+##	Map X server temporary files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`xserver_map_tmp_files',`
+	gen_require(`
+		type xserver_tmp_t;
+	')
+
+	allow $1 xserver_tmp_t:file map;
 ')
 
 ########################################

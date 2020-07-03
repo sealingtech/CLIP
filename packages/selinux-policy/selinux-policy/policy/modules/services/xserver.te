@@ -307,7 +307,7 @@ allow xdm_t self:udp_socket create_socket_perms;
 allow xdm_t self:socket create_socket_perms;
 allow xdm_t self:appletalk_socket create_socket_perms;
 allow xdm_t self:key { search link write };
-allow xdm_t self:netlink_kobject_uevent_socket { bind create getattr setopt };
+allow xdm_t self:netlink_kobject_uevent_socket { bind create getattr setopt read };
 
 allow xdm_t xconsole_device_t:fifo_file { read_fifo_file_perms setattr_fifo_file_perms };
 
@@ -324,6 +324,9 @@ manage_files_pattern(xdm_t, xdm_rw_etc_t, xdm_rw_etc_t)
 # files in /run/user/%{USERID}/*
 manage_dirs_pattern(xdm_t, xdm_runtime_t, xdm_runtime_t)
 manage_files_pattern(xdm_t, xdm_runtime_t, xdm_runtime_t)
+# MJM: gnome-shell creates /run/user/UID/wayland-0.  for gdm gnome-shell
+# runs as xdm_t.  there should probably be a transition
+manage_sock_files_pattern(xdm_t, xdm_runtime_t, xdm_runtime_t)
 # gsettings tries to map /run/user/42/dconf/user
 allow xdm_t xdm_runtime_t:file map;
 
@@ -331,6 +334,7 @@ manage_dirs_pattern(xdm_t, xdm_tmp_t, xdm_tmp_t)
 manage_files_pattern(xdm_t, xdm_tmp_t, xdm_tmp_t)
 manage_sock_files_pattern(xdm_t, xdm_tmp_t, xdm_tmp_t)
 files_tmp_filetrans(xdm_t, xdm_tmp_t, { file dir sock_file })
+allow xdm_t xdm_tmp_t:file { map execute };
 
 manage_dirs_pattern(xdm_t, xdm_tmpfs_t, xdm_tmpfs_t)
 manage_files_pattern(xdm_t, xdm_tmpfs_t, xdm_tmpfs_t)
@@ -356,6 +360,7 @@ allow xdm_t xserver_t:unix_stream_socket connectto;
 
 allow xdm_t xserver_tmp_t:sock_file rw_sock_file_perms;
 allow xdm_t xserver_tmp_t:dir { setattr list_dir_perms };
+allow xdm_t xserver_tmp_t:file { write map };
 
 # transition to the xdm xserver
 domtrans_pattern(xdm_t, xserver_exec_t, xserver_t)
@@ -454,6 +459,8 @@ storage_dontaudit_rw_scsi_generic(xdm_t)
 term_setattr_console(xdm_t)
 term_use_unallocated_ttys(xdm_t)
 term_setattr_unallocated_ttys(xdm_t)
+term_relabel_all_ttys(xdm_t)
+term_relabel_unallocated_ttys(xdm_t)
 
 auth_domtrans_pam_console(xdm_t)
 auth_manage_pam_pid(xdm_t)
@@ -473,11 +480,16 @@ miscfiles_read_fonts(xdm_t)
 sysnet_read_config(xdm_t)
 
 userdom_dontaudit_use_unpriv_user_fds(xdm_t)
-userdom_create_all_users_keys(xdm_t)
+userdom_manage_all_users_keys(xdm_t)
 # Search /proc for any user domain processes.
 userdom_read_all_users_state(xdm_t)
 userdom_signal_all_users(xdm_t)
 userdom_user_runtime_filetrans(xdm_t, xdm_runtime_t, dir)
+# MJM: this may because gnome-shell for gdm runs as xdm_t.  there should probably be a transition
+userdom_user_runtime_filetrans(xdm_t, xdm_runtime_t, file)
+# MJM: this is because gnome-shell for gdm runs as xdm_t.  there should probably be a transition
+userdom_user_runtime_filetrans(xdm_t, xdm_runtime_t, sock_file)
+userdom_use_user_terminals(xdm_t)
 
 # for .dmrc: this was used by the Gnome Display Manager (gdm)
 # and it is now obsolete in Gnome3
@@ -487,6 +499,11 @@ xserver_manage_xsession_log(xdm_t)
 xserver_rw_session(xdm_t, xdm_tmpfs_t)
 xserver_unconfined(xdm_t)
 xserver_user_home_dir_filetrans_user_xsession_log(xdm_t)
+
+# MJM: normally this would be optional but things will not work if the
+# wm module is not present so making it required.  also, this should probably
+# involve a domain transition.
+wm_exec(xdm_t)
 
 tunable_policy(`use_nfs_home_dirs',`
 	fs_manage_nfs_dirs(xdm_t)
@@ -554,6 +571,7 @@ optional_policy(`
 		systemd_read_logind_pids(xdm_t)
 		systemd_read_logind_sessions_files(xdm_t)
 		systemd_write_inherited_logind_inhibit_pipes(xdm_t)
+		systemd_write_user_runtime_sock_files(xdm_t)
 	')
 ')
 
@@ -667,6 +685,7 @@ manage_sock_files_pattern(xserver_t, xserver_tmp_t, xserver_tmp_t)
 files_tmp_filetrans(xserver_t, xserver_tmp_t, { file dir sock_file })
 
 filetrans_pattern(xserver_t, xserver_tmp_t, xserver_tmp_t, sock_file)
+allow xserver_t xserver_tmp_t:file map;
 
 manage_dirs_pattern(xserver_t, xserver_tmpfs_t, xserver_tmpfs_t)
 manage_files_pattern(xserver_t, xserver_tmpfs_t, xserver_tmpfs_t)
@@ -787,8 +806,16 @@ userdom_setattr_user_ttys(xserver_t)
 userdom_read_user_tmp_files(xserver_t)
 userdom_map_user_tmpfs_files(xserver_t)
 userdom_rw_user_tmpfs_files(xserver_t)
+# Xwayland creates /run/user/UID/wayland-shared-XXXXXX
+userdom_user_runtime_filetrans(xserver_t, xserver_tmp_t, file)
 
 xserver_use_user_fonts(xserver_t)
+
+# MJM: i would normaly make this optional, but without
+# the wm module things break so make it required
+wm_map_tmp_files(xserver_t)
+
+xdg_read_data_dirs(xserver_t)
 
 ifdef(`enable_mls',`
 	range_transition xserver_t xserver_tmp_t:sock_file s0 - mls_systemhigh;
@@ -856,6 +883,7 @@ optional_policy(`
 
 allow xserver_t xdm_t:process { signal getpgid };
 allow xserver_t xdm_t:shm rw_shm_perms;
+allow xserver_t xdm_t:unix_stream_socket { ioctl read write accept getopt shutdown };
 
 # NB we do NOT allow xserver_t xdm_var_lib_t:dir, only access to an open
 # handle of a file inside the dir!!!
@@ -868,6 +896,7 @@ read_files_pattern(xserver_t, xdm_var_run_t, xdm_var_run_t)
 manage_files_pattern(xserver_t, xdm_tmp_t, xdm_tmp_t)
 manage_lnk_files_pattern(xserver_t, xdm_tmp_t, xdm_tmp_t)
 manage_sock_files_pattern(xserver_t, xdm_tmp_t, xdm_tmp_t)
+allow xserver_t xdm_tmp_t:file map;
 
 # Run Xorg.wrap
 can_exec(xserver_t, xserver_exec_t)

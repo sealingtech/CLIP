@@ -30,6 +30,7 @@ allow wm_domain self:process { setcap setrlimit execmem signal_perms getsched se
 allow wm_domain self:netlink_kobject_uevent_socket create_socket_perms;
 allow wm_domain self:shm create_shm_perms;
 allow wm_domain self:unix_dgram_socket create_socket_perms;
+allow wm_domain self:unix_stream_socket connectto;
 
 manage_dirs_pattern(wm_domain, wm_tmp_t, wm_tmp_t)
 manage_files_pattern(wm_domain, wm_tmp_t, wm_tmp_t)
@@ -55,18 +56,27 @@ dev_read_urand(wm_domain)
 dev_rw_dri(wm_domain)
 dev_rw_wireless(wm_domain)
 dev_write_sound(wm_domain)
+dev_rw_input_dev(wm_domain)
 
 files_read_etc_runtime_files(wm_domain)
 files_map_usr_files(wm_domain)
 files_read_usr_files(wm_domain)
+files_map_etc_files(wm_domain)
 
 fs_getattr_all_fs(wm_domain)
+fs_search_cgroup_dirs(wm_domain)
 
 kernel_read_fs_sysctls(wm_domain)
 kernel_read_proc_symlinks(wm_domain)
 kernel_read_sysctl(wm_domain)
 
+# MJM: gnome-shell reads /proc/1/cgroup
+init_search_pids(wm_domain)
+init_read_state(wm_domain)
+
 locallogin_dontaudit_use_fds(wm_domain)
+
+logging_send_syslog_msg(wm_domain)
 
 miscfiles_read_fonts(wm_domain)
 miscfiles_read_generic_certs(wm_domain)
@@ -84,6 +94,13 @@ userdom_exec_user_home_content_files(wm_domain)
 userdom_manage_user_tmp_sockets(wm_domain)
 userdom_tmp_filetrans_user_tmp(wm_domain, sock_file)
 userdom_user_runtime_filetrans_user_tmp(wm_domain, sock_file)
+# MJM: gnome-shell creates /run/user/UID/wayland-0.lock
+userdom_manage_user_tmp_files(wm_domain)
+userdom_map_user_tmp_files(wm_domain)
+userdom_user_runtime_filetrans_user_tmp(wm_domain, file)
+userdom_manage_user_runtime_dirs(wm_domain)
+userdom_rw_user_tmpfs_files(wm_domain)
+userdom_map_user_tmpfs_files(wm_domain)
 
 # to print error messages
 userdom_use_inherited_user_terminals(wm_domain)
@@ -92,6 +109,7 @@ userdom_manage_user_home_content_dirs(wm_domain)
 userdom_manage_user_home_content_files(wm_domain)
 
 userdom_user_home_dir_filetrans_user_home_content(wm_domain, { dir file })
+
 
 wm_dontaudit_exec_tmp_files(wm_domain)
 wm_dontaudit_exec_tmpfs_files(wm_domain)
@@ -141,6 +159,9 @@ optional_policy(`
 
 optional_policy(`
 	systemd_dbus_chat_logind(wm_domain)
+	systemd_write_inherited_logind_inhibit_pipes(wm_domain)
+	systemd_read_logind_sessions_files(wm_domain)
+	systemd_write_user_runtime_sock_files(wm_domain)
 ')
 
 optional_policy(`
@@ -154,4 +175,8 @@ optional_policy(`
 optional_policy(`
 	xserver_dbus_chat_xdm(wm_domain)
 	xserver_rw_xsession_log(wm_domain)
+	# MJM: not sure why this is not in upstream
+	xserver_stream_rw_xdm(wm_domain)
+	xserver_map_xkb_libs(wm_domain)
+	xserver_map_tmp_files(wm_domain)
 ')

@@ -385,6 +385,7 @@ interface(`udev_read_pid_files',`
 
 	files_search_pids($1)
 	read_files_pattern($1, udev_runtime_t, udev_runtime_t)
+	allow $1 udev_runtime_t:dir read;
 ')
 
 ########################################
