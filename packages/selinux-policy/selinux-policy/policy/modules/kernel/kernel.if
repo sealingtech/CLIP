@@ -362,7 +362,7 @@ interface(`kernel_dgram_send',`
 		type kernel_t;
 	')
 
-	allow $1 kernel_t:unix_dgram_socket sendto;
+	allow $1 kernel_t:unix_dgram_socket { write sendto };
 ')
 
 ########################################

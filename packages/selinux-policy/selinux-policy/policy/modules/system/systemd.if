@@ -63,6 +63,14 @@ template(`systemd_role_template',`
 	# See the sytemd --user section of systemd.te for the
 	# remainder of the rules.
 	allow $1_systemd_t $3:process { setsched rlimitinh };
+	# MJM: without this permission the reboot command does not immediately
+	# reboot the system.  there is a 2 minute delay where systemd is waiting
+	# for user units to stop.
+	# reboot is a symlink to systemctl.  systemctl recognizes when it is run
+	# through reboot and then isolates reboot.target which then
+	# triggers systemd-reboot.service to start.  this service then
+	# runs systemctl --force reboot.  i have no idea why noatsecure is needed.
+	allow $1_systemd_t $3:process noatsecure;
 	corecmd_shell_domtrans($1_systemd_t, $3)
 	corecmd_bin_domtrans($1_systemd_t, $3)
 

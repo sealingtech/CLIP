@@ -4798,6 +4798,25 @@ interface(`fs_dontaudit_use_tmpfs_chr_dev',`
 
 ########################################
 ## <summary>
+##	Relabelfrom character nodes on tmpfs filesystems.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`fs_relabelfrom_tmpfs_chr_file',`
+	gen_require(`
+		type tmpfs_t;
+	')
+
+	allow $1 tmpfs_t:dir list_dir_perms;
+	relabelfrom_chr_files_pattern($1, tmpfs_t, tmpfs_t)
+')
+
+########################################
+## <summary>
 ##	Relabel character nodes on tmpfs filesystems.
 ## </summary>
 ## <param name="domain">
@@ -4836,6 +4855,25 @@ interface(`fs_rw_tmpfs_blk_files',`
 
 ########################################
 ## <summary>
+##	Relabelfrom block nodes on tmpfs filesystems.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`fs_relabelfrom_tmpfs_blk_file',`
+	gen_require(`
+		type tmpfs_t;
+	')
+
+	allow $1 tmpfs_t:dir list_dir_perms;
+	relabelfrom_blk_files_pattern($1, tmpfs_t, tmpfs_t)
+')
+
+########################################
+## <summary>
 ##	Relabel block nodes on tmpfs filesystems.
 ## </summary>
 ## <param name="domain">
@@ -4851,6 +4889,25 @@ interface(`fs_relabel_tmpfs_blk_file',`
 
 	allow $1 tmpfs_t:dir list_dir_perms;
 	relabel_blk_files_pattern($1, tmpfs_t, tmpfs_t)
+')
+
+########################################
+## <summary>
+##	Relabelfrom fifo files on tmpfs filesystems.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`fs_relabelfrom_tmpfs_pipes',`
+	gen_require(`
+		type tmpfs_t;
+	')
+
+	allow $1 tmpfs_t:dir list_dir_perms;
+	relabelfrom_fifo_files_pattern($1, tmpfs_t, tmpfs_t)
 ')
 
 ########################################
