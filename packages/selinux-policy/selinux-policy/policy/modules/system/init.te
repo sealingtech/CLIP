@@ -54,7 +54,6 @@ domain_type(init_t)
 domain_entry_file(init_t, init_exec_t)
 kernel_domtrans_to(init_t, init_exec_t)
 role system_r types init_t;
-permissive init_t;
 
 #
 # init_runtime_t is the type for /var/run/shutdown.pid and /var/run/systemd.
@@ -417,6 +416,15 @@ ifdef(`init_systemd',`
 	# for network namespaces
 	fs_read_nsfs_files(init_t)
 
+	# this is to relabel files created under /run/systemd/inaccessible
+	# before the policy is loaded
+	fs_relabelfrom_tmpfs_blk_file(init_t)
+	fs_relabelfrom_tmpfs_chr_file(init_t)
+	fs_relabelfrom_tmpfs_pipes(init_t)
+	allow init_t init_runtime_t:blk_file relabelto;
+	allow init_t init_runtime_t:chr_file relabelto;
+	allow init_t init_runtime_t:fifo_file relabelto;
+
 	init_manage_all_unit_files(init_t)
 	init_read_script_state(init_t)
 
@@ -469,6 +477,9 @@ ifdef(`init_systemd',`
 	term_create_devpts_dirs(init_t)
 	term_create_ptmx(init_t)
 	term_create_controlling_term(init_t)
+
+	# relabel /run/user because it is created before policy is loaded
+	userdom_relabelto_user_runtime_root_dirs(init_t)
 
 	# udevd is a "systemd kobject uevent socket activated daemon"
 	udev_create_kobject_uevent_sockets(init_t)
