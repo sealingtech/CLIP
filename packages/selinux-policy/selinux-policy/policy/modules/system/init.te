@@ -122,6 +122,9 @@ ifdef(`distro_gentoo',`
 	domain_entry_file(initrc_t, rc_exec_t)
 ')
 
+ifdef(`enable_mcs',`
+	kernel_ranged_domtrans_to(init_t, init_exec_t, s0 - mcs_systemhigh)
+')
 ifdef(`enable_mls',`
 	kernel_ranged_domtrans_to(init_t, init_exec_t, s0 - mls_systemhigh)
 ')

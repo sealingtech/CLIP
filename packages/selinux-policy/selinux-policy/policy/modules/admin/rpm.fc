@@ -64,6 +64,4 @@ ifdef(`distro_redhat',`
 /run/yum.*	--	gen_context(system_u:object_r:rpm_runtime_t,s0)
 /run/PackageKit(/.*)?	gen_context(system_u:object_r:rpm_runtime_t,s0)
 
-ifdef(`enable_mls',`
 /usr/sbin/cpio	--	gen_context(system_u:object_r:rpm_exec_t,s0)
-')
