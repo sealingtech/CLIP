@@ -48,7 +48,7 @@ ifdef(`enable_mls',`
 type kernel_t, can_load_kernmodule;
 domain_base_type(kernel_t)
 role system_r types kernel_t;
-sid kernel gen_context(system_u:system_r:kernel_t,mls_systemhigh)
+sid kernel gen_context(system_u:system_r:kernel_t,mls_systemhigh,s0 - mcs_systemhigh)
 
 #
 # DebugFS

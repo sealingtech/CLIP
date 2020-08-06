@@ -346,7 +346,7 @@ sid node gen_context(system_u:object_r:node_t,s0 - mls_systemhigh)
 # netif_t is the default type of network interfaces.
 #
 type netif_t, netif_type;
-sid netif gen_context(system_u:object_r:netif_t,s0 - mls_systemhigh)
+sid netif gen_context(system_u:object_r:netif_t,s0 - mls_systemhigh,s0 - mcs_systemhigh)
 
 build_option(`enable_mls',`
 network_interface(lo, lo, s0 - mls_systemhigh)

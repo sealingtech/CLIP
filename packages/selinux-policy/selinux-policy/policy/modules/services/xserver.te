@@ -821,6 +821,10 @@ ifdef(`enable_mls',`
 	range_transition xserver_t xserver_tmp_t:sock_file s0 - mls_systemhigh;
 	range_transition xserver_t xserver_t:x_drawable s0 - mls_systemhigh;
 ')
+ifdef(`enable_mcs',`
+	range_transition xserver_t xserver_tmp_t:sock_file s0 - mcs_systemhigh;
+	range_transition xserver_t xserver_t:x_drawable s0 - mcs_systemhigh;
+')
 
 tunable_policy(`!xserver_object_manager',`
 	# should be xserver_unconfined(xserver_t),
