@@ -90,8 +90,8 @@ logging_log_file(var_log_t)
 files_mountpoint(var_log_t)
 
 ifdef(`enable_mcs',`
-	init_ranged_daemon_domain(auditd_t, auditd_exec_t, mcs_systemhigh)
-	init_ranged_daemon_domain(syslogd_t, syslogd_exec_t, mcs_systemhigh)
+	init_ranged_daemon_domain(auditd_t, auditd_exec_t, s0 - mcs_systemhigh)
+	init_ranged_daemon_domain(syslogd_t, syslogd_exec_t, s0 - mcs_systemhigh)
 ')
 ifdef(`enable_mls',`
 	init_ranged_daemon_domain(auditd_t, auditd_exec_t, mls_systemhigh)
