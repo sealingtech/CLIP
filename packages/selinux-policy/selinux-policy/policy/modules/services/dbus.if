@@ -89,7 +89,8 @@ template(`dbus_role_template',`
 	allow $3 $1_dbusd_t:dbus { send_msg acquire_svc };
 	allow $3 $1_dbusd_t:fd use;
 
-	allow $3 system_dbusd_t:dbus { send_msg acquire_svc };
+	# CLIP: removed acquire_svc for system_dbusd_t
+	allow $3 system_dbusd_t:dbus { send_msg };
 
 	allow $3 { session_dbusd_home_t session_dbusd_tmp_t }:dir { manage_dir_perms relabel_dir_perms };
 	allow $3 { session_dbusd_home_t session_dbusd_tmp_t }:file { manage_file_perms relabel_file_perms };
@@ -164,7 +165,8 @@ template(`dbus_session_run',`
 	allow $3 $1_dbusd_t:dbus { send_msg acquire_svc };
 	allow $3 $1_dbusd_t:fd use;
 
-	allow $3 system_dbusd_t:dbus { send_msg acquire_svc };
+	# CLIP: removed acquire_svc for system_dbusd_t
+	allow $3 system_dbusd_t:dbus { send_msg };
 
 	allow $3 { session_dbusd_home_t session_dbusd_tmp_t }:dir { manage_dir_perms relabel_dir_perms };
 	allow $3 { session_dbusd_home_t session_dbusd_tmp_t }:file { manage_file_perms relabel_file_perms };
@@ -516,7 +518,7 @@ interface(`dbus_spec_session_domain',`
 
 ########################################
 ## <summary>
-##	Acquire service on the DBUS system bus.
+##	Acquire service for self
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -526,11 +528,13 @@ interface(`dbus_spec_session_domain',`
 #
 interface(`dbus_connect_system_bus',`
 	gen_require(`
-		type system_dbusd_t;
 		class dbus acquire_svc;
 	')
 
-	allow $1 system_dbusd_t:dbus acquire_svc;
+	# CLIP: This is modified for because all services
+	# receive a specific label.  Therefore no service
+	# should be acquired on the system dbus type.
+	allow $1 self:dbus acquire_svc;
 ')
 
 ########################################
