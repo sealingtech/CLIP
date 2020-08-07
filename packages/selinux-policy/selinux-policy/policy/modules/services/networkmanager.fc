@@ -17,7 +17,9 @@
 
 /usr/lib/NetworkManager/nm-dispatcher.*	--	gen_context(system_u:object_r:NetworkManager_initrc_exec_t,s0)
 /usr/lib/networkmanager/nm-dispatcher.*	--	gen_context(system_u:object_r:NetworkManager_initrc_exec_t,s0)
-/usr/libexec/nm-dispatcher.*	--	gen_context(system_u:object_r:NetworkManager_initrc_exec_t,s0)
+# CLIP: this provides dbus service org.freedesktop.nm_dispatcher so run it as
+# NetworkManager_t instead of initrc_t
+/usr/libexec/nm-dispatcher.*	--	gen_context(system_u:object_r:NetworkManager_exec_t,s0)
 /usr/libexec/iwd			--	gen_context(system_u:object_r:NetworkManager_exec_t,s0)
 
 # Systemd unit files

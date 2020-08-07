@@ -81,6 +81,11 @@ udev_read_pid_files(tuned_t)
 
 userdom_dontaudit_search_user_home_dirs(tuned_t)
 
+# CLIP: this is missing from upstream
+optional_policy(`
+	dbus_connect_system_bus(tuned_t)
+')
+
 optional_policy(`
 	fstools_domtrans(tuned_t)
 ')
