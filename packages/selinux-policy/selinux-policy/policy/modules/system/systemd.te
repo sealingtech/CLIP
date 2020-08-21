@@ -673,6 +673,10 @@ optional_policy(`
 ')
 
 optional_policy(`
+	wm_read_all_wm_domains_state(systemd_logind_t)
+')
+
+optional_policy(`
 	xserver_read_state(systemd_logind_t)
 	xserver_dbus_chat(systemd_logind_t)
 	xserver_dbus_chat_xdm(systemd_logind_t)
