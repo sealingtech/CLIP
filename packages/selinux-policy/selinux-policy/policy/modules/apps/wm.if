@@ -131,6 +131,28 @@ interface(`wm_exec',`
 
 ########################################
 ## <summary>
+##	Read the process state (/proc/pid) of all wm domains.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`wm_read_all_wm_domains_state',`
+	gen_require(`
+		attribute wm_domain;
+	')
+
+	kernel_search_proc($1)
+	allow $1 wm_domain:dir list_dir_perms;
+	read_files_pattern($1, wm_domain, wm_domain)
+	read_lnk_files_pattern($1, wm_domain, wm_domain)
+')
+
+########################################
+## <summary>
 ##	Send and receive messages from
 ##	specified wm over dbus.
 ## </summary>
