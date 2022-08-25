@@ -134,6 +134,7 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %verify(not md5 size mtime) /var/lib/selinux/%1/semanage.trans.LOCK \
 %dir %attr(700,root,root) %dir /var/lib/selinux/%1/active/modules/ \
 %verify(not md5 size mtime) /var/lib/selinux/%1/active/commit_num \
+%verify(not md5 size mtime) /var/lib/selinux/mcs/active/modules_checksum \
 # TODO: stop globbing \
 %verify(not md5 size mtime) /var/lib/selinux/%1/active/modules/100/*/* \
 %config(noreplace) %verify(not md5 size mtime) /var/lib/selinux/%1/active/users_extra \
