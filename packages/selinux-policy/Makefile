@@ -1,8 +1,10 @@
 # Copyright (C) 2012 Tresys Technology, LLC
 # Copyright (C) 2014-15 Quark Security, Inc
+# Copyright (C) 2023 Sealing Technologies, Inc.
 #
 # Authors: Spencer Shimko <sshimko@tresys.com>
 # 	   Spencer Shimko <spencer@quarksecurity.com>
+# 	   Spencer Shimko <spencer@sealingtech.com>
 #
 #
 #
@@ -23,16 +25,17 @@ VERSION := 999.1
 RELEASE := el8
 
 # The name of the Vendor
-VENDOR := Quark Security, Inc
+VENDOR := Sealing Technologies, Inc.
 
 # The name of the Packager
-PACKAGER ?= Quark Security, Inc
+PACKAGER ?= Sealing Technologies, Inc.
 
 # snag the architecture, hard code an arch if cross-compiling or going noarch
 ARCH := noarch
 
 # Specify the type of policy to build.
-# Currently either mcs or mls.
+# This _will_ override the TYPE= value in build.conf
+# Currently either mcs, mls, or standard.
 # Only supported for CIL builds at the moment (RHEL 7.3 and some later 7.2.x releases).
 CONFIG_BUILD_SELINUX_POL_TYPE ?= mcs
 
@@ -42,13 +45,10 @@ CONFIG_BUILD_SELINUX_POL_TYPE ?= mcs
 # disabled in modules.conf.
 SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser cyrus snmp ntp bind sasl amavis denyhosts postgresql rhsmcertd logwatch raid sssd openvpn rpcbind gssproxy rpc kerberos sendmail oddjob certmonger apcupsd nagios nut mrtg xserver devicekit rtkit accountsd colord geoclue rngd gnome wm telepathy bluetooth
 
-# the filename of the tarball
-TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
-
 # Since the policy structure changes between 7.2 and 7.3, we need to decide which spec to use
 # <3 awk
 ifeq ($(OS_REL),)
-override OS_REL := 8.2
+override OS_REL := 8.6
 endif
 
 # Yes, use awk to perform floating point math. Believe it or not, bc is not installed by default and bash only does integer math and make doesn't have a clean way to do it.
@@ -63,9 +63,15 @@ ROOT_DIR ?= $(CURDIR)
 OUTPUT_DIR ?= $(ROOT_DIR)
 SRPM_OUTPUT_DIR ?= $(OUTPUT_DIR)
 
+# the filename of the tarball
+TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
+
+# Other source files rolled into the src.rpm
+SOURCES := support/Makefile.devel support/rpm.macros support/macro-expander support/selinux-policy.conf
+
 # exhaustive list of deps for the RPM, used to determine if RPM needs to be rebuilt
 TAR_DEPS := $(CURDIR)/Makefile $(shell find $(CURDIR)/$(PKGNAME)/* -type f -or -type d | sed -e "s/ /\\\ /g")
-RPM_DEPS = $(TARBALL) $(RPM_V_SPEC) $(CURDIR)/Makefile $(ADDTL_DEPS)
+RPM_DEPS = $(TARBALL) $(SOURCES) $(RPM_V_SPEC) $(CURDIR)/Makefile $(ADDTL_DEPS)
 
 RPM_TMPDIR ?= $(ROOT_DIR)/tmp
 RPM_TOPDIR ?= $(RPM_TMPDIR)/src/redhat
@@ -147,7 +153,7 @@ $(OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).$(ARCH).rpm: $(SRPM_OUTPUT_DIR)/$
 $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm: $(RPM_DEPS)
 	@echo "Building $(PKGNAME) SRPM..."
 	$(call rpm-prep)
-	cp $(TARBALL) $(RPM_TOPDIR)/SOURCES/
+	cp $(SOURCES) $(TARBALL) $(RPM_TOPDIR)/SOURCES/
 	echo -e "%define type $(CONFIG_BUILD_SELINUX_POL_TYPE)\n%define enable_modules $(ENABLE_MODULES)\n%define enforcing_mode $(ENFORCING_MODE)\n%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n%define separatePkgs $(SEPARATE_PKGS)\n%define OS_REL $(OS_REL)\n"> $(RPM_SPEC)
 	cat $(RPM_V_SPEC) >> $(RPM_SPEC)
 	cd $(RPM_TOPDIR) && rpmbuild $(RPMBUILD_ARGS) -bs $(RPM_SPEC) --nodeps

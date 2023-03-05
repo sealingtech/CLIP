@@ -12,25 +12,63 @@ Summary: Policy Base Configuration Data
 License: GPLv2+
 Group: System Environment/Base
 Source: %{pkgname}-%{version}.tar.gz
+# Tool helps during policy development, to expand system m4 macros to raw allow rules
+# Git repo: https://gitlab.cee.redhat.com/SELinux/macro-expander
+Source1:  macro-expander
+Source2:  rpm.macros
+Source3:  Makefile.devel
+Source4:  selinux-policy.conf
 Url: http:/oss.tresys.com/repos/refpolicy/
 BuildRequires: python3 gawk checkpolicy >= %{CHECKPOLICYVER} m4 policycoreutils-devel >= %{POLICYCOREUTILSVER} bzip2
 Requires(pre): policycoreutils >= %{POLICYCOREUTILSVER}
 Requires(post): /bin/awk /usr/bin/sha512sum
 Requires: libsemanage >= %{LIBSEMANAGEVER}
 Requires: platform-python
-Provides: selinux-policy-devel
 
 %description 
-This package contains the base components common across policy types.  In
-addition to this package, you will also get %{type}-specific RPMs.
-selinux-policy-%{type}
+This package contains the base components common across policy types.
+This package does not contain the full policy, you will also need something like
+selinux-policy-%{type} and any supplemental %{type}-specific RPMs.
+It is part of the Certificable Linux Integration Platform code base
+and has different security goals that typical vendor policies. Installing
+these packages may require updates to system configuration or additional
+policy modifications to support your use cases.
 
 %files 
 %defattr(-,root,root,-)
+%{!?_licensedir:%global license %%doc}
+%license COPYING
 %dir %{_usr}/share/selinux
 %dir %{_sysconfdir}/selinux
 %ghost %config(noreplace) %{_sysconfdir}/selinux/config
 %ghost %{_sysconfdir}/sysconfig/selinux
+%{_usr}/lib/tmpfiles.d/selinux-policy.conf
+%{_rpmconfigdir}/macros.d/macros.selinux-policy
+
+%package devel
+Summary: SELinux policy devel
+Requires(pre): selinux-policy = %{version}-%{release}
+Requires: selinux-policy = %{version}-%{release}
+Requires: m4 checkpolicy >= %{CHECKPOLICYVER}
+Requires: /usr/bin/make
+Requires(post): policycoreutils-devel >= %{POLICYCOREUTILSVER}
+
+%description devel
+SELinux policy development support.
+
+%files devel
+%{_bindir}/macro-expander
+%dir %{_usr}/share/selinux/devel
+%dir %{_usr}/share/selinux/devel/include
+%{_usr}/share/selinux/devel/include/*
+%{_usr}/share/selinux/devel/Makefile
+%{_usr}/share/selinux/devel/example.*
+%{_usr}/share/selinux/devel/policy.*
+%ghost %verify(not md5 size mode mtime) %{_sharedstatedir}/sepolgen/interface_info
+
+%post devel
+selinuxenabled && /usr/bin/sepolgen-ifgen 2>/dev/null
+exit 0
 
 %package doc
 Summary: SELinux policy documentation
@@ -45,8 +83,8 @@ Policy documentation
 %files doc
 %defattr(-,root,root,-)
 %doc %{_usr}/share/doc/%{name}-%{version}
-#%doc %{_usr}/share/selinux/devel/html
-#%attr(755,root,root) %{_usr}/share/selinux/devel/policyhelp
+#%doc %%{_usr}/share/selinux/devel/html
+#%attr(755,root,root) %%{_usr}/share/selinux/devel/policyhelp
 
 %global genSeparatePolRPM() \
 %package %2-%1 \
@@ -84,7 +122,7 @@ make UNK_PERMS=%4 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=n DIRECT_INITRC=%3 MONOL
 %{__mkdir} -p %{buildroot}/var/lib/selinux/%1/active/modules/disabled \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/logins \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs \
-install -m0644 selinux_config/setrans-%1.conf %{buildroot}%{_sysconfdir}/selinux/%1/setrans.conf \
+if [[ %2 != "standard" ]]; then install -m0644 selinux_config/setrans-%1.conf %{buildroot}%{_sysconfdir}/selinux/%1/setrans.conf; fi \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.local \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.local.bin \
 sefcontext_compile -o %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.bin %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts \
@@ -134,7 +172,7 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %verify(not md5 size mtime) /var/lib/selinux/%1/semanage.trans.LOCK \
 %dir %attr(700,root,root) %dir /var/lib/selinux/%1/active/modules/ \
 %verify(not md5 size mtime) /var/lib/selinux/%1/active/commit_num \
-%verify(not md5 size mtime) /var/lib/selinux/mcs/active/modules_checksum \
+%verify(not md5 size mtime) /var/lib/selinux/%1/active/modules_checksum \
 # TODO: stop globbing \
 %verify(not md5 size mtime) /var/lib/selinux/%1/active/modules/100/*/* \
 %config(noreplace) %verify(not md5 size mtime) /var/lib/selinux/%1/active/users_extra \
@@ -164,12 +202,12 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs_dist \
 %config %{_sysconfdir}/selinux/%1/contexts/files/media \
 %dir %{_sysconfdir}/selinux/%1/contexts/users \
+%if %1 != "standard" \
 %config(noreplace) %{_sysconfdir}/selinux/%1/setrans.conf \
+%endif \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/users/* \
 %{_usr}/share/selinux/%1/*.pp \
 %{_usr}/share/selinux/%1/modules.lst \
-%dir %{_usr}/share/selinux/%1/include \
-%{_usr}/share/selinux/%1/include/*
 
 %build
 
@@ -189,32 +227,37 @@ mkdir -p %{buildroot}%{_usr}/share/selinux/modules/
 
 mkdir -p %{buildroot}/var/lib/selinux/%{type}
 
-# Install devel
 make %{?_smp_mflags} clean
 # installCmds NAME TYPE DIRECT_INITRC POLY UNKNOWN
 %installCmds %{type} %{type}  n y deny
 
 make %{?_smp_mflags} UNK_PERMS=deny NAME=%{type} TYPE=%{type}  DISTRO=%{distro} UBAC=y DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name}-%{version} POLY=y MLS_CATS=1024 MCS_CATS=1024 APPS_MODS="%{enable_modules}" install-headers install-docs
-make UNK_PERMS=allow NAME=%{type} TYPE=%{type} DISTRO=%{distro} UBAC=n DIRECT_INITRC=n MONOLITHIC=%{monolithic} DESTDIR=%{buildroot} PKGNAME=%{name} MLS_CATS=1024 MCS_CATS=1024 install-headers
 touch %{buildroot}/var/lib/selinux/%{type}/active/seusers.linked
-#echo  "xdg-open file://usr/share/doc/selinux-policy/html/index.html"> %{buildroot}%{_usr}/share/selinux/devel/policyhelp
-#chmod +x %{buildroot}%{_usr}/share/selinux/devel/policyhelp
-# This insanity is b/c libselinux always looks at the host's /etc/selinux/config
-# and even though you can specify a diff "root" below, it still uses libselinux 
-# which means the root is only used for output, it is consulted for the pol
-# FIXME: man page generation is broken when building separate pol packages.
-# It consults the packages in the pol store which doesn't contain all of the packages
-# configured and dies.
-#ln -s %{buildroot}/etc/selinux/mcs %{buildroot}/etc/selinux/targeted  
+mkdir %{buildroot}%{_usr}/share/selinux/devel/
+mv %{buildroot}%{_usr}/share/selinux/%{type}/include %{buildroot}%{_usr}/share/selinux/devel/include
+install -m 644 %{SOURCE3} %{buildroot}%{_usr}/share/selinux/devel/Makefile
+install -m 644 doc/example.* %{buildroot}%{_usr}/share/selinux/devel/
+install -m 644 doc/policy.* %{buildroot}%{_usr}/share/selinux/devel/
+# FIXME: sepolicy manpage errors out, might be an issue with non-rhel policy naming conventions, symlinking isnt fixing it (yet..)
+#ln -s %{buildroot}/%{_sysconfdir}/selinux/%{type} %{buildroot}/%{_sysconfdir}/selinux/targeted
+#ln -s %{buildroot}%{_usr}/share/selinux/standard %{buildroot}%{_usr}/share/selinux/targeted
 #/usr/bin/sepolicy manpage -a -p %{buildroot}/usr/share/man/man8/ -w -r %{buildroot}
-#rm %{buildroot}/etc/selinux/targeted
+#rm -f %{buildroot}/%{_sysconfdir}/selinux/targeted %{buildroot}%{_usr}/share/selinux/targeted
 #mkdir %{buildroot}%{_usr}/share/selinux/devel/html
-#htmldir=`compgen -d %{buildroot}%{_usr}/share/man/man8/`
-#mv ${htmldir}/* %{buildroot}%{_usr}/share/selinux/devel/html
-#mv %{buildroot}%{_usr}/share/man/man8/index.html %{buildroot}%{_usr}/share/selinux/devel/html
+#mv %{buildroot}%{_usr}/share/man/man8/*.html %{buildroot}%{_usr}/share/selinux/devel/html
 #mv %{buildroot}%{_usr}/share/man/man8/style.css %{buildroot}%{_usr}/share/selinux/devel/html
-#rm -rf ${htmldir}
-#chmod +x %{buildroot}%{_usr}/share/selinux/devel/policyhelp
+
+mkdir -p %{buildroot}%{_bindir}
+cp %{SOURCE1} %{buildroot}%{_bindir}/
+
+mkdir -p %{buildroot}%{_rpmconfigdir}/macros.d
+install -m 644 %{SOURCE2} %{buildroot}%{_rpmconfigdir}/macros.d/macros.selinux-policy
+sed -i 's/SELINUXPOLICYVERSION/%{version}-%{release}/' %{buildroot}%{_rpmconfigdir}/macros.d/macros.selinux-policy
+sed -i 's@SELINUXSTOREPATH@%{_sharedstatedir}/selinux@' %{buildroot}%{_rpmconfigdir}/macros.d/macros.selinux-policy
+
+mkdir -p %{buildroot}%{_usr}/lib/tmpfiles.d/
+cp %{SOURCE4} %{buildroot}%{_usr}/lib/tmpfiles.d/
+
 
 %clean
 %{__rm} -fR %{buildroot}
@@ -234,6 +277,7 @@ SELINUX=%{enforcing_mode}
 # SELINUXTYPE= can take one of these two values:
 #     mcs - standard Multi Category security policy,
 #     mls - Multi Level Security security policy.
+#     standard - SELinux policy without MLS (neight MCS nor MLS features are enabled, UBAC, RBAC, TE only)
 SELINUXTYPE=%{type}
 
 " > /etc/selinux/config
@@ -314,6 +358,7 @@ Requires(pre): selinux-policy = %{version}-%{release}
 Requires: selinux-policy = %{version}-%{release} policycoreutils-devel
 Conflicts:  audispd-plugins <= 1.7.7-1
 Conflicts:  seedit
+Obsoletes: selinux-policy-targeted, selinux-policy-minimum, selinux-policy-mls
 
 %description %{type}
 SELinux %{type} policy
