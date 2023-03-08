@@ -4665,3 +4665,322 @@ interface(`userdom_dontaudit_rw_all_users_stream_sockets',`
 
 	dontaudit $1 userdomain:unix_stream_socket rw_socket_perms;
 ')
+
+########################################
+## <summary>
+##      dontaudit Search /root
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain to not audit.
+##      </summary>
+## </param>
+#
+interface(`userdom_dontaudit_search_admin_dir',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        dontaudit $1 admin_home_t:lnk_file read_lnk_file_perms;
+        dontaudit $1 admin_home_t:dir search_dir_perms;
+')
+
+########################################
+## <summary>
+##      dontaudit list /root
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain to not audit.
+##      </summary>
+## </param>
+#
+interface(`userdom_dontaudit_list_admin_dir',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        dontaudit $1 admin_home_t:lnk_file read_lnk_file_perms;
+        dontaudit $1 admin_home_t:dir list_dir_perms;
+')
+
+########################################
+## <summary>
+##      Allow domain to  list /root
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`userdom_list_admin_dir',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        allow $1 admin_home_t:lnk_file read_lnk_file_perms;
+        allow $1 admin_home_t:dir list_dir_perms;
+')
+
+########################################
+## <summary>
+##      Allow Search /root
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`userdom_search_admin_dir',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        allow $1 admin_home_t:lnk_file read_lnk_file_perms;
+        allow $1 admin_home_t:dir search_dir_perms;
+')
+
+########################################
+## <summary>
+##      dontaudit create dirs /root
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain to not audit.
+##      </summary>
+## </param>
+#
+interface(`userdom_dontaudit_create_admin_dir',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        dontaudit $1 admin_home_t:dir create_dir_perms;
+')
+
+
+########################################
+## <summary>
+##      allow manage dirs /root
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain to not audit.
+##      </summary>
+## </param>
+#
+interface(`userdom_manage_admin_dirs',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        allow $1 admin_home_t:dir manage_dir_perms;
+')
+
+########################################
+## <summary>
+##      allow manage files /root
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain to not audit.
+##      </summary>
+## </param>
+#
+interface(`userdom_manage_admin_files',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        allow $1 admin_home_t:file manage_file_perms;
+')
+
+########################################
+## <summary>
+##      dontaudit manage dirs /root
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain to not audit.
+##      </summary>
+## </param>
+#
+interface(`userdom_dontaudit_manage_admin_dir',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        dontaudit $1 admin_home_t:dir manage_dir_perms;
+')
+
+########################################
+## <summary>
+##      dontaudit manage files /root
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain to not audit.
+##      </summary>
+## </param>
+#
+interface(`userdom_dontaudit_manage_admin_files',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        dontaudit $1 admin_home_t:file manage_file_perms;
+')
+
+########################################
+## <summary>
+##      Read admin home files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <rolecap/>
+#
+interface(`userdom_read_admin_home_files',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        allow $1 admin_home_t:lnk_file read_lnk_file_perms;
+        read_files_pattern($1, admin_home_t, admin_home_t)
+')
+
+########################################
+## <summary>
+##      Delete admin home files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <rolecap/>
+#
+interface(`userdom_delete_admin_home_files',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        allow $1 admin_home_t:lnk_file read_lnk_file_perms;
+        allow $1 admin_home_t:file delete_file_perms;
+')
+
+
+########################################
+## <summary>
+##      Execute admin home files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <rolecap/>
+#
+interface(`userdom_exec_admin_home_files',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        allow $1 admin_home_t:lnk_file read_lnk_file_perms;
+        exec_files_pattern($1, admin_home_t, admin_home_t)
+')
+
+########################################
+## <summary>
+##      Append files inherited
+##      in the /root directory.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`userdom_inherit_append_admin_home_files',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        allow $1 admin_home_t:file { getattr append };
+')
+
+########################################
+## <summary>
+##      Create objects in the /root directory
+##      with an automatic type transition to
+##      a specified private type.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <param name="private_type">
+##      <summary>
+##      The type of the object to create.
+##      </summary>
+## </param>
+## <param name="object_class">
+##      <summary>
+##      The class of the object to be created.
+##      </summary>
+## </param>
+## <param name="name" optional="true">
+##      <summary>
+##      The name of the object being created.
+##      </summary>
+## </param>
+#
+interface(`userdom_admin_home_dir_filetrans',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        allow $1 admin_home_t:lnk_file read_lnk_file_perms;
+        filetrans_pattern($1, admin_home_t, $2, $3, $4)
+')
+
+########################################
+## <summary>
+##      Dontaudit Read files inherited from the admin home dir.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain to not audit.
+##      </summary>
+## </param>
+#
+interface(`userdom_dontaudit_read_inherited_admin_home_files',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        dontaudit $1 admin_home_t:file read_inherited_file_perms;
+')
+
+########################################
+## <summary>
+##      Dontaudit append files inherited from the admin home dir.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain to not audit.
+##      </summary>
+## </param>
+#
+interface(`userdom_dontaudit_append_inherited_admin_home_file',`
+        gen_require(`
+                type admin_home_t;
+        ')
+
+        dontaudit $1 admin_home_t:file append_inherited_file_perms;
+')

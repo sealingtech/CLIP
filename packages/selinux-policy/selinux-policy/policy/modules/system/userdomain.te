@@ -112,6 +112,14 @@ type user_tmpfs_t;
 files_tmpfs_file(user_tmpfs_t)
 userdom_user_home_content(user_tmpfs_t)
 
+type admin_home_t;
+files_type(admin_home_t)
+files_associate_tmp(admin_home_t)
+fs_associate_tmpfs(admin_home_t)
+files_mountpoint(admin_home_t)
+files_poly_member(admin_home_t)
+files_poly_parent(admin_home_t)
+
 type user_tty_device_t;
 dev_node(user_tty_device_t)
 ubac_constrained(user_tty_device_t)
