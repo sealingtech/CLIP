@@ -8,24 +8,33 @@
 #
 #
 #
+# NOTE: you can override any of the config variables in a Makefile.supl
+# except the SEPARATE_PKGS feature that splits policy mods into separate i
+# RPMs. The list is added to the list defined below in this file.
+include $(CURDIR)/Makefile.supl
 
 # The name of the package
-PKGNAME := selinux-policy
+PKGNAME ?= selinux-policy
 
 # These two are typically set by the top-level CONFIG_BUILD file.
 CONFIG_BUILD_ENFORCING_MODE ?= y
 CONFIG_BUILD_TOOR ?= n
 
+
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
-VERSION := 999.1
+ifdef DEVVER 
+VERSION ?= 999.1.$(DEVVER)
+else
+VERSION ?= 999.1
+endif
 
 # bump this if creating multiple releases from the same
 # version (think about this... why are you doing this?)
-RELEASE := el8
+RELEASE ?= el8
 
 # The name of the Vendor
-VENDOR := Sealing Technologies, Inc.
+VENDOR ?= Sealing Technologies, Inc.
 
 # The name of the Packager
 PACKAGER ?= Sealing Technologies, Inc.
@@ -43,12 +52,15 @@ CONFIG_BUILD_SELINUX_POL_TYPE ?= mcs
 # e.g., selinux-policy-apache
 # Listing a module here will also cause it to be enabled even if it
 # disabled in modules.conf.
-SEPARATE_PKGS := aide apache mysql postfix samhain ssh tripwire unprivuser cyrus snmp ntp bind sasl amavis denyhosts postgresql rhsmcertd logwatch raid sssd openvpn rpcbind gssproxy rpc kerberos sendmail oddjob certmonger apcupsd nagios nut mrtg xserver devicekit rtkit accountsd colord geoclue rngd gnome wm telepathy bluetooth
+SEPARATE_PKGS += usbguard aide apache mysql postfix samhain ssh tripwire unprivuser cyrus snmp ntp bind sasl \
+	denyhosts postgresql rhsmcertd logwatch raid sssd openvpn rpcbind gssproxy rpc kerberos sendmail oddjob certmonger \
+	apcupsd nagios nut mrtg xserver devicekit rtkit accountsd colord geoclue rngd gnome wm telepathy bluetooth amavis \
+	auditadm secadm staff samba
 
 # Since the policy structure changes between 7.2 and 7.3, we need to decide which spec to use
 # <3 awk
 ifeq ($(OS_REL),)
-override OS_REL := 8.6
+override OS_REL ?= 8.6
 endif
 
 # Yes, use awk to perform floating point math. Believe it or not, bc is not installed by default and bash only does integer math and make doesn't have a clean way to do it.
@@ -106,9 +118,9 @@ endef
 # Note: due to remediation content, overriding this may not work the way you expect.
 # Look at the bottom of the stock clip-rhel6--ks %post for an example.
 ifneq ($(CONFIG_BUILD_ENFORCING_MODE),n)
-	ENFORCING_MODE := enforcing
+	ENFORCING_MODE ?= enforcing
 else
-	ENFORCING_MODE := permissive
+	ENFORCING_MODE ?= permissive
 endif
 
 # always build toor as a separate RPM.
