@@ -48,3 +48,108 @@ interface(`staff_role_change_to',`
 
 	allow staff_r $1;
 ')
+
+########################################
+## <summary>
+##      Allow staff domain to execute the specified program in
+##      the specified domain.
+## </summary>
+## <desc>
+##      <p>
+##      Allow staff domain to execute the specified program in
+##      the specified domain.
+##      </p>
+##      <p>
+##      This is a interface to support third party modules
+##      and its use is not allowed in upstream reference
+##      policy.
+##      </p>
+## </desc>
+## <param name="domain">
+##      <summary>
+##      Domain to execute in.
+##      </summary>
+## </param>
+## <param name="entry_file">
+##      <summary>
+##      Domain entry point file.
+##      </summary>
+## </param>
+#
+interface(`staff_domtrans_to',`
+        gen_require(`
+                type staff_t;
+		role staff_r;
+        ')
+
+        domtrans_pattern(staff_t,$2,$1)
+	role staff_r types $1;
+')
+
+########################################
+## <summary>
+##      Setup a domain which can be manually transitioned to from staff.
+## </summary>
+## <desc>
+##      <p>
+##      Create a domain where staff sets the execution context manually (setexeccon() or runcon)
+## This allows for the
+##  manual transition from staff into the new domain.  This is used
+##  when automatic transitions won't work.  Used for the case where the
+##  same binary is used for multiple target domains.
+##      </p>
+## </desc>
+## <param name="domain">
+##      <summary>
+##      Type to be used as a domain.
+##      </summary>
+## </param>
+## <param name="entry_point">
+##      <summary>
+##      Type of the program being executed when starting this domain.
+##      </summary>
+## </param>
+#
+interface(`staff_spec_domtrans_to',`
+        gen_require(`
+                type staff_t;
+                role staff_r;
+        ')
+
+
+        domain_type($1)
+        domain_entry_file($1, $2)
+
+        role staff_r types $1;
+
+        spec_domtrans_pattern(staff_t, $2, $1)
+
+        allow staff_t $1:process rlimitinh;
+
+        userdom_use_user_terminals($1)
+')
+
+########################################
+## <summary>
+##      Allow staff domain to manage directories and files with a specific label.
+##      This is a reverse interface granting access to a callers resources and is used
+##	to enable third party module support.
+## </summary>
+## <param name="dir">
+##      <summary>
+##      Dir type staff can manage the contents of this parent dir.
+##      </summary>
+## </param>
+## <param name="file">
+##      <summary>
+##      File type staff can manage these files.
+##      </summary>
+## </param>
+#
+interface(`staff_can_manage_files',`
+        gen_require(`
+                type staff_t;
+        ')
+
+	manage_files_pattern(staff_t, $1, $2)
+')
