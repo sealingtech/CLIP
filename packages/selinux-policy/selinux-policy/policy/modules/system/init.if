@@ -188,6 +188,25 @@ interface(`init_domain',`
 		allow init_t $1:process2 { nnp_transition nosuid_transition };
 	')
 ')
+########################################
+## <summary>
+##      Allow SELinux Domain trasition from sytemd
+##  into confined domain with NoNewPrivileges
+##  Systemd Security feature.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`init_nnp_daemon_domain',`
+    gen_require(`
+        type init_t;
+    ')
+
+    allow init_t $1:process2 { nnp_transition nosuid_transition };
+')
 
 ########################################
 ## <summary>
