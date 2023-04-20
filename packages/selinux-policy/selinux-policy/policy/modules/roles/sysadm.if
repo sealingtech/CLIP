@@ -193,6 +193,87 @@ interface(`sysadm_bin_spec_domtrans_to',`
 	allow $1 sysadm_t:process sigchld;
 ')
 
+
+########################################
+## <summary>
+##      Allow sysadm domain to execute the specified program in
+##      the specified domain.
+## </summary>
+## <desc>
+##      <p>
+##      Allow sysadm domain to execute the specified program in
+##      the specified domain.
+##      </p>
+##      <p>
+##      This is a interface to support third party modules
+##      and its use is not allowed in upstream reference
+##      policy.
+##      </p>
+## </desc>
+## <param name="domain">
+##      <summary>
+##      Domain to execute in.
+##      </summary>
+## </param>
+## <param name="entry_file">
+##      <summary>
+##      Domain entry point file.
+##      </summary>
+## </param>
+#
+interface(`sysadm_domtrans_to',`
+        gen_require(`
+                type sysadm_t;
+		role sysadm_r;
+        ')
+
+        domtrans_pattern(sysadm_t,$2,$1)
+	role sysadm_r types $1;
+')
+
+########################################
+## <summary>
+##      Setup a domain which can be manually transitioned to from sysadm.
+## </summary>
+## <desc>
+##      <p>
+##      Create a domain where sysadm sets the execution context manually (setexeccon() or runcon)
+## This allows for the
+##  manual transition from sysadm into the new domain.  This is used
+##  when automatic transitions won't work.  Used for the case where the
+##  same binary is used for multiple target domains.
+##      </p>
+## </desc>
+## <param name="domain">
+##      <summary>
+##      Type to be used as a domain.
+##      </summary>
+## </param>
+## <param name="entry_point">
+##      <summary>
+##      Type of the program being executed when starting this domain.
+##      </summary>
+## </param>
+#
+interface(`sysadm_spec_domtrans_to',`
+        gen_require(`
+                type sysadm_t;
+		role sysadm_r;
+        ')
+
+
+        domain_type($1)
+        domain_entry_file($1, $2)
+
+        role sysadm_r types $1;
+
+        spec_domtrans_pattern(sysadm_t, $2, $1)
+
+        allow sysadm_t $1:process rlimitinh;
+
+        userdom_use_user_terminals($1)
+')
+
 ########################################
 ## <summary>
 ##	Send a SIGCHLD signal to sysadm users.
@@ -245,4 +326,29 @@ interface(`sysadm_rw_pipes',`
 	')
 
 	allow $1 sysadm_t:fifo_file rw_fifo_file_perms;
+')
+
+########################################
+## <summary>
+##      Allow sysadm domain to manage directories and files with a specific label.
+##      This is a reverse interface granting access to a callers resources and is used
+##      to enable third party module support.
+## </summary>
+## <param name="dir">
+##      <summary>
+##      Dir type sysadm can manage the contents of this parent dir.
+##      </summary>
+## </param>
+## <param name="file">
+##      <summary>
+##      File type sysadm can manage these files.
+##      </summary>
+## </param>
+#
+interface(`sysadm_can_manage_files',`
+        gen_require(`
+                type sysadm_t;
+        ')
+
+        manage_files_pattern(sysadm_t, $1, $2)
 ')
