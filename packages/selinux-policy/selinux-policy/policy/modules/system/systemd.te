@@ -299,6 +299,11 @@ kernel_domtrans_to(systemd_cgroups_t, systemd_cgroups_exec_t)
 # for /proc/cmdline
 kernel_read_system_state(systemd_cgroups_t)
 
+kernel_search_fs_sysctls(systemd_cgroups_t)
+kernel_read_crypto_sysctls(systemd_cgroups_t)
+
+fs_getattr_xattr_fs(systemd_cgroups_t)
+
 mls_fd_use_all_levels(systemd_cgroups_t)
 
 selinux_getattr_fs(systemd_cgroups_t)
@@ -1128,6 +1133,9 @@ allow systemd_sessions_t systemd_sessions_runtime_t:file manage_file_perms;
 files_pid_filetrans(systemd_sessions_t, systemd_sessions_runtime_t, file)
 
 kernel_read_kernel_sysctls(systemd_sessions_t)
+kernel_read_crypto_sysctls(systemd_sessions_t)
+
+fs_getattr_xattr_fs(systemd_sessions_t)
 
 selinux_get_enforce_mode(systemd_sessions_t)
 selinux_get_fs_mount(systemd_sessions_t)
@@ -1183,6 +1191,7 @@ allow systemd_tmpfiles_t systemd_tmpfiles_conf_t:dir list_dir_perms;
 allow systemd_tmpfiles_t systemd_tmpfiles_conf_type:file read_file_perms;
 
 kernel_getattr_proc(systemd_tmpfiles_t)
+kernel_read_crypto_sysctls(systemd_tmpfiles_t)
 kernel_read_kernel_sysctls(systemd_tmpfiles_t)
 kernel_read_network_state(systemd_tmpfiles_t)
 
@@ -1215,6 +1224,9 @@ files_relabelto_home(systemd_tmpfiles_t)
 files_relabelto_etc_dirs(systemd_tmpfiles_t)
 # for /etc/mtab
 files_manage_etc_symlinks(systemd_tmpfiles_t)
+files_getattr_generic_locks(systemd_tmpfiles_t)
+files_read_generic_pids(systemd_tmpfiles_t)
+
 
 fs_getattr_tmpfs(systemd_tmpfiles_t)
 fs_getattr_xattr_fs(systemd_tmpfiles_t)
@@ -1224,6 +1236,7 @@ fs_relabelfrom_tmpfs_dirs(systemd_tmpfiles_t)
 selinux_get_fs_mount(systemd_tmpfiles_t)
 selinux_search_fs(systemd_tmpfiles_t)
 
+auth_setattr_faillog_files(systemd_tmpfiles_t)
 auth_append_lastlog(systemd_tmpfiles_t)
 auth_manage_faillog(systemd_tmpfiles_t)
 auth_manage_lastlog(systemd_tmpfiles_t)
@@ -1251,6 +1264,8 @@ logging_setattr_syslogd_tmp_dirs(systemd_tmpfiles_t)
 
 miscfiles_manage_man_pages(systemd_tmpfiles_t)
 miscfiles_relabel_man_cache(systemd_tmpfiles_t)
+miscfiles_relabel_localization(systemd_tmpfiles_t)
+miscfiles_setattr_localization(systemd_tmpfiles_t)
 
 seutil_read_config(systemd_tmpfiles_t)
 seutil_read_file_contexts(systemd_tmpfiles_t)
@@ -1351,6 +1366,7 @@ files_list_usr(systemd_user_session_type)
 # /etc/localtime
 files_watch_etc_symlinks(systemd_user_session_type)
 
+fs_getattr_xattr_fs(systemd_user_session_type)
 fs_getattr_cgroup(systemd_user_session_type)
 fs_getattr_tmpfs(systemd_user_session_type)
 fs_rw_cgroup_files(systemd_user_session_type)
@@ -1359,6 +1375,7 @@ fs_manage_cgroup_dirs(systemd_user_session_type)
 # for /proc/sys/fs/nr_open
 kernel_read_fs_sysctls(systemd_user_session_type)
 kernel_read_kernel_sysctls(systemd_user_session_type)
+kernel_read_crypto_sysctls(systemd_user_session_type)
 
 selinux_compute_access_vector(systemd_user_session_type)
 selinux_compute_create_context(systemd_user_session_type)
@@ -1398,13 +1415,16 @@ domain_obj_id_change_exemption(systemd_user_runtime_dir_t)
 
 files_read_etc_files(systemd_user_runtime_dir_t)
 
+fs_getattr_xattr_fs(systemd_user_runtime_dir_t)
 fs_mount_tmpfs(systemd_user_runtime_dir_t)
 fs_getattr_tmpfs(systemd_user_runtime_dir_t)
 fs_list_tmpfs(systemd_user_runtime_dir_t)
 fs_unmount_tmpfs(systemd_user_runtime_dir_t)
 fs_relabelfrom_tmpfs_dirs(systemd_user_runtime_dir_t)
+fs_read_cgroup_files(systemd_user_runtime_dir_t)
 
 kernel_read_kernel_sysctls(systemd_user_runtime_dir_t)
+kernel_read_crypto_sysctls(systemd_user_runtime_dir_t)
 
 selinux_get_enforce_mode(systemd_user_runtime_dir_t)
 
