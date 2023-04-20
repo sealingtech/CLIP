@@ -191,6 +191,30 @@ interface(`init_domain',`
 
 ########################################
 ## <summary>
+##	Provide a transition from init into target domain with no extraneous permissions like those granted by init_domain.
+##	NOTE: this does NOT setup an auto trans, so it can be used with eg templatized unit files using SELinuxContext=.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition.
+##	</summary>
+## </param>
+## <param name="file">
+##	<summary>
+##	Executable type for target domain (the entrypoint).
+##	</summary>
+## </param>
+#
+interface(`init_spec_domtrans',`
+	gen_require(`
+		type init_t;
+	')
+
+	domain_transition_pattern(init_t, $2, $1)
+')
+
+########################################
+## <summary>
 ##	Create a domain which can be started by init,
 ##	with a range transition.
 ## </summary>
@@ -3450,4 +3474,27 @@ interface(`init_getrlimit',`
 	')
 
 	allow $1 init_t:process getrlimit;
+')
+
+########################################
+## <summary>
+##      Allow init_t to read a file. 
+## </summary>
+## <param name="dir">
+##      <summary>
+##      Parent dir type
+##      </summary>
+## </param>
+## <param name="file">
+##      <summary>
+##      Target file type
+##      </summary>
+## </param>
+#
+interface(`init_read_files',`
+	gen_require(`
+		type init_t;
+	')
+
+	read_files_pattern(init_t, $1, $2)
 ')
