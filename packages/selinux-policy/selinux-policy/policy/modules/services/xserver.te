@@ -106,8 +106,9 @@ type user_fonts_t;
 userdom_user_home_content(user_fonts_t)
 
 type user_fonts_cache_t;
-xdg_cache_content(user_fonts_cache_t)
-
+optional_policy(`
+	xdg_cache_content(user_fonts_cache_t)
+')
 type user_fonts_config_t;
 userdom_user_home_content(user_fonts_config_t)
 
@@ -194,7 +195,9 @@ type xserver_log_t;
 logging_log_file(xserver_log_t)
 
 type mesa_shader_cache_t;
-xdg_cache_content(mesa_shader_cache_t)
+optional_policy(`
+	xdg_cache_content(mesa_shader_cache_t)
+')
 
 ifdef(`enable_mcs',`
 	init_ranged_domain(xdm_t, xdm_exec_t, s0 - mcs_systemhigh)
@@ -703,11 +706,15 @@ files_search_var_lib(xserver_t)
 manage_dirs_pattern(xserver_t, mesa_shader_cache_t, mesa_shader_cache_t)
 manage_files_pattern(xserver_t, mesa_shader_cache_t, mesa_shader_cache_t)
 allow xserver_t mesa_shader_cache_t:file map;
-xdg_cache_filetrans(xserver_t, mesa_shader_cache_t, dir, "mesa_shader_cache")
-xdg_generic_user_home_dir_filetrans_cache(xserver_t, dir, ".cache")
+optional_policy(`
+	xdg_cache_filetrans(xserver_t, mesa_shader_cache_t, dir, "mesa_shader_cache")
+	xdg_generic_user_home_dir_filetrans_cache(xserver_t, dir, ".cache")
+')
 
-# for writing to ~/.local/share/sddm/xorg-session.log
-xdg_manage_data(xauth_t)
+optional_policy(`
+	# for writing to ~/.local/share/sddm/xorg-session.log
+	xdg_manage_data(xauth_t)
+')
 
 domtrans_pattern(xserver_t, xauth_exec_t, xauth_t)
 allow xserver_t xauth_home_t:file read_file_perms;
@@ -815,7 +822,9 @@ xserver_use_user_fonts(xserver_t)
 # the wm module things break so make it required
 wm_map_tmp_files(xserver_t)
 
-xdg_read_data_dirs(xserver_t)
+optional_policy(`
+	xdg_read_data_dirs(xserver_t)
+')
 
 ifdef(`enable_mls',`
 	range_transition xserver_t xserver_tmp_t:sock_file s0 - mls_systemhigh;
