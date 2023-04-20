@@ -538,7 +538,9 @@ interface(`xserver_use_user_fonts',`
 	allow $1 user_fonts_config_t:file read_file_perms;
 
 	userdom_search_user_home_dirs($1)
-	xdg_search_cache_dirs($1)
+	optional_policy(`
+		xdg_search_cache_dirs($1)
+	')
 ')
 
 ########################################
@@ -1744,5 +1746,7 @@ interface(`xserver_rw_mesa_shader_cache',`
 	rw_files_pattern($1, mesa_shader_cache_t, mesa_shader_cache_t)
 	allow $1 mesa_shader_cache_t:file map;
 
-	xdg_search_cache_dirs($1)
+	optional_policy(`
+		xdg_search_cache_dirs($1)
+	')
 ')

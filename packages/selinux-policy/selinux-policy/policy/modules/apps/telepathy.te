@@ -28,22 +28,32 @@ attribute telepathy_tmp_content;
 telepathy_domain_template(gabble)
 
 type telepathy_xdg_cache_t;
-xdg_cache_content(telepathy_xdg_cache_t)
+optional_policy(`
+	xdg_cache_content(telepathy_xdg_cache_t)
+')
 
 type telepathy_gabble_xdg_cache_t;
-xdg_cache_content(telepathy_gabble_xdg_cache_t)
+optional_policy(`
+	xdg_cache_content(telepathy_gabble_xdg_cache_t)
+')
 
 telepathy_domain_template(idle)
 telepathy_domain_template(logger)
 
 type telepathy_xdg_data_t;
-xdg_data_content(telepathy_xdg_data_t)
+optional_policy(`
+	xdg_data_content(telepathy_xdg_data_t)
+')
 
 type telepathy_logger_xdg_cache_t;
-xdg_cache_content(telepathy_logger_xdg_cache_t)
+optional_policy(`
+	xdg_cache_content(telepathy_logger_xdg_cache_t)
+')
 
 type telepathy_logger_xdg_data_t;
-xdg_data_content(telepathy_logger_xdg_data_t)
+optional_policy(`
+	xdg_data_content(telepathy_logger_xdg_data_t)
+')
 
 telepathy_domain_template(mission_control)
 
@@ -51,10 +61,14 @@ type telepathy_mission_control_home_t;
 userdom_user_home_content(telepathy_mission_control_home_t)
 
 type telepathy_mission_control_xdg_data_t;
-xdg_data_content(telepathy_mission_control_xdg_data_t)
+optional_policy(`
+	xdg_data_content(telepathy_mission_control_xdg_data_t)
+')
 
 type telepathy_mission_control_xdg_cache_t;
-xdg_cache_content(telepathy_mission_control_xdg_cache_t)
+optional_policy(`
+	xdg_cache_content(telepathy_mission_control_xdg_cache_t)
+')
 
 telepathy_domain_template(msn)
 telepathy_domain_template(salut)
@@ -435,10 +449,14 @@ allow telepathy_domain self:process { getsched signal sigkill };
 allow telepathy_domain self:fifo_file rw_fifo_file_perms;
 
 manage_dirs_pattern(telepathy_domain, telepathy_xdg_cache_t, telepathy_xdg_cache_t)
-xdg_cache_filetrans(telepathy_domain, telepathy_xdg_cache_t, dir, "telepathy")
+optional_policy(`
+	xdg_cache_filetrans(telepathy_domain, telepathy_xdg_cache_t, dir, "telepathy")
+')
 
 manage_dirs_pattern(telepathy_domain, telepathy_xdg_data_t, telepathy_xdg_data_t)
-xdg_data_filetrans(telepathy_domain, telepathy_xdg_data_t, dir, "telepathy")
+optional_policy(`
+	xdg_data_filetrans(telepathy_domain, telepathy_xdg_data_t, dir, "telepathy")
+')
 
 dev_read_urand(telepathy_domain)
 
