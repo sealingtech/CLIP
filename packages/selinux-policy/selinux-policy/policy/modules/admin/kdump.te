@@ -68,6 +68,8 @@ files_tmp_filetrans(kdumpctl_t, kdumpctl_tmp_t, { file dir lnk_file })
 
 domtrans_pattern(kdumpctl_t, kdump_exec_t, kdump_t)
 
+kernel_getattr_core_if(kdumpctl_t)
+kernel_read_crypto_sysctls(kdumpctl_t)
 kernel_read_system_state(kdumpctl_t)
 
 corecmd_exec_bin(kdumpctl_t)
@@ -88,6 +90,9 @@ files_getattr_all_dirs(kdumpctl_t)
 fs_getattr_all_fs(kdumpctl_t)
 fs_search_all(kdumpctl_t)
 
+fs_list_efivars(kdumpctl_t)
+fs_read_efivarfs_files(kdumpctl_t)
+
 init_domtrans_script(kdumpctl_t)
 init_exec(kdumpctl_t)
 
@@ -102,6 +107,7 @@ optional_policy(`
 ')
 
 optional_policy(`
+	lvm_domtrans(kdumpctl_t)
 	lvm_read_config(kdumpctl_t)
 ')
 
@@ -116,4 +122,12 @@ optional_policy(`
 
 optional_policy(`
 	ssh_exec(kdumpctl_t)
+')
+
+optional_policy(`
+	hostname_domtrans(kdumpctl_t)
+')
+
+optional_policy(`
+	udevadm_exec(kdumpctl_t)
 ')
