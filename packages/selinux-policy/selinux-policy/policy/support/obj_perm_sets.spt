@@ -277,6 +277,12 @@ define(`rw_term_perms', `{ rw_inherited_term_perms open }')
 define(`client_stream_socket_perms', `{ create ioctl read getattr write setattr append bind getopt setopt shutdown }')
 define(`server_stream_socket_perms', `{ client_stream_socket_perms listen accept }')
 
+
+#
+# Service
+#
+define(`manage_service_perms', `{ start stop status reload enable disable } ')
+
 #
 # Keys
 #
