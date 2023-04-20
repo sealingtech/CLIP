@@ -19,3 +19,5 @@ packages/selinux-policy/selinux-policy/support/pyplate.pyc
 packages/selinux-policy/selinux-policy/policy/modules/kernel/corenetwork.te
 packages/selinux-policy/selinux-policy/policy/modules/kernel/corenetwork.if
 packages/selinux-policy/selinux-policy/doc/policy.xml
+packages/selinux-policy/selinux-policy/doc/global_booleans.xml
+packages/selinux-policy/selinux-policy/doc/global_tunables.xml
