@@ -11,7 +11,7 @@
 # NOTE: you can override any of the config variables in a Makefile.supl
 # except the SEPARATE_PKGS feature that splits policy mods into separate i
 # RPMs. The list is added to the list defined below in this file.
-include $(CURDIR)/Makefile.supl
+-include $(CURDIR)/Makefile.supl
 
 # The name of the package
 PKGNAME ?= selinux-policy
@@ -139,7 +139,7 @@ ifeq ($(strip $(ENABLE_MODULES)),)
 ENABLE_MODULES := %{nil}
 endif
 
-RPMQ_DEFS := --query --define 'separatePkgs $(SEPARATE_PKGS)' --define 'pkgname $(PKGNAME)' --define '_sysconfdir /etc' --define 'version $(VERSION)' --define 'release $(RELEASE)' --define 'vendor $(VENDOR)' --define 'packager $(PACKAGER)' --qf '%{NAME}\n'
+RPMQ_DEFS := --query --define 'separatePkgs $(SEPARATE_PKGS)' --define 'type $(CONFIG_BUILD_SELINUX_POL_TYPE)' --define 'pkgname $(PKGNAME)' --define '_sysconfdir /etc' --define 'version $(VERSION)' --define 'release $(RELEASE)' --define 'vendor $(VENDOR)' --define 'packager $(PACKAGER)' --qf '%{NAME}\n'
 
 all: $(PKGNAME)-rpm $(PKGNAME)-srpm
 
@@ -175,7 +175,8 @@ clean:
 	$(RM) -r $(RPM_TMPDIR)
 
 bare: clean
-	$(foreach f,$(shell rpm $(RPMQ_DEFS) --specfile $(RPM_V_SPEC)),$(RM) $(OUTPUT_DIR)/$(f)*.rpm;)
+	$(foreach f,$(shell rpm $(RPMQ_DEFS) --specfile $(RPM_V_SPEC) > /dev/null),$(RM) $(OUTPUT_DIR)/$(f)*.rpm > /dev/null;)
 	$(RM) $(TARBALL) $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm $(OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).$(ARCH).rpm
+	@[[ "$(DEVVER)" != "" ]] && /bin/echo -e "WARNING: DEVVER variable set to $(DEVVER) in $(CURDIR)/Makefile, $(CURDIR)/Makefile.supl, or on the command-line.\nWARNING: Often this is a build-time timestamp. The source tarball and All RPMs might not have been removed.\n"; true
 
 .PHONY: all rpm srpm $(PKGNAME)-rpm $(PKGNAME)-srpm clean bare
