@@ -48,14 +48,56 @@ ARCH := noarch
 # Only supported for CIL builds at the moment (RHEL 7.3 and some later 7.2.x releases).
 CONFIG_BUILD_SELINUX_POL_TYPE ?= mcs
 
+# SELinux policy supports building individual policy components in a modular manner.
+# This is typically controlled by modifying selinux-policy/policy/modules.conf.
+#
+# The vendor packages isntall nearly all of those built as "modules" from the main
+# selinux-policy-TYPE RPM and enables them all by default. You can end up with a lot
+# to disable with that approach.
+#
+# First, CLIP includes a very trimmed down set of enabled modules in modules.conf,
+# and then adds the following feature...
+#
+# CLIP supports building policy packages (pp) files and placing them in separate RPMs
+# to ease development (e.g., install specific packages to aid development, but don't
+# install them in production builds) and building for multiple system types from one
+# policy tree.
+#
+# A number of modules are includes in the main selinux-policy-TYPE RPM that
+# are pretty much necessary for system functionality.
 # Policy modules listed here will be built as separate RPMs.
-# e.g., selinux-policy-apache
+# e.g., selinux-policy-mcs-apache will install the apache.pp policy package.
+#
 # Listing a module here will also cause it to be enabled even if it
 # disabled in modules.conf.
-SEPARATE_PKGS += usbguard aide apache mysql postfix samhain ssh tripwire unprivuser cyrus snmp ntp bind sasl \
-	denyhosts postgresql rhsmcertd logwatch raid sssd openvpn rpcbind gssproxy rpc kerberos sendmail oddjob certmonger \
-	apcupsd nagios nut mrtg xserver devicekit rtkit accountsd colord geoclue rngd gnome wm telepathy bluetooth amavis \
-	auditadm secadm staff samba
+#
+# SSH is a perfect example of a module that would be present during development,
+# but not necessairly once a system is deployed.
+SEPARATE_PKGS += ssh
+
+# These system components are typically installed by default even in minimal installs and you have to manually remove them
+SEPARATE_PKGS += rhsmcertd oddjob rtkit
+
+# security guides install these even if you don't want them, but in case you're ignoring those guides just don't install the RPMs
+SEPARATE_PKGS += aide postfix usbguard fapolicyd rngd
+
+# Common roles.
+# By default, we have staff and sysadm built into the core policy RPM.
+# If you are developing for an embedded, maybe you don't want any roles except during dev, in which case put them all here.
+# IF YOU PUT ALL ROLES IN SEPARATE RPMs MAKE SURE YOU INSTALL THE RPMs FOR THE ROLES YOU WANT OR LOGINS WON'T WORK!
+SEPARATE_PKGS +=  logadm auditadm secadm # staff sysadm unprivuser
+
+# Auth-related
+SEPARATE_PKGS += sasl rpcbind rpc gssproxy kerberos certmonger pcscd
+
+# Got UPS?
+SEPARATE_PKGS += apcupsd nut
+
+# A few random services we have used in either CLIP variants or we wsee being commonly deployed by systems using this policy
+SEPARATE_PKGS += postgresql mysql apache bind openvpn samba denyhosts ntp
+
+# These are pretty much necessary for typical GUI support
+SEPARATE_PKGS += xserver accountsd colord geoclue gnome wm telepathy bluetooth devicekit consolekit
 
 # Since the policy structure changes between 7.2 and 7.3, we need to decide which spec to use
 # <3 awk
