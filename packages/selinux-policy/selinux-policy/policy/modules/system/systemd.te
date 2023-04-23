@@ -1436,6 +1436,7 @@ allow systemd_user_runtime_dir_t self:process setfscreate;
 domain_obj_id_change_exemption(systemd_user_runtime_dir_t)
 
 files_read_etc_files(systemd_user_runtime_dir_t)
+files_map_etc_files(systemd_user_runtime_dir_t)
 
 fs_getattr_xattr_fs(systemd_user_runtime_dir_t)
 fs_mount_tmpfs(systemd_user_runtime_dir_t)
@@ -1444,6 +1445,8 @@ fs_list_tmpfs(systemd_user_runtime_dir_t)
 fs_unmount_tmpfs(systemd_user_runtime_dir_t)
 fs_relabelfrom_tmpfs_dirs(systemd_user_runtime_dir_t)
 fs_read_cgroup_files(systemd_user_runtime_dir_t)
+
+fs_getattr_cgroup(systemd_user_runtime_dir_t)
 
 kernel_read_kernel_sysctls(systemd_user_runtime_dir_t)
 kernel_read_crypto_sysctls(systemd_user_runtime_dir_t)
