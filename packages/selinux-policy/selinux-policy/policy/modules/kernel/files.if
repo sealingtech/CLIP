@@ -5082,6 +5082,24 @@ interface(`files_read_usr_files',`
 
 ########################################
 ## <summary>
+##      Map files in /usr in the caller domain.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`files_mmap_usr_files',`
+        gen_require(`
+                type usr_t;
+        ')
+
+        allow $1 usr_t:file map;
+')
+
+########################################
+## <summary>
 ##	Execute generic programs in /usr in the caller domain.
 ## </summary>
 ## <param name="domain">
