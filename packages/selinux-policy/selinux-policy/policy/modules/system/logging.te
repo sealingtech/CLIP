@@ -121,11 +121,13 @@ files_read_etc_files(auditctl_t)
 kernel_read_kernel_sysctls(auditctl_t)
 kernel_read_proc_symlinks(auditctl_t)
 kernel_setsched(auditctl_t)
+kernel_getattr_proc(auditctl_t)
 
 domain_read_all_domains_state(auditctl_t)
 domain_use_interactive_fds(auditctl_t)
 
 mls_file_read_all_levels(auditctl_t)
+selinux_search_fs(auditctl_t)
 
 term_use_all_terms(auditctl_t)
 
@@ -180,8 +182,6 @@ dev_read_sysfs(auditd_t)
 fs_getattr_all_fs(auditd_t)
 fs_search_auto_mountpoints(auditd_t)
 fs_rw_anon_inodefs_files(auditd_t)
-
-selinux_search_fs(auditctl_t)
 
 corenet_all_recvfrom_netlabel(auditd_t)
 corenet_tcp_sendrecv_generic_if(auditd_t)
