@@ -305,3 +305,84 @@ interface(`plymouthd_admin',`
 	files_search_pids($1)
 	admin_pattern($1, plymouthd_runtime_t)
 ')
+
+
+########################################
+## <summary>
+##      Allow the specified domain to read
+##      to plymouthd log files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`plymouthd_read_log',`
+        gen_require(`
+                type plymouthd_var_log_t;
+        ')
+
+        logging_search_logs($1)
+        read_files_pattern($1, plymouthd_var_log_t, plymouthd_var_log_t)
+')
+
+#####################################
+## <summary>
+##  Allow the specified domain to create plymouthd's log files.
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed access.
+##  </summary>
+## </param>
+#
+interface(`plymouthd_create_log',`
+    gen_require(`
+        type plymouthd_var_log_t;
+    ')
+
+    logging_search_logs($1)
+    create_files_pattern($1, plymouthd_var_log_t, plymouthd_var_log_t)
+')
+
+########################################
+## <summary>
+##      Allow the specified domain to manage
+##      to plymouthd log files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`plymouthd_manage_log',`
+        gen_require(`
+                type plymouthd_var_log_t;
+        ')
+
+        logging_search_logs($1)
+        manage_dirs_pattern($1, plymouthd_var_log_t, plymouthd_var_log_t)
+        manage_files_pattern($1, plymouthd_var_log_t, plymouthd_var_log_t)
+        read_lnk_files_pattern($1, plymouthd_var_log_t, plymouthd_var_log_t)
+')
+
+#######################################
+## <summary>
+##      Allow domain to create boot.log
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`plymouthd_filetrans_named_content',`
+
+    gen_require(`
+        type plymouthd_var_log_t;
+    ')
+
+    logging_log_named_filetrans($1, plymouthd_var_log_t, file, "boot.log")
+')
