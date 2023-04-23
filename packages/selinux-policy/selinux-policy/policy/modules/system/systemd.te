@@ -1313,6 +1313,13 @@ optional_policy(`
 ')
 
 optional_policy(`
+	# configured to cleanup rpm/dnf DB dirs if empty, but that is excessive
+	# since the DBs contain security-relevant info
+	# FIXME: this should probably be handled via filename trans rules to split out locks from the DB
+	rpm_dontaudit_manage_db(systemd_tmpfiles_t)
+')
+
+optional_policy(`
 	xfs_create_tmp_dirs(systemd_tmpfiles_t)
 ')
 
