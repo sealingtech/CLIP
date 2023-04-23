@@ -436,8 +436,11 @@ ifdef(`distro_redhat',`
 allow systemd_hostnamed_t self:capability sys_admin;
 
 kernel_read_kernel_sysctls(systemd_hostnamed_t)
+kernel_read_crypto_sysctls(systemd_hostnamed_t)
 
 dev_read_sysfs(systemd_hostnamed_t)
+
+fs_getattr_xattr_fs(systemd_hostnamed_t)
 
 files_read_etc_files(systemd_hostnamed_t)
 
@@ -452,6 +455,7 @@ optional_policy(`
 	dbus_connect_system_bus(systemd_hostnamed_t)
 	dbus_system_bus_client(systemd_hostnamed_t)
 	init_dbus_chat(systemd_hostnamed_t)
+	init_dbus_send_script(systemd_hostnamed_t)
 ')
 
 optional_policy(`
