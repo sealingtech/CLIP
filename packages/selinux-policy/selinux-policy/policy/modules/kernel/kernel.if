@@ -1625,6 +1625,28 @@ interface(`kernel_dontaudit_list_all_proc',`
 
 ########################################
 ## <summary>
+##      Allow attempts to read all proc types.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`kernel_read_all_proc',`
+        gen_require(`
+                attribute proc_type;
+        attribute can_dump_kernel;
+        attribute can_receive_kernel_messages;
+        ')
+
+        read_files_pattern($1, proc_type, proc_type)
+    typeattribute $1 can_dump_kernel;
+    typeattribute $1 can_receive_kernel_messages;
+')
+
+########################################
+## <summary>
 ##	Do not audit attempts by caller to search
 ##	the base directory of sysctls.
 ## </summary>
@@ -2657,6 +2679,25 @@ interface(`kernel_dontaudit_list_unlabeled',`
 	')
 
 	dontaudit $1 unlabeled_t:dir list_dir_perms;
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to read unlabeled dirs and files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_dontaudit_read_unlabeled',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	dontaudit $1 unlabeled_t:dir list_dir_perms;
+	dontaudit $1 unlabeled_t:file read_file_perms;
 ')
 
 ########################################
