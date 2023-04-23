@@ -46,7 +46,7 @@ logging_log_file(chronyd_var_log_t)
 # chronyd local policy
 #
 
-allow chronyd_t self:capability { chown dac_override ipc_lock setgid setuid sys_resource sys_time };
+allow chronyd_t self:capability { chown dac_override dac_read_search ipc_lock setgid setuid sys_resource sys_time };
 allow chronyd_t self:process { getcap setcap setrlimit signal };
 allow chronyd_t self:shm create_shm_perms;
 allow chronyd_t self:fifo_file rw_fifo_file_perms;
@@ -75,6 +75,9 @@ files_pid_filetrans(chronyd_t, chronyd_runtime_t, { dir file sock_file })
 
 kernel_read_system_state(chronyd_t)
 kernel_read_network_state(chronyd_t)
+files_read_usr_files(chronyd_t)
+kernel_read_crypto_sysctls(chronyd_t)
+kernel_search_fs_sysctls(chronyd_t)
 
 corenet_all_recvfrom_netlabel(chronyd_t)
 corenet_udp_sendrecv_generic_if(chronyd_t)
@@ -112,10 +115,13 @@ optional_policy(`
 # chronyc local policy
 #
 
-allow chronyc_t self:capability { dac_override };
+allow chronyc_t self:capability { dac_override dac_read_search };
 allow chronyc_t self:process { signal };
 allow chronyc_t self:udp_socket create_socket_perms;
 allow chronyc_t self:netlink_route_socket create_netlink_socket_perms;
+
+kernel_read_crypto_sysctls(chronyc_t)
+kernel_search_fs_sysctls(chronyc_t)
 
 manage_dirs_pattern(chronyc_t, chronyd_runtime_t, chronyd_runtime_t)
 manage_files_pattern(chronyc_t, chronyd_runtime_t, chronyd_runtime_t)
