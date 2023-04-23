@@ -11,6 +11,8 @@
 # NOTE: you can override any of the config variables in a Makefile.supl
 # except the SEPARATE_PKGS feature that splits policy mods into separate i
 # RPMs. The list is added to the list defined below in this file.
+# You can disable that behavior and disable all of the SEPARATE_PKGS 
+# added in this Makefile by setting "DISABLE_STD_SEPARATE_PKGS := y"
 -include $(CURDIR)/Makefile.supl
 
 # The name of the package
@@ -48,6 +50,7 @@ ARCH := noarch
 # Only supported for CIL builds at the moment (RHEL 7.3 and some later 7.2.x releases).
 CONFIG_BUILD_SELINUX_POL_TYPE ?= mcs
 
+ifneq ($(DISABLE_STD_SEPARATE_PKGS),y)
 # SELinux policy supports building individual policy components in a modular manner.
 # This is typically controlled by modifying selinux-policy/policy/modules.conf.
 #
@@ -98,6 +101,7 @@ SEPARATE_PKGS += postgresql mysql apache bind openvpn samba denyhosts ntp
 
 # These are pretty much necessary for typical GUI support
 SEPARATE_PKGS += xserver accountsd colord geoclue gnome wm telepathy bluetooth devicekit consolekit
+endif # ifneq DISABLE_STD_SEPARATE_PKGS,y
 
 # Since the policy structure changes between 7.2 and 7.3, we need to decide which spec to use
 # <3 awk
