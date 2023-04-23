@@ -23,7 +23,7 @@ CONFIG_BUILD_TOOR ?= n
 
 # This is the version number of the RPM that will be
 # generated.  Typically you bump this for delivery.
-ifdef DEVVER 
+ifdef DEVVER
 VERSION ?= 999.1.$(DEVVER)
 else
 VERSION ?= 999.1
