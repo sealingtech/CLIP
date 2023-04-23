@@ -594,6 +594,11 @@ optional_policy(`
 	unconfined_domain(init_t)
 ')
 
+optional_policy(`
+	plymouthd_stream_connect(init_t)
+')
+
+
 ########################################
 #
 # Init script local policy
