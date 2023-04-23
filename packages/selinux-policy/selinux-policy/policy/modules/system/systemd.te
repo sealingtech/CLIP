@@ -548,6 +548,7 @@ allow systemd_logind_t systemd_sessions_runtime_t:file manage_file_perms;
 allow systemd_logind_t systemd_sessions_runtime_t:fifo_file manage_fifo_file_perms;
 
 kernel_read_kernel_sysctls(systemd_logind_t)
+kernel_read_crypto_sysctls(systemd_logind_t)
 
 dev_getattr_dri_dev(systemd_logind_t)
 dev_getattr_generic_usb_dev(systemd_logind_t)
@@ -571,6 +572,7 @@ domain_obj_id_change_exemption(systemd_logind_t)
 files_read_etc_files(systemd_logind_t)
 files_search_pids(systemd_logind_t)
 
+fs_getattr_xattr_fs(systemd_logind_t)
 fs_getattr_cgroup(systemd_logind_t)
 fs_getattr_tmpfs(systemd_logind_t)
 fs_getattr_tmpfs_dirs(systemd_logind_t)
@@ -594,6 +596,8 @@ term_use_unallocated_ttys(systemd_logind_t)
 auth_manage_faillog(systemd_logind_t)
 #auth_use_nsswitch(systemd_logind_t)
 
+#============= systemd_logind_t ==============
+systemd_dbus_chat_logind(systemd_logind_t)
 init_dbus_send_script(systemd_logind_t)
 init_get_all_units_status(systemd_logind_t)
 init_get_system_status(systemd_logind_t)
