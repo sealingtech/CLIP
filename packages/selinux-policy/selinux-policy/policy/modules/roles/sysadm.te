@@ -966,6 +966,7 @@ optional_policy(`
 ')
 
 optional_policy(`
+	rpm_dbus_chat(sysadm_t)
 	rpm_run(sysadm_t, sysadm_r)
 	rpm_admin(sysadm_t, sysadm_r)
 ')
