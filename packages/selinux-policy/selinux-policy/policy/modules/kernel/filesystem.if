@@ -3513,6 +3513,25 @@ interface(`fs_mount_nfsd_fs',`
 	allow $1 nfsd_fs_t:filesystem mount;
 ')
 
+
+#######################################
+## <summary>
+##  read files on an nfsd filesystem
+## </summary>
+## <param name="domain">
+##  <summary>
+##  Domain allowed access.
+##  </summary>
+## </param>
+#
+interface(`fs_read_nfsd_files',`
+    gen_require(`
+        type nfsd_fs_t;
+    ')
+
+    read_files_pattern($1, nfsd_fs_t, nfsd_fs_t)
+')
+
 ########################################
 ## <summary>
 ##	Mount a NFS server pseudo filesystem.
@@ -4392,6 +4411,44 @@ interface(`fs_mounton_tmpfs_files',`
 	')
 
 	allow $1 tmpfs_t:file mounton;
+')
+
+########################################
+## <summary>
+##      Delete tmpfs directories.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`fs_delete_tmpfs_dirs', `
+        gen_require(`
+                type tmpfs_t;
+        ')
+
+        delete_dirs_pattern($1, tmpfs_t, tmpfs_t)
+        fs_search_tmpfs($1)
+')
+
+########################################
+## <summary>
+##      Delete generic files in tmpfs directory.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`fs_delete_tmpfs_files',`
+        gen_require(`
+                type tmpfs_t;
+        ')
+
+        allow $1 tmpfs_t:dir del_entry_dir_perms;
+        allow $1 tmpfs_t:file_class_set delete_file_perms;
 ')
 
 ########################################
