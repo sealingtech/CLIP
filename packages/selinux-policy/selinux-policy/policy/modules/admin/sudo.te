@@ -7,3 +7,37 @@ attribute sudodomain;
 
 type sudo_exec_t;
 application_executable_file(sudo_exec_t)
+
+allow sudodomain self:capability { chown fowner setuid setgid dac_read_search dac_override sys_nice sys_resource };
+dontaudit sudodomain self:capability net_admin;
+allow sudodomain self:process ~{ ptrace setcurrent setexec setfscreate setrlimit execmem execstack execheap };
+allow sudodomain self:process { setexec setrlimit };
+allow sudodomain self:fd use;
+allow sudodomain self:fifo_file rw_fifo_file_perms;
+allow sudodomain self:shm create_shm_perms;
+allow sudodomain self:sem create_sem_perms;
+allow sudodomain self:msgq create_msgq_perms;
+allow sudodomain self:msg { send receive };
+allow sudodomain self:unix_dgram_socket create_socket_perms;
+allow sudodomain self:unix_stream_socket create_stream_socket_perms;
+allow sudodomain self:unix_dgram_socket sendto;
+allow sudodomain self:unix_stream_socket connectto;
+allow sudodomain self:key manage_key_perms;
+allow sudodomain self:netlink_kobject_uevent_socket create_socket_perms;
+allow sudodomain self:netlink_selinux_socket create_socket_perms;
+
+selinux_validate_context(sudodomain)
+selinux_compute_relabel_context(sudodomain)
+selinux_compute_access_vector(sudodomain)
+
+optional_policy(`
+	ssh_signull(sudodomain)
+')
+
+optional_policy(`
+	systemd_write_inherited_logind_sessions_pipes(sudodomain)
+')
+
+optional_policy(`
+        fprintd_dbus_chat(sudodomain)
+')
