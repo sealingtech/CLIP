@@ -386,3 +386,22 @@ interface(`plymouthd_filetrans_named_content',`
 
     logging_log_named_filetrans($1, plymouthd_var_log_t, file, "boot.log")
 ')
+
+########################################
+## <summary>
+##  Allow domain to use a file descriptor
+##  from plymouthd.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`plymouth_use_plymouthd_fd', `
+        gen_require(`
+                type plymouthd_t;
+        ')
+
+        allow $1 plymouthd_t:fd use;
+')
