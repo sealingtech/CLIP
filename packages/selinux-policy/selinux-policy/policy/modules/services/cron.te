@@ -317,6 +317,7 @@ seutil_read_default_contexts(crond_t)
 miscfiles_read_localization(crond_t)
 
 userdom_list_user_home_dirs(crond_t)
+userdom_search_admin_dir(crond_t)
 
 tunable_policy(`cron_userdomain_transition',`
 	dontaudit crond_t cronjob_t:process transition;
