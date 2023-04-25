@@ -684,15 +684,33 @@ files_pid_filetrans_lock_dir(initrc_t, "lock")
 files_read_kernel_symbol_table(initrc_t)
 files_setattr_lock_dirs(initrc_t)
 
+# for lsof which is used by alsa shutdown:
+kernel_dontaudit_getattr_message_if(initrc_t)
+kernel_stream_connect(initrc_t)
+files_read_kernel_modules(initrc_t)
+files_read_config_files(initrc_t)
+files_read_var_lib_symlinks(initrc_t)
+files_setattr_pid_dirs(initrc_t)
+
+files_exec_etc_files(initrc_t)
+files_manage_etc_symlinks(initrc_t)
+
+fs_manage_tmpfs_dirs(initrc_t)
+fs_manage_tmpfs_symlinks(initrc_t)
+fs_delete_tmpfs_files(initrc_t)
+fs_tmpfs_filetrans(initrc_t, initrc_state_t, file)
+fs_read_nfsd_files(initrc_t)
+
 corecmd_exec_all_executables(initrc_t)
 
-corenet_all_recvfrom_netlabel(initrc_t)
-corenet_tcp_sendrecv_all_if(initrc_t)
-corenet_udp_sendrecv_all_if(initrc_t)
-corenet_tcp_sendrecv_all_nodes(initrc_t)
-corenet_udp_sendrecv_all_nodes(initrc_t)
-corenet_tcp_connect_all_ports(initrc_t)
-corenet_sendrecv_all_client_packets(initrc_t)
+# SRS: remvoed for CLIP
+#corenet_all_recvfrom_netlabel(initrc_t)
+#corenet_tcp_sendrecv_all_if(initrc_t)
+#corenet_udp_sendrecv_all_if(initrc_t)
+#corenet_tcp_sendrecv_all_nodes(initrc_t)
+#corenet_udp_sendrecv_all_nodes(initrc_t)
+#corenet_tcp_connect_all_ports(initrc_t)
+#corenet_sendrecv_all_client_packets(initrc_t)
 
 dev_read_rand(initrc_t)
 dev_read_urand(initrc_t)
