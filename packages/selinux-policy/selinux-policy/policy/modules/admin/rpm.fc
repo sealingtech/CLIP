@@ -2,6 +2,7 @@
 
 /usr/bin/bcfg2	--	gen_context(system_u:object_r:rpm_exec_t,s0)
 /usr/bin/debuginfo-install	--	gen_context(system_u:object_r:debuginfo_exec_t,s0)
+/usr/libexec/dnf-utils  --      gen_context(system_u:object_r:debuginfo_exec_t,s0)
 /usr/bin/fedora-rmdevelrpms	--	gen_context(system_u:object_r:rpm_exec_t,s0)
 /usr/bin/online_update	--	gen_context(system_u:object_r:rpm_exec_t,s0)
 /usr/bin/packagekitd	--	gen_context(system_u:object_r:rpm_exec_t,s0)
@@ -10,6 +11,9 @@
 /usr/bin/rhn_check	--	gen_context(system_u:object_r:rpm_exec_t,s0)
 /usr/bin/rpmdev-rmdevelrpms	--	gen_context(system_u:object_r:rpm_exec_t,s0)
 /usr/bin/rpm	--	gen_context(system_u:object_r:rpm_exec_t,s0)
+/usr/bin/dnf                    --      gen_context(system_u:object_r:rpm_exec_t,s0)
+/usr/bin/dnf-automatic  --  gen_context(system_u:object_r:rpm_exec_t,s0)
+/usr/bin/dnf-[0-9]+             --      gen_context(system_u:object_r:rpm_exec_t,s0)
 /usr/bin/smart	--	gen_context(system_u:object_r:rpm_exec_t,s0)
 /usr/bin/system-install-packages	--	gen_context(system_u:object_r:rpm_exec_t,s0)
 /usr/bin/up2date	--	gen_context(system_u:object_r:rpm_exec_t,s0)
@@ -53,6 +57,9 @@ ifdef(`distro_redhat',`
 /var/lib/rpm(/.*)?	gen_context(system_u:object_r:rpm_var_lib_t,s0)
 /var/lib/YaST2(/.*)?	gen_context(system_u:object_r:rpm_var_lib_t,s0)
 /var/lib/yum(/.*)?	gen_context(system_u:object_r:rpm_var_lib_t,s0)
+/var/lib/dnf(/.*)?                      gen_context(system_u:object_r:rpm_var_lib_t,s0)
+
+
 
 /var/lock/bcfg2\.run	--	gen_context(system_u:object_r:rpm_lock_t,s0)
 
