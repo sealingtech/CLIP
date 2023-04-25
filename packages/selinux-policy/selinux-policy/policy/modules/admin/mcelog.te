@@ -66,7 +66,7 @@ files_pid_file(mcelog_runtime_t)
 #
 
 allow mcelog_t self:capability sys_admin;
-allow mcelog_t self:unix_stream_socket connected_socket_perms;
+allow mcelog_t self:unix_stream_socket { create rw_stream_socket_perms };
 
 allow mcelog_t mcelog_etc_t:dir list_dir_perms;
 read_files_pattern(mcelog_t, mcelog_etc_t, mcelog_etc_t)
