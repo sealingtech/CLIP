@@ -23,6 +23,7 @@
 /usr/lib/systemd/system-generators/.*							--	gen_context(system_u:object_r:systemd_generator_exec_t,s0)
 /usr/lib/systemd/user-environment-generators/.*					--	gen_context(system_u:object_r:systemd_generator_exec_t,s0)
 /usr/lib/systemd/user-generators/.*								--	gen_context(system_u:object_r:systemd_generator_exec_t,s0)
+/usr/lib/systemd/system-generators/systemd-gpt-auto-generator       --      gen_context(system_u:object_r:systemd_gpt_generator_exec_t,s0)
 
 /usr/lib/systemd/systemd-activate	--	gen_context(system_u:object_r:systemd_activate_exec_t,s0)
 /usr/lib/systemd/systemd-backlight	--	gen_context(system_u:object_r:systemd_backlight_exec_t,s0)
@@ -77,6 +78,8 @@
 
 /run/tmpfiles\.d	-d	gen_context(system_u:object_r:systemd_tmpfiles_conf_t,s0)
 /run/tmpfiles\.d/.*		<<none>>
+
+/var/run/initramfs(/.*)?        <<none>>
 
 /var/log/journal(/.*)?		gen_context(system_u:object_r:systemd_journal_t,s0)
 
