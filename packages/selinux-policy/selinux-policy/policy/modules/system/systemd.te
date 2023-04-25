@@ -715,6 +715,10 @@ optional_policy(`
 	unconfined_dbus_send(systemd_logind_t)
 ')
 
+optional_policy(`
+	rpm_dbus_chat(systemd_logind_t)
+')
+
 #########################################
 #
 # machined local policy
