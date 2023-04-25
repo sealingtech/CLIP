@@ -672,3 +672,39 @@ interface(`selinux_unconfined',`
 
 	typeattribute $1 selinux_unconfined_type;
 ')
+
+########################################
+## <summary>
+##	Read the kernel policy from selinuxfs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`selinux_read_kern_policy',`
+	gen_require(`
+		type security_t;
+	')
+
+	allow $1 security_t:security read_policy;
+')
+
+########################################
+## <summary>
+##	Set if SELinux will check original protection mode or modified protection mode (read-implies-exec) for mmap / mprotect. 
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`selinux_set_check_protection_mode',`
+	gen_require(`
+		type security_t;
+	')
+
+	allow $1 security_t:security setcheckreqprot;
+')
