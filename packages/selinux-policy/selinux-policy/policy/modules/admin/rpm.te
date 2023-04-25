@@ -72,7 +72,7 @@ files_tmpfs_file(rpm_script_tmpfs_t)
 # rpm Local policy
 #
 
-allow rpm_t self:capability { chown dac_override fowner fsetid ipc_lock mknod setfcap setgid setuid sys_chroot sys_nice sys_tty_config };
+allow rpm_t self:capability { chown dac_read_search dac_override fowner fsetid ipc_lock mknod setfcap setgid setuid sys_chroot sys_nice sys_tty_config };
 allow rpm_t self:process { transition signal_perms getsched setsched getsession getpgid setpgid getcap setcap share getattr setexec setfscreate noatsecure siginh setrlimit rlimitinh dyntransition execmem setkeycreate setsockcreate getrlimit };
 allow rpm_t self:fd use;
 allow rpm_t self:fifo_file rw_fifo_file_perms;
@@ -125,6 +125,8 @@ kernel_read_system_state(rpm_t)
 kernel_read_kernel_sysctls(rpm_t)
 kernel_read_network_state_symlinks(rpm_t)
 kernel_rw_irq_sysctls(rpm_t)
+kernel_read_vm_overcommit_sysctl(rpm_t)
+kernel_search_vm_sysctl(rpm_t)
 
 corecmd_exec_all_executables(rpm_t)
 
@@ -213,6 +215,12 @@ seutil_read_file_contexts(rpm_t)
 userdom_use_user_terminals(rpm_t)
 userdom_use_unpriv_users_fds(rpm_t)
 
+rpm_dbus_chat(rpm_t)
+
+optional_policy(`
+	systemd_use_logind_fds(rpm_t)
+')
+
 optional_policy(`
 	cron_system_entry(rpm_t, rpm_exec_t)
 ')
@@ -244,7 +252,7 @@ optional_policy(`
 #
 
 allow rpm_script_t self:capability { chown dac_override dac_read_search fowner fsetid ipc_lock kill mknod net_admin setgid setuid sys_admin sys_chroot sys_nice sys_rawio };
-allow rpm_script_t self:process { transition signal_perms getsched setsched getsession getpgid setpgid getcap setcap share getattr noatsecure siginh rlimitinh dyntransition execmem execstack setkeycreate setsockcreate getrlimit };
+allow rpm_script_t self:process { transition signal_perms getsched setsched getsession getpgid setpgid getcap setcap share getattr noatsecure siginh rlimitinh dyntransition execmem execstack setkeycreate setsockcreate getrlimit setfscreate };
 allow rpm_script_t self:fd use;
 allow rpm_script_t self:fifo_file rw_fifo_file_perms;
 allow rpm_script_t self:unix_dgram_socket sendto;
@@ -328,6 +336,8 @@ selinux_compute_access_vector(rpm_script_t)
 selinux_compute_create_context(rpm_script_t)
 selinux_compute_relabel_context(rpm_script_t)
 selinux_compute_user_contexts(rpm_script_t)
+selinux_set_check_protection_mode(rpm_script_t)
+selinux_read_kern_policy(rpm_script_t)
 
 storage_raw_read_fixed_disk(rpm_script_t)
 storage_raw_write_fixed_disk(rpm_script_t)
@@ -357,6 +367,7 @@ modutils_run(rpm_script_t, rpm_roles)
 seutil_run_loadpolicy(rpm_script_t, rpm_roles)
 seutil_run_setfiles(rpm_script_t, rpm_roles)
 seutil_run_semanage(rpm_script_t, rpm_roles)
+seutil_read_file_contexts(rpm_script_t)
 
 userdom_use_all_users_fds(rpm_script_t)
 
