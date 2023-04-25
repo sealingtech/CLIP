@@ -85,6 +85,7 @@ interface(`rpm_run',`
 	')
 
 	rpm_domtrans($1)
+        allow rpm_script_t $1:fifo_file rw_fifo_file_perms;
 	roleattribute $2 rpm_roles;
 ')
 
