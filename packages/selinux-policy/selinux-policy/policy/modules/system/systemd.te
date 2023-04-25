@@ -611,7 +611,6 @@ term_use_unallocated_ttys(systemd_logind_t)
 auth_manage_faillog(systemd_logind_t)
 #auth_use_nsswitch(systemd_logind_t)
 
-#============= systemd_logind_t ==============
 systemd_dbus_chat_logind(systemd_logind_t)
 init_dbus_send_script(systemd_logind_t)
 init_get_all_units_status(systemd_logind_t)
@@ -676,7 +675,8 @@ tunable_policy(`systemd_logind_get_bootloader',`
 ')
 # systemd-logind uses util-linux's blkid in order to find the ESP (EFI System Partition).
 # This reads the first sectors of fixed disk devices.
-storage_raw_read_fixed_disk_cond(systemd_logind_t, systemd_logind_get_bootloader)
+# SRS: removed for CLIP
+#storage_raw_read_fixed_disk_cond(systemd_logind_t, systemd_logind_get_bootloader)
 
 optional_policy(`
 	dbus_connect_system_bus(systemd_logind_t)
