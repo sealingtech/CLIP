@@ -152,6 +152,8 @@ can_exec(init_t, init_exec_t)
 manage_files_pattern(init_t, initrc_state_t, initrc_state_t)
 can_exec(init_t, initrc_state_t)
 
+
+
 allow init_t initrc_t:unix_stream_socket connectto;
 
 # For /var/run/shutdown.pid.
@@ -225,6 +227,8 @@ selinux_set_all_booleans(init_t)
 term_use_all_terms(init_t)
 
 libs_rw_ld_so_cache(init_t)
+
+init_manage_var_lib_files(init_t)
 
 logging_send_syslog_msg(init_t)
 logging_rw_generic_logs(init_t)
@@ -435,6 +439,7 @@ ifdef(`init_systemd',`
 
 	init_manage_all_unit_files(init_t)
 	init_read_script_state(init_t)
+	init_dbus_chat(init_t)
 
 	miscfiles_watch_localization(init_t)
 
