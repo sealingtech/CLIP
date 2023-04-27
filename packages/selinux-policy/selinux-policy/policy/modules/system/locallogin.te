@@ -34,7 +34,7 @@ role system_r types sulogin_t;
 
 allow local_login_t self:capability { chown dac_read_search dac_override fowner fsetid kill setgid setuid sys_nice sys_resource sys_tty_config };
 dontaudit local_login_t self:capability net_admin;
-allow local_login_t self:process { getcap setcap setexec setrlimit setsched };
+allow local_login_t self:process { getcap setcap setexec setrlimit setsched signal };
 allow local_login_t self:fd use;
 allow local_login_t self:fifo_file rw_fifo_file_perms;
 allow local_login_t self:sock_file read_sock_file_perms;
@@ -59,6 +59,8 @@ kernel_read_system_state(local_login_t)
 kernel_read_kernel_sysctls(local_login_t)
 kernel_search_key(local_login_t)
 kernel_link_key(local_login_t)
+kernel_getattr_proc(local_login_t)
+kernel_read_crypto_sysctls(local_login_t)
 
 corecmd_list_bin(local_login_t)
 # cjp: these are probably not needed:
