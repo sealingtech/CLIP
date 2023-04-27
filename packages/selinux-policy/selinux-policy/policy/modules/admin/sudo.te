@@ -26,6 +26,12 @@ allow sudodomain self:key manage_key_perms;
 allow sudodomain self:netlink_kobject_uevent_socket create_socket_perms;
 allow sudodomain self:netlink_selinux_socket create_socket_perms;
 
+# something eithe rin PAM or in sudo itself stat()s everything in /dev
+dev_dontaudit_getattr_all_chr_files(sudodomain)
+dev_dontaudit_getattr_all_blk_files(sudodomain)
+init_dontaudit_getattr_initctl(sudodomain)
+kernel_dontaudit_getattr_core_if(sudodomain)
+
 selinux_validate_context(sudodomain)
 selinux_compute_relabel_context(sudodomain)
 selinux_compute_access_vector(sudodomain)
