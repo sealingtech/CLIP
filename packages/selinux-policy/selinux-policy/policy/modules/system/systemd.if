@@ -56,6 +56,12 @@ template(`systemd_role_template',`
 	allow $3 $1_systemd_t:unix_dgram_socket sendto;
 	allow $3 $1_systemd_t:unix_stream_socket { getattr ioctl read write };
 
+	allow $1_systemd_t $1_t:dir search;
+	allow $1_systemd_t $1_t:file { getattr open read };
+	allow $1_systemd_t $1_t:process { sigkill signal sigchld signull sigstop };
+	allow $1_systemd_t $1_t:process2 nnp_transition;
+	allow $1_systemd_t $1_t:unix_stream_socket { bind create listen setopt };
+
 	# allow the user to reboot the system.  this could be excessive for some roles
 	allow $3 $1_systemd_t:system halt;
 
