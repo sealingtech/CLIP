@@ -1,6 +1,6 @@
 # Copyright (C) 2012 Tresys Technology, LLC
 # Copyright (C) 2014-15 Quark Security, Inc
-# Copyright (C) 2023 Sealing Technologies, Inc.
+# Copyright (C) 2023-24 Sealing Technologies, Inc.
 #
 # Authors: Spencer Shimko <sshimko@tresys.com>
 # 	   Spencer Shimko <spencer@quarksecurity.com>
@@ -33,7 +33,7 @@ endif
 
 # bump this if creating multiple releases from the same
 # version (think about this... why are you doing this?)
-RELEASE ?= el8
+RELEASE ?= el9
 
 # The name of the Vendor
 VENDOR ?= Sealing Technologies, Inc.
@@ -106,11 +106,11 @@ endif # ifneq DISABLE_STD_SEPARATE_PKGS,y
 # Since the policy structure changes between 7.2 and 7.3, we need to decide which spec to use
 # <3 awk
 ifeq ($(OS_REL),)
-override OS_REL ?= 8.6
+override OS_REL ?= 9.3
 endif
 
 # Yes, use awk to perform floating point math. Believe it or not, bc is not installed by default and bash only does integer math and make doesn't have a clean way to do it.
-SPEC_VER := $(strip $(shell awk 'BEGIN { print ($(OS_REL) >= 7.3) ? "-cil" : "-nocil"; }'))
+SPEC_VER := $(strip $(shell awk 'BEGIN { print ($(OS_REL) >= 9.3) ? "-cil" : "-nocil"; }'))
 # version-specific spec file name
 RPM_V_SPEC = $(CURDIR)/$(PKGNAME)$(SPEC_VER).spec
 RPM_SPEC = $(RPM_TOPDIR)/SPECS/$(PKGNAME).spec

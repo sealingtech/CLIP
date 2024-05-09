@@ -202,7 +202,7 @@ rm -rf %{buildroot}/usr/share/selinux/devel/include
 %{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs_dist \
 %config %{_sysconfdir}/selinux/%1/contexts/files/media \
 %dir %{_sysconfdir}/selinux/%1/contexts/users \
-%if %1 != "standard" \
+%if "%1" != "standard" \
 %config(noreplace) %{_sysconfdir}/selinux/%1/setrans.conf \
 %endif \
 %config(noreplace) %{_sysconfdir}/selinux/%1/contexts/users/* \

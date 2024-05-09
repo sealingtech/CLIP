@@ -1,7 +1,8 @@
 *.swp
 tmp
-./*.rpm
+*.rpm
 *.iso
+selinux-policy-*.tar.gz
 conf/mock/*.cfg
 conf/pkglist.clip-repo
 repos/yumcache/*
