@@ -1,10 +1,10 @@
 %define distro redhat 
 %define polyinstatiate n
 %define monolithic n
-%define POLICYVER 31
-%define POLICYCOREUTILSVER 2.5-24
-%define CHECKPOLICYVER 2.5-8
-%define LIBSEMANAGEVER 2.5-13
+%define POLICYVER 33
+%define POLICYCOREUTILSVER 3.4-1
+%define CHECKPOLICYVER 3.2
+%define LIBSEMANAGEVER 3.5-2
 Name:   %{pkgname}
 Version: %{version}
 Release: %{release}
@@ -355,7 +355,7 @@ Group: System Environment/Base
 Requires(pre): policycoreutils >= %{POLICYCOREUTILSVER}
 Requires(pre): coreutils
 Requires(pre): selinux-policy = %{version}-%{release}
-Requires: selinux-policy = %{version}-%{release} policycoreutils-devel
+Requires: selinux-policy = %{version}-%{release}
 Conflicts:  audispd-plugins <= 1.7.7-1
 Conflicts:  seedit
 Obsoletes: selinux-policy-targeted, selinux-policy-minimum, selinux-policy-mls

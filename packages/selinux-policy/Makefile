@@ -3,8 +3,9 @@
 # Copyright (C) 2023-24 Sealing Technologies, Inc.
 #
 # Authors: Spencer Shimko <sshimko@tresys.com>
-# 	   Spencer Shimko <spencer@quarksecurity.com>
-# 	   Spencer Shimko <spencer@sealingtech.com>
+#          Spencer Shimko <spencer@quarksecurity.com>
+#          Spencer Shimko <spencer@sealingtech.com>
+#          Martin Kuna <martin@sealingtech.com>
 #
 #
 #
