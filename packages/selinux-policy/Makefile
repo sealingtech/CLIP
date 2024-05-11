@@ -10,7 +10,7 @@
 #
 #
 # NOTE: you can override any of the config variables in a Makefile.supl
-# except the SEPARATE_PKGS feature that splits policy mods into separate i
+# except the SEPARATE_PKGS feature that splits policy mods into separate
 # RPMs. The list is added to the list defined below in this file.
 # You can disable that behavior and disable all of the SEPARATE_PKGS 
 # added in this Makefile by setting "DISABLE_STD_SEPARATE_PKGS := y"
@@ -97,24 +97,13 @@ SEPARATE_PKGS += sasl rpcbind rpc gssproxy kerberos certmonger pcscd
 # Got UPS?
 SEPARATE_PKGS += apcupsd nut
 
-# A few random services we have used in either CLIP variants or we wsee being commonly deployed by systems using this policy
+# A few random services we have used in either CLIP variants or we see being commonly deployed by systems using this policy
 SEPARATE_PKGS += postgresql mysql apache bind openvpn samba denyhosts ntp
 
 # These are pretty much necessary for typical GUI support
 SEPARATE_PKGS += xserver accountsd colord geoclue gnome wm telepathy bluetooth devicekit consolekit
 endif # ifneq DISABLE_STD_SEPARATE_PKGS,y
 
-# Since the policy structure changes between 7.2 and 7.3, we need to decide which spec to use
-# <3 awk
-ifeq ($(OS_REL),)
-override OS_REL ?= 9.3
-endif
-
-# Yes, use awk to perform floating point math. Believe it or not, bc is not installed by default and bash only does integer math and make doesn't have a clean way to do it.
-SPEC_VER := $(strip $(shell awk 'BEGIN { print ($(OS_REL) >= 9.3) ? "-cil" : "-nocil"; }'))
-# version-specific spec file name
-RPM_V_SPEC = $(CURDIR)/$(PKGNAME)$(SPEC_VER).spec
-RPM_SPEC = $(RPM_TOPDIR)/SPECS/$(PKGNAME).spec
 
 ####################################################
 ## things below this line should rarely change
@@ -125,12 +114,15 @@ SRPM_OUTPUT_DIR ?= $(OUTPUT_DIR)
 # the filename of the tarball
 TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
 
+# top level spec file
+RPM_SPEC = $(CURDIR)/$(PKGNAME).spec
+
 # Other source files rolled into the src.rpm
 SOURCES := support/Makefile.devel support/rpm.macros support/macro-expander support/selinux-policy.conf
 
 # exhaustive list of deps for the RPM, used to determine if RPM needs to be rebuilt
 TAR_DEPS := $(CURDIR)/Makefile $(shell find $(CURDIR)/$(PKGNAME)/* -type f -or -type d | sed -e "s/ /\\\ /g")
-RPM_DEPS = $(TARBALL) $(SOURCES) $(RPM_V_SPEC) $(CURDIR)/Makefile $(ADDTL_DEPS)
+RPM_DEPS = $(TARBALL) $(SOURCES) $(RPM_SPEC) $(CURDIR)/Makefile $(ADDTL_DEPS)
 
 RPM_TMPDIR ?= $(ROOT_DIR)/tmp
 RPM_TOPDIR ?= $(RPM_TMPDIR)/src/redhat
@@ -139,19 +131,6 @@ RPM_BUILDROOT ?= $(RPM_TMPDIR)/rpm-buildroot
 MKDIR = test -d $(1) || mkdir -p $(1)
 
 RPMBUILD_ARGS := --define '_topdir $(RPM_TOPDIR)'  --define '_tmppath $(RPM_TMPDIR)' --buildroot $(RPM_BUILDROOT)
-
-# this hack is because I can not figure out hot the heck to get rpm query to expand a variable defined in a spec file.
-# --eval only expxands built-in macros and eval %dump is no help either.
-# In short, since we need to rebuild the src RPM whenever the OS_REL changes, we need to remove the spec file
-ifeq ($(strip $(shell test -f $(RPM_SPEC) && grep "OS_REL $(OS_REL)" $(RPM_SPEC))),)
-$(shell rm -f $(RPM_SPEC))
-$(shell rm -f $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm)
-endif
-
-# FIXME: This and the shell above can probably be fixed by extract the spec from the src rpm
-# and looking at that spec for the value.
-# For now assume that if we don't have a spec file to analyze remove the srpm.
-$(shell test -f $(RPM_SPEC) ||  rm -f $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm)
 
 define rpm-prep
 	$(call MKDIR,$(RPM_TOPDIR)/SOURCES)
@@ -213,16 +192,16 @@ $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm: $(RPM_DEPS)
 	@echo "Building $(PKGNAME) SRPM..."
 	$(call rpm-prep)
 	cp $(SOURCES) $(TARBALL) $(RPM_TOPDIR)/SOURCES/
-	echo -e "%define type $(CONFIG_BUILD_SELINUX_POL_TYPE)\n%define enable_modules $(ENABLE_MODULES)\n%define enforcing_mode $(ENFORCING_MODE)\n%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n%define separatePkgs $(SEPARATE_PKGS)\n%define OS_REL $(OS_REL)\n"> $(RPM_SPEC)
-	cat $(RPM_V_SPEC) >> $(RPM_SPEC)
-	cd $(RPM_TOPDIR) && rpmbuild $(RPMBUILD_ARGS) -bs $(RPM_SPEC) --nodeps
+	echo -e "%define type $(CONFIG_BUILD_SELINUX_POL_TYPE)\n%define enable_modules $(ENABLE_MODULES)\n%define enforcing_mode $(ENFORCING_MODE)\n%define pkgname $(PKGNAME)\n%define _sysconfdir /etc\n%define version $(VERSION)\n%define release $(RELEASE)\n%define vendor $(VENDOR)\n%define packager $(PACKAGER)\nBuildArch: $(ARCH)\n%define separatePkgs $(SEPARATE_PKGS)\n"> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
+	cat $(RPM_SPEC) >> $(RPM_TOPDIR)/SPECS/$(notdir $(RPM_SPEC))
+	cd $(RPM_TOPDIR) && rpmbuild $(RPMBUILD_ARGS) -bs ./SPECS/$(notdir $(RPM_SPEC)) --nodeps
 	mv  $(RPM_TOPDIR)/SRPMS/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm $(SRPM_OUTPUT_DIR)
 
 clean:
 	$(RM) -r $(RPM_TMPDIR)
 
 bare: clean
-	$(foreach f,$(shell rpm $(RPMQ_DEFS) --specfile $(RPM_V_SPEC) > /dev/null),$(RM) $(OUTPUT_DIR)/$(f)*.rpm > /dev/null;)
+	$(foreach f,$(shell rpm $(RPMQ_DEFS) --specfile $(RPM_SPEC) > /dev/null),$(RM) $(OUTPUT_DIR)/$(f)*.rpm > /dev/null;)
 	$(RM) $(TARBALL) $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).src.rpm $(OUTPUT_DIR)/$(PKGNAME)-$(VERSION)-$(RELEASE).$(ARCH).rpm
 	@[[ "$(DEVVER)" != "" ]] && /bin/echo -e "WARNING: DEVVER variable set to $(DEVVER) in $(CURDIR)/Makefile, $(CURDIR)/Makefile.supl, or on the command-line.\nWARNING: Often this is a build-time timestamp. The source tarball and All RPMs might not have been removed.\n"; true
 
