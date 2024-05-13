@@ -118,7 +118,7 @@ TARBALL = $(SRPM_OUTPUT_DIR)/$(PKGNAME)-$(VERSION).tar.gz
 RPM_SPEC = $(CURDIR)/$(PKGNAME).spec
 
 # Other source files rolled into the src.rpm
-SOURCES := support/Makefile.devel support/rpm.macros support/macro-expander support/selinux-policy.conf
+SOURCES := support/Makefile.devel support/rpm.macros support/macro-expander support/selinux-policy.conf support/selinux-check-proper-disable.service
 
 # exhaustive list of deps for the RPM, used to determine if RPM needs to be rebuilt
 TAR_DEPS := $(CURDIR)/Makefile $(shell find $(CURDIR)/$(PKGNAME)/* -type f -or -type d | sed -e "s/ /\\\ /g")
