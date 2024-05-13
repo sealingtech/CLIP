@@ -25,6 +25,7 @@ common file
 	link
 	rename
 	execute
+	swapon
 	quotaon
 	mounton
 	audit_access
@@ -66,6 +67,8 @@ common socket
 	shutdown
 	recvfrom
 	sendto
+	recv_msg
+	send_msg
 	name_bind
 }
 
@@ -132,7 +135,7 @@ common x_device
 #
 common cap
 {
-	# The capabilities are defined in include/linux/capability.h
+	# The capabilities are defined in include/uapi/linux/capability.h
 	# Capabilities >= 32 are defined in the cap2 common.
 	# Care should be taken to ensure that these are consistent with
 	# those definitions. (Order matters)
@@ -174,11 +177,14 @@ common cap
 common cap2
 {
 	mac_override	# unused by SELinux
-	mac_admin
+	mac_admin	# unused by SELinux
 	syslog
 	wake_alarm
 	block_suspend
 	audit_read
+	perfmon
+	bpf
+	checkpoint_restore
 }
 
 #
@@ -199,6 +205,7 @@ class filesystem
 	getattr
 	relabelfrom
 	relabelto
+	transition
 	associate
 	quotamod
 	quotaget
@@ -227,6 +234,10 @@ inherits file
 
 class chr_file
 inherits file
+{
+	execute_no_trans
+	entrypoint
+}
 
 class blk_file
 inherits file
@@ -235,6 +246,9 @@ class sock_file
 inherits file
 
 class fifo_file
+inherits file
+
+class anon_inode
 inherits file
 
 class fd
@@ -253,6 +267,9 @@ inherits socket
 class tcp_socket
 inherits socket
 {
+	connectto
+	newconn
+	acceptfrom
 	node_bind
 	name_connect
 }
@@ -271,12 +288,29 @@ inherits socket
 
 class node
 {
+	tcp_recv
+	tcp_send
+	udp_recv
+	udp_send
+	rawip_recv
+	rawip_send
+	enforce_dest
+	dccp_recv
+	dccp_send
 	recvfrom
 	sendto
 }
 
 class netif
 {
+	tcp_recv
+	tcp_send
+	udp_recv
+	udp_send
+	rawip_recv
+	rawip_send
+	dccp_recv
+	dccp_send
 	ingress
 	egress
 }
@@ -294,6 +328,8 @@ class unix_stream_socket
 inherits socket
 {
 	connectto
+	newconn
+	acceptfrom
 }
 
 class unix_dgram_socket
@@ -407,7 +443,6 @@ class system
 	syslog_console
 	module_request
 	module_load
-
 	# these are overloaded userspace
 	# permissions from systemd
 	halt
@@ -418,6 +453,7 @@ class system
 	enable
 	disable
 	reload
+	undefined
 }
 
 #
@@ -429,7 +465,9 @@ inherits cap
 
 class capability2
 inherits cap2
-
+{
+	epolwakeup
+}
 #
 # Define the access vector interpretation for controlling
 # changes to passwd information.
@@ -599,7 +637,7 @@ inherits socket
 	nlmsg_write
 }
 
-class obsolete_netlink_firewall_socket
+class netlink_firewall_socket
 inherits socket
 {
 	nlmsg_read
@@ -636,7 +674,7 @@ inherits socket
 	nlmsg_tty_audit
 }
 
-class obsolete_netlink_ip6fw_socket
+class netlink_ip6fw_socket
 inherits socket
 {
 	nlmsg_read
@@ -671,6 +709,8 @@ class nscd
 	shmemhost
 	getserv
 	shmemserv
+	getnetgrp
+	shmemnetgrp
 }
 
 # Define the access vector interpretation for controlling
@@ -696,6 +736,8 @@ class packet
 	send
 	recv
 	relabelto
+	flow_in		# deprecated
+	flow_out	# deprecated
 	forward_in
 	forward_out
 }
@@ -713,7 +755,7 @@ class key
 
 class context
 {
-	unused_perm
+	translate
 	contains
 }
 
@@ -783,18 +825,6 @@ inherits database
 	write
 	import
 	export
-}
-
-class db_exception
-inherits database
-{
-	use
-}
-
-class db_datatype
-inherits database
-{
-	use
 }
 
 # network peer labels
@@ -909,6 +939,11 @@ class service
 	disable
 }
 
+class proxy
+{
+	read
+}
+
 #
 # Define the access vector interpretation for controlling capabilities
 # in user namespaces
@@ -958,6 +993,9 @@ inherits socket
 class netrom_socket
 inherits socket
 
+class bridge_socket
+inherits socket
+
 class atmpvc_socket
 inherits socket
 
@@ -983,6 +1021,12 @@ class pppox_socket
 inherits socket
 
 class llc_socket
+inherits socket
+
+class ib_socket
+inherits socket
+
+class mpls_socket
 inherits socket
 
 class can_socket
@@ -1042,6 +1086,9 @@ class bpf
 class xdp_socket
 inherits socket
 
+class mctp_socket
+inherits socket
+
 class perf_event
 {
 	open
@@ -1052,8 +1099,20 @@ class perf_event
 	write
 }
 
+class io_uring
+{
+	override_creds
+	sqpoll
+	cmd
+}
+
 class lockdown
 {
     integrity
     confidentiality
+}
+
+class user_namespace
+{
+	create
 }

@@ -105,6 +105,18 @@ constrain process { transition dyntransition noatsecure siginh rlimitinh }
 	or ( t1 == process_uncond_exempt )
 );
 
+constrain process dyntransition
+(
+	u1 == u2
+	or ( t1 == can_change_process_identity and t2 == process_user_target )
+);
+
+constrain process dyntransition
+(
+	r1 == r2
+	or ( t1 == can_change_process_identity and t2 == process_user_target )
+);
+
 # Constrain access to memory mapping file objects
 # One scenario in which this is useful is for a series of 
 # filters where, once filterA is done processing/modifying it, it passes
@@ -152,11 +164,13 @@ exempted_ubac_constraint(key_socket, ubacsock)
 exempted_ubac_constraint(unix_stream_socket, ubacsock)
 exempted_ubac_constraint(unix_dgram_socket, ubacsock)
 exempted_ubac_constraint(netlink_route_socket, ubacsock)
+exempted_ubac_constraint(netlink_firewall_socket, ubacsock)
 exempted_ubac_constraint(netlink_tcpdiag_socket, ubacsock)
 exempted_ubac_constraint(netlink_nflog_socket, ubacsock)
 exempted_ubac_constraint(netlink_xfrm_socket, ubacsock)
 exempted_ubac_constraint(netlink_selinux_socket, ubacsock)
 exempted_ubac_constraint(netlink_audit_socket, ubacsock)
+exempted_ubac_constraint(netlink_ip6fw_socket, ubacsock)
 exempted_ubac_constraint(netlink_dnrt_socket, ubacsock)
 exempted_ubac_constraint(netlink_kobject_uevent_socket, ubacsock)
 exempted_ubac_constraint(appletalk_socket, ubacsock)

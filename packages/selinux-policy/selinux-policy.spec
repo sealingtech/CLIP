@@ -367,7 +367,7 @@ if [ %1 -eq 1 ]; then \
    %{_sbindir}/restorecon -R /root /var/log /run /etc/passwd* /etc/group* /etc/*shadow* 2> /dev/null; \
 else \
 %relabel %2 \
-fi;
+fi; \
 echo -n " -F " > /.autorelabel
 
 
