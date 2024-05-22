@@ -10,13 +10,8 @@
 /doc/policy.xml
 /doc/tmp/
 /file_contexts
-/homedir_template
-/net_contexts
-/net_contexts.nft
 /policy.conf
 /policy.[0-9]*
-/policy/booleans.conf
-/policy/modules.conf
 /policy/modules/kernel/corenetwork.if
 /policy/modules/kernel/corenetwork.te
 /tmp/
