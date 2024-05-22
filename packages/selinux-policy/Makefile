@@ -98,10 +98,10 @@ SEPARATE_PKGS += sasl rpcbind rpc gssproxy kerberos certmonger pcscd
 SEPARATE_PKGS += apcupsd nut
 
 # A few random services we have used in either CLIP variants or we see being commonly deployed by systems using this policy
-SEPARATE_PKGS += postgresql mysql apache bind openvpn samba denyhosts ntp
+SEPARATE_PKGS += postgresql mysql apache bind openvpn samba ntp
 
 # These are pretty much necessary for typical GUI support
-SEPARATE_PKGS += xserver accountsd colord geoclue gnome wm telepathy bluetooth devicekit consolekit
+SEPARATE_PKGS += xserver accountsd colord geoclue gnome wm telepathy bluetooth devicekit
 endif # ifneq DISABLE_STD_SEPARATE_PKGS,y
 
 
