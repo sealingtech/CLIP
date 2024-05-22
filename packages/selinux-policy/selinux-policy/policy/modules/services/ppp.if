@@ -205,7 +205,7 @@ interface(`ppp_signull',`
 ## </summary>
 ## <param name="domain">
 ##	<summary>
-##	 Domain allowed to transition.
+##	Domain allowed to transition.
 ##	</summary>
 ## </param>
 #
@@ -225,7 +225,7 @@ interface(`ppp_domtrans',`
 ## </summary>
 ## <param name="domain">
 ##	<summary>
-##	 Domain allowed to transition.
+##	Domain allowed to transition.
 ##	</summary>
 ## </param>
 ## <param name="role">
@@ -254,7 +254,7 @@ interface(`ppp_run_cond',`
 ## </summary>
 ## <param name="domain">
 ##	<summary>
-##	 Domain allowed to transition.
+##	Domain allowed to transition.
 ##	</summary>
 ## </param>
 ## <param name="role">
@@ -279,7 +279,7 @@ interface(`ppp_run',`
 ## </summary>
 ## <param name="domain">
 ##	<summary>
-##	 Domain allowed access.
+##	Domain allowed access.
 ##	</summary>
 ## </param>
 #
@@ -355,7 +355,7 @@ interface(`ppp_read_secrets',`
 
 ########################################
 ## <summary>
-##	Read ppp pid files.
+##	Read ppp runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -363,19 +363,19 @@ interface(`ppp_read_secrets',`
 ##	</summary>
 ## </param>
 #
-interface(`ppp_read_pid_files',`
+interface(`ppp_read_runtime_files',`
 	gen_require(`
 		type pppd_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	allow $1 pppd_runtime_t:file read_file_perms;
 ')
 
 ########################################
 ## <summary>
 ##	Create, read, write, and delete
-##	ppp pid files.
+##	ppp runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -383,18 +383,18 @@ interface(`ppp_read_pid_files',`
 ##	</summary>
 ## </param>
 #
-interface(`ppp_manage_pid_files',`
+interface(`ppp_manage_runtime_files',`
 	gen_require(`
 		type pppd_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	allow $1 pppd_runtime_t:file manage_file_perms;
 ')
 
 ########################################
 ## <summary>
-##	Create specified pppd pid objects
+##	Create specified pppd runtime objects
 ##	with a type transition.
 ## </summary>
 ## <param name="domain">
@@ -413,12 +413,12 @@ interface(`ppp_manage_pid_files',`
 ##	</summary>
 ## </param>
 #
-interface(`ppp_pid_filetrans',`
+interface(`ppp_runtime_filetrans',`
 	gen_require(`
 		type pppd_runtime_t;
 	')
 
-	files_pid_filetrans($1, pppd_runtime_t, $2, $3)
+	files_runtime_filetrans($1, pppd_runtime_t, $2, $3)
 ')
 
 ########################################
@@ -482,6 +482,6 @@ interface(`ppp_admin',`
 	files_list_etc($1)
 	admin_pattern($1, { pppd_etc_rw_t pppd_secret_t pppd_etc_t })
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, { pptp_runtime_t pppd_runtime_t })
 ')

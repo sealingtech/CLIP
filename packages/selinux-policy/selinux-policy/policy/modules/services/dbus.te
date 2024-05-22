@@ -1,4 +1,4 @@
-policy_module(dbus, 1.28.3)
+policy_module(dbus)
 
 gen_require(`
 	class dbus all_dbus_perms;
@@ -11,12 +11,39 @@ gen_require(`
 
 ## <desc>
 ## <p>
+## Determine whether the dbus server
+## can use the network (insecure
+## except than in the case of the
+## loopback interface).
+## </p>
+## </desc>
+gen_tunable(dbus_can_network, false)
+
+## <desc>
+## <p>
 ## Allow dbus-daemon system bus to access /dev/net/tun
 ## which is needed to pass tun/tap device file descriptors
 ## over D-Bus.  This is needed by openvpn3-linux.
 ## </p>
 ## </desc>
 gen_tunable(dbus_pass_tuntap_fd, false)
+
+## <desc>
+## <p>
+## Allow dbus-daemon system bus to to run systemd transient
+## units. This is used by dbus-broker for dbus-activated
+## services when the unit file for the service does not exist.
+## </p>
+## </desc>
+gen_tunable(dbus_broker_run_transient_units, false)
+
+## <desc>
+## <p>
+## Enable additional rules to support using dbus-broker
+## as the dbus-daemon system bus.
+## </p>
+## </desc>
+gen_tunable(dbus_broker_system_bus, false)
 
 attribute dbusd_unconfined;
 attribute session_bus_type;
@@ -37,7 +64,7 @@ type session_dbusd_home_t;
 userdom_user_home_content(session_dbusd_home_t)
 
 type session_dbusd_runtime_t;
-files_pid_file(session_dbusd_runtime_t)
+files_runtime_file(session_dbusd_runtime_t)
 userdom_user_runtime_content(session_dbusd_runtime_t)
 
 type session_dbusd_tmp_t;
@@ -48,61 +75,22 @@ init_system_domain(system_dbusd_t, dbusd_exec_t)
 init_named_socket_activation(system_dbusd_t, system_dbusd_runtime_t)
 
 type system_dbusd_runtime_t alias system_dbusd_var_run_t;
-files_pid_file(system_dbusd_runtime_t)
-init_daemon_pid_file(system_dbusd_runtime_t, dir, "dbus")
+files_runtime_file(system_dbusd_runtime_t)
+init_daemon_runtime_file(system_dbusd_runtime_t, dir, "dbus")
+init_mountpoint(system_dbusd_runtime_t)
 
 type system_dbusd_tmp_t;
 files_tmp_file(system_dbusd_tmp_t)
 
+type system_dbusd_tmpfs_t;
+files_tmpfs_file(system_dbusd_tmpfs_t)
+
 type system_dbusd_var_lib_t;
 files_type(system_dbusd_var_lib_t)
-
-ifdef(`enable_mcs',`
-	init_ranged_system_domain(system_dbusd_t, dbusd_exec_t, s0 - mcs_systemhigh)
-')
 
 ifdef(`enable_mls',`
 	init_ranged_system_domain(system_dbusd_t, dbusd_exec_t, s0 - mls_systemhigh)
 ')
-
-#### IMPORTANT CLIP INFORMATION
-# Our approach to dbus is that every single dbus service should have a specific label in dbus_contexts. We have
-# chosen to stick with the type of the service provider as the label for the service, thus NetworkManager's service
-# is labeled networkmanager_t.
-#
-# If there is no specific label for a service in dbus_contexts, the default label is used, system_dbusd_t, and 
-# permission denials will reflect that. But we don't want anyone to accidentally grant access to that type, 
-# so this assertion is in-place to prevent users from accidentally doing that.
-#
-# If you don't know what all this means, here is an example entry from config/appconfig-mcs/dbus_contexts:
-#        <associate
-#        own="org.freedesktop.NetworkManager"
-#        context="system_u:object_r:NetworkManager_t:s0"/>
-#
-# This says that an application providing a service via org.freedesktop.NetworkManager
-# will be checked against the NetworkManager_t type. This applies to the
-# service provider who is performing acquire_svc to provide the service.
-#
-# Note that send_msg checks are not performed by consulting the dbus_contexts file.
-# Once a a process has "acquired a service" a client may communicate with it
-# via send_msg. This check is done by dbus calling "getpeercon()" on the sending
-# process and the receiving processes to obtain the contexts of the service and client.
-#
-# The policy would look something like this:
-# allow networkmanager_t self:dbus acquire_svc;
-# allow staff_t networkmanager_t:dbus send_msg;
-#
-# Remember: 'ausearch -m user_avc' will help identify the service name.
-#
-# You might not want to allow access to a service. If that is the
-# case you have two options:
-# 1. Do nothing and live with the denial as doing nothing still prevents
-# any access to the service, like we have done with genclue.
-#
-# 2. Add a label for the service to dbus_contexts, but sitll grant
-# no access to that label.
-#
-neverallow ~{ system_dbusd_t } system_dbusd_t:dbus acquire_svc;
 
 ########################################
 #
@@ -110,12 +98,12 @@ neverallow ~{ system_dbusd_t } system_dbusd_t:dbus acquire_svc;
 #
 
 allow system_dbusd_t self:capability { dac_override setgid setpcap setuid sys_resource };
-allow system_dbusd_t self:capability net_admin;
-dontaudit system_dbusd_t self:capability sys_tty_config;
+# net_admin for changing buffer sizes
+dontaudit system_dbusd_t self:capability { net_admin sys_tty_config };
 allow system_dbusd_t self:process { getattr getsched signal_perms setpgid getcap setcap setrlimit };
 allow system_dbusd_t self:fifo_file rw_fifo_file_perms;
 allow system_dbusd_t self:dbus { send_msg acquire_svc };
-allow system_dbusd_t self:unix_stream_socket { accept connectto listen };
+allow system_dbusd_t self:unix_stream_socket { create_stream_socket_perms connectto };
 allow system_dbusd_t self:netlink_selinux_socket { create bind read };
 
 allow system_dbusd_t dbusd_etc_t:dir { list_dir_perms watch };
@@ -124,18 +112,21 @@ read_lnk_files_pattern(system_dbusd_t, dbusd_etc_t, dbusd_etc_t)
 
 manage_dirs_pattern(system_dbusd_t, system_dbusd_tmp_t, system_dbusd_tmp_t)
 manage_files_pattern(system_dbusd_t, system_dbusd_tmp_t, system_dbusd_tmp_t)
-files_tmp_filetrans(system_dbusd_t, system_dbusd_tmp_t, { dir file })
+files_tmp_filetrans(system_dbusd_t, system_dbusd_tmp_t, { dir file sock_file })
+
+manage_files_pattern(system_dbusd_t, system_dbusd_tmpfs_t, system_dbusd_tmpfs_t)
+fs_tmpfs_filetrans(system_dbusd_t, system_dbusd_tmpfs_t, file)
+allow system_dbusd_t system_dbusd_tmpfs_t:file map;
 
 read_files_pattern(system_dbusd_t, system_dbusd_var_lib_t, system_dbusd_var_lib_t)
 
 manage_dirs_pattern(system_dbusd_t, system_dbusd_runtime_t, system_dbusd_runtime_t)
 manage_files_pattern(system_dbusd_t, system_dbusd_runtime_t, system_dbusd_runtime_t)
 manage_sock_files_pattern(system_dbusd_t, system_dbusd_runtime_t, system_dbusd_runtime_t)
-files_pid_filetrans(system_dbusd_t, system_dbusd_runtime_t, { dir file })
+files_runtime_filetrans(system_dbusd_t, system_dbusd_runtime_t, { dir file sock_file })
 
 can_exec(system_dbusd_t, dbusd_exec_t)
 
-kernel_read_crypto_sysctls(system_dbusd_t)
 kernel_read_system_state(system_dbusd_t)
 kernel_read_kernel_sysctls(system_dbusd_t)
 
@@ -168,6 +159,7 @@ mls_socket_read_to_clearance(system_dbusd_t)
 mls_dbus_recv_all_levels(system_dbusd_t)
 
 selinux_get_fs_mount(system_dbusd_t)
+selinux_use_status_page(system_dbusd_t)
 selinux_validate_context(system_dbusd_t)
 selinux_compute_access_vector(system_dbusd_t)
 selinux_compute_create_context(system_dbusd_t)
@@ -182,7 +174,6 @@ auth_read_pam_console_data(system_dbusd_t)
 init_use_fds(system_dbusd_t)
 init_use_script_ptys(system_dbusd_t)
 init_all_labeled_script_domtrans(system_dbusd_t)
-init_start_system(system_dbusd_t) # needed by dbus-broker
 
 # for powerdevil /usr/lib/x86_64-linux-gnu/libexec/kauth/*
 libs_exec_lib_files(system_dbusd_t)
@@ -196,6 +187,9 @@ miscfiles_read_generic_certs(system_dbusd_t)
 seutil_read_config(system_dbusd_t)
 seutil_read_default_contexts(system_dbusd_t)
 
+# for machinectl shell
+term_use_ptmx(system_dbusd_t)
+
 userdom_dontaudit_use_unpriv_user_fds(system_dbusd_t)
 userdom_dontaudit_search_user_home_dirs(system_dbusd_t)
 # read a file in ~/.local/share
@@ -206,31 +200,72 @@ ifdef(`init_systemd', `
 	dev_rw_dri(system_dbusd_t)
 	dev_rw_input_dev(system_dbusd_t)
 
+	files_read_etc_runtime_files(system_dbusd_t)
+
 	# for /run/systemd/dynamic-uid/
-	init_list_pids(system_dbusd_t)
+	init_list_runtime(system_dbusd_t)
 	init_read_runtime_symlinks(system_dbusd_t)
 
+	init_start_system(system_dbusd_t) # needed by dbus-broker
+
+	# dbus-broker checks the status of systemd-logind
+	init_get_generic_units_status(system_dbusd_t)
+
+	# for system dbus daemon to start/stop units
+	init_start_all_units(system_dbusd_t)
+	init_stop_all_units(system_dbusd_t)
+
 	# Recent versions of dbus are started as Type=notify
-	init_write_runtime_socket(system_dbusd_t)
+	systemd_write_notify_socket(system_dbusd_t)
+
+	tunable_policy(`dbus_broker_system_bus',`
+		init_get_system_status(system_dbusd_t)
+	')
 ')
 
 tunable_policy(`dbus_pass_tuntap_fd',`
         corenet_rw_tun_tap_dev(system_dbusd_t)
 ')
 
+tunable_policy(`dbus_broker_run_transient_units',`
+	init_start_transient_units(system_dbusd_t)
+	init_stop_transient_units(system_dbusd_t)
+')
+
+# the below duplicated tunable blocks are due to
+# optionals within tunables not being supported
+optional_policy(`
+	tunable_policy(`dbus_broker_system_bus',`
+		policykit_get_unit_status(system_dbusd_t)
+		policykit_start_unit(system_dbusd_t)
+		policykit_stop_unit(system_dbusd_t)
+		policykit_reload_unit(system_dbusd_t)
+	')
+')
+
+optional_policy(`
+	tunable_policy(`dbus_broker_system_bus',`
+		networkmanager_startstop(system_dbusd_t)
+		networkmanager_status(system_dbusd_t)
+	')
+')
+
 optional_policy(`
 	# for /run/systemd/users/*
-	systemd_read_logind_pids(system_dbusd_t)
+	systemd_read_logind_runtime_files(system_dbusd_t)
 	systemd_write_inherited_logind_inhibit_pipes(system_dbusd_t)
 	systemd_write_inherited_logind_sessions_pipes(system_dbusd_t)
+
+	systemd_connect_machined(system_dbusd_t)
+	# for passing around terminal file handles for machinectl shell
+	systemd_use_inherited_machined_ptys(system_dbusd_t)
+
+	# allow populating of /var/lib/dbus by systemd-tmpfilesd
+	systemd_tmpfilesd_managed(system_dbusd_var_lib_t)
 ')
 
 optional_policy(`
 	bluetooth_stream_connect(system_dbusd_t)
-')
-
-optional_policy(`
-	consolekit_use_inhibit_lock(system_dbusd_t)
 ')
 
 optional_policy(`
@@ -243,10 +278,6 @@ optional_policy(`
 
 optional_policy(`
 	tpm2_rw_abrmd_pipes(system_dbusd_t)
-')
-
-optional_policy(`
-	udev_read_db(system_dbusd_t)
 ')
 
 optional_policy(`
@@ -266,11 +297,10 @@ optional_policy(`
 dontaudit session_bus_type self:capability sys_resource;
 allow session_bus_type self:process { getattr sigkill signal };
 dontaudit session_bus_type self:process { ptrace setrlimit };
-allow session_bus_type self:file { getattr read write };
+allow session_bus_type self:file rw_inherited_file_perms;
 allow session_bus_type self:fifo_file rw_fifo_file_perms;
 allow session_bus_type self:dbus { send_msg acquire_svc };
 allow session_bus_type self:unix_stream_socket { accept listen };
-allow session_bus_type self:tcp_socket { accept listen };
 allow session_bus_type self:netlink_selinux_socket create_socket_perms;
 
 allow session_bus_type dbusd_etc_t:dir list_dir_perms;
@@ -284,14 +314,13 @@ userdom_user_home_dir_filetrans(session_bus_type, session_dbusd_home_t, dir, ".d
 
 manage_dirs_pattern(session_bus_type, session_dbusd_tmp_t, session_dbusd_tmp_t)
 manage_files_pattern(session_bus_type, session_dbusd_tmp_t, session_dbusd_tmp_t)
-files_tmp_filetrans(session_bus_type, session_dbusd_tmp_t, { dir file })
+files_tmp_filetrans(session_bus_type, session_dbusd_tmp_t, { dir file sock_file })
 
 manage_dirs_pattern(session_bus_type, session_dbusd_runtime_t, session_dbusd_runtime_t)
 manage_files_pattern(session_bus_type, session_dbusd_runtime_t, session_dbusd_runtime_t)
 manage_sock_files_pattern(session_bus_type, session_dbusd_runtime_t, session_dbusd_runtime_t)
 userdom_user_runtime_filetrans(session_bus_type, session_dbusd_runtime_t, { dir file sock_file })
 
-kernel_read_crypto_sysctls(session_bus_type)
 kernel_read_system_state(session_bus_type)
 kernel_read_kernel_sysctls(session_bus_type)
 
@@ -299,14 +328,6 @@ corecmd_list_bin(session_bus_type)
 corecmd_read_bin_files(session_bus_type)
 corecmd_read_bin_pipes(session_bus_type)
 corecmd_read_bin_sockets(session_bus_type)
-
-corenet_all_recvfrom_netlabel(session_bus_type)
-corenet_tcp_sendrecv_generic_if(session_bus_type)
-corenet_tcp_sendrecv_generic_node(session_bus_type)
-corenet_tcp_bind_generic_node(session_bus_type)
-
-corenet_sendrecv_all_server_packets(session_bus_type)
-corenet_tcp_bind_reserved_port(session_bus_type)
 
 dev_read_urand(session_bus_type)
 
@@ -318,10 +339,13 @@ files_read_usr_files(session_bus_type)
 files_watch_usr_dirs(session_bus_type)
 files_dontaudit_search_var(session_bus_type)
 
+fs_getattr_cgroup(session_bus_type)
 fs_getattr_romfs(session_bus_type)
 fs_getattr_xattr_fs(session_bus_type)
 fs_list_inotifyfs(session_bus_type)
 fs_dontaudit_list_nfs(session_bus_type)
+
+kernel_getattr_proc(session_bus_type)
 
 selinux_get_fs_mount(session_bus_type)
 selinux_validate_context(session_bus_type)
@@ -342,11 +366,22 @@ seutil_read_default_contexts(session_bus_type)
 
 term_use_all_terms(session_bus_type)
 
+tunable_policy(`dbus_can_network',`
+	allow session_bus_type self:tcp_socket { accept listen };
+
+	corenet_all_recvfrom_netlabel(session_bus_type)
+	corenet_tcp_sendrecv_generic_if(session_bus_type)
+	corenet_tcp_sendrecv_generic_node(session_bus_type)
+	corenet_tcp_bind_generic_node(session_bus_type)
+
+	corenet_sendrecv_all_server_packets(session_bus_type)
+	corenet_tcp_bind_reserved_port(session_bus_type)
+')
+
 optional_policy(`
 	xserver_rw_xsession_log(session_bus_type)
 	xserver_use_xdm_fds(session_bus_type)
 	xserver_rw_xdm_pipes(session_bus_type)
-	xserver_stream_rw_xdm(session_bus_type)
 ')
 
 ########################################

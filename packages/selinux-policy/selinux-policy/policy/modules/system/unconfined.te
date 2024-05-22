@@ -1,4 +1,4 @@
-policy_module(unconfined, 3.14.3)
+policy_module(unconfined)
 
 ########################################
 #
@@ -30,9 +30,6 @@ domtrans_pattern(unconfined_t, unconfined_execmem_exec_t, unconfined_execmem_t)
 
 files_create_boot_flag(unconfined_t)
 
-mcs_killall(unconfined_t)
-mcs_ptrace_all(unconfined_t)
-
 libs_run_ldconfig(unconfined_t, unconfined_r)
 
 logging_send_syslog_msg(unconfined_t)
@@ -59,19 +56,26 @@ ifdef(`direct_sysadm_daemon',`
 ')
 
 ifdef(`init_systemd',`
+	gen_require(`
+		class system { status start stop reload };
+	')
+
 	# for systemd-analyze
 	init_service_status(unconfined_t)
 	# for systemd --user:
+	init_linkable_keyring(unconfined_t)
 	init_pgm_spec_user_daemon_domain(unconfined_t)
+	allow unconfined_t self:system { status start stop reload };
 
 	optional_policy(`
 		systemd_dbus_chat_resolved(unconfined_t)
+		systemd_filetrans_passwd_runtime_dirs(unconfined_t)
 	')
 ')
 
 optional_policy(`
 	apache_run_helper(unconfined_t, unconfined_r)
-	apache_role(unconfined_r, unconfined_t)
+	apache_role(unconfined, unconfined_t, unconfined_application_exec_domain, unconfined_r)
 ')
 
 optional_policy(`
@@ -79,11 +83,19 @@ optional_policy(`
 ')
 
 optional_policy(`
+	bluetooth_dbus_chat(unconfined_t)
+')
+
+optional_policy(`
 	bootloader_run(unconfined_t, unconfined_r)
 ')
 
 optional_policy(`
-	cron_unconfined_role(unconfined_r, unconfined_t)
+	container_unconfined_role(unconfined, unconfined_t, unconfined_application_exec_domain, unconfined_r)
+')
+
+optional_policy(`
+	cron_unconfined_role(unconfined, unconfined_t, unconfined_application_exec_domain, unconfined_r)
 ')
 
 optional_policy(`
@@ -100,7 +112,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	hadoop_role(unconfined_r, unconfined_t)
+	hadoop_role(unconfined, unconfined_t, unconfined_application_exec_domain, unconfined_r)
 ')
 
 optional_policy(`
@@ -112,7 +124,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	java_run_unconfined(unconfined_t, unconfined_r)
+	java_run_unconfined(unconfined_application_exec_domain, unconfined_r)
 ')
 
 optional_policy(`
@@ -136,7 +148,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	mta_role(unconfined_r, unconfined_t)
+	mta_role(unconfined, unconfined_t, unconfined_application_exec_domain, unconfined_r)
 ')
 
 optional_policy(`
@@ -164,7 +176,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	pyzor_role(unconfined_r, unconfined_t)
+	pyzor_role(unconfined, unconfined_t, unconfined_application_exec_domain, unconfined_r)
 ')
 
 optional_policy(`
@@ -186,11 +198,11 @@ optional_policy(`
 ')
 
 optional_policy(`
-	spamassassin_role(unconfined_r, unconfined_t)
+	spamassassin_role(unconfined, unconfined_t, unconfined_application_exec_domain, unconfined_r)
 ')
 
 optional_policy(`
-	syncthing_role(unconfined_r, unconfined_t)
+	syncthing_role(unconfined, unconfined_t, unconfined_application_exec_domain, unconfined_r)
 ')
 
 optional_policy(`
@@ -223,7 +235,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	xserver_role(unconfined_r, unconfined_t)
+	xserver_role(unconfined, unconfined_t, unconfined_application_exec_domain, unconfined_r)
 	xserver_dbus_chat_xdm(unconfined_t)
 ')
 

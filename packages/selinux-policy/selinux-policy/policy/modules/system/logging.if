@@ -148,6 +148,25 @@ interface(`logging_read_audit_log',`
 
 ########################################
 ## <summary>
+##	Watch the audit log.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`logging_watch_audit_log',`
+	gen_require(`
+		type auditd_log_t;
+	')
+
+	allow $1 auditd_log_t:file watch;
+')
+
+########################################
+## <summary>
 ##	Execute auditctl in the auditctl domain.
 ## </summary>
 ## <param name="domain">
@@ -238,9 +257,9 @@ interface(`logging_run_auditd',`
 ##	Execute a domain transition to run the audit dispatcher.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`logging_domtrans_dispatcher',`
@@ -256,9 +275,9 @@ interface(`logging_domtrans_dispatcher',`
 ##	Signal the audit dispatcher.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed access.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`logging_signal_dispatcher',`
@@ -287,7 +306,7 @@ interface(`logging_signal_dispatcher',`
 #
 interface(`logging_dispatcher_domain',`
 	gen_require(`
-		type audisp_t;
+		type audisp_t, auditd_t;
 		role system_r;
 	')
 
@@ -295,6 +314,8 @@ interface(`logging_dispatcher_domain',`
 	domain_entry_file($1, $2)
 
 	role system_r types $1;
+
+	allow auditd_t $2:file getattr;
 
 	domtrans_pattern(audisp_t, $2, $1)
 	allow audisp_t $1:process { sigkill sigstop signull signal };
@@ -318,7 +339,7 @@ interface(`logging_stream_connect_dispatcher',`
 		type audisp_t, audisp_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, audisp_runtime_t, audisp_runtime_t, audisp_t)
 ')
 
@@ -490,9 +511,9 @@ interface(`logging_setattr_syslogd_tmp_files',`
 ##  for syslogd.
 ## </summary>
 ## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`logging_audit_socket_activation', `
@@ -519,7 +540,7 @@ interface(`logging_relabel_syslogd_tmp_files',`
 		type syslogd_tmp_t;
 	')
 
-	allow $1 syslogd_tmp_t:file { relabelfrom relabelto };
+	allow $1 syslogd_tmp_t:file relabel_file_perms;
 ')
 
 ########################################
@@ -557,7 +578,7 @@ interface(`logging_relabel_syslogd_tmp_dirs',`
 		type syslogd_tmp_t;
 	')
 
-	allow $1 syslogd_tmp_t:dir { relabelfrom relabelto };
+	allow $1 syslogd_tmp_t:dir relabel_dir_perms;
 ')
 
 ########################################
@@ -623,68 +644,6 @@ interface(`logging_log_filetrans',`
 	allow $1 var_log_t:lnk_file read_lnk_file_perms;
 ')
 
-#######################################
-## <summary>
-##  Create an object in the log directory, with a private type.
-## </summary>
-## <desc>
-##  <p>
-##  Allow the specified domain to create an object
-##  in the general system log directories (e.g., /var/log)
-##  with a private type.  Typically this is used for creating
-##  private log files in /var/log with the private type instead
-##  of the general system log type. To accomplish this goal,
-##  either the program must be SELinux-aware, or use this interface.
-##  </p>
-##  <p>
-##  Related interfaces:
-##  </p>
-##  <ul>
-##      <li>logging_log_file()</li>
-##  </ul>
-##  <p>
-##  Example usage with a domain that can create
-##  and append to a private log file stored in the
-##  general directories (e.g., /var/log):
-##  </p>
-##  <p>
-##  type mylogfile_t;
-##  logging_log_file(mylogfile_t)
-##  allow mydomain_t mylogfile_t:file { create_file_perms append_file_perms };
-##  logging_log_filetrans(mydomain_t, mylogfile_t, file)
-##  </p>
-## </desc>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-## <param name="private type">
-##  <summary>
-##  The type of the object to be created.
-##  </summary>
-## </param>
-## <param name="object">
-##  <summary>
-##  The object class of the object being created.
-##  </summary>
-## </param>
-## <param name="name" optional="true">
-##      <summary>
-##      The name of the object being created.
-##      </summary>
-## </param>
-## <infoflow type="write" weight="10"/>
-#
-interface(`logging_log_named_filetrans',`
-    gen_require(`
-        type var_log_t;
-    ')
-
-    files_search_var($1)
-    filetrans_pattern($1, var_log_t, $2, $3, $4)
-')
-
 ########################################
 ## <summary>
 ##	Send system log messages.
@@ -743,10 +702,10 @@ interface(`logging_send_syslog_msg',`
 		# Allow systemd-journald to check whether the process died
 		allow syslogd_t $1:process signull;
 
-		ifdef(`distro_redhat',`
-			kernel_dgram_send($1)
-		')
+		kernel_dgram_send($1)
+		kernel_stream_connect($1)
 	')
+
 ')
 
 ########################################
@@ -792,9 +751,9 @@ interface(`logging_relabelto_devlog_sock_files',`
 ##      Connect to the syslog control unix stream socket.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`logging_create_devlog',`
@@ -804,7 +763,7 @@ interface(`logging_create_devlog',`
 
 	allow $1 devlog_t:sock_file manage_sock_file_perms;
 	dev_filetrans($1, devlog_t, sock_file)
-	init_pid_filetrans($1, devlog_t, sock_file, "syslog")
+	init_runtime_filetrans($1, devlog_t, sock_file, "syslog")
 ')
 
 ########################################
@@ -888,6 +847,25 @@ interface(`logging_watch_runtime_dirs',`
 
 ########################################
 ## <summary>
+##	Connect syslog varlink socket files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`logging_stream_connect_journald_varlink',`
+	gen_require(`
+		type syslogd_runtime_t, syslogd_t;
+	')
+
+	init_search_run($1)
+	stream_connect_pattern($1, syslogd_runtime_t, syslogd_runtime_t, syslogd_t)
+')
+
+########################################
+## <summary>
 ##	Create, read, write, and delete syslog PID sockets.
 ## </summary>
 ## <param name="domain">
@@ -896,13 +874,13 @@ interface(`logging_watch_runtime_dirs',`
 ##	</summary>
 ## </param>
 #
-interface(`logging_manage_pid_sockets',`
+interface(`logging_manage_runtime_sockets',`
 	gen_require(`
 		type syslogd_runtime_t;
 	')
 
 	manage_sock_files_pattern($1, syslogd_runtime_t, syslogd_runtime_t)
-	files_search_pids($1)
+	files_search_runtime($1)
 ')
 
 ########################################
@@ -1044,7 +1022,7 @@ interface(`logging_dontaudit_getattr_all_logs',`
 
 ########################################
 ## <summary>
-##	Read the atttributes of any log file
+##	Read the attributes of any log file
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -1086,9 +1064,9 @@ interface(`logging_append_all_logs',`
 ##      Append to all log files.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`logging_append_all_inherited_logs',`
@@ -1096,7 +1074,7 @@ interface(`logging_append_all_inherited_logs',`
 		attribute logfile;
 	')
 
-	allow $1 logfile:file { getattr append ioctl lock };
+	allow $1 logfile:file append_inherited_file_perms;
 ')
 
 ########################################
@@ -1122,24 +1100,21 @@ interface(`logging_read_all_logs',`
 
 ########################################
 ## <summary>
-##	Execute all log files in the caller domain.
+##	Watch all log files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
 ##	Domain allowed access.
 ##	</summary>
 ## </param>
+## <rolecap/>
 #
-# cjp: not sure why this is needed.  This was added
-# because of logrotate.
-interface(`logging_exec_all_logs',`
+interface(`logging_watch_all_logs',`
 	gen_require(`
 		attribute logfile;
 	')
 
-	files_search_var($1)
-	allow $1 logfile:dir list_dir_perms;
-	can_exec($1, logfile)
+	allow $1 logfile:file watch;
 ')
 
 ########################################
@@ -1219,7 +1194,7 @@ interface(`logging_relabel_generic_log_dirs',`
 	')
 
 	files_search_var($1)
-	allow $1 var_log_t:dir { relabelfrom relabelto };
+	allow $1 var_log_t:dir relabel_dir_perms;
 ')
 
 ########################################

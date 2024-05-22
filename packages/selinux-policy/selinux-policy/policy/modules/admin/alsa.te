@@ -1,4 +1,4 @@
-policy_module(alsa, 1.20.0)
+policy_module(alsa)
 
 ########################################
 #
@@ -19,7 +19,7 @@ type alsa_home_t;
 userdom_user_home_content(alsa_home_t)
 
 type alsa_runtime_t;
-files_pid_file(alsa_runtime_t)
+files_runtime_file(alsa_runtime_t)
 
 type alsa_tmp_t;
 files_tmp_file(alsa_tmp_t)
@@ -61,14 +61,14 @@ can_exec(alsa_t, alsa_exec_t)
 allow alsa_t alsa_runtime_t:dir manage_dir_perms;
 allow alsa_t alsa_runtime_t:file manage_file_perms;
 allow alsa_t alsa_runtime_t:lnk_file manage_lnk_file_perms;
-files_pid_filetrans(alsa_t, alsa_runtime_t, { dir file })
+files_runtime_filetrans(alsa_t, alsa_runtime_t, { dir file })
 
 manage_dirs_pattern(alsa_t, alsa_tmp_t, alsa_tmp_t)
 manage_files_pattern(alsa_t, alsa_tmp_t, alsa_tmp_t)
 files_tmp_filetrans(alsa_t, alsa_tmp_t, { dir file })
 userdom_user_tmp_filetrans(alsa_t, alsa_tmp_t, { dir file })
 
-allow alsa_t alsa_tmpfs_t:file { manage_file_perms map };
+allow alsa_t alsa_tmpfs_t:file mmap_manage_file_perms;
 fs_tmpfs_filetrans(alsa_t, alsa_tmpfs_t, file)
 
 manage_dirs_pattern(alsa_t, alsa_var_lib_t, alsa_var_lib_t)
@@ -106,8 +106,3 @@ miscfiles_read_localization(alsa_t)
 userdom_manage_unpriv_user_semaphores(alsa_t)
 userdom_manage_unpriv_user_shared_mem(alsa_t)
 userdom_search_user_home_dirs(alsa_t)
-
-optional_policy(`
-	hal_use_fds(alsa_t)
-	hal_write_log(alsa_t)
-')

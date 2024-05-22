@@ -20,6 +20,11 @@ ifdef(`distro_gentoo',`
 /dev/initctl		-p	gen_context(system_u:object_r:initctl_t,s0)
 
 #
+# /etc
+#
+/etc/containers/systemd(/.*)?	gen_context(system_u:object_r:systemd_unit_t,s0)
+
+#
 # /usr
 #
 /usr/bin/init(ng)?	--	gen_context(system_u:object_r:init_exec_t,s0)
@@ -28,14 +33,17 @@ ifdef(`distro_gentoo',`
 /usr/bin/systemd	--	gen_context(system_u:object_r:init_exec_t,s0)
 /usr/bin/upstart	--	gen_context(system_u:object_r:init_exec_t,s0)
 
-/usr/lib/systemd/systemd --	gen_context(system_u:object_r:init_exec_t,s0)
+/usr/lib/dracut/modules\.d/[^/]+/.*\.service	--	gen_context(system_u:object_r:systemd_unit_t,s0)
+/usr/lib/systemd/systemd -- gen_context(system_u:object_r:init_exec_t,s0)
+/usr/lib/systemd/systemd-executor	--	gen_context(system_u:object_r:init_exec_t,s0)
 /usr/lib/systemd/systemd-shutdown	--	gen_context(system_u:object_r:init_exec_t,s0)
+/usr/lib/systemd/systemd-oomd	--	gen_context(system_u:object_r:init_exec_t,s0)
 /usr/lib/systemd/system-preset(/.*)? gen_context(system_u:object_r:systemd_unit_t,s0)
 /usr/lib/systemd/user-preset(/.*)? gen_context(system_u:object_r:systemd_unit_t,s0)
 /usr/lib/systemd/ntp-units\.d -d gen_context(system_u:object_r:systemd_unit_t,s0)
 /usr/lib/systemd/system(/.*)?	gen_context(system_u:object_r:systemd_unit_t,s0)
-/run/systemd/transient(/.*)?	gen_context(system_u:object_r:systemd_unit_t,s0)
-/usr/lib/dracut/modules.d/.*\.service       gen_context(system_u:object_r:systemd_unit_t,s0)
+/usr/share/containers/systemd(/.*)?	gen_context(system_u:object_r:systemd_unit_t,s0)
+/run/systemd/transient(/.*)?	gen_context(system_u:object_r:systemd_transient_unit_t,s0)
 
 /usr/libexec/dcc/start-.* --	gen_context(system_u:object_r:initrc_exec_t,s0)
 /usr/libexec/dcc/stop-.* --	gen_context(system_u:object_r:initrc_exec_t,s0)
@@ -45,8 +53,13 @@ ifdef(`distro_gentoo',`
 /usr/sbin/upstart	--	gen_context(system_u:object_r:init_exec_t,s0)
 
 ifdef(`distro_gentoo', `
+/usr/lib/rc/cache(/.*)?		gen_context(system_u:object_r:initrc_state_t,s0)
+/usr/lib/rc/console(/.*)?		gen_context(system_u:object_r:initrc_state_t,s0)
 /usr/lib/rc/init\.d(/.*)?		gen_context(system_u:object_r:initrc_state_t,s0)
-/usr/sbin/rc		--	gen_context(system_u:object_r:rc_exec_t,s0)
+/usr/sbin/rc			--	gen_context(system_u:object_r:rc_exec_t,s0)
+/usr/sbin/openrc		--	gen_context(system_u:object_r:rc_exec_t,s0)
+/usr/sbin/openrc-init		--	gen_context(system_u:object_r:init_exec_t,s0)
+/usr/sbin/openrc-shutdown	--	gen_context(system_u:object_r:init_exec_t,s0)
 ')
 
 ifdef(`distro_redhat',`
@@ -56,13 +69,14 @@ ifdef(`distro_redhat',`
 #
 # /var
 #
+/var/lib/random-seed	--	gen_context(system_u:object_r:init_random_seed_t,s0)
 /var/lib/systemd(/.*)?		gen_context(system_u:object_r:init_var_lib_t,s0)
 
 /run/initctl	-p	gen_context(system_u:object_r:initctl_t,s0)
 /run/kerneloops\.pid	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
 /run/utmp		--	gen_context(system_u:object_r:initrc_runtime_t,s0)
 /run/runlevel\.dir		gen_context(system_u:object_r:initrc_runtime_t,s0)
-/run/random-seed	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
+/run/random-seed	--	gen_context(system_u:object_r:init_random_seed_t,s0)
 /run/setmixer_flag	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
 /run/systemd(/.*)?		gen_context(system_u:object_r:init_runtime_t,s0)
 /run/wd_keepalive\.pid	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
@@ -78,6 +92,9 @@ ifdef(`distro_debian',`
 
 ifdef(`distro_gentoo', `
 /var/lib/init\.d(/.*)?		gen_context(system_u:object_r:initrc_state_t,s0)
+/var/lib/ip6?tables(/.*)?	gen_context(system_u:object_r:initrc_tmp_t,s0)
+
+/run/openrc(/.*)?		gen_context(system_u:object_r:initrc_state_t,s0)
 /run/svscan\.pid	--	gen_context(system_u:object_r:initrc_runtime_t,s0)
 ')
 

@@ -1,4 +1,4 @@
-policy_module(kernel, 1.27.3)
+policy_module(kernel)
 
 ########################################
 #
@@ -48,7 +48,7 @@ ifdef(`enable_mls',`
 type kernel_t, can_load_kernmodule;
 domain_base_type(kernel_t)
 role system_r types kernel_t;
-sid kernel gen_context(system_u:system_r:kernel_t,mls_systemhigh,s0 - mcs_systemhigh)
+sid kernel gen_context(system_u:system_r:kernel_t,mls_systemhigh)
 
 #
 # DebugFS
@@ -78,6 +78,10 @@ fs_type(proc_t)
 genfscon proc / gen_context(system_u:object_r:proc_t,s0)
 genfscon proc /sysvipc gen_context(system_u:object_r:proc_t,s0)
 
+optional_policy(`
+	container_mountpoint(proc_t)
+')
+
 type proc_afs_t, proc_type;
 genfscon proc /fs/openafs gen_context(system_u:object_r:proc_afs_t,s0)
 
@@ -96,6 +100,10 @@ neverallow ~{ can_dump_kernel kern_unconfined } proc_kcore_t:file ~{ getattr mou
 genfscon proc /kcore gen_context(system_u:object_r:proc_kcore_t,mls_systemhigh)
 
 optional_policy(`
+	container_mountpoint(proc_kcore_t)
+')
+
+optional_policy(`
 	init_mountpoint(proc_kcore_t)
 ')
 
@@ -104,6 +112,9 @@ genfscon proc /mdstat gen_context(system_u:object_r:proc_mdstat_t,s0)
 
 type proc_net_t, proc_type;
 genfscon proc /net gen_context(system_u:object_r:proc_net_t,s0)
+
+type proc_psi_t, proc_type;
+genfscon proc /pressure gen_context(system_u:object_r:proc_psi_t,s0)
 
 type proc_xen_t, proc_type;
 files_mountpoint(proc_xen_t)
@@ -119,12 +130,20 @@ files_mountpoint(sysctl_t)
 sid sysctl gen_context(system_u:object_r:sysctl_t,s0)
 genfscon proc /sys gen_context(system_u:object_r:sysctl_t,s0)
 
+optional_policy(`
+	container_mountpoint(sysctl_t)
+')
+
 # /proc/irq directory and files
 type sysctl_irq_t, sysctl_type;
 genfscon proc /irq gen_context(system_u:object_r:sysctl_irq_t,s0)
 
 optional_policy(`
 	init_mountpoint(sysctl_irq_t)
+')
+
+optional_policy(`
+	container_mountpoint(sysctl_irq_t)
 ')
 
 # /proc/net/rpc directory and files
@@ -190,7 +209,6 @@ genfscon proc /sys/dev gen_context(system_u:object_r:sysctl_dev_t,s0)
 #
 type unlabeled_t;
 kernel_rootfs_mountpoint(unlabeled_t)
-files_mountpoint(unlabeled_t)
 fs_associate(unlabeled_t)
 sid file gen_context(system_u:object_r:unlabeled_t,s0)
 sid unlabeled gen_context(system_u:object_r:unlabeled_t,mls_systemhigh)
@@ -260,12 +278,11 @@ allow kernel_t unlabeled_t:dir mounton;
 # connections with invalidated labels:
 allow kernel_t unlabeled_t:packet send;
 
-kernel_change_ring_buffer_level(kernel_t)
 kernel_mounton_proc_dirs(kernel_t)
 kernel_request_load_module(kernel_t)
 
 # Allow unlabeled network traffic
-allow unlabeled_t unlabeled_t:packet { forward_in forward_out };
+allow unlabeled_t self:packet { forward_in forward_out };
 corenet_in_generic_if(unlabeled_t)
 corenet_in_generic_node(unlabeled_t)
 
@@ -286,7 +303,7 @@ corenet_ib_access_unlabeled_pkeys(kernel_t)
 corenet_ib_manage_subnet_all_endports(kernel_t)
 corenet_ib_manage_subnet_unlabeled_endports(kernel_t)
 
-dev_mounton_sysfs(kernel_t)
+dev_mounton_sysfs_dirs(kernel_t)
 dev_read_sysfs(kernel_t)
 dev_search_usbfs(kernel_t)
 # devtmpfs handling:
@@ -301,6 +318,9 @@ dev_delete_generic_symlinks(kernel_t)
 dev_rw_generic_chr_files(kernel_t)
 dev_setattr_generic_blk_files(kernel_t)
 dev_setattr_generic_chr_files(kernel_t)
+dev_getattr_mouse_dev(kernel_t)
+dev_setattr_mouse_dev(kernel_t)
+dev_delete_mouse_dev(kernel_t)
 dev_getattr_fs(kernel_t)
 dev_getattr_sysfs(kernel_t)
 dev_write_kmsg(kernel_t)
@@ -316,6 +336,7 @@ fs_manage_tmpfs_dirs(kernel_t)
 fs_manage_tmpfs_files(kernel_t)
 fs_manage_tmpfs_sockets(kernel_t)
 fs_delete_tmpfs_symlinks(kernel_t)
+fs_read_all_inherited_image_files(kernel_t)
 
 mls_rangetrans_source(kernel_t)
 mls_process_set_level(kernel_t)
@@ -346,10 +367,12 @@ files_delete_root_symlinks(kernel_t)
 files_delete_root_chr_files(kernel_t)
 files_list_root(kernel_t)
 files_list_etc(kernel_t)
+files_mounton_runtime_dirs(kernel_t)
 files_getattr_etc_runtime_dirs(kernel_t)
 files_mounton_etc_runtime_dirs(kernel_t)
 files_list_home(kernel_t)
 files_read_usr_files(kernel_t)
+files_mounton_default(kernel_t)
 
 mcs_process_set_categories(kernel_t)
 
@@ -370,24 +393,45 @@ ifdef(`init_systemd',`
 	')
 
 	optional_policy(`
+		systemd_start_power_units(kernel_t)
+		systemd_status_power_units(kernel_t)
+	')
+
+	optional_policy(`
 		selinux_compute_create_context(kernel_t)
 	')
 
 	optional_policy(`
-		storage_dev_filetrans_fixed_disk(kernel_t)
+		dev_setattr_generic_usb_dev(kernel_t)
+		dev_delete_generic_usb_dev(kernel_t)
+
+		storage_dev_filetrans_fixed_disk(kernel_t, blk_file)
 		storage_setattr_fixed_disk_dev(kernel_t)
 		storage_create_fixed_disk_dev(kernel_t)
 		storage_delete_fixed_disk_dev(kernel_t)
+
+		storage_setattr_scsi_generic_dev(kernel_t)
+		storage_delete_scsi_generic_dev(kernel_t)
+	')
+')
+
+optional_policy(`
+	tunable_policy(`container_spc_create_nfs_servers',`
+		container_stream_connect_spc(kernel_t)
+		container_rw_spc_tcp_sockets(kernel_t)
+
+		container_manage_dirs(kernel_t)
+		container_manage_files(kernel_t)
+		container_manage_chr_files(kernel_t)
+		container_manage_fifo_files(kernel_t)
+		container_manage_lnk_files(kernel_t)
+		container_manage_sock_files(kernel_t)
 	')
 ')
 
 optional_policy(`
 	# loop devices
 	fstools_use_fds(kernel_t)
-')
-
-optional_policy(`
-	hotplug_search_config(kernel_t)
 ')
 
 optional_policy(`
@@ -406,7 +450,6 @@ optional_policy(`
 
 optional_policy(`
 	mount_use_fds(kernel_t)
-	mount_read_loopback_files(kernel_t)
 ')
 
 optional_policy(`
@@ -416,17 +459,10 @@ optional_policy(`
 optional_policy(`
 	dev_ioctl_dri_dev(kernel_t)
 
-	plymouthd_delete_pid_files(kernel_t)
-	plymouthd_read_pid_files(kernel_t)
+	plymouthd_delete_runtime_files(kernel_t)
+	plymouthd_read_runtime_files(kernel_t)
 	plymouthd_read_spool_files(kernel_t)
 	plymouthd_rw_lib_files(kernel_t)
-	plymouthd_manage_lib_files(kernel_t)
-	plymouthd_create_log(kernel_t)
-	plymouthd_filetrans_named_content(kernel_t)
-
-
-	udev_read_pid_files(kernel_t)
-	udev_search_pids(kernel_t)
 
 	term_use_ptmx(kernel_t)
 	term_use_unallocated_ttys(kernel_t)
@@ -454,6 +490,8 @@ optional_policy(`
 
 	rpc_manage_nfs_ro_content(kernel_t)
 	rpc_manage_nfs_rw_content(kernel_t)
+	rpc_search_nfs_state_data(kernel_t)
+	rpc_use_nfsd_fds(kernel_t)
 	rpc_tcp_rw_nfs_sockets(kernel_t)
 	rpc_udp_rw_nfs_sockets(kernel_t)
 
@@ -489,7 +527,16 @@ optional_policy(`
 ')
 
 optional_policy(`
+	storage_dontaudit_read_fixed_disk(kernel_t)
+')
+
+optional_policy(`
 	unconfined_domain_noaudit(kernel_t)
+')
+
+optional_policy(`
+	zfs_filetrans_zpool_cache(kernel_t)
+	zfs_rw_zpool_cache(kernel_t)
 ')
 
 ########################################
@@ -510,41 +557,43 @@ optional_policy(`
 # Kernel module loading policy
 #
 
-if( ! secure_mode_insmod ) {
+if(secure_mode_insmod) {
+	dontaudit can_load_kernmodule self:capability sys_module;
+	dontaudit can_load_kernmodule self:system module_load;
+
+	files_dontaudit_load_kernel_modules(can_load_kernmodule)
+
+	dontaudit can_load_kernmodule kernel_t:key search;
+} else {
 	allow can_load_kernmodule self:capability sys_module;
 	allow can_load_kernmodule self:system module_load;
 
 	files_load_kernel_modules(can_load_kernmodule)
 
-	# load_module() calls stop_machine() which
-	# calls sched_setscheduler()
-	# gt: there seems to be no trace of the above, at
-	# least in kernel versions greater than 2.6.37...
-	allow can_load_kernmodule self:capability sys_nice;
-	kernel_setsched(can_load_kernmodule)
+	kernel_search_key(can_load_kernmodule)
 }
 
 ########################################
 #
-# Rules for unconfined acccess to this module
+# Rules for unconfined access to this module
 #
 
-allow kern_unconfined proc_type:dir { manage_dir_perms relabelfrom relabelto append map execute quotaon mounton audit_access execmod watch };
-allow kern_unconfined proc_type:lnk_file { manage_lnk_file_perms relabelfrom relabelto append map execute quotaon mounton open audit_access execmod watch };
-allow kern_unconfined proc_type:file { manage_file_perms relabelfrom relabelto map execute quotaon mounton execute_no_trans audit_access watch };
+allow kern_unconfined proc_type:dir { manage_dir_perms relabel_dir_perms append map execute quotaon mounton execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow kern_unconfined proc_type:lnk_file { manage_lnk_file_perms relabel_lnk_file_perms append map execute quotaon mounton open execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow kern_unconfined proc_type:file { manage_file_perms relabel_file_perms exec_file_perms quotaon mounton watch watch_mount watch_reads watch_sb watch_with_perm };
 
-allow kern_unconfined sysctl_type:dir { manage_dir_perms relabelfrom relabelto append map execute quotaon mounton audit_access execmod watch };
-allow kern_unconfined sysctl_type:file { manage_file_perms relabelfrom relabelto map execute quotaon mounton execute_no_trans audit_access watch };
+allow kern_unconfined sysctl_type:dir { manage_dir_perms relabel_dir_perms append map execute quotaon mounton execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow kern_unconfined sysctl_type:file { manage_file_perms relabel_file_perms exec_file_perms quotaon mounton watch watch_mount watch_reads watch_sb watch_with_perm };
 
-allow kern_unconfined kernel_t:system { ipc_info syslog_read syslog_mod syslog_console module_request module_load halt reboot status start stop enable disable reload };
+allow kern_unconfined kernel_t:system { ipc_info syslog_read syslog_mod syslog_console module_request module_load halt reboot status start stop enable disable reload }; #selint-disable:W-001
 
-allow kern_unconfined unlabeled_t:file { manage_file_perms relabelfrom relabelto map execute quotaon mounton execute_no_trans audit_access watch };
-allow kern_unconfined unlabeled_t:lnk_file  { manage_lnk_file_perms relabelfrom relabelto append map execute quotaon mounton open audit_access execmod watch };
-allow kern_unconfined unlabeled_t:sock_file { manage_sock_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
-allow kern_unconfined unlabeled_t:fifo_file { manage_fifo_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
-allow kern_unconfined unlabeled_t:blk_file { manage_blk_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
-allow kern_unconfined unlabeled_t:chr_file { manage_chr_file_perms relabelfrom relabelto map execute quotaon mounton audit_access watch };
-allow kern_unconfined unlabeled_t:dir { manage_dir_perms relabelfrom relabelto append map execute quotaon mounton add_name remove_name reparent search rmdir audit_access execmod watch };
+allow kern_unconfined unlabeled_t:file { manage_file_perms relabel_file_perms exec_file_perms quotaon mounton watch watch_mount watch_reads watch_sb watch_with_perm };
+allow kern_unconfined unlabeled_t:lnk_file  { manage_lnk_file_perms relabel_lnk_file_perms append map execute quotaon mounton open execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow kern_unconfined unlabeled_t:sock_file { manage_sock_file_perms relabel_sock_file_perms map execute quotaon mounton execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow kern_unconfined unlabeled_t:fifo_file { manage_fifo_file_perms relabel_fifo_file_perms map execute quotaon mounton execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow kern_unconfined unlabeled_t:blk_file { manage_blk_file_perms relabel_blk_file_perms map execute quotaon mounton execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow kern_unconfined unlabeled_t:chr_file { manage_chr_file_perms relabel_chr_file_perms map execute quotaon mounton watch watch_mount watch_reads watch_sb watch_with_perm };
+allow kern_unconfined unlabeled_t:dir { manage_dir_perms relabelfrom relabelto append map execute quotaon mounton add_name remove_name reparent search rmdir execmod watch watch_mount watch_reads watch_sb watch_with_perm };
 allow kern_unconfined unlabeled_t:filesystem { mount remount unmount getattr relabelfrom relabelto associate quotamod quotaget watch };
 allow kern_unconfined unlabeled_t:association { sendto recvfrom setcontext polmatch };
 allow kern_unconfined unlabeled_t:packet { send recv relabelto forward_in forward_out };

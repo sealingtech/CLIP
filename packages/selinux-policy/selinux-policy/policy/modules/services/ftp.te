@@ -1,4 +1,4 @@
-policy_module(ftp, 1.23.1)
+policy_module(ftp)
 
 ########################################
 #
@@ -110,7 +110,6 @@ gen_tunable(sftpd_write_ssh_home, false)
 attribute_role ftpdctl_roles;
 
 type anon_sftpd_t;
-typealias anon_sftpd_t alias sftpd_anon_t;
 domain_type(anon_sftpd_t)
 role system_r types anon_sftpd_t;
 
@@ -131,7 +130,7 @@ type ftpd_lock_t;
 files_lock_file(ftpd_lock_t)
 
 type ftpd_runtime_t alias ftpd_var_run_t;
-files_pid_file(ftpd_runtime_t)
+files_runtime_file(ftpd_runtime_t)
 
 type ftpd_tmp_t;
 files_tmp_file(ftpd_tmp_t)
@@ -157,10 +156,6 @@ role system_r types sftpd_t;
 type xferlog_t;
 logging_log_file(xferlog_t)
 
-ifdef(`enable_mcs',`
-	init_ranged_daemon_domain(ftpd_t, ftpd_exec_t, s0 - mcs_systemhigh)
-')
-
 ifdef(`enable_mls',`
 	init_ranged_daemon_domain(ftpd_t, ftpd_exec_t, mls_systemhigh)
 ')
@@ -180,6 +175,7 @@ allow ftpd_t self:tcp_socket { accept listen };
 allow ftpd_t self:shm create_shm_perms;
 allow ftpd_t self:key manage_key_perms;
 
+allow ftpd_t ftpd_etc_t:dir list_dir_perms;
 allow ftpd_t ftpd_etc_t:file read_file_perms;
 
 allow ftpd_t ftpd_keytab_t:file read_file_perms;
@@ -196,8 +192,9 @@ fs_tmpfs_filetrans(ftpd_t, ftpd_tmpfs_t, { dir file lnk_file sock_file fifo_file
 
 manage_dirs_pattern(ftpd_t, ftpd_runtime_t, ftpd_runtime_t)
 manage_files_pattern(ftpd_t, ftpd_runtime_t, ftpd_runtime_t)
+allow ftpd_t ftpd_runtime_t:file map;
 manage_sock_files_pattern(ftpd_t, ftpd_runtime_t, ftpd_runtime_t)
-files_pid_filetrans(ftpd_t, ftpd_runtime_t, { file dir })
+files_runtime_filetrans(ftpd_t, ftpd_runtime_t, { file dir })
 
 allow ftpd_t ftpdctl_tmp_t:sock_file delete_sock_file_perms;
 
@@ -406,7 +403,10 @@ optional_policy(`
 ')
 
 optional_policy(`
-	udev_read_db(ftpd_t)
+	systemd_connect_machined(ftpd_t)
+	systemd_dbus_chat_logind(ftpd_t)
+	systemd_read_logind_state(ftpd_t)
+	systemd_write_inherited_logind_sessions_pipes(ftpd_t)
 ')
 
 ########################################
@@ -420,7 +420,7 @@ allow ftpdctl_t ftpdctl_tmp_t:sock_file manage_sock_file_perms;
 files_tmp_filetrans(ftpdctl_t, ftpdctl_tmp_t, sock_file)
 
 files_read_etc_files(ftpdctl_t)
-files_search_pids(ftpdctl_t)
+files_search_runtime(ftpdctl_t)
 
 userdom_use_user_terminals(ftpdctl_t)
 
@@ -485,10 +485,6 @@ tunable_policy(`sftpd_full_access',`
 	files_manage_non_auth_files(sftpd_t)
 ')
 
-tunable_policy(`sftpd_write_ssh_home',`
-	ssh_manage_home_files(sftpd_t)
-')
-
 tunable_policy(`use_samba_home_dirs',`
 	fs_list_cifs(sftpd_t)
 	fs_read_cifs_files(sftpd_t)
@@ -499,4 +495,10 @@ tunable_policy(`use_nfs_home_dirs',`
 	fs_list_nfs(sftpd_t)
 	fs_read_nfs_files(sftpd_t)
 	fs_read_nfs_symlinks(ftpd_t)
+')
+
+optional_policy(`
+	tunable_policy(`sftpd_write_ssh_home',`
+		ssh_manage_home_files(sftpd_t)
+	')
 ')

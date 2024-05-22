@@ -1,4 +1,4 @@
-policy_module(locallogin, 1.20.0)
+policy_module(locallogin)
 
 ########################################
 #
@@ -34,7 +34,7 @@ role system_r types sulogin_t;
 
 allow local_login_t self:capability { chown dac_read_search dac_override fowner fsetid kill setgid setuid sys_nice sys_resource sys_tty_config };
 dontaudit local_login_t self:capability net_admin;
-allow local_login_t self:process { getcap setcap setexec setrlimit setsched signal };
+allow local_login_t self:process { getcap setcap setexec setrlimit setsched };
 allow local_login_t self:fd use;
 allow local_login_t self:fifo_file rw_fifo_file_perms;
 allow local_login_t self:sock_file read_sock_file_perms;
@@ -55,12 +55,15 @@ allow local_login_t local_login_tmp_t:dir manage_dir_perms;
 allow local_login_t local_login_tmp_t:file manage_file_perms;
 files_tmp_filetrans(local_login_t, local_login_tmp_t, { file dir })
 
+fs_getattr_cgroup(local_login_t)
+fs_search_cgroup_dirs(local_login_t)
+fs_getattr_xattr_fs(local_login_t)
+
 kernel_read_system_state(local_login_t)
 kernel_read_kernel_sysctls(local_login_t)
 kernel_search_key(local_login_t)
 kernel_link_key(local_login_t)
 kernel_getattr_proc(local_login_t)
-kernel_read_crypto_sysctls(local_login_t)
 
 corecmd_list_bin(local_login_t)
 # cjp: these are probably not needed:
@@ -121,11 +124,15 @@ term_setattr_unallocated_ttys(local_login_t)
 
 auth_rw_login_records(local_login_t)
 auth_rw_faillog(local_login_t)
-auth_manage_pam_pid(local_login_t)
+auth_manage_pam_runtime_dirs(local_login_t)
+auth_manage_pam_runtime_files(local_login_t)
 auth_manage_pam_console_data(local_login_t)
 auth_domtrans_pam_console(local_login_t)
+auth_read_pam_motd_dynamic(local_login_t)
+auth_read_shadow_history(local_login_t)
 
-init_dontaudit_use_fds(local_login_t)
+# if local_login_t can not inherit fd from init it takes ages to login
+init_use_fds(local_login_t)
 
 miscfiles_read_localization(local_login_t)
 
@@ -141,9 +148,12 @@ ifdef(`init_systemd',`
 	auth_manage_faillog(local_login_t)
 
 	init_dbus_chat(local_login_t)
+	init_use_fds(local_login_t)
+
+	systemd_connect_machined(local_login_t)
 	systemd_dbus_chat_logind(local_login_t)
 	systemd_use_logind_fds(local_login_t)
-	systemd_manage_logind_pid_pipes(local_login_t)
+	systemd_manage_logind_runtime_pipes(local_login_t)
 ')
 
 ifdef(`distro_debian',`
@@ -154,6 +164,10 @@ ifdef(`distro_ubuntu',`
 	optional_policy(`
 		unconfined_domain(local_login_t)
 	')
+')
+
+tunable_policy(`allow_polyinstantiation',`
+	seutil_domtrans_setfiles(local_login_t)
 ')
 
 tunable_policy(`console_login',`
@@ -177,10 +191,6 @@ optional_policy(`
 
 optional_policy(`
 	dbus_system_bus_client(local_login_t)
-
-	optional_policy(`
-		consolekit_dbus_chat(local_login_t)
-	')
 ')
 
 optional_policy(`
@@ -237,7 +247,6 @@ allow sulogin_t self:msgq create_msgq_perms;
 allow sulogin_t self:msg { send receive };
 
 kernel_read_system_state(sulogin_t)
-kernel_read_crypto_sysctls(sulogin_t)
 kernel_stream_connect(sulogin_t)
 kernel_use_fds(sulogin_t)
 # because file systems are not mounted:
@@ -268,9 +277,7 @@ userdom_use_unpriv_users_fds(sulogin_t)
 userdom_search_user_home_dirs(sulogin_t)
 userdom_use_user_ptys(sulogin_t)
 
-optional_policy(`
-	sysadm_shell_domtrans(sulogin_t)
-')
+sysadm_shell_domtrans(sulogin_t)
 
 # by default, sulogin does not use pam...
 # sulogin_pam might need to be defined otherwise

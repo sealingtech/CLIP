@@ -1,4 +1,4 @@
-policy_module(abrt, 1.9.2)
+policy_module(abrt)
 
 ########################################
 #
@@ -48,7 +48,7 @@ type abrt_etc_t;
 files_config_file(abrt_etc_t)
 
 type abrt_runtime_t alias abrt_var_run_t;
-files_pid_file(abrt_runtime_t)
+files_runtime_file(abrt_runtime_t)
 
 type abrt_var_log_t;
 logging_log_file(abrt_var_log_t)
@@ -100,10 +100,6 @@ type abrt_upload_watch_t, abrt_domain;
 type abrt_upload_watch_exec_t;
 init_daemon_domain(abrt_upload_watch_t, abrt_upload_watch_exec_t)
 
-ifdef(`enable_mcs',`
-	init_ranged_daemon_domain(abrt_t, abrt_exec_t, s0 - mcs_systemhigh)
-')
-
 ########################################
 #
 # Local policy
@@ -136,7 +132,7 @@ manage_files_pattern(abrt_t, abrt_runtime_t, abrt_runtime_t)
 manage_dirs_pattern(abrt_t, abrt_runtime_t, abrt_runtime_t)
 manage_sock_files_pattern(abrt_t, abrt_runtime_t, abrt_runtime_t)
 manage_lnk_files_pattern(abrt_t, abrt_runtime_t, abrt_runtime_t)
-files_pid_filetrans(abrt_t, abrt_runtime_t, { file dir sock_file })
+files_runtime_filetrans(abrt_t, abrt_runtime_t, { file dir sock_file })
 
 can_exec(abrt_t, abrt_tmp_t)
 
@@ -236,7 +232,7 @@ optional_policy(`
 	rpm_dontaudit_manage_db(abrt_t)
 	rpm_manage_cache(abrt_t)
 	rpm_manage_log(abrt_t)
-	rpm_manage_pid_files(abrt_t)
+	rpm_manage_runtime_files(abrt_t)
 	rpm_read_db(abrt_t)
 	rpm_signull(abrt_t)
 ')
@@ -285,25 +281,24 @@ read_lnk_files_pattern(abrt_helper_t, abrt_runtime_t, abrt_runtime_t)
 
 corecmd_read_all_executables(abrt_helper_t)
 
+dev_dontaudit_read_all_blk_files(abrt_helper_t)
+dev_dontaudit_read_all_chr_files(abrt_helper_t)
+dev_dontaudit_write_all_chr_files(abrt_helper_t)
+dev_dontaudit_write_all_blk_files(abrt_helper_t)
+
 domain_read_all_domains_state(abrt_helper_t)
 
 fs_list_inotifyfs(abrt_helper_t)
 fs_getattr_all_fs(abrt_helper_t)
+fs_dontaudit_rw_anon_inodefs_files(abrt_helper_t)
 
 auth_use_nsswitch(abrt_helper_t)
 
 term_dontaudit_use_all_ttys(abrt_helper_t)
 term_dontaudit_use_all_ptys(abrt_helper_t)
 
-ifdef(`hide_broken_symptoms',`
-	userdom_dontaudit_read_user_home_content_files(abrt_helper_t)
-	userdom_dontaudit_read_user_tmp_files(abrt_helper_t)
-	dev_dontaudit_read_all_blk_files(abrt_helper_t)
-	dev_dontaudit_read_all_chr_files(abrt_helper_t)
-	dev_dontaudit_write_all_chr_files(abrt_helper_t)
-	dev_dontaudit_write_all_blk_files(abrt_helper_t)
-	fs_dontaudit_rw_anon_inodefs_files(abrt_helper_t)
-')
+userdom_dontaudit_read_user_home_content_files(abrt_helper_t)
+userdom_dontaudit_read_user_tmp_files(abrt_helper_t)
 
 #######################################
 #
@@ -334,7 +329,7 @@ optional_policy(`
 	rpm_dontaudit_manage_db(abrt_retrace_coredump_t)
 	rpm_manage_cache(abrt_retrace_coredump_t)
 	rpm_manage_log(abrt_retrace_coredump_t)
-	rpm_manage_pid_files(abrt_retrace_coredump_t)
+	rpm_manage_runtime_files(abrt_retrace_coredump_t)
 	rpm_read_db(abrt_retrace_coredump_t)
 	rpm_signull(abrt_retrace_coredump_t)
 ')
@@ -373,6 +368,7 @@ sysnet_dns_name_resolve(abrt_retrace_worker_t)
 #
 
 allow abrt_dump_oops_t self:capability dac_override;
+allow abrt_dump_oops_t self:cap_userns { kill sys_ptrace };
 allow abrt_dump_oops_t self:fifo_file rw_fifo_file_perms;
 allow abrt_dump_oops_t self:unix_stream_socket { accept listen };
 

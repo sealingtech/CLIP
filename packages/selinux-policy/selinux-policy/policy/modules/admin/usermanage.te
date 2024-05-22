@@ -1,4 +1,4 @@
-policy_module(usermanage, 1.24.0)
+policy_module(usermanage)
 
 ########################################
 #
@@ -202,6 +202,10 @@ allow groupadd_t self:unix_stream_socket create_stream_socket_perms;
 allow groupadd_t self:unix_dgram_socket sendto;
 allow groupadd_t self:unix_stream_socket connectto;
 
+# for getting the number of groups
+kernel_read_kernel_sysctls(groupadd_t)
+kernel_dontaudit_getattr_proc(groupadd_t)
+
 fs_getattr_xattr_fs(groupadd_t)
 fs_search_auto_mountpoints(groupadd_t)
 
@@ -226,6 +230,9 @@ files_manage_etc_files(groupadd_t)
 files_relabel_etc_files(groupadd_t)
 files_read_etc_runtime_files(groupadd_t)
 files_read_usr_symlinks(groupadd_t)
+
+kernel_getattr_proc(groupadd_t)
+kernel_read_kernel_sysctls(groupadd_t)
 
 # Execute /usr/bin/{passwd, chfn, chsh} and /usr/sbin/{useradd, vipw}.
 corecmd_exec_bin(groupadd_t)
@@ -256,6 +263,10 @@ optional_policy(`
 ')
 
 optional_policy(`
+	cloudinit_write_inherited_tmp_files(groupadd_t)
+')
+
+optional_policy(`
 	dbus_system_bus_client(groupadd_t)
 ')
 
@@ -275,6 +286,8 @@ optional_policy(`
 optional_policy(`
 	rpm_use_fds(groupadd_t)
 	rpm_rw_pipes(groupadd_t)
+	rpm_read_tmp_files(groupadd_t)
+	rpm_append_tmp_files(groupadd_t)
 ')
 
 optional_policy(`
@@ -282,7 +295,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	unconfined_use_fds(groupadd_t)
+	unconfined_write_inherited_pipes(groupadd_t)
 ')
 
 ########################################
@@ -306,10 +319,11 @@ allow passwd_t self:msgq create_msgq_perms;
 allow passwd_t self:msg { send receive };
 
 allow passwd_t crack_db_t:dir list_dir_perms;
+read_lnk_files_pattern(passwd_t, crack_db_t, crack_db_t)
 read_files_pattern(passwd_t, crack_db_t, crack_db_t)
 
-kernel_read_crypto_sysctls(passwd_t)
 kernel_read_kernel_sysctls(passwd_t)
+kernel_dontaudit_getattr_proc(passwd_t)
 
 # for SSP
 dev_read_urand(passwd_t)
@@ -321,6 +335,7 @@ mls_file_write_all_levels(passwd_t)
 mls_file_downgrade(passwd_t)
 
 selinux_get_fs_mount(passwd_t)
+selinux_use_status_page(passwd_t)
 selinux_validate_context(passwd_t)
 selinux_compute_access_vector(passwd_t)
 selinux_compute_create_context(passwd_t)
@@ -331,6 +346,7 @@ term_use_all_ttys(passwd_t)
 term_use_all_ptys(passwd_t)
 
 auth_run_chk_passwd(passwd_t, passwd_roles)
+auth_run_upd_passwd(passwd_t, passwd_roles)
 auth_manage_shadow(passwd_t)
 auth_relabel_shadow(passwd_t)
 auth_etc_filetrans_shadow(passwd_t)
@@ -344,7 +360,7 @@ domain_use_interactive_fds(passwd_t)
 files_read_etc_runtime_files(passwd_t)
 files_manage_etc_files(passwd_t)
 files_search_var(passwd_t)
-files_dontaudit_search_pids(passwd_t)
+files_dontaudit_search_runtime(passwd_t)
 files_relabel_etc_files(passwd_t)
 
 # /usr/bin/passwd asks for w access to utmp, but it will operate
@@ -436,7 +452,7 @@ files_manage_etc_files(sysadm_passwd_t)
 files_relabel_etc_files(sysadm_passwd_t)
 files_read_etc_runtime_files(sysadm_passwd_t)
 # for nscd lookups
-files_dontaudit_search_pids(sysadm_passwd_t)
+files_dontaudit_search_runtime(sysadm_passwd_t)
 
 # /usr/bin/passwd asks for w access to utmp, but it will operate
 # correctly without it.  Do not audit write denials to utmp.
@@ -463,7 +479,8 @@ optional_policy(`
 #
 
 allow useradd_t self:capability { chown dac_override fowner fsetid kill setuid sys_resource };
-dontaudit useradd_t self:capability { net_admin sys_tty_config };
+dontaudit useradd_t self:capability { net_admin sys_ptrace sys_tty_config };
+dontaudit useradd_t self:cap_userns sys_ptrace;
 allow useradd_t self:process { transition signal_perms getsched setsched getsession getpgid setpgid getcap setcap share getattr setfscreate noatsecure siginh rlimitinh dyntransition setkeycreate setsockcreate getrlimit };
 allow useradd_t self:fd use;
 allow useradd_t self:fifo_file rw_fifo_file_perms;
@@ -478,6 +495,7 @@ allow useradd_t self:unix_stream_socket connectto;
 
 # for getting the number of groups
 kernel_read_kernel_sysctls(useradd_t)
+kernel_dontaudit_getattr_proc(useradd_t)
 
 corecmd_exec_shell(useradd_t)
 # Execute /usr/bin/{passwd,chfn,chsh} and /usr/sbin/{useradd,vipw}.
@@ -537,7 +555,6 @@ userdom_manage_user_home_dirs(useradd_t)
 userdom_home_filetrans_user_home_dir(useradd_t)
 userdom_manage_user_home_content_dirs(useradd_t)
 userdom_manage_user_home_content_files(useradd_t)
-userdom_home_filetrans_user_home_dir(useradd_t)
 userdom_user_home_dir_filetrans_user_home_content(useradd_t, notdevfile_class_set)
 
 optional_policy(`
@@ -556,6 +573,10 @@ optional_policy(`
 
 optional_policy(`
 	apt_use_fds(useradd_t)
+')
+
+optional_policy(`
+	cloudinit_write_inherited_tmp_files(useradd_t)
 ')
 
 optional_policy(`
@@ -584,8 +605,10 @@ optional_policy(`
 optional_policy(`
 	rpm_use_fds(useradd_t)
 	rpm_rw_pipes(useradd_t)
+	rpm_read_tmp_files(useradd_t)
+	rpm_append_tmp_files(useradd_t)
 ')
 
 optional_policy(`
-	unconfined_use_fds(useradd_t)
+	unconfined_write_inherited_pipes(useradd_t)
 ')

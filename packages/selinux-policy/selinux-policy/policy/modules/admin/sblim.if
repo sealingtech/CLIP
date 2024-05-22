@@ -21,25 +21,6 @@ interface(`sblim_domtrans_gatherd',`
 
 ########################################
 ## <summary>
-##	Read gatherd pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`sblim_read_pid_files',`
-	gen_require(`
-		type sblim_runtime_t;
-	')
-
-	files_search_pids($1)
-	allow $1 sblim_runtime_t:file read_file_perms;
-')
-
-########################################
-## <summary>
 ##	All of the rules required to
 ##	administrate an sblim environment.
 ## </summary>
@@ -66,6 +47,6 @@ interface(`sblim_admin',`
 
 	init_startstop_service($1, $2, sblim_domain, sblim_initrc_exec_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, sblim_runtime_t)
 ')

@@ -5,9 +5,9 @@
 ##	Execute a domain transition to run snort.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`snort_domtrans',`
@@ -54,5 +54,5 @@ interface(`snort_admin',`
 	logging_search_logs($1)
 
 	admin_pattern($1, snort_runtime_t)
-	files_search_pids($1)
+	files_search_runtime($1)
 ')

@@ -1,4 +1,4 @@
-policy_module(ntp, 1.21.3)
+policy_module(ntp)
 
 ########################################
 #
@@ -33,7 +33,7 @@ type ntpd_log_t;
 logging_log_file(ntpd_log_t)
 
 type ntpd_pid_t;
-files_pid_file(ntpd_pid_t)
+files_runtime_file(ntpd_pid_t)
 init_mountpoint(ntpd_pid_t)
 
 type ntpd_tmp_t;
@@ -53,8 +53,8 @@ init_system_domain(ntpd_t, ntpdate_exec_t)
 # Local policy
 #
 
-allow ntpd_t self:capability { chown dac_override kill setgid setuid sys_time ipc_lock ipc_owner sys_chroot sys_nice };
-dontaudit ntpd_t self:capability { net_admin sys_tty_config fsetid sys_resource };
+allow ntpd_t self:capability { chown dac_override kill setgid setuid sys_time ipc_lock ipc_owner sys_chroot sys_nice sys_resource };
+dontaudit ntpd_t self:capability { net_admin sys_tty_config fsetid };
 allow ntpd_t self:process { signal_perms getcap setcap setsched setrlimit };
 allow ntpd_t self:fifo_file rw_fifo_file_perms;
 allow ntpd_t self:shm create_shm_perms;
@@ -63,6 +63,7 @@ allow ntpd_t self:unix_dgram_socket sendto;
 
 allow ntpd_t ntp_conf_t:file read_file_perms;
 
+allow ntpd_t ntp_drift_t:lnk_file read_lnk_file_perms;
 manage_dirs_pattern(ntpd_t, ntp_drift_t, ntp_drift_t)
 manage_files_pattern(ntpd_t, ntp_drift_t, ntp_drift_t)
 files_etc_filetrans(ntpd_t, ntp_drift_t, file)
@@ -79,7 +80,7 @@ manage_files_pattern(ntpd_t, ntpd_log_t, ntpd_log_t)
 logging_log_filetrans(ntpd_t, ntpd_log_t, { file dir })
 
 manage_files_pattern(ntpd_t, ntpd_pid_t, ntpd_pid_t)
-files_pid_filetrans(ntpd_t, ntpd_pid_t, file)
+files_runtime_filetrans(ntpd_t, ntpd_pid_t, file)
 
 manage_dirs_pattern(ntpd_t, ntpd_tmp_t, ntpd_tmp_t)
 manage_files_pattern(ntpd_t, ntpd_tmp_t, ntpd_tmp_t)
@@ -139,10 +140,14 @@ userdom_dontaudit_use_unpriv_user_fds(ntpd_t)
 userdom_list_user_home_dirs(ntpd_t)
 
 ifdef(`init_systemd',`
+	allow ntpd_t self:process setfscreate;
+
 	allow ntpd_t ntpd_unit_t:file read_file_perms;
 
 	dbus_system_bus_client(ntpd_t)
 	dbus_connect_system_bus(ntpd_t)
+	dbus_watch_system_bus_runtime_dirs(ntpd_t)
+	dbus_watch_system_bus_runtime_named_sockets(ntpd_t)
 	init_dbus_chat(ntpd_t)
 	init_get_system_status(ntpd_t)
 	init_list_unit_dirs(ntpd_t)
@@ -151,6 +156,7 @@ ifdef(`init_systemd',`
 	allow ntpd_t self:capability { fowner setpcap };
 	init_read_state(ntpd_t)
 	init_reload(ntpd_t)
+	fs_watch_memory_pressure(ntpd_t)
 
 	# for /var/lib/systemd/clock
 	init_list_var_lib_dirs(ntpd_t)
@@ -191,10 +197,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	hal_dontaudit_write_log(ntpd_t)
-')
-
-optional_policy(`
 	logrotate_exec(ntpd_t)
 ')
 
@@ -202,6 +204,3 @@ optional_policy(`
 	seutil_sigchld_newrole(ntpd_t)
 ')
 
-optional_policy(`
-	udev_read_db(ntpd_t)
-')

@@ -1,4 +1,4 @@
-policy_module(nsd, 1.13.1)
+policy_module(nsd)
 
 ########################################
 #
@@ -24,7 +24,7 @@ type nsd_db_t;
 files_type(nsd_db_t)
 
 type nsd_runtime_t alias nsd_var_run_t;
-files_pid_file(nsd_runtime_t)
+files_runtime_file(nsd_runtime_t)
 
 type nsd_zone_t;
 files_type(nsd_zone_t)
@@ -44,11 +44,11 @@ allow nsd_t nsd_conf_t:dir list_dir_perms;
 allow nsd_t nsd_conf_t:file read_file_perms;
 allow nsd_t nsd_conf_t:lnk_file read_lnk_file_perms;
 
-allow nsd_t nsd_db_t:file { manage_file_perms map };
+allow nsd_t nsd_db_t:file mmap_manage_file_perms;
 filetrans_pattern(nsd_t, nsd_zone_t, nsd_db_t, file)
 
 manage_files_pattern(nsd_t, nsd_runtime_t, nsd_runtime_t)
-files_pid_filetrans(nsd_t, nsd_runtime_t, file)
+files_runtime_filetrans(nsd_t, nsd_runtime_t, file)
 
 allow nsd_t nsd_zone_t:file map;
 manage_dirs_pattern(nsd_t, nsd_zone_t, nsd_zone_t)
@@ -95,10 +95,6 @@ userdom_dontaudit_search_user_home_dirs(nsd_t)
 
 optional_policy(`
 	seutil_sigchld_newrole(nsd_t)
-')
-
-optional_policy(`
-	udev_read_db(nsd_t)
 ')
 
 ########################################

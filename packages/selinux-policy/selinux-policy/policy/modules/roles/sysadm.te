@@ -1,4 +1,4 @@
-policy_module(sysadm, 2.16.2)
+policy_module(sysadm)
 
 ########################################
 #
@@ -33,12 +33,19 @@ ifndef(`enable_mls',`
 # Local policy
 #
 
+# for networkctl and possibly other networking tools
+allow sysadm_t self:netlink_route_socket rw_netlink_socket_perms;
+
 corecmd_exec_shell(sysadm_t)
 
 corenet_ib_access_unlabeled_pkeys(sysadm_t)
 corenet_ib_manage_subnet_unlabeled_endports(sysadm_t)
 
 dev_read_kmsg(sysadm_t)
+dev_rw_ipmi_dev(sysadm_t)
+
+logging_watch_all_logs(sysadm_t)
+logging_watch_audit_log(sysadm_t)
 
 mls_process_read_all_levels(sysadm_t)
 
@@ -50,8 +57,6 @@ ubac_fd_exempt(sysadm_t)
 
 init_exec(sysadm_t)
 init_admin(sysadm_t)
-
-selinux_read_policy(sysadm_t)
 
 # Add/remove user home directories
 userdom_manage_user_home_dirs(sysadm_t)
@@ -80,9 +85,26 @@ ifndef(`enable_mls',`
 ')
 
 ifdef(`init_systemd',`
+	# Allow managing runtime units, for example mount units generated
+	# from /etc/fstab.
+	init_get_runtime_units_status(sysadm_t)
+	init_start_runtime_units(sysadm_t)
+	init_stop_runtime_units(sysadm_t)
+
 	# Allow sysadm to resolve the username of dynamic users by calling
 	# LookupDynamicUserByUID on org.freedesktop.systemd1.
 	init_dbus_chat(sysadm_t)
+
+	# Allow sysadm to get the status of and set properties of other users,
+	# sessions, and seats on the system.
+	systemd_dbus_chat_logind(sysadm_t)
+
+	# Allow sysadm to query and set networking settings on the system.
+	systemd_dbus_chat_networkd(sysadm_t)
+	fs_read_nsfs_files(sysadm_t)
+
+	# Allow sysadm to follow logs in the journal, i.e. with podman logs -f
+	systemd_watch_journal_dirs(sysadm_t)
 ')
 
 tunable_policy(`allow_ptrace',`
@@ -111,10 +133,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	aiccu_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	aide_admin(sysadm_t, sysadm_r)
 ')
 
@@ -139,7 +157,7 @@ optional_policy(`
 	apache_run_helper(sysadm_t, sysadm_r)
 	#apache_run_all_scripts(sysadm_t, sysadm_r)
 	#apache_domtrans_sys_script(sysadm_t)
-	apache_role(sysadm_r, sysadm_t)
+	apache_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -185,10 +203,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	bcfg2_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	bind_admin(sysadm_t, sysadm_r)
 	bind_run_ndc(sysadm_t, sysadm_r)
 ')
@@ -222,15 +236,11 @@ optional_policy(`
 ')
 
 optional_policy(`
-	callweaver_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	canna_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	ccs_admin(sysadm_t, sysadm_r)
+	certbot_run(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -262,10 +272,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	cipe_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	clamav_admin(sysadm_t, sysadm_r)
 ')
 
@@ -274,15 +280,11 @@ optional_policy(`
 ')
 
 optional_policy(`
-	clockspeed_run_cli(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
-	cmirrord_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	cobbler_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	cockpit_admin(sysadm_t)
 ')
 
 optional_policy(`
@@ -295,6 +297,10 @@ optional_policy(`
 
 optional_policy(`
 	consoletype_run(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	container_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -335,25 +341,15 @@ optional_policy(`
 ')
 
 optional_policy(`
-	dcc_run_cdcc(sysadm_t, sysadm_r)
-	dcc_run_client(sysadm_t, sysadm_r)
-	dcc_run_dbclean(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	ddclient_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	ddcprobe_run(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
-	denyhosts_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	devicekit_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	dev_rw_xen(sysadm_t)
 ')
 
 optional_policy(`
@@ -389,10 +385,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	dnssectrigger_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	dovecot_admin(sysadm_t, sysadm_r)
 ')
 
@@ -409,10 +401,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	dspam_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	entropyd_admin(sysadm_t, sysadm_r)
 ')
 
@@ -422,6 +410,10 @@ optional_policy(`
 
 optional_policy(`
 	fail2ban_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	fapolicyd_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -477,7 +469,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	hadoop_role(sysadm_r, sysadm_t)
+	hadoop_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -491,10 +483,6 @@ optional_policy(`
 optional_policy(`
 	hwloc_admin(sysadm_t)
 	hwloc_run_dhwd(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
-	howl_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -576,8 +564,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	kudzu_admin(sysadm_t, sysadm_r)
-	kudzu_run(sysadm_t, sysadm_r)
+	kubernetes_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -589,7 +576,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	libmtp_role(sysadm_r, sysadm_t)
+	libmtp_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -613,16 +600,12 @@ optional_policy(`
 ')
 
 optional_policy(`
-	lockdev_role(sysadm_r, sysadm_t)
-')
-
-optional_policy(`
 	logrotate_run(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
 	lpd_run_checkpc(sysadm_t, sysadm_r)
-	lpd_role(sysadm_r, sysadm_t)
+	lpd_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -675,7 +658,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	mozilla_role(sysadm_r, sysadm_t)
+	mozilla_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -683,7 +666,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	mplayer_role(sysadm_r, sysadm_t)
+	mplayer_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -691,11 +674,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	mscan_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
-	mta_role(sysadm_r, sysadm_t)
+	mta_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -759,15 +738,11 @@ optional_policy(`
 ')
 
 optional_policy(`
-	oav_run_update(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	oident_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	ooffice_role(sysadm_r, sysadm_t)
+	ooffice_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -776,6 +751,10 @@ optional_policy(`
 
 optional_policy(`
 	openhpi_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	opensm_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -792,10 +771,6 @@ optional_policy(`
 
 optional_policy(`
 	pads_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
-	pcmcia_run_cardctl(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -820,10 +795,6 @@ optional_policy(`
 
 optional_policy(`
 	plymouthd_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
-	polipo_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -878,12 +849,8 @@ optional_policy(`
 ')
 
 optional_policy(`
-	pyicqt_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	pyzor_admin(sysadm_t, sysadm_r)
-	pyzor_role(sysadm_r, sysadm_t)
+	pyzor_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -917,7 +884,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	razor_role(sysadm_r, sysadm_t)
+	razor_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -929,19 +896,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	rgmanager_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
-	rhcs_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	rhsmcertd_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
-	ricci_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -950,10 +905,6 @@ optional_policy(`
 
 optional_policy(`
 	rngd_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
-	roundup_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -966,13 +917,12 @@ optional_policy(`
 ')
 
 optional_policy(`
-	rpm_dbus_chat(sysadm_t)
 	rpm_run(sysadm_t, sysadm_r)
 	rpm_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
-	rssh_role(sysadm_r, sysadm_t)
+	rssh_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -1013,7 +963,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	screen_role_template(sysadm, sysadm_r, sysadm_t)
+	screen_role_template(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -1042,7 +992,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	shutdown_role(sysadm_r, sysadm_t)
+	shutdown_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -1075,11 +1025,11 @@ optional_policy(`
 
 optional_policy(`
 	spamassassin_admin(sysadm_t, sysadm_r)
-	spamassassin_role(sysadm_r, sysadm_t)
+	spamassassin_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
-	ssh_role_template(sysadm, sysadm_r, sysadm_t)
+	ssh_role_template(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -1095,11 +1045,11 @@ optional_policy(`
 ')
 
 optional_policy(`
-	su_role_template(sysadm, sysadm_r, sysadm_t)
+	su_role_template(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
-	sudo_role_template(sysadm, sysadm_r, sysadm_t)
+	sudo_role_template(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -1136,7 +1086,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	thunderbird_role(sysadm_r, sysadm_t)
+	thunderbird_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -1155,7 +1105,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	tvtime_role(sysadm_r, sysadm_t)
+	tvtime_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -1163,7 +1113,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	udevadm_run(sysadm_t, sysadm_r)
+	udev_run_udevadm(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -1171,7 +1121,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	uml_role(sysadm_r, sysadm_t)
+	uml_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -1191,7 +1141,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	userhelper_role_template(sysadm, sysadm_r, sysadm_t)
+	userhelper_role_template(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -1230,7 +1180,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	vmware_role(sysadm_r, sysadm_t)
+	vmware_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -1259,7 +1209,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	wireshark_role(sysadm_r, sysadm_t)
+	wireshark_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
@@ -1267,19 +1217,15 @@ optional_policy(`
 ')
 
 optional_policy(`
-	xscreensaver_role(sysadm_r, sysadm_t)
+	xscreensaver_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
-	xserver_role(sysadm_r, sysadm_t)
+	xserver_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
 optional_policy(`
 	xfs_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
-	yam_run(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -1295,69 +1241,57 @@ optional_policy(`
 ')
 
 optional_policy(`
-	fapolicyd_admin(sysadm_t)
+	zfs_admin(sysadm_t, sysadm_r)
 ')
 
-#ifndef(`distro_redhat',`
+ifndef(`distro_redhat',`
 	optional_policy(`
-		auth_role(sysadm_r, sysadm_t)
+		auth_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
 		bluetooth_admin(sysadm_t, sysadm_r)
-		bluetooth_role(sysadm_r, sysadm_t)
+		bluetooth_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
-		cdrecord_role(sysadm_r, sysadm_t)
+		cdrecord_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
-		chromium_role(sysadm_r, sysadm_t)
+		chromium_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
-		cron_admin_role(sysadm_r, sysadm_t)
+		cron_admin_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
-		cryfs_role(sysadm_r, sysadm_t)
+		cryfs_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
-		dbus_role_template(sysadm, sysadm_r, sysadm_t)
+		dirmngr_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
-		gnome_role_template(sysadm, sysadm_r, sysadm_t)
+		evolution_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
-		wm_role_template(sysadm, sysadm_r, sysadm_t)
+		games_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
-		dirmngr_role(sysadm_r, sysadm_t)
+		gnome_role_template(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
-		evolution_role(sysadm_r, sysadm_t)
+		gpg_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
-		games_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		gift_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		gpg_role(sysadm_r, sysadm_t)
-	')
-
-	optional_policy(`
-		irc_role(sysadm_r, sysadm_t)
+		irc_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
@@ -1365,7 +1299,10 @@ optional_policy(`
 	')
 
 	optional_policy(`
-		java_role(sysadm_r, sysadm_t)
+		java_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
-#')
 
+	optional_policy(`
+		wm_role_template(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
+	')
+')

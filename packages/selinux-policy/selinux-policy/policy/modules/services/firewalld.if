@@ -5,9 +5,9 @@
 ##	Read firewalld configuration files.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed access.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`firewalld_read_config_files',`
@@ -74,7 +74,7 @@ interface(`firewalld_read_var_run_files',`
 		type firewalld_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	read_files_pattern($1, firewalld_runtime_t, firewalld_runtime_t)
 ')
 
@@ -105,9 +105,11 @@ interface(`firewalld_admin',`
 	allow $1 firewalld_t:process { ptrace signal_perms };
 	ps_process_pattern($1, firewalld_t)
 
+	firewalld_dbus_chat($1)
+
 	init_startstop_service($1, $2, firewalld_t, firewalld_initrc_exec_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, firewalld_runtime_t)
 
 	logging_search_logs($1)

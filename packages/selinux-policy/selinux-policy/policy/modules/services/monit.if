@@ -89,14 +89,14 @@ interface(`monit_startstop_service',`
 ##	administrate an monit environment.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 ## <param name="role">
-##      <summary>
-##      Role allowed access.
-##      </summary>
+##	<summary>
+##	Role allowed access.
+##	</summary>
 ## </param>
 #
 interface(`monit_admin',`
@@ -116,7 +116,7 @@ interface(`monit_admin',`
 	logging_search_logs($1)
 	admin_pattern($1, monit_log_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, monit_runtime_t)
 
 	files_search_var_lib($1)

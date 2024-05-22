@@ -21,7 +21,7 @@ interface(`pcscd_domtrans',`
 
 ########################################
 ## <summary>
-##	Read pcscd pid files.
+##	Read pcscd runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -29,12 +29,12 @@ interface(`pcscd_domtrans',`
 ##	</summary>
 ## </param>
 #
-interface(`pcscd_read_pid_files',`
+interface(`pcscd_read_runtime_files',`
 	gen_require(`
 		type pcscd_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	read_files_pattern($1, pcscd_runtime_t, pcscd_runtime_t)
 ')
 
@@ -54,7 +54,7 @@ interface(`pcscd_stream_connect',`
 		type pcscd_t, pcscd_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, pcscd_runtime_t, pcscd_runtime_t, pcscd_t)
 
 	allow pcscd_t $1:dir list_dir_perms;
@@ -88,6 +88,6 @@ interface(`pcscd_admin',`
 
 	init_startstop_service($1, $2, pcscd_t, pcscd_initrc_exec_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, pcscd_runtime_t)
 ')

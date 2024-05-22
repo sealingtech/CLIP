@@ -828,7 +828,7 @@ interface(`mls_fd_use_all_levels',`
 ########################################
 ## <summary>
 ##	Make the file descriptors from the
-##	specifed domain inheritable by
+##	specified domain inheritable by
 ##	all levels.
 ## </summary>
 ## <param name="domain">
@@ -844,22 +844,6 @@ interface(`mls_fd_share_all_levels',`
 	')
 
 	typeattribute $1 mlsfdshare;
-')
-
-########################################
-## <summary>
-##	Make specified domain MLS trusted
-##	for translating contexts at all levels.  (Deprecated)
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <rolecap/>
-#
-interface(`mls_context_translate_all_levels',`
-	refpolicywarn(`$0($*) has been deprecated')
 ')
 
 ########################################

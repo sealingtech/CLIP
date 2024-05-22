@@ -181,11 +181,29 @@ interface(`ftp_admin',`
 	files_list_var($1)
 	admin_pattern($1, ftpd_lock_t)
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, ftpd_runtime_t)
 
 	logging_list_logs($1)
 	admin_pattern($1, xferlog_t)
 
 	ftp_run_ftpdctl($1, $2)
+')
+
+########################################
+## <summary>
+##	create /run/pure-ftpd
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`ftp_filetrans_pure_ftpd_runtime',`
+	gen_require(`
+		type ftpd_runtime_t;
+	')
+
+	files_runtime_filetrans($1, ftpd_runtime_t, dir, "pure-ftpd")
 ')

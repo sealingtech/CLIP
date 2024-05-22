@@ -155,9 +155,9 @@ interface(`rsync_exec',`
 ##	Read rsync config files.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed access.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`rsync_read_config',`
@@ -174,9 +174,9 @@ interface(`rsync_read_config',`
 ##	Write rsync config files.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed access.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`rsync_write_config',`
@@ -274,6 +274,6 @@ interface(`rsync_admin',`
 	files_search_tmp($1)
 	admin_pattern($1, rsync_tmp_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, rsync_runtime_t)
 ')

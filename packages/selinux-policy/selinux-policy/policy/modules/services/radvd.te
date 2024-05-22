@@ -1,4 +1,4 @@
-policy_module(radvd, 1.18.1)
+policy_module(radvd)
 
 ########################################
 #
@@ -15,7 +15,7 @@ type radvd_initrc_exec_t;
 init_script_file(radvd_initrc_exec_t)
 
 type radvd_runtime_t alias radvd_var_run_t;
-files_pid_file(radvd_runtime_t)
+files_runtime_file(radvd_runtime_t)
 
 ########################################
 #
@@ -33,7 +33,7 @@ allow radvd_t radvd_etc_t:file read_file_perms;
 
 manage_dirs_pattern(radvd_t, radvd_runtime_t, radvd_runtime_t)
 manage_files_pattern(radvd_t, radvd_runtime_t, radvd_runtime_t)
-files_pid_filetrans(radvd_t, radvd_runtime_t, { dir file })
+files_runtime_filetrans(radvd_t, radvd_runtime_t, { dir file })
 
 kernel_read_kernel_sysctls(radvd_t)
 kernel_rw_net_sysctls(radvd_t)
@@ -48,6 +48,7 @@ corenet_raw_sendrecv_generic_if(radvd_t)
 corenet_tcp_sendrecv_generic_node(radvd_t)
 corenet_udp_sendrecv_generic_node(radvd_t)
 corenet_raw_sendrecv_generic_node(radvd_t)
+corenet_sendrecv_icmp_packets(radvd_t)
 
 dev_read_sysfs(radvd_t)
 
@@ -71,6 +72,3 @@ optional_policy(`
 	seutil_sigchld_newrole(radvd_t)
 ')
 
-optional_policy(`
-	udev_read_db(radvd_t)
-')

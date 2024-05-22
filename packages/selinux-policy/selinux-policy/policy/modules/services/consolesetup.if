@@ -78,7 +78,7 @@ interface(`consolesetup_manage_runtime', `
         type consolesetup_runtime_t;
     ')
 
-    files_search_pids($1)
+    files_search_runtime($1)
     manage_dirs_pattern($1, consolesetup_runtime_t, consolesetup_runtime_t)
     manage_files_pattern($1, consolesetup_runtime_t, consolesetup_runtime_t)
 ')
@@ -95,10 +95,10 @@ interface(`consolesetup_manage_runtime', `
 ## </param>
 ## <rolecap/>
 #
-interface(`consolesetup_pid_filetrans_runtime', `
+interface(`consolesetup_runtime_filetrans_runtime_dir', `
     gen_require(`
         type consolesetup_runtime_t;
     ')
 
-    files_pid_filetrans($1, consolesetup_runtime_t, dir, "console-setup")
+    files_runtime_filetrans($1, consolesetup_runtime_t, dir, "console-setup")
 ')

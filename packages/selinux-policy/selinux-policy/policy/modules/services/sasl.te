@@ -1,4 +1,4 @@
-policy_module(sasl, 1.20.1)
+policy_module(sasl)
 
 ########################################
 #
@@ -24,7 +24,7 @@ type saslauthd_keytab_t;
 files_type(saslauthd_keytab_t)
 
 type saslauthd_runtime_t alias saslauthd_var_run_t;
-files_pid_file(saslauthd_runtime_t)
+files_runtime_file(saslauthd_runtime_t)
 
 ########################################
 #
@@ -42,7 +42,7 @@ allow saslauthd_t saslauthd_keytab_t:file read_file_perms;
 manage_dirs_pattern(saslauthd_t, saslauthd_runtime_t, saslauthd_runtime_t)
 manage_files_pattern(saslauthd_t, saslauthd_runtime_t, saslauthd_runtime_t)
 manage_sock_files_pattern(saslauthd_t, saslauthd_runtime_t, saslauthd_runtime_t)
-files_pid_filetrans(saslauthd_t, saslauthd_runtime_t, { file dir })
+files_runtime_filetrans(saslauthd_t, saslauthd_runtime_t, { file dir })
 
 kernel_read_kernel_sysctls(saslauthd_t)
 kernel_read_system_state(saslauthd_t)
@@ -109,6 +109,3 @@ optional_policy(`
 	seutil_sigchld_newrole(saslauthd_t)
 ')
 
-optional_policy(`
-	udev_read_db(saslauthd_t)
-')

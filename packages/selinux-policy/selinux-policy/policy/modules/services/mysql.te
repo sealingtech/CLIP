@@ -1,4 +1,4 @@
-policy_module(mysql, 1.21.1)
+policy_module(mysql)
 
 ########################################
 #
@@ -37,8 +37,8 @@ type mysqld_log_t;
 logging_log_file(mysqld_log_t)
 
 type mysqld_runtime_t alias mysqld_var_run_t;
-files_pid_file(mysqld_runtime_t)
-init_daemon_pid_file(mysqld_runtime_t, dir, "mysqld")
+files_runtime_file(mysqld_runtime_t)
+init_daemon_runtime_file(mysqld_runtime_t, dir, "mysqld")
 
 type mysqld_safe_t;
 type mysqld_safe_exec_t;
@@ -58,23 +58,24 @@ type mysqlmanagerd_initrc_exec_t;
 init_script_file(mysqlmanagerd_initrc_exec_t)
 
 type mysqlmanagerd_runtime_t alias mysqlmanagerd_var_run_t;
-files_pid_file(mysqlmanagerd_runtime_t)
+files_runtime_file(mysqlmanagerd_runtime_t)
 
 ########################################
 #
 # Local policy
 #
 
-allow mysqld_t self:capability { dac_override ipc_lock setgid setuid sys_resource };
+allow mysqld_t self:capability { dac_override dac_read_search ipc_lock setgid setuid sys_resource };
 dontaudit mysqld_t self:capability sys_tty_config;
-allow mysqld_t self:process { setsched getsched setrlimit signal_perms rlimitinh };
+allow mysqld_t self:process { getcap setsched getsched setrlimit signal_perms rlimitinh };
 allow mysqld_t self:fifo_file rw_fifo_file_perms;
 allow mysqld_t self:shm create_shm_perms;
 allow mysqld_t self:unix_stream_socket { connectto accept listen };
 allow mysqld_t self:tcp_socket { accept listen };
+allow mysqld_t self:anon_inode { create map read write };
 
 manage_dirs_pattern(mysqld_t, mysqld_db_t, mysqld_db_t)
-manage_files_pattern(mysqld_t, mysqld_db_t, mysqld_db_t)
+mmap_manage_files_pattern(mysqld_t, mysqld_db_t, mysqld_db_t)
 manage_lnk_files_pattern(mysqld_t, mysqld_db_t, mysqld_db_t)
 files_var_lib_filetrans(mysqld_t, mysqld_db_t, { dir file lnk_file })
 
@@ -90,18 +91,19 @@ manage_lnk_files_pattern(mysqld_t, mysqld_log_t, mysqld_log_t)
 logging_log_filetrans(mysqld_t, mysqld_log_t, { dir file })
 
 manage_dirs_pattern(mysqld_t, mysqld_tmp_t, mysqld_tmp_t)
-manage_files_pattern(mysqld_t, mysqld_tmp_t, mysqld_tmp_t)
+mmap_manage_files_pattern(mysqld_t, mysqld_tmp_t, mysqld_tmp_t)
 files_tmp_filetrans(mysqld_t, mysqld_tmp_t, { file dir })
 
 manage_dirs_pattern(mysqld_t, mysqld_runtime_t, mysqld_runtime_t)
 manage_files_pattern(mysqld_t, mysqld_runtime_t, mysqld_runtime_t)
 manage_sock_files_pattern(mysqld_t, mysqld_runtime_t, mysqld_runtime_t)
-files_pid_filetrans(mysqld_t, mysqld_runtime_t, { dir file sock_file })
+files_runtime_filetrans(mysqld_t, mysqld_runtime_t, { dir file sock_file })
 
 kernel_read_kernel_sysctls(mysqld_t)
 kernel_read_network_state(mysqld_t)
 kernel_read_system_state(mysqld_t)
 kernel_read_vm_sysctls(mysqld_t)
+kernel_read_vm_overcommit_sysctl(mysqld_t)
 
 corenet_all_recvfrom_netlabel(mysqld_t)
 corenet_tcp_sendrecv_generic_if(mysqld_t)
@@ -123,6 +125,7 @@ domain_use_interactive_fds(mysqld_t)
 
 fs_getattr_all_fs(mysqld_t)
 fs_search_auto_mountpoints(mysqld_t)
+fs_search_tmpfs(mysqld_t)
 fs_rw_hugetlbfs_files(mysqld_t)
 
 files_read_etc_runtime_files(mysqld_t)
@@ -132,6 +135,7 @@ auth_use_nsswitch(mysqld_t)
 
 logging_send_syslog_msg(mysqld_t)
 
+miscfiles_read_generic_certs(mysqld_t)
 miscfiles_read_localization(mysqld_t)
 
 userdom_search_user_home_dirs(mysqld_t)
@@ -148,10 +152,6 @@ optional_policy(`
 
 optional_policy(`
 	seutil_sigchld_newrole(mysqld_t)
-')
-
-optional_policy(`
-	udev_read_db(mysqld_t)
 ')
 
 #######################################
@@ -192,9 +192,10 @@ dev_read_sysfs(mysqld_safe_t)
 
 domain_read_all_domains_state(mysqld_safe_t)
 
+files_dontaudit_write_root_dirs(mysqld_safe_t)
 files_read_etc_files(mysqld_safe_t)
 files_read_usr_files(mysqld_safe_t)
-files_search_pids(mysqld_safe_t)
+files_search_runtime(mysqld_safe_t)
 files_dontaudit_getattr_all_dirs(mysqld_safe_t)
 files_dontaudit_search_all_mountpoints(mysqld_safe_t)
 
@@ -251,7 +252,7 @@ dev_read_urand(mysqlmanagerd_t)
 
 files_read_etc_files(mysqlmanagerd_t)
 files_read_usr_files(mysqlmanagerd_t)
-files_search_pids(mysqlmanagerd_t)
+files_search_runtime(mysqlmanagerd_t)
 files_search_var_lib(mysqlmanagerd_t)
 
 miscfiles_read_localization(mysqlmanagerd_t)

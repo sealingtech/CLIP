@@ -18,6 +18,7 @@
 /dev/beep		-c	gen_context(system_u:object_r:sound_device_t,s0)
 /dev/btrfs-control	-c	gen_context(system_u:object_r:lvm_control_t,s0)
 /dev/cachefiles		-c	gen_context(system_u:object_r:cachefiles_device_t,s0)
+/dev/cdc-wdm[0-9]       -c      gen_context(system_u:object_r:modem_device_t,s0)
 /dev/controlD64		-c	gen_context(system_u:object_r:xserver_misc_device_t,s0)
 /dev/crash		-c	gen_context(system_u:object_r:crash_device_t,mls_systemhigh)
 /dev/dahdi/.*		-c	gen_context(system_u:object_r:sound_device_t,s0)
@@ -77,6 +78,7 @@
 /dev/mixer.*		-c	gen_context(system_u:object_r:sound_device_t,s0)
 /dev/mmetfgrab		-c	gen_context(system_u:object_r:scanner_device_t,s0)
 /dev/modem		-c	gen_context(system_u:object_r:modem_device_t,s0)
+/dev/mpt[2-9]*ctl       -c      gen_context(system_u:object_r:mptctl_device_t,s0)
 /dev/mpu401.*		-c	gen_context(system_u:object_r:sound_device_t,s0)
 /dev/msr.*		-c	gen_context(system_u:object_r:cpu_device_t,s0)
 /dev/ndctl[0-9]		-c	gen_context(system_u:object_r:nvram_device_t,s0)
@@ -137,6 +139,7 @@ ifdef(`distro_suse', `
 /dev/vhci			-c	gen_context(system_u:object_r:vhost_device_t,s0)
 /dev/vhost-net		-c	gen_context(system_u:object_r:vhost_device_t,s0)
 /dev/vhost-scsi		-c	gen_context(system_u:object_r:vhost_device_t,s0)
+/dev/vhost-vsock        -c      gen_context(system_u:object_r:vhost_device_t,s0)
 /dev/video.*		-c	gen_context(system_u:object_r:v4l_device_t,s0)
 /dev/vmmon		-c	gen_context(system_u:object_r:vmware_device_t,s0)
 /dev/vmnet.*		-c	gen_context(system_u:object_r:vmware_device_t,s0)
@@ -162,6 +165,9 @@ ifdef(`distro_suse', `
 /dev/dri/.+		-c	gen_context(system_u:object_r:dri_device_t,s0)
 
 /dev/dvb/.*		-c	gen_context(system_u:object_r:v4l_device_t,s0)
+
+/dev/iio:device[0-9]	-c	gen_context(system_u:object_r:iio_device_t,s0)
+/dev/infiniband/.*      -c      gen_context(system_u:object_r:infiniband_device_t,s0)
 
 /dev/input/.*		-c	gen_context(system_u:object_r:event_device_t,s0)
 /dev/input/m.*		-c	gen_context(system_u:object_r:mouse_device_t,s0)
@@ -192,14 +198,19 @@ ifdef(`distro_suse', `
 /dev/usb/mdc800.*	-c	gen_context(system_u:object_r:scanner_device_t,s0)
 /dev/usb/scanner.*	-c	gen_context(system_u:object_r:scanner_device_t,s0)
 
+/dev/vmbus/hv_kvp	-c	gen_context(system_u:object_r:hyperv_kvp_device_t,s0)
+/dev/vmbus/hv_vss	-c	gen_context(system_u:object_r:hyperv_vss_device_t,s0)
+
 /dev/wmi/dell-smbios	-c	gen_context(system_u:object_r:acpi_bios_t,s0)
 
 /dev/xen/blktap.*	-c	gen_context(system_u:object_r:xen_device_t,s0)
 /dev/xen/evtchn		-c	gen_context(system_u:object_r:xen_device_t,s0)
 /dev/xen/gntdev		-c	gen_context(system_u:object_r:xen_device_t,s0)
 /dev/xen/gntalloc	-c	gen_context(system_u:object_r:xen_device_t,s0)
+/dev/xen/hypercall	-c	gen_context(system_u:object_r:xen_device_t,s0)
 /dev/xen/privcmd	-c	gen_context(system_u:object_r:xen_device_t,s0)
 /dev/xen/xenbus		-c	gen_context(system_u:object_r:xen_device_t,s0)
+/dev/xen/xenbus_backend	-c	gen_context(system_u:object_r:xen_device_t,s0)
 
 ifdef(`distro_debian',`
 # this is a static /dev dir "backup mount"
@@ -211,7 +222,7 @@ ifdef(`distro_debian',`
 
 /etc/udev/devices	-d	gen_context(system_u:object_r:device_t,s0)
 
-# used by init scripts to initally populate udev /dev
+# used by init scripts to initially populate udev /dev
 /usr/lib/udev/devices(/.*)?		gen_context(system_u:object_r:device_t,s0)
 /usr/lib/udev/devices/lp.*	-c	gen_context(system_u:object_r:printer_device_t,s0)
 /usr/lib/udev/devices/null	-c	gen_context(system_u:object_r:null_device_t,s0)
@@ -226,4 +237,8 @@ ifdef(`distro_redhat',`
 /var/named/chroot/dev/null -c	gen_context(system_u:object_r:null_device_t,s0)
 /var/named/chroot/dev/random -c	gen_context(system_u:object_r:random_device_t,s0)
 /var/named/chroot/dev/zero -c	gen_context(system_u:object_r:zero_device_t,s0)
+')
+
+ifdef(`distro_gentoo',`
+/var/empty/dev		-d	gen_context(system_u:object_r:device_t,s0)
 ')

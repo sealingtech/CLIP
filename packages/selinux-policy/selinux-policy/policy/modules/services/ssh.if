@@ -143,6 +143,10 @@ template(`ssh_basic_client_template',`
 	optional_policy(`
 		kerberos_use($1_ssh_t)
 	')
+
+	optional_policy(`
+		systemd_user_app_status($1, $1_ssh_t)
+	')
 ')
 
 #######################################
@@ -167,8 +171,17 @@ template(`ssh_basic_client_template',`
 #
 template(`ssh_server_template', `
 	gen_require(`
+		attribute ssh_server;
 		type sshd_exec_t, sshd_key_t;
 	')
+
+	## <desc>
+	## <p>
+	##	Allow sshd to use remote port forwarding (bind to any TCP port)
+	## </p>
+	## </desc>
+	gen_tunable($1_port_forwarding, false)
+
 	type $1_t, ssh_server;
 	auth_login_pgm_domain($1_t)
 
@@ -176,7 +189,7 @@ template(`ssh_server_template', `
 	term_login_pty($1_devpts_t)
 
 	type $1_runtime_t alias $1_var_run_t;
-	files_pid_file($1_runtime_t)
+	files_runtime_file($1_runtime_t)
 
 	type $1_tmpfs_t;
 	files_tmpfs_file($1_tmpfs_t)
@@ -200,7 +213,7 @@ template(`ssh_server_template', `
 
 	allow $1_t $1_runtime_t:dir search_dir_perms;
 	allow $1_t $1_runtime_t:file manage_file_perms;
-	files_pid_filetrans($1_t, $1_runtime_t, file)
+	files_runtime_filetrans($1_t, $1_runtime_t, file)
 
 	can_exec($1_t, sshd_exec_t)
 
@@ -259,6 +272,10 @@ template(`ssh_server_template', `
 		fs_read_cifs_files($1_t)
 	')
 
+	tunable_policy(`$1_port_forwarding',`
+		corenet_tcp_bind_all_ports($1_t)
+	')
+
 	optional_policy(`
 		kerberos_use($1_t)
 		kerberos_manage_host_rcache($1_t)
@@ -271,6 +288,7 @@ template(`ssh_server_template', `
 
 	optional_policy(`
 		systemd_read_logind_sessions_files($1_t)
+		systemd_stream_connect_userdb($1_t)
 	')
 ')
 
@@ -280,18 +298,23 @@ template(`ssh_server_template', `
 ## </summary>
 ## <param name="role_prefix">
 ##	<summary>
-##	The prefix of the role (e.g., user
+##	The prefix of the user role (e.g., user
 ##	is the prefix for user_r).
+##	</summary>
+## </param>
+## <param name="user_domain">
+##	<summary>
+##	User domain for the role.
+##	</summary>
+## </param>
+## <param name="user_exec_domain">
+##	<summary>
+##	User exec domain for execute and transition access.
 ##	</summary>
 ## </param>
 ## <param name="role">
 ##	<summary>
 ##	Role allowed access
-##	</summary>
-## </param>
-## <param name="domain">
-##	<summary>
-##	User domain for the role
 ##	</summary>
 ## </param>
 #
@@ -308,12 +331,12 @@ template(`ssh_role_template',`
 	# Declarations
 	#
 
-	role $2 types ssh_t;
+	role $4 types ssh_t;
 
 	type $1_ssh_agent_t, ssh_agent_type;
 	userdom_user_application_domain($1_ssh_agent_t, ssh_agent_exec_t)
 	domain_interactive_fd($1_ssh_agent_t)
-	role $2 types $1_ssh_agent_t;
+	role $4 types $1_ssh_agent_t;
 
 	##############################
 	#
@@ -337,10 +360,14 @@ template(`ssh_role_template',`
 	allow ssh_t $3:key manage_key_perms;
 
 	# user can manage the keys and config
-	manage_files_pattern($3, ssh_home_t, ssh_home_t)
-	manage_lnk_files_pattern($3, ssh_home_t, ssh_home_t)
-	manage_sock_files_pattern($3, ssh_home_t, ssh_home_t)
+	manage_files_pattern($2, ssh_home_t, ssh_home_t)
+	manage_lnk_files_pattern($2, ssh_home_t, ssh_home_t)
+	manage_sock_files_pattern($2, ssh_home_t, ssh_home_t)
 	userdom_search_user_home_dirs($1_t)
+
+	optional_policy(`
+		systemd_user_app_status($1, ssh_t)
+	')
 
 	##############################
 	#
@@ -378,13 +405,14 @@ template(`ssh_role_template',`
 	fs_search_auto_mountpoints($1_ssh_agent_t)
 
 	# transition back to normal privs upon exec
-	corecmd_shell_domtrans($1_ssh_agent_t, $3)
-	corecmd_bin_domtrans($1_ssh_agent_t, $3)
+	corecmd_shell_domtrans($1_ssh_agent_t, $2)
+	corecmd_bin_domtrans($1_ssh_agent_t, $2)
 
 	domain_use_interactive_fds($1_ssh_agent_t)
 
 	files_read_etc_files($1_ssh_agent_t)
 	files_read_etc_runtime_files($1_ssh_agent_t)
+	files_read_usr_files($1_ssh_agent_t)
 	files_search_home($1_ssh_agent_t)
 
 	libs_read_lib_files($1_ssh_agent_t)
@@ -401,7 +429,7 @@ template(`ssh_role_template',`
 
 	# for the transition back to normal privs upon exec
 	userdom_search_user_home_content($1_ssh_agent_t)
-	userdom_user_home_domtrans($1_ssh_agent_t, $3)
+	userdom_user_home_domtrans($1_ssh_agent_t, $2)
 	allow $3 $1_ssh_agent_t:fd use;
 	allow $3 $1_ssh_agent_t:fifo_file rw_inherited_fifo_file_perms;
 	allow $3 $1_ssh_agent_t:process sigchld;
@@ -414,18 +442,28 @@ template(`ssh_role_template',`
 		fs_manage_nfs_files($1_ssh_agent_t)
 
 		# transition back to normal privs upon exec
-		fs_nfs_domtrans($1_ssh_agent_t, $3)
+		fs_nfs_domtrans($1_ssh_agent_t, $2)
 	')
 
 	tunable_policy(`use_samba_home_dirs',`
 		fs_manage_cifs_files($1_ssh_agent_t)
 
 		# transition back to normal privs upon exec
-		fs_cifs_domtrans($1_ssh_agent_t, $3)
+		fs_cifs_domtrans($1_ssh_agent_t, $2)
 	')
 
 	optional_policy(`
+		cockpit_use_session_fds($1_ssh_agent_t)
+		cockpit_rw_session_pipes($1_ssh_agent_t)
+		cockpit_send_signal($1_ssh_agent_t)
+	')
+	
+	optional_policy(`
 		nis_use_ypbind($1_ssh_agent_t)
+	')
+
+	optional_policy(`
+		systemd_user_app_status($1, $1_ssh_agent_t)
 	')
 
 	optional_policy(`
@@ -439,6 +477,7 @@ template(`ssh_role_template',`
 		xserver_use_xdm_fds($1_ssh_agent_t)
 		xserver_rw_xdm_pipes($1_ssh_agent_t)
 		xserver_sigchld_xdm($1_ssh_agent_t)
+		xserver_write_inherited_xsession_log($1_ssh_agent_t)
 	')
 ')
 
@@ -528,7 +567,7 @@ interface(`ssh_rw_pipes',`
 		type sshd_t;
 	')
 
-	allow $1 sshd_t:fifo_file { write read getattr ioctl };
+	allow $1 sshd_t:fifo_file rw_inherited_fifo_file_perms;
 ')
 
 ########################################
@@ -625,6 +664,24 @@ interface(`ssh_domtrans',`
 
 ########################################
 ## <summary>
+##	Execute the ssh client in the ssh client domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition.
+##	</summary>
+## </param>
+#
+interface(`ssh_client_domtrans',`
+	gen_require(`
+		type ssh_t, ssh_exec_t;
+	')
+
+	domtrans_pattern($1, ssh_exec_t, ssh_t)
+')
+
+########################################
+## <summary>
 ##	Execute the ssh client in the caller domain.
 ## </summary>
 ## <param name="domain">
@@ -658,7 +715,7 @@ interface(`ssh_setattr_key_files',`
 	')
 
 	allow $1 sshd_key_t:file setattr;
-	files_search_pids($1)
+	files_search_runtime($1)
 ')
 
 ########################################
@@ -682,20 +739,39 @@ interface(`ssh_agent_exec',`
 
 ########################################
 ## <summary>
-##      Send generic signals to ssh_agent_type.
+##	Set the attributes of ssh home directory (~/.ssh)
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
-interface(`ssh_agent_signal',`
-        gen_require(`
-                attribute ssh_agent_type;
-        ')
+interface(`ssh_setattr_home_dirs',`
+	gen_require(`
+		type ssh_home_t;
+	')
 
-        allow $1 ssh_agent_type:process signal;
+	allow $1 ssh_home_t:dir setattr_dir_perms;
+')
+
+########################################
+## <summary>
+##	Create ssh home directory (~/.ssh)
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`ssh_create_home_dirs',`
+	gen_require(`
+		type ssh_home_t;
+	')
+
+	allow $1 ssh_home_t:dir create_dir_perms;
+	userdom_user_home_dir_filetrans($1, ssh_home_t, dir, ".ssh")
 ')
 
 ########################################
@@ -737,9 +813,52 @@ interface(`ssh_domtrans_keygen',`
 	domtrans_pattern($1, ssh_keygen_exec_t, ssh_keygen_t)
 ')
 
+######################################
+## <summary>
+##	Execute the ssh key generator in the ssh keygen domain,
+##	and allow the specified	role the ssh keygen domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access.
+##	</summary>
+## </param>
+#
+interface(`ssh_run_keygen',`
+	gen_require(`
+		type ssh_keygen_t;
+	')
+
+	ssh_domtrans_keygen($1)
+	role $2 types ssh_keygen_t;
+')
+
 ########################################
 ## <summary>
 ##	Read ssh server keys
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`ssh_read_server_keys',`
+	gen_require(`
+		type sshd_key_t;
+	')
+
+	allow $1 sshd_key_t:file read_file_perms;
+')
+
+########################################
+## <summary>
+##	Do not audit denials on reading ssh server keys
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -791,4 +910,22 @@ interface(`ssh_delete_tmp',`
 
 	files_search_tmp($1)
 	delete_files_pattern($1, sshd_tmp_t, sshd_tmp_t)
+')
+
+#######################################
+## <summary>
+##	dontaudit access to ssh agent tmp dirs
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain not to audit.
+##	</summary>
+## </param>
+#
+interface(`ssh_dontaudit_agent_tmp',`
+	gen_require(`
+		type ssh_agent_tmp_t;
+	')
+
+	dontaudit $1 ssh_agent_tmp_t:dir list_dir_perms;
 ')

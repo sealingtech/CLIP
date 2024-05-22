@@ -1,4 +1,4 @@
-policy_module(fail2ban, 1.8.1)
+policy_module(fail2ban)
 
 ########################################
 #
@@ -18,7 +18,7 @@ type fail2ban_log_t;
 logging_log_file(fail2ban_log_t)
 
 type fail2ban_runtime_t alias fail2ban_var_run_t;
-files_pid_file(fail2ban_runtime_t)
+files_runtime_file(fail2ban_runtime_t)
 
 type fail2ban_var_lib_t;
 files_type(fail2ban_var_lib_t)
@@ -37,7 +37,7 @@ role fail2ban_client_roles types fail2ban_client_t;
 #
 
 allow fail2ban_t self:capability { dac_override dac_read_search sys_tty_config };
-allow fail2ban_t self:process signal;
+allow fail2ban_t self:process { getsched signal };
 allow fail2ban_t self:fifo_file rw_fifo_file_perms;
 allow fail2ban_t self:unix_stream_socket { accept connectto listen };
 allow fail2ban_t self:tcp_socket { accept listen };
@@ -60,9 +60,11 @@ manage_files_pattern(fail2ban_t, fail2ban_var_lib_t, fail2ban_var_lib_t)
 manage_dirs_pattern(fail2ban_t, fail2ban_runtime_t, fail2ban_runtime_t)
 manage_sock_files_pattern(fail2ban_t, fail2ban_runtime_t, fail2ban_runtime_t)
 manage_files_pattern(fail2ban_t, fail2ban_runtime_t, fail2ban_runtime_t)
-files_pid_filetrans(fail2ban_t, fail2ban_runtime_t, file)
+files_runtime_filetrans(fail2ban_t, fail2ban_runtime_t, file)
 
 kernel_read_system_state(fail2ban_t)
+kernel_read_vm_overcommit_sysctl(fail2ban_t)
+kernel_search_fs_sysctls(fail2ban_t)
 
 corecmd_exec_bin(fail2ban_t)
 corecmd_exec_shell(fail2ban_t)
@@ -90,6 +92,7 @@ fs_getattr_all_fs(fail2ban_t)
 auth_use_nsswitch(fail2ban_t)
 
 logging_read_all_logs(fail2ban_t)
+logging_read_audit_log(fail2ban_t)
 logging_send_syslog_msg(fail2ban_t)
 
 miscfiles_read_localization(fail2ban_t)
@@ -121,6 +124,11 @@ optional_policy(`
 	shorewall_domtrans(fail2ban_t)
 ')
 
+optional_policy(`
+	systemd_read_journal_files(fail2ban_t)
+	systemd_watch_journal_dirs(fail2ban_t)
+')
+
 ########################################
 #
 # Client Local policy
@@ -141,7 +149,7 @@ domain_use_interactive_fds(fail2ban_client_t)
 
 files_read_etc_files(fail2ban_client_t)
 files_read_usr_files(fail2ban_client_t)
-files_search_pids(fail2ban_client_t)
+files_search_runtime(fail2ban_client_t)
 
 logging_getattr_all_logs(fail2ban_client_t)
 logging_search_all_logs(fail2ban_client_t)

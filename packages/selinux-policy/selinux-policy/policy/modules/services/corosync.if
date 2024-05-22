@@ -93,8 +93,27 @@ interface(`corosync_stream_connect',`
 		type corosync_t, corosync_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, corosync_runtime_t, corosync_runtime_t, corosync_t)
+')
+
+######################################
+## <summary>
+##	Memmap, read and write corosync tmpfs files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`corosync_mmap_rw_tmpfs',`
+	gen_require(`
+		type corosync_tmpfs_t;
+	')
+
+	fs_search_tmpfs($1)
+	mmap_rw_files_pattern($1, corosync_tmpfs_t, corosync_tmpfs_t)
 ')
 
 ######################################
@@ -114,6 +133,24 @@ interface(`corosync_rw_tmpfs',`
 
 	fs_search_tmpfs($1)
 	rw_files_pattern($1, corosync_tmpfs_t, corosync_tmpfs_t)
+')
+
+########################################
+## <summary>
+##	Read process state of corosync.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`corosync_read_state',`
+	gen_require(`
+		type corosync_t;
+	')
+
+	ps_process_pattern($1, corosync_t)
 ')
 
 ######################################
@@ -156,6 +193,6 @@ interface(`corosync_admin',`
 	logging_list_logs($1)
 	admin_pattern($1, corosync_var_log_t)
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, corosync_runtime_t)
 ')

@@ -177,25 +177,6 @@ interface(`rhsmcertd_manage_lib_dirs',`
 	manage_dirs_pattern($1, rhsmcertd_var_lib_t, rhsmcertd_var_lib_t)
 ')
 
-########################################
-## <summary>
-##	Read rhsmcertd pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`rhsmcertd_read_pid_files',`
-	gen_require(`
-		type rhsmcertd_runtime_t;
-	')
-
-	files_search_pids($1)
-	allow $1 rhsmcertd_runtime_t:file read_file_perms;
-')
-
 ####################################
 ## <summary>
 ##	Connect to rhsmcertd with a
@@ -212,7 +193,7 @@ interface(`rhsmcertd_stream_connect',`
 		type rhsmcertd_t, rhsmcertd_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, rhsmcertd_runtime_t, rhsmcertd_runtime_t, rhsmcertd_t)
 ')
 
@@ -293,7 +274,7 @@ interface(`rhsmcertd_admin',`
 	files_search_var_lib($1)
 	admin_pattern($1, rhsmcertd_var_lib_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, rhsmcertd_runtime_t)
 
 	files_search_locks($1)

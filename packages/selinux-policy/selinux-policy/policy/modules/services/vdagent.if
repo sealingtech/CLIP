@@ -56,25 +56,6 @@ interface(`vdagent_getattr_log',`
 	allow $1 vdagent_log_t:file getattr_file_perms;
 ')
 
-########################################
-## <summary>
-##	Read vdagent pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`vdagent_read_pid_files',`
-	gen_require(`
-		type vdagent_runtime_t;
-	')
-
-	files_search_pids($1)
-	allow $1 vdagent_runtime_t:file read_file_perms;
-')
-
 #####################################
 ## <summary>
 ##	Connect to vdagent with a unix
@@ -91,7 +72,7 @@ interface(`vdagent_stream_connect',`
 		type vdagent_runtime_t, vdagent_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, vdagent_runtime_t, vdagent_runtime_t, vdagent_t)
 ')
 
@@ -126,6 +107,6 @@ interface(`vdagent_admin',`
 	logging_search_logs($1)
 	admin_pattern($1, vdagent_log_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, vdagent_runtime_t)
 ')

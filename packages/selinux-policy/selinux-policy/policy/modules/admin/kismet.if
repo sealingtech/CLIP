@@ -15,13 +15,13 @@
 ##	</summary>
 ## </param>
 #
-template(`kismet_role',`
+interface(`kismet_role',`
 	gen_require(`
 		type kismet_home_t, kismet_tmp_t, kismet_tmpfs_t;
 		type kismet_t;
 	')
 
-	kismet_run($1, $2)
+	kismet_run($2, $1)
 
 	allow $2 kismet_t:process { ptrace signal_perms };
 	ps_process_pattern($2, kismet_t)
@@ -43,9 +43,9 @@ template(`kismet_role',`
 ##	Execute a domain transition to run kismet.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`kismet_domtrans',`
@@ -84,7 +84,7 @@ interface(`kismet_run',`
 
 ########################################
 ## <summary>
-##	Read kismet pid files.
+##	Read kismet runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -92,19 +92,19 @@ interface(`kismet_run',`
 ##	</summary>
 ## </param>
 #
-interface(`kismet_read_pid_files',`
+interface(`kismet_read_runtime_files',`
 	gen_require(`
 		type kismet_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	allow $1 kismet_runtime_t:file read_file_perms;
 ')
 
 ########################################
 ## <summary>
 ##	Create, read, write, and delete
-##	kismet pid files.
+##	kismet runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -112,12 +112,12 @@ interface(`kismet_read_pid_files',`
 ##	</summary>
 ## </param>
 #
-interface(`kismet_manage_pid_files',`
+interface(`kismet_manage_runtime_files',`
 	gen_require(`
 		type kismet_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	allow $1 kismet_runtime_t:file manage_file_perms;
 ')
 
@@ -294,7 +294,7 @@ interface(`kismet_admin',`
 	files_search_var_lib($1)
 	admin_pattern($1, kismet_var_lib_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, kismet_runtime_t)
 
 	logging_search_logs($1)

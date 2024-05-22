@@ -1,4 +1,4 @@
-policy_module(aptcacher, 1.0.0)
+policy_module(aptcacher)
 
 ########################################
 #
@@ -29,7 +29,7 @@ type aptcacher_log_t;
 logging_log_file(aptcacher_log_t)
 
 type aptcacher_runtime_t;
-files_pid_file(aptcacher_runtime_t)
+files_runtime_file(aptcacher_runtime_t)
 
 ########################################
 #
@@ -51,7 +51,7 @@ allow aptcacher_t aptcacher_conf_t:file mmap_read_file_perms;
 allow aptcacher_t aptcacher_conf_t:lnk_file read_lnk_file_perms;
 
 allow aptcacher_t aptcacher_cache_t:dir manage_dir_perms;
-allow aptcacher_t aptcacher_cache_t:file { manage_file_perms map };
+allow aptcacher_t aptcacher_cache_t:file mmap_manage_file_perms;
 allow aptcacher_t aptcacher_cache_t:lnk_file manage_lnk_file_perms;
 
 allow aptcacher_t aptcacher_lib_t:file map;
@@ -74,6 +74,8 @@ corenet_tcp_bind_generic_node(aptcacher_t)
 corenet_tcp_connect_http_port(aptcacher_t)
 
 auth_use_nsswitch(aptcacher_t)
+
+files_read_etc_files(aptcacher_t)
 
 # Uses sd_notify() to inform systemd it has properly started
 init_dgram_send(aptcacher_t)

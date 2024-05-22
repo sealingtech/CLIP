@@ -1,8 +1,10 @@
 /etc/rc\.d/init\.d/named	--	gen_context(system_u:object_r:named_initrc_exec_t,s0)
+/etc/rc\.d/init\.d/bind	--	gen_context(system_u:object_r:named_initrc_exec_t,s0)
 /etc/rc\.d/init\.d/unbound	--	gen_context(system_u:object_r:named_initrc_exec_t,s0)
 
 /etc/bind(/.*)?	gen_context(system_u:object_r:named_zone_t,s0)
 /etc/bind/named\.conf.*	--	gen_context(system_u:object_r:named_conf_t,s0)
+/etc/bind/rndc\.conf.*	--	gen_context(system_u:object_r:named_conf_t,s0)
 /etc/bind/rndc\.key	--	gen_context(system_u:object_r:dnssec_t,s0)
 /etc/dnssec-trigger/dnssec_trigger_server\.key	--	gen_context(system_u:object_r:dnssec_t,s0)
 /etc/named\.rfc1912\.zones	--	gen_context(system_u:object_r:named_conf_t,s0)
@@ -13,13 +15,15 @@
 /etc/rndc\.key	--	gen_context(system_u:object_r:dnssec_t,s0)
 /etc/unbound(/.*)?	gen_context(system_u:object_r:named_conf_t,s0)
 /etc/unbound/.*\.key	--	gen_context(system_u:object_r:dnssec_t,s0)
+/etc/unbound/cache(/.*)?		gen_context(system_u:object_r:dnssec_t,s0)
 
 /usr/bin/lwresd	--	gen_context(system_u:object_r:named_exec_t,s0)
 /usr/bin/named	--	gen_context(system_u:object_r:named_exec_t,s0)
 /usr/bin/named-checkconf	--	gen_context(system_u:object_r:named_checkconf_exec_t,s0)
 /usr/bin/r?ndc	--	gen_context(system_u:object_r:ndc_exec_t,s0)
 /usr/bin/unbound	--	gen_context(system_u:object_r:named_exec_t,s0)
-/usr/sbin/unbound-anchor --   gen_context(system_u:object_r:named_exec_t,s0)
+/usr/bin/unbound-checkconf	--	gen_context(system_u:object_r:named_checkconf_exec_t,s0)
+/usr/bin/unbound-control	--	gen_context(system_u:object_r:ndc_exec_t,s0)
 
 /usr/lib/systemd/system/named.*\.service -- gen_context(system_u:object_r:named_unit_t,s0)
 /usr/lib/systemd/system/unbound.*\.service -- gen_context(system_u:object_r:named_unit_t,s0)
@@ -29,6 +33,8 @@
 /usr/sbin/named-checkconf	--	gen_context(system_u:object_r:named_checkconf_exec_t,s0)
 /usr/sbin/r?ndc	--	gen_context(system_u:object_r:ndc_exec_t,s0)
 /usr/sbin/unbound	--	gen_context(system_u:object_r:named_exec_t,s0)
+/usr/sbin/unbound-checkconf	--	gen_context(system_u:object_r:named_checkconf_exec_t,s0)
+/usr/sbin/unbound-control	--	gen_context(system_u:object_r:ndc_exec_t,s0)
 
 /var/bind(/.*)?	gen_context(system_u:object_r:named_cache_t,s0)
 /var/bind/pri(/.*)?	gen_context(system_u:object_r:named_zone_t,s0)

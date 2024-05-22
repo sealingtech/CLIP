@@ -13,7 +13,19 @@ ifeq "$(kv)" ""
 	kv := $(pv)
 endif
 
+# dont print version warnings if we specified a lower version than the kernel supports
+ifneq "$(OUTPUT_POLICY)" ""
+	kv := $(shell if test $(kv) -gt $(pv); then echo $(pv); else echo $(kv); fi)
+endif
+
+# load_policy(8) loads policy from /etc/selinux/<SELINUXTYPE>/policy/policy.$(pv)
+# It does this by reading the /etc/selinux/config file SELINUXTYPE entry to
+# form the full path. $(polbinpath) will contain this evaluated path for use as
+# a validation check.
+polbinpath := $(shell $(binary_policy_path))
+
 policy_conf = $(builddir)policy.conf
+policy_cil = $(builddir)policy.cil
 fc = $(builddir)file_contexts
 polver = $(builddir)policy.$(pv)
 homedir_template = $(builddir)homedir_template
@@ -67,10 +79,23 @@ $(polver): $(policy_conf)
 	@echo "Compiling $(NAME) $(polver)"
 ifneq ($(pv),$(kv))
 	@echo
-	@echo "WARNING: Policy version mismatch!  Is your OUTPUT_POLICY set correctly?"
+	@echo "WARNING: Policy version mismatch (policy:$(pv) kernel:$(kv))!  Is your OUTPUT_POLICY set correctly?"
 	@echo
 endif
-	$(verbose) $(CHECKPOLICY) -U $(UNK_PERMS) $^ -o $@
+	$(verbose) $(CHECKPOLICY) -U $(UNK_PERMS) -S -O -E $^ -o $@
+
+########################################
+#
+# Build a CIL policy locally
+#
+$(policy_cil): $(policy_conf)
+	@echo "Compiling $(NAME) $(policy_cil)"
+ifneq ($(pv),$(kv))
+	@echo
+	@echo "WARNING: Policy version mismatch (policy:$(pv) kernel:$(kv))!  Is your OUTPUT_POLICY set correctly?"
+	@echo
+endif
+	$(verbose) $(CHECKPOLICY) -C -U $(UNK_PERMS) -S -O -E $^ -o $@
 
 ########################################
 #
@@ -80,20 +105,27 @@ $(loadpath): $(policy_conf)
 	@echo "Compiling and installing $(NAME) $(loadpath)"
 ifneq ($(pv),$(kv))
 	@echo
-	@echo "WARNING: Policy version mismatch!  Is your OUTPUT_POLICY set correctly?"
+	@echo "WARNING: Policy version mismatch (policy:$(pv) kernel:$(kv))!  Is your OUTPUT_POLICY set correctly?"
 	@echo
 endif
 	@$(INSTALL) -d -m 0755 $(@D)
-	$(verbose) $(CHECKPOLICY) -U $(UNK_PERMS)  $^ -o $@
+	$(verbose) $(CHECKPOLICY) -U $(UNK_PERMS) -S -O -E $^ -o $@
 
 ########################################
 #
 # Load the binary policy
 #
 reload $(tmpdir)/load: $(loadpath) $(fcpath) $(appfiles)
+ifneq ($(DESTDIR),)
+	$(error Cannot load policy as '$$DESTDIR' is set to $(DESTDIR), \
+		creating an invalid policy load path)
+endif
+ifneq ($(polbinpath).$(pv),$(loadpath))
+	$(error Cannot load policy as invalid policy path: $(polbinpath).$(pv) - \
+		Check $(topdir)/config file entry is: "SELINUXTYPE=$(NAME)")
+endif
 	@echo "Loading $(NAME) $(loadpath)"
-	$(verbose) $(LOADPOLICY) -q $(loadpath)
-	@touch $(tmpdir)/load
+	$(verbose) $(LOADPOLICY)
 
 ########################################
 #
@@ -134,9 +166,10 @@ endif
 	@test -d $(tmpdir) || mkdir -p $(tmpdir)
 	$(verbose) $(M4) $(M4PARAM) -s $^ > $@
 
-$(tmpdir)/post_te_files.conf: $(m4support) $(tmpdir)/generated_definitions.conf $(post_te_files)
+$(tmpdir)/post_te_files.conf: $(m4support) $(tmpdir)/generated_definitions.conf $(post_te_files) $(tmpdir)/all_te_files.conf
 	@test -d $(tmpdir) || mkdir -p $(tmpdir)
-	$(verbose) $(M4) $(M4PARAM) $^ > $@
+	$(verbose) $(GREP) '^[[:blank:]]*user ' $(tmpdir)/all_te_files.conf > $@ || true
+	$(verbose) $(M4) $(M4PARAM) $(m4support) $(tmpdir)/generated_definitions.conf $(post_te_files) >> $@
 
 # extract attributes and put them first. extract post te stuff
 # like genfscon and put last.
@@ -146,14 +179,14 @@ $(tmpdir)/all_attrs_types.conf: $(tmpdir)/all_te_files.conf
 $(tmpdir)/all_post.conf: $(tmpdir)/all_te_files.conf $(tmpdir)/post_te_files.conf
 	$(verbose) cat $(tmpdir)/post_te_files.conf > $@
 # these have to run individually because order matters:
-	$(verbose) $(GREP) '^sid ' $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) '^fs_use_(xattr|task|trans)' $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) ^genfscon $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) ^portcon $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) ^netifcon $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) ^nodecon $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) ^ibpkeycon $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) ^ibendportcon $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*sid ' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*fs_use_(xattr|task|trans)' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*genfscon' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*portcon' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*netifcon' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*nodecon' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*ibpkeycon' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*ibendportcon' $(tmpdir)/all_te_files.conf >> $@ || true
 
 $(tmpdir)/only_te_rules.conf: $(tmpdir)/all_te_files.conf
 	$(verbose) $(comment_move_decl) $^ > $@
@@ -198,7 +231,13 @@ $(fcpath): $(fc) $(loadpath) $(userpath)/system.users
 	@$(INSTALL) -d -m 0755 $(@D)
 	$(verbose) $(INSTALL) -m 0644 $(fc) $(fcpath)
 	$(verbose) $(INSTALL) -m 0644 $(homedir_template) $(homedirpath)
-	$(verbose) $(UMASK) 022 ; $(genhomedircon) -d $(topdir) -t $(NAME) $(USEPWD)
+	$(verbose) $(UMASK) 022 ; $(genhomedircon) -d $(topdir) -t $(NAME)
+	$(verbose) if $(SEFCONTEXT_COMPILE) -i > /dev/null 2>&1 ; then \
+		$(SEFCONTEXT_COMPILE) $(fcpath) ;\
+		$(SEFCONTEXT_COMPILE) $(fcpath).homedirs ;\
+	else \
+		echo "$@ Pre-compiled file context not generated!  Please install the sefcontext_compile tool (commonly part of libselinux-utils)." ;\
+	fi
 
 ########################################
 #
@@ -242,10 +281,11 @@ $(installdir)/seusers: $(seusers)
 clean:
 	$(verbose) rm -f $(policy_conf)
 	$(verbose) rm -f $(polver)
+	$(verbose) rm -f $(policy_cil)
 	$(verbose) rm -f $(fc)
 	$(verbose) rm -f $(homedir_template)
 	$(verbose) rm -f $(net_contexts) $(net_contexts_nft)
 	$(verbose) rm -f *.res
 	$(verbose) rm -fR $(tmpdir)
 
-.PHONY: default policy install load reload enableaudit checklabels restorelabels relabel check longcheck clean
+.PHONY: default policy install load reload enableaudit checklabels restorelabels relabel resetlabels validate check longcheck clean

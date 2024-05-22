@@ -53,6 +53,7 @@ ifdef(`distro_suse',`
 /etc/ioctl\.save	--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/killpower		--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/localtime		-l	gen_context(system_u:object_r:etc_t,s0)
+/etc/machine-id		--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/mtab		--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/mtab~[0-9]*	--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/mtab\.tmp		--	gen_context(system_u:object_r:etc_runtime_t,s0)
@@ -72,16 +73,10 @@ ifdef(`distro_suse',`
 /etc/sysconfig/iptables\.save -- gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/sysconfig/firstboot --	gen_context(system_u:object_r:etc_runtime_t,s0)
 
-/etc/zfs/zpool\.cache	--	gen_context(system_u:object_r:etc_runtime_t,s0)
-
 ifdef(`distro_gentoo', `
 /etc/profile\.env	--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/csh\.env		--	gen_context(system_u:object_r:etc_runtime_t,s0)
 /etc/env\.d/.*		--	gen_context(system_u:object_r:etc_runtime_t,s0)
-')
-
-ifdef(`distro_redhat',`
-/etc/rhgb(/.*)?		-d	gen_context(system_u:object_r:mnt_t,s0)
 ')
 
 ifdef(`distro_suse',`
@@ -116,7 +111,7 @@ HOME_ROOT/lost\+found/.*	<<none>>
 #
 # Mount points; do not relabel subdirectories, since
 # we don't want to change any removable media by default.
-/media(/[^/]*)		-l	gen_context(system_u:object_r:mnt_t,s0)
+/media(/[^/]*)?		-l	gen_context(system_u:object_r:mnt_t,s0)
 /media(/[^/]*)?		-d	gen_context(system_u:object_r:mnt_t,s0)
 /media/[^/]*/.*			<<none>>
 /media/\.hal-.*		--	gen_context(system_u:object_r:mnt_t,s0)
@@ -170,6 +165,7 @@ HOME_ROOT/lost\+found/.*	<<none>>
 # /srv
 #
 /srv			-d	gen_context(system_u:object_r:var_t,s0)
+/srv			-l	gen_context(system_u:object_r:var_t,s0)
 /srv/.*				gen_context(system_u:object_r:var_t,s0)
 
 #
@@ -200,6 +196,8 @@ HOME_ROOT/lost\+found/.*	<<none>>
 # Avoid calling m4's include by using en empty string
 /usr/include`'(/.*)?		gen_context(system_u:object_r:usr_t,s0)
 
+/usr/lib/modules(/.*)?		gen_context(system_u:object_r:modules_object_t,s0)
+
 /usr/local/\.journal		<<none>>
 
 /usr/local/etc(/.*)?		gen_context(system_u:object_r:etc_t,s0)
@@ -212,6 +210,8 @@ HOME_ROOT/lost\+found/.*	<<none>>
 
 /usr/share/doc(/.*)?/README.*		gen_context(system_u:object_r:usr_t,s0)
 /usr/share/docbook2X/xslt/man(/.*)?	gen_context(system_u:object_r:usr_t,s0)
+
+/usr/share/munin/plugins/plugin\.sh	--	gen_context(system_u:object_r:usr_t,s0)
 
 /usr/tmp		-d	gen_context(system_u:object_r:tmp_t,s0-mls_systemhigh)
 /usr/tmp/.*			<<none>>

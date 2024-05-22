@@ -1,4 +1,4 @@
-policy_module(timidity, 1.11.1)
+policy_module(timidity)
 
 ########################################
 #
@@ -67,6 +67,3 @@ optional_policy(`
 	seutil_sigchld_newrole(timidity_t)
 ')
 
-optional_policy(`
-	udev_read_db(timidity_t)
-')

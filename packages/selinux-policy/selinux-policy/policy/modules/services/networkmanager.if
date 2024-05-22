@@ -41,9 +41,9 @@ interface(`networkmanager_rw_packet_sockets',`
 ## Relabel networkmanager tun socket.
 ## </summary>
 ## <param name="domain">
-## <summary>
-## Domain allowed access.
-## </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`networkmanager_attach_tun_iface',`
@@ -273,7 +273,7 @@ interface(`networkmanager_append_log_files',`
 
 ########################################
 ## <summary>
-##	Read networkmanager pid files.
+##	Read networkmanager runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -281,14 +281,13 @@ interface(`networkmanager_append_log_files',`
 ##	</summary>
 ## </param>
 #
-interface(`networkmanager_read_pid_files',`
+interface(`networkmanager_read_runtime_files',`
 	gen_require(`
 		type NetworkManager_runtime_t;
 	')
 
-	files_search_pids($1)
-	allow $1 NetworkManager_runtime_t:dir search_dir_perms;
-	allow $1 NetworkManager_runtime_t:file read_file_perms;
+	files_search_runtime($1)
+	read_files_pattern($1, NetworkManager_runtime_t, NetworkManager_runtime_t)
 ')
 
 ####################################
@@ -297,9 +296,9 @@ interface(`networkmanager_read_pid_files',`
 ##	a unix domain stream socket.
 ## </summary>
 ## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`networkmanager_stream_connect',`
@@ -307,7 +306,7 @@ interface(`networkmanager_stream_connect',`
 		type NetworkManager_t, NetworkManager_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, NetworkManager_runtime_t, NetworkManager_runtime_t, NetworkManager_t)
 ')
 
@@ -407,7 +406,7 @@ interface(`networkmanager_admin',`
 	admin_pattern($1, NetworkManager_var_lib_t)
 	allow $1 NetworkManager_var_lib_t:file map;
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, NetworkManager_runtime_t)
 
 	files_search_tmp($1)

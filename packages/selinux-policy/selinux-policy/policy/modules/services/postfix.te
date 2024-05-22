@@ -1,4 +1,4 @@
-policy_module(postfix, 1.22.3)
+policy_module(postfix)
 
 ########################################
 #
@@ -51,8 +51,7 @@ type postfix_map_tmp_t;
 files_tmp_file(postfix_map_tmp_t)
 
 postfix_domain_template(master)
-typealias postfix_master_t alias postfix_t;
-mta_mailserver(postfix_t, postfix_master_exec_t)
+mta_mailserver(postfix_master_t, postfix_master_exec_t)
 
 type postfix_initrc_exec_t;
 init_script_file(postfix_initrc_exec_t)
@@ -76,7 +75,7 @@ files_type(postfix_prng_t)
 postfix_server_domain_template(qmgr)
 
 type postfix_runtime_t alias postfix_var_run_t;
-files_pid_file(postfix_runtime_t)
+files_runtime_file(postfix_runtime_t)
 
 postfix_user_domain_template(showq)
 
@@ -109,7 +108,8 @@ mta_mailserver_delivery(postfix_virtual_t)
 #
 
 allow postfix_domain self:capability { sys_chroot sys_nice };
-dontaudit postfix_domain self:capability sys_tty_config;
+# net_admin for changing buffer sizes
+dontaudit postfix_domain self:capability { net_admin sys_tty_config };
 allow postfix_domain self:process { signal_perms setpgid setsched };
 allow postfix_domain self:fifo_file rw_fifo_file_perms;
 allow postfix_domain self:unix_stream_socket { accept connectto listen };
@@ -127,7 +127,7 @@ allow postfix_domain postfix_master_t:process sigchld;
 allow postfix_domain postfix_spool_t:dir list_dir_perms;
 
 manage_files_pattern(postfix_domain, postfix_runtime_t, postfix_runtime_t)
-files_pid_filetrans(postfix_domain, postfix_runtime_t, file)
+files_runtime_filetrans(postfix_domain, postfix_runtime_t, file)
 
 kernel_read_system_state(postfix_domain)
 kernel_read_network_state(postfix_domain)
@@ -163,10 +163,6 @@ miscfiles_read_generic_tls_privkey(postfix_domain)
 
 userdom_dontaudit_use_unpriv_user_fds(postfix_domain)
 
-optional_policy(`
-	udev_read_db(postfix_domain)
-')
-
 ########################################
 #
 # Common postfix server domain local policy
@@ -198,7 +194,7 @@ domain_use_interactive_fds(postfix_user_domains)
 # Master local policy
 #
 
-allow postfix_master_t self:capability { chown dac_read_search dac_override fowner kill setgid setuid sys_tty_config };
+allow postfix_master_t self:capability { chown dac_read_search dac_override fowner fsetid kill setgid setuid sys_tty_config };
 allow postfix_master_t self:capability2 block_suspend;
 allow postfix_master_t self:process setrlimit;
 allow postfix_master_t self:tcp_socket create_stream_socket_perms;
@@ -211,7 +207,7 @@ allow postfix_master_t postfix_etc_t:dir rw_dir_perms;
 allow postfix_master_t postfix_etc_t:file rw_file_perms;
 
 allow postfix_master_t postfix_data_t:dir manage_dir_perms;
-allow postfix_master_t postfix_data_t:file manage_file_perms;
+allow postfix_master_t postfix_data_t:file mmap_manage_file_perms;
 
 allow postfix_master_t postfix_keytab_t:file read_file_perms;
 
@@ -296,7 +292,7 @@ domain_use_interactive_fds(postfix_master_t)
 
 files_search_tmp(postfix_master_t)
 
-mcs_file_read_all(postfix_master_t)
+init_read_state(postfix_master_t)
 
 term_dontaudit_search_ptys(postfix_master_t)
 
@@ -315,6 +311,10 @@ mta_etc_filetrans_aliases(postfix_master_t, file, "aliasesdb-stamp")
 mta_spec_filetrans_aliases(postfix_master_t, postfix_etc_t, file)
 mta_read_sendmail_bin(postfix_master_t)
 mta_getattr_spool(postfix_master_t)
+
+optional_policy(`
+	certbot_read_lib(postfix_master_t)
+')
 
 optional_policy(`
 	cyrus_stream_connect(postfix_master_t)
@@ -376,11 +376,7 @@ manage_files_pattern(postfix_bounce_t, postfix_spool_bounce_t, postfix_spool_bou
 manage_lnk_files_pattern(postfix_bounce_t, postfix_spool_bounce_t, postfix_spool_bounce_t)
 
 optional_policy(`
-	init_dbus_chat(postfix_bounce_t)
-')
-
-optional_policy(`
-	dbus_system_bus_client(postfix_bounce_t)
+	systemd_use_nss(postfix_bounce_t)
 ')
 
 ########################################
@@ -477,7 +473,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	dspam_domtrans(postfix_local_t)
+	logwatch_search_cache_dir(postfix_local_t)
 ')
 
 optional_policy(`
@@ -512,7 +508,7 @@ allow postfix_map_t self:capability { dac_read_search dac_override setgid setuid
 allow postfix_map_t self:tcp_socket { accept listen };
 
 allow postfix_map_t postfix_etc_t:dir manage_dir_perms;
-allow postfix_map_t postfix_etc_t:file { manage_file_perms map };
+allow postfix_map_t postfix_etc_t:file mmap_manage_file_perms;
 allow postfix_map_t postfix_etc_t:lnk_file manage_lnk_file_perms;
 
 manage_dirs_pattern(postfix_map_t, postfix_map_tmp_t, postfix_map_tmp_t)
@@ -520,8 +516,11 @@ manage_files_pattern(postfix_map_t, postfix_map_tmp_t, postfix_map_tmp_t)
 files_tmp_filetrans(postfix_map_t, postfix_map_tmp_t, { file dir })
 
 kernel_read_kernel_sysctls(postfix_map_t)
+kernel_read_network_state(postfix_map_t)
 kernel_dontaudit_list_proc(postfix_map_t)
 kernel_dontaudit_read_system_state(postfix_map_t)
+
+dev_read_urand(postfix_map_t)
 
 corenet_all_recvfrom_netlabel(postfix_map_t)
 corenet_tcp_sendrecv_generic_if(postfix_map_t)
@@ -545,6 +544,10 @@ auth_use_nsswitch(postfix_map_t)
 logging_send_syslog_msg(postfix_map_t)
 
 miscfiles_read_localization(postfix_map_t)
+
+optional_policy(`
+	certbot_read_lib(postfix_map_t)
+')
 
 optional_policy(`
 	locallogin_dontaudit_use_fds(postfix_map_t)
@@ -572,9 +575,6 @@ allow postfix_pickup_t postfix_spool_maildrop_t:dir list_dir_perms;
 read_files_pattern(postfix_pickup_t, postfix_spool_maildrop_t, postfix_spool_maildrop_t)
 delete_files_pattern(postfix_pickup_t, postfix_spool_maildrop_t, postfix_spool_maildrop_t)
 
-mcs_file_read_all(postfix_pickup_t)
-mcs_file_write_all(postfix_pickup_t)
-
 optional_policy(`
 	dbus_system_bus_client(postfix_pickup_t)
 	init_dbus_chat(postfix_pickup_t)
@@ -600,6 +600,8 @@ corecmd_exec_bin(postfix_pipe_t)
 
 optional_policy(`
 	dovecot_domtrans_deliver(postfix_pipe_t)
+	dovecot_read_config(postfix_pipe_t)
+	dovecot_stream_connect(postfix_pipe_t)
 ')
 
 optional_policy(`
@@ -641,9 +643,6 @@ allow postfix_postdrop_t postfix_local_t:unix_stream_socket { read write };
 # for /var/spool/postfix/public/pickup
 stream_connect_pattern(postfix_postdrop_t, postfix_public_t, postfix_public_t, postfix_master_t)
 
-mcs_file_read_all(postfix_postdrop_t)
-mcs_file_write_all(postfix_postdrop_t)
-
 term_dontaudit_use_all_ptys(postfix_postdrop_t)
 term_dontaudit_use_all_ttys(postfix_postdrop_t)
 
@@ -656,6 +655,7 @@ optional_policy(`
 
 optional_policy(`
 	cron_system_entry(postfix_postdrop_t, postfix_postdrop_exec_t)
+	cron_use_system_job_fds(postfix_postdrop_t)
 ')
 
 optional_policy(`
@@ -748,11 +748,14 @@ allow postfix_showq_t postfix_spool_maildrop_t:file read_file_perms;
 allow postfix_showq_t postfix_spool_maildrop_t:lnk_file read_lnk_file_perms;
 
 allow postfix_showq_t postfix_spool_t:file read_file_perms;
-
-mcs_file_read_all(postfix_showq_t)
+allow postfix_showq_t postfix_postqueue_t:unix_stream_socket { read write };
 
 term_use_all_ptys(postfix_showq_t)
 term_use_all_ttys(postfix_showq_t)
+
+optional_policy(`
+	systemd_use_nss(postfix_showq_t)
+')
 
 ########################################
 #
@@ -770,6 +773,10 @@ rw_files_pattern(postfix_smtp_t, postfix_spool_maildrop_t, postfix_spool_maildro
 corenet_tcp_bind_generic_node(postfix_smtp_t)
 
 optional_policy(`
+	certbot_read_lib(postfix_smtp_t)
+')
+
+optional_policy(`
 	cyrus_stream_connect(postfix_smtp_t)
 ')
 
@@ -778,11 +785,11 @@ optional_policy(`
 ')
 
 optional_policy(`
-	dspam_stream_connect(postfix_smtp_t)
+	milter_stream_connect_all(postfix_smtp_t)
 ')
 
 optional_policy(`
-	milter_stream_connect_all(postfix_smtp_t)
+	systemd_use_nss(postfix_smtp_t)
 ')
 
 ########################################
@@ -811,9 +818,7 @@ mta_read_aliases(postfix_smtpd_t)
 mta_map_aliases(postfix_smtpd_t)
 
 optional_policy(`
-	dbus_send_system_bus(postfix_smtp_t)
-	dbus_system_bus_client(postfix_smtp_t)
-	init_dbus_chat(postfix_smtp_t)
+	certbot_read_lib(postfix_smtpd_t)
 ')
 
 optional_policy(`
@@ -839,11 +844,16 @@ optional_policy(`
 
 optional_policy(`
 	sasl_connect(postfix_smtpd_t)
+	sasl_read_keytab(postfix_smtpd_t)
 ')
 
 optional_policy(`
-	spamassassin_read_spamd_pid_files(postfix_smtpd_t)
+	spamassassin_read_spamd_runtime_files(postfix_smtpd_t)
 	spamassassin_stream_connect_spamd(postfix_smtpd_t)
+')
+
+optional_policy(`
+	systemd_use_nss(postfix_smtpd_t)
 ')
 
 ########################################

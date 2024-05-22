@@ -1,4 +1,4 @@
-policy_module(networkmanager, 1.25.2)
+policy_module(networkmanager)
 
 ########################################
 #
@@ -22,7 +22,7 @@ type NetworkManager_log_t;
 logging_log_file(NetworkManager_log_t)
 
 type NetworkManager_runtime_t alias NetworkManager_var_run_t;
-files_pid_file(NetworkManager_runtime_t)
+files_runtime_file(NetworkManager_runtime_t)
 
 type NetworkManager_tmp_t;
 files_tmp_file(NetworkManager_tmp_t)
@@ -42,7 +42,7 @@ init_system_domain(wpa_cli_t, wpa_cli_exec_t)
 # Local policy
 #
 
-allow NetworkManager_t self:capability { chown dac_override fowner fsetid ipc_lock kill net_admin net_raw setgid setuid sys_nice };
+allow NetworkManager_t self:capability { chown dac_override dac_read_search fowner fsetid ipc_lock kill net_admin net_raw setgid setuid sys_nice };
 dontaudit NetworkManager_t self:capability { sys_module sys_ptrace sys_tty_config };
 allow NetworkManager_t self:capability2 wake_alarm;
 allow NetworkManager_t self:process { ptrace getcap setcap setpgid getsched setsched signal_perms };
@@ -89,11 +89,10 @@ allow NetworkManager_t NetworkManager_var_lib_t:file map;
 manage_dirs_pattern(NetworkManager_t, NetworkManager_runtime_t, NetworkManager_runtime_t)
 manage_files_pattern(NetworkManager_t, NetworkManager_runtime_t, NetworkManager_runtime_t)
 manage_sock_files_pattern(NetworkManager_t, NetworkManager_runtime_t, NetworkManager_runtime_t)
-files_pid_filetrans(NetworkManager_t, NetworkManager_runtime_t, { dir file sock_file })
+files_runtime_filetrans(NetworkManager_t, NetworkManager_runtime_t, { dir file sock_file })
 
 can_exec(NetworkManager_t, { NetworkManager_exec_t NetworkManager_initrc_exec_t wpa_cli_exec_t NetworkManager_tmp_t })
 
-kernel_read_crypto_sysctls(NetworkManager_t)
 kernel_read_system_state(NetworkManager_t)
 kernel_read_network_state(NetworkManager_t)
 kernel_read_kernel_sysctls(NetworkManager_t)
@@ -146,13 +145,13 @@ files_manage_etc_symlinks(NetworkManager_t)
 files_read_etc_runtime_files(NetworkManager_t)
 files_read_usr_files(NetworkManager_t)
 files_read_usr_src_files(NetworkManager_t)
+files_watch_etc_dirs(NetworkManager_t)
 
 fs_getattr_all_fs(NetworkManager_t)
-fs_search_auto_mountpoints(NetworkManager_t)
-fs_list_inotifyfs(NetworkManager_t)
-
-# network namespacing
 fs_read_nsfs_files(NetworkManager_t)
+fs_search_auto_mountpoints(NetworkManager_t)
+fs_search_tmpfs(NetworkManager_t)
+fs_list_inotifyfs(NetworkManager_t)
 
 mls_file_read_all_levels(NetworkManager_t)
 
@@ -163,11 +162,16 @@ storage_getattr_fixed_disk_dev(NetworkManager_t)
 init_read_utmp(NetworkManager_t)
 init_dontaudit_write_utmp(NetworkManager_t)
 init_domtrans_script(NetworkManager_t)
+init_get_system_status(NetworkManager_t)
 
 auth_use_nsswitch(NetworkManager_t)
 
+libs_watch_shared_libs_dirs(NetworkManager_t)
+
 logging_send_audit_msgs(NetworkManager_t)
 logging_send_syslog_msg(NetworkManager_t)
+
+libs_watch_lib_dirs(NetworkManager_t)
 
 miscfiles_read_generic_certs(NetworkManager_t)
 miscfiles_read_localization(NetworkManager_t)
@@ -178,15 +182,16 @@ sysnet_domtrans_ifconfig(NetworkManager_t)
 sysnet_domtrans_dhcpc(NetworkManager_t)
 sysnet_signal_dhcpc(NetworkManager_t)
 sysnet_signull_dhcpc(NetworkManager_t)
-sysnet_read_dhcpc_pid(NetworkManager_t)
+sysnet_read_dhcpc_runtime_files(NetworkManager_t)
 sysnet_read_dhcp_config(NetworkManager_t)
-sysnet_delete_dhcpc_pid(NetworkManager_t)
+sysnet_delete_dhcpc_runtime_files(NetworkManager_t)
 sysnet_kill_dhcpc(NetworkManager_t)
 sysnet_read_dhcpc_state(NetworkManager_t)
 sysnet_delete_dhcpc_state(NetworkManager_t)
 sysnet_search_dhcp_state(NetworkManager_t)
 sysnet_manage_config(NetworkManager_t)
 sysnet_etc_filetrans_config(NetworkManager_t)
+sysnet_watch_config_dirs(NetworkManager_t)
 
 # certificates in user home directories (cert_home_t in ~/\.pki)
 userdom_read_user_certs(NetworkManager_t)
@@ -215,11 +220,11 @@ optional_policy(`
 ')
 
 optional_policy(`
-	consolekit_read_pid_files(NetworkManager_t)
+	consoletype_exec(NetworkManager_t)
 ')
 
 optional_policy(`
-	consoletype_exec(NetworkManager_t)
+	chronyd_domtrans_cli(NetworkManager_t)
 ')
 
 optional_policy(`
@@ -232,11 +237,6 @@ optional_policy(`
 
 	optional_policy(`
 		avahi_dbus_chat(NetworkManager_t)
-	')
-
-	optional_policy(`
-		consolekit_dbus_chat(NetworkManager_t)
-		consolekit_use_inhibit_lock(NetworkManager_t)
 	')
 
 	optional_policy(`
@@ -257,8 +257,8 @@ optional_policy(`
 ')
 
 optional_policy(`
-	dnsmasq_read_pid_files(NetworkManager_t)
-	dnsmasq_delete_pid_files(NetworkManager_t)
+	dnsmasq_read_runtime_files(NetworkManager_t)
+	dnsmasq_delete_runtime_files(NetworkManager_t)
 	dnsmasq_domtrans(NetworkManager_t)
 	dnsmasq_initrc_domtrans(NetworkManager_t)
 	dnsmasq_kill(NetworkManager_t)
@@ -268,14 +268,6 @@ optional_policy(`
 
 optional_policy(`
 	gnome_stream_connect_all_gkeyringd(NetworkManager_t)
-')
-
-optional_policy(`
-	hal_write_log(NetworkManager_t)
-')
-
-optional_policy(`
-	howl_signal(NetworkManager_t)
 ')
 
 optional_policy(`
@@ -330,13 +322,9 @@ optional_policy(`
 ')
 
 optional_policy(`
-	polipo_initrc_domtrans(NetworkManager_t)
-')
-
-optional_policy(`
 	ppp_initrc_domtrans(NetworkManager_t)
 	ppp_domtrans(NetworkManager_t)
-	ppp_manage_pid_files(NetworkManager_t)
+	ppp_manage_runtime_files(NetworkManager_t)
 	ppp_kill(NetworkManager_t)
 	ppp_signal(NetworkManager_t)
 	ppp_signull(NetworkManager_t)
@@ -354,15 +342,14 @@ optional_policy(`
 ')
 
 optional_policy(`
-	systemd_read_logind_pids(NetworkManager_t)
+	systemd_read_logind_runtime_files(NetworkManager_t)
 	systemd_read_logind_sessions_files(NetworkManager_t)
 	systemd_write_inherited_logind_inhibit_pipes(NetworkManager_t)
 ')
 
 optional_policy(`
 	udev_exec(NetworkManager_t)
-	udev_read_db(NetworkManager_t)
-	udev_read_pid_files(NetworkManager_t)
+	udev_read_runtime_files(NetworkManager_t)
 ')
 
 optional_policy(`
@@ -376,10 +363,6 @@ optional_policy(`
 	vpn_signal(NetworkManager_t)
 	vpn_signull(NetworkManager_t)
 	vpn_relabelfrom_tun_socket(NetworkManager_t)
-')
-
-optional_policy(`
-	chronyd_domtrans_cli(NetworkManager_t)
 ')
 
 ########################################

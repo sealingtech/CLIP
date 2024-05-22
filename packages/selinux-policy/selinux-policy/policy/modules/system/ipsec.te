@@ -1,4 +1,4 @@
-policy_module(ipsec, 1.22.1)
+policy_module(ipsec)
 
 ########################################
 #
@@ -33,7 +33,7 @@ logging_log_file(ipsec_log_t)
 
 # type for runtime files, including pluto.ctl
 type ipsec_runtime_t alias ipsec_var_run_t;
-files_pid_file(ipsec_runtime_t)
+files_runtime_file(ipsec_runtime_t)
 
 # Default type for IPSEC SPD entries
 type ipsec_spd_t;
@@ -55,7 +55,7 @@ type ipsec_mgmt_lock_t;
 files_lock_file(ipsec_mgmt_lock_t)
 
 type ipsec_mgmt_runtime_t alias ipsec_mgmt_var_run_t;
-files_pid_file(ipsec_mgmt_runtime_t)
+files_runtime_file(ipsec_mgmt_runtime_t)
 
 type ipsec_supervisor_t;
 type ipsec_supervisor_exec_t;
@@ -88,7 +88,7 @@ allow ipsec_t self:udp_socket create_socket_perms;
 allow ipsec_t self:key_socket create_socket_perms;
 allow ipsec_t self:fifo_file rw_fifo_file_perms;
 allow ipsec_t self:netlink_xfrm_socket create_netlink_socket_perms;
-allow ipsec_t self:netlink_route_socket rw_netlink_socket_perms;
+allow ipsec_t self:netlink_route_socket create_netlink_socket_perms;
 
 allow ipsec_t ipsec_initrc_exec_t:file read_file_perms;
 
@@ -107,7 +107,7 @@ files_tmp_filetrans(ipsec_t, ipsec_tmp_t, { dir file })
 manage_dirs_pattern(ipsec_t, ipsec_runtime_t, ipsec_runtime_t)
 manage_files_pattern(ipsec_t, ipsec_runtime_t, ipsec_runtime_t)
 manage_sock_files_pattern(ipsec_t, ipsec_runtime_t, ipsec_runtime_t)
-files_pid_filetrans(ipsec_t, ipsec_runtime_t, { dir file sock_file })
+files_runtime_filetrans(ipsec_t, ipsec_runtime_t, { dir file sock_file })
 
 can_exec(ipsec_t, ipsec_mgmt_exec_t)
 
@@ -189,10 +189,6 @@ optional_policy(`
 	seutil_sigchld_newrole(ipsec_t)
 ')
 
-optional_policy(`
-	udev_read_db(ipsec_t)
-')
-
 ########################################
 #
 # ipsec_mgmt Local policy
@@ -214,6 +210,7 @@ domtrans_pattern(ipsec_mgmt_t, ipsec_exec_t, ipsec_t)
 read_files_pattern(ipsec_mgmt_t, ipsec_t, ipsec_t)
 read_lnk_files_pattern(ipsec_mgmt_t, ipsec_t, ipsec_t)
 
+allow ipsec_mgmt_t ipsec_conf_file_t:dir list_dir_perms;
 allow ipsec_mgmt_t ipsec_conf_file_t:file read_file_perms;
 
 manage_files_pattern(ipsec_mgmt_t, ipsec_key_file_t, ipsec_key_file_t)
@@ -232,10 +229,10 @@ files_tmp_filetrans(ipsec_mgmt_t, ipsec_tmp_t, { dir file })
 allow ipsec_mgmt_t ipsec_mgmt_runtime_t:file manage_file_perms;
 manage_files_pattern(ipsec_mgmt_t, ipsec_runtime_t, ipsec_runtime_t)
 manage_lnk_files_pattern(ipsec_mgmt_t, ipsec_runtime_t, ipsec_runtime_t)
-files_pid_filetrans(ipsec_mgmt_t, ipsec_mgmt_runtime_t, file)
+files_runtime_filetrans(ipsec_mgmt_t, ipsec_mgmt_runtime_t, file)
 
 allow ipsec_mgmt_t ipsec_runtime_t:sock_file manage_sock_file_perms;
-files_pid_filetrans(ipsec_mgmt_t, ipsec_runtime_t, sock_file)
+files_runtime_filetrans(ipsec_mgmt_t, ipsec_runtime_t, sock_file)
 
 # logger, running in ipsec_mgmt_t needs to use sockets
 allow ipsec_mgmt_t self:unix_dgram_socket { create connect write };
@@ -304,6 +301,7 @@ init_labeled_script_domtrans(ipsec_mgmt_t, ipsec_initrc_exec_t)
 logging_send_syslog_msg(ipsec_mgmt_t)
 
 miscfiles_read_localization(ipsec_mgmt_t)
+miscfiles_read_generic_certs(ipsec_mgmt_t)
 
 seutil_dontaudit_search_config(ipsec_mgmt_t)
 
@@ -366,7 +364,7 @@ can_exec(racoon_t, setkey_exec_t)
 # manage pid file
 manage_files_pattern(racoon_t, ipsec_runtime_t, ipsec_runtime_t)
 manage_sock_files_pattern(racoon_t, ipsec_runtime_t, ipsec_runtime_t)
-files_pid_filetrans(racoon_t, ipsec_runtime_t, file)
+files_runtime_filetrans(racoon_t, ipsec_runtime_t, file)
 
 allow racoon_t ipsec_conf_file_t:dir list_dir_perms;
 read_files_pattern(racoon_t, ipsec_conf_file_t, ipsec_conf_file_t)
@@ -464,7 +462,7 @@ userdom_use_user_terminals(setkey_t)
 allow ipsec_supervisor_t self:capability { dac_override dac_read_search kill net_admin };
 allow ipsec_supervisor_t self:process { signal signull };
 allow ipsec_supervisor_t self:fifo_file rw_fifo_file_perms;
-allow ipsec_supervisor_t self:netlink_route_socket rw_netlink_socket_perms;
+allow ipsec_supervisor_t self:netlink_route_socket create_netlink_socket_perms;
 allow ipsec_supervisor_t self:netlink_xfrm_socket create_netlink_socket_perms;
 
 allow ipsec_supervisor_t ipsec_conf_file_t:dir list_dir_perms;
@@ -478,7 +476,7 @@ allow ipsec_supervisor_t ipsec_t:process { signal signull };
 allow ipsec_supervisor_t ipsec_runtime_t:sock_file { rw_sock_file_perms unlink };
 manage_dirs_pattern(ipsec_supervisor_t, ipsec_runtime_t, ipsec_runtime_t)
 manage_files_pattern(ipsec_supervisor_t, ipsec_runtime_t, ipsec_runtime_t)
-files_pid_filetrans(ipsec_supervisor_t, ipsec_runtime_t, { dir file sock_file })
+files_runtime_filetrans(ipsec_supervisor_t, ipsec_runtime_t, { dir file sock_file })
 
 domtrans_pattern(ipsec_supervisor_t, ipsec_exec_t, ipsec_t)
 

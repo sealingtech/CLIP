@@ -47,9 +47,16 @@ endif
 BINDIR ?= /usr/bin
 SBINDIR ?= /usr/sbin
 ifdef TEST_TOOLCHAIN
-tc_usrbindir := env LD_LIBRARY_PATH="$(TEST_TOOLCHAIN)/lib:$(TEST_TOOLCHAIN)/usr/lib" $(TEST_TOOLCHAIN)$(BINDIR)
-tc_usrsbindir := env LD_LIBRARY_PATH="$(TEST_TOOLCHAIN)/lib:$(TEST_TOOLCHAIN)/usr/lib" $(TEST_TOOLCHAIN)$(SBINDIR)
-tc_sbindir := env LD_LIBRARY_PATH="$(TEST_TOOLCHAIN)/lib:$(TEST_TOOLCHAIN)/usr/lib" $(TEST_TOOLCHAIN)/sbin
+python_path_plat := $(shell python3 -c "import sysconfig; print(sysconfig.get_path('platlib', vars={'platbase': '/usr', 'base': '/usr'}))")
+python_path_pure := $(shell python3 -c "import sysconfig; print(sysconfig.get_path('purelib', vars={'platbase': '/usr', 'base': '/usr'}))")
+ifdef PYTHONPATH
+python_path := "$(TEST_TOOLCHAIN)$(python_path_plat):$(TEST_TOOLCHAIN)$(python_path_pure):$(PYTHONPATH)"
+else
+python_path := "$(TEST_TOOLCHAIN)$(python_path_plat):$(TEST_TOOLCHAIN)$(python_path_pure)"
+endif
+tc_usrbindir := env LD_LIBRARY_PATH="$(TEST_TOOLCHAIN)/lib:$(TEST_TOOLCHAIN)/usr/lib" PYTHONPATH="$(python_path)" $(TEST_TOOLCHAIN)$(BINDIR)
+tc_usrsbindir := env LD_LIBRARY_PATH="$(TEST_TOOLCHAIN)/lib:$(TEST_TOOLCHAIN)/usr/lib" PYTHONPATH="$(python_path)" $(TEST_TOOLCHAIN)$(SBINDIR)
+tc_sbindir := env LD_LIBRARY_PATH="$(TEST_TOOLCHAIN)/lib:$(TEST_TOOLCHAIN)/usr/lib" PYTHONPATH="$(python_path)" $(TEST_TOOLCHAIN)/sbin
 else
 tc_usrbindir := $(BINDIR)
 tc_usrsbindir := $(SBINDIR)
@@ -62,17 +69,22 @@ SEMOD_PKG ?= $(tc_usrbindir)/semodule_package
 SEMOD_LNK ?= $(tc_usrbindir)/semodule_link
 SEMOD_EXP ?= $(tc_usrbindir)/semodule_expand
 LOADPOLICY ?= $(tc_usrsbindir)/load_policy
+ifdef TEST_TOOLCHAIN
+SEPOLGEN_IFGEN ?= $(tc_usrbindir)/sepolgen-ifgen --attr-helper $(TEST_TOOLCHAIN)$(BINDIR)/sepolgen-ifgen-attr-helper
+else
 SEPOLGEN_IFGEN ?= $(tc_usrbindir)/sepolgen-ifgen
+endif
 SETFILES ?= $(tc_sbindir)/setfiles
+SEFCONTEXT_COMPILE ?= $(tc_usrsbindir)/sefcontext_compile
 XMLLINT ?= $(BINDIR)/xmllint
 SECHECK ?= $(BINDIR)/sechecker
 
 # interpreters and aux tools
 AWK ?= gawk
-GREP ?= egrep
+GREP ?= grep -E
 INSTALL ?= install
 M4 ?= m4 -E -E
-PYTHON ?= python3 -t -t -E -W error
+PYTHON ?= python3 -bb -t -t -E -W error
 SED ?= sed
 SORT ?= LC_ALL=C sort
 UMASK ?= umask
@@ -97,6 +109,7 @@ genxml := $(PYTHON) $(support)/segenxml.py
 gendoc := $(PYTHON) $(support)/sedoctool.py
 genperm := $(PYTHON) $(support)/genclassperms.py
 policyvers := $(PYTHON) $(support)/policyvers.py
+binary_policy_path := $(PYTHON) $(support)/selinux_binary_policy_path.py
 fcsort := $(PYTHON) $(support)/fc_sort.py
 setbools := $(AWK) -f $(support)/set_bools_tuns.awk
 get_type_attr_decl := $(SED) -r -f $(support)/get_type_attr_decl.sed
@@ -132,6 +145,9 @@ htmldir := $(LOCAL_ROOT)/doc/html
 doctmpdir := $(LOCAL_ROOT)/doc/tmp
 endif
 
+# udica templates path
+udicatemplates := udica-templates
+
 # config file paths
 globaltun := $(poldir)/global_tunables
 globalbool := $(poldir)/global_booleans
@@ -166,42 +182,43 @@ sharedir := $(prefix)/share/selinux
 modpkgdir := $(sharedir)/$(strip $(NAME))
 headerdir := $(modpkgdir)/include
 docsdir := $(prefix)/share/doc/$(PKGNAME)
+udicatemplatesdir := $(prefix)/share/udica/templates
 
 # enable MLS if requested.
 ifeq "$(TYPE)" "mls"
-	M4PARAM += -D enable_mls
-	CHECKPOLICY += -M
-	CHECKMODULE += -M
+	M4PARAM += -D enable_mls=true
+	override CHECKPOLICY += -M
+	override CHECKMODULE += -M
 	gennetfilter += -m
 endif
 
 # enable MLS if MCS requested.
 ifeq "$(TYPE)" "mcs"
-	M4PARAM += -D enable_mcs
-	CHECKPOLICY += -M
-	CHECKMODULE += -M
+	M4PARAM += -D enable_mcs=true
+	override CHECKPOLICY += -M
+	override CHECKMODULE += -M
 	gennetfilter += -c
 endif
 
 # enable distribution-specific policy
 ifneq ($(DISTRO),)
-	M4PARAM += -D distro_$(DISTRO)
+	M4PARAM += -D distro_$(DISTRO)=true
 endif
 
 ifeq "$(DISTRO)" "ubuntu"
-	M4PARAM += -D distro_debian
+	M4PARAM += -D distro_debian=true
 endif
 
 ifeq "$(SYSTEMD)" "y"
-	M4PARAM += -D init_systemd
+	M4PARAM += -D init_systemd=true
 endif
 
 ifneq ($(OUTPUT_POLICY),)
-	CHECKPOLICY += -c $(OUTPUT_POLICY)
+	override CHECKPOLICY += -c $(OUTPUT_POLICY)
 endif
 
 ifneq "$(CUSTOM_BUILDOPT)" ""
-	M4PARAM += $(foreach opt,$(CUSTOM_BUILDOPT),-D $(opt))
+	M4PARAM += $(foreach opt,$(CUSTOM_BUILDOPT),-D $(opt)=true)
 endif
 
 # if not set, use the type as the name.
@@ -211,15 +228,15 @@ NAME ?= $(TYPE)
 UNK_PERMS ?= deny
 
 ifeq ($(DIRECT_INITRC),y)
-	M4PARAM += -D direct_sysadm_daemon
+	M4PARAM += -D direct_sysadm_daemon=true
 endif
 
 ifeq "$(WERROR)" "y"
-	M4PARAM += -D m4_werror
+	M4PARAM += -D m4_werror=true
 endif
 
 ifeq "$(UBAC)" "y"
-	M4PARAM += -D enable_ubac
+	M4PARAM += -D enable_ubac=true
 endif
 
 # default MLS/MCS sensitivity and category settings.
@@ -233,7 +250,7 @@ else
 	VERBOSE_FLAG = --verbose
 endif
 
-M4PARAM += -D mls_num_sens=$(MLS_SENS) -D mls_num_cats=$(MLS_CATS) -D mcs_num_cats=$(MCS_CATS) -D hide_broken_symptoms
+M4PARAM += -D mls_num_sens=$(MLS_SENS) -D mls_num_cats=$(MLS_CATS) -D mcs_num_cats=$(MCS_CATS)
 
 # we need exuberant ctags; unfortunately it is named
 # differently on different distros
@@ -319,7 +336,7 @@ off_mods += $(filter-out $(cmdline_off) $(cmdline_base) $(cmdline_mods), $(mod_c
 off_mods += $(filter-out $(base_mods) $(mod_mods) $(off_mods),$(notdir $(detected_mods)))
 
 # filesystems to be used in labeling targets
-filesystems = $(shell mount | grep -v "context=" | egrep -v '\((|.*,)bind(,.*|)\)' | $(AWK) '/(ext[234]|btrfs| xfs| jfs).*rw/{print $$3}';)
+filesystems = $(shell mount | grep -v "context=" | $(GREP) -v '\((|.*,)bind(,.*|)\)' | $(AWK) '/(ext[234]|btrfs| xfs| jfs).*rw/{print $$3}';)
 fs_names := "btrfs ext2 ext3 ext4 xfs jfs"
 
 ########################################
@@ -531,17 +548,19 @@ $(appdir)/%: $(appconf)/%
 # Install policy headers
 #
 install-headers: $(layerxml) $(tunxml) $(boolxml)
-	@mkdir -p $(headerdir)
+	$(verbose) $(INSTALL) -d -m 755 $(headerdir)
 	@echo "Installing $(NAME) policy headers."
 	$(verbose) $(INSTALL) -m 644 $^ $(headerdir)
-	$(verbose) mkdir -p $(headerdir)/support
+	$(verbose) $(INSTALL) -d -m 755 $(headerdir)/support
 	$(verbose) $(INSTALL) -m 644 $(m4support) $(xmldtd) $(headerdir)/support
 	$(verbose) $(INSTALL) -m 755 $(word $(words $(genxml)),$(genxml)) $(headerdir)/support
+	$(verbose) $(INSTALL) -m 644 /dev/null $(headerdir)/support/all_perms.spt
 	$(verbose) $(genperm) $(avs) $(secclass) > $(headerdir)/support/all_perms.spt
 	$(verbose) for i in $(notdir $(all_layers)); do \
-		mkdir -p $(headerdir)/$$i ;\
+		$(INSTALL) -d -m 755 $(headerdir)/$$i ;\
 		$(INSTALL) -m 644 $(moddir)/$$i/*.if $(headerdir)/$$i ;\
 	done
+	$(verbose) $(INSTALL) -m 644 /dev/null $(headerdir)/build.conf
 	$(verbose) echo "TYPE ?= $(TYPE)" > $(headerdir)/build.conf
 	$(verbose) echo "NAME ?= $(NAME)" >> $(headerdir)/build.conf
 ifneq "$(DISTRO)" ""
@@ -589,6 +608,15 @@ install-src:
 
 ########################################
 #
+# Install udica templates
+#
+install-udica-templates:
+	@mkdir -p $(udicatemplatesdir)
+	@echo "Installing udica templates"
+	$(verbose) $(INSTALL) -m 644 $(wildcard $(udicatemplates)/*) $(udicatemplatesdir)
+
+########################################
+#
 # Generate tags file
 #
 ctags: $(tags)
@@ -614,7 +642,7 @@ checklabels:
 		echo "No filesystems with extended attributes found!" ;\
 		false ;\
 	fi
-	$(verbose) $(SETFILES) -v -n $(fcpath) $(filesystems)
+	$(verbose) $(SETFILES) -E -v -n $(fcpath) $(filesystems)
 
 restorelabels:
 	@echo "Restoring labels on filesystem types: $(fs_names)"
@@ -622,7 +650,7 @@ restorelabels:
 		echo "No filesystems with extended attributes found!" ;\
 		false ;\
 	fi
-	$(verbose) $(SETFILES) -v $(fcpath) $(filesystems)
+	$(verbose) $(SETFILES) -E -v $(fcpath) $(filesystems)
 
 relabel:
 	@echo "Relabeling filesystem types: $(fs_names)"
@@ -630,7 +658,7 @@ relabel:
 		echo "No filesystems with extended attributes found!" ;\
 		false ;\
 	fi
-	$(verbose) $(SETFILES) $(fcpath) $(filesystems)
+	$(verbose) $(SETFILES) -E $(fcpath) $(filesystems)
 
 resetlabels:
 	@echo "Resetting labels on filesystem types: $(fs_names)"
@@ -638,7 +666,7 @@ resetlabels:
 		echo "No filesystems with extended attributes found!" ;\
 		false ;\
 	fi
-	$(verbose) $(SETFILES) -F $(fcpath) $(filesystems)
+	$(verbose) $(SETFILES) -E -F $(fcpath) $(filesystems)
 
 ########################################
 #
@@ -668,4 +696,4 @@ ifneq ($(generated_fc),)
 endif
 endif
 
-.PHONY: install-src install-appconfig install-headers build-interface-db generate xml conf html bare tags
+.PHONY: install-src install-appconfig install-headers install-udica-templates build-interface-db generate xml conf html bare tags

@@ -17,14 +17,19 @@
 ##	is the prefix for user_r).
 ##	</summary>
 ## </param>
-## <param name="user_role">
-##	<summary>
-##	The user role.
-##	</summary>
-## </param>
 ## <param name="user_domain">
 ##	<summary>
-##	The user domain associated with the role.
+##	User domain for the role.
+##	</summary>
+## </param>
+## <param name="user_exec_domain">
+##	<summary>
+##	User exec domain for execute and transition access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access
 ##	</summary>
 ## </param>
 #
@@ -44,7 +49,7 @@ template(`sudo_role_template',`
 	userdom_user_application_domain($1_sudo_t, sudo_exec_t)
 	domain_interactive_fd($1_sudo_t)
 	domain_role_change_exemption($1_sudo_t)
-	role $2 types $1_sudo_t;
+	role $4 types $1_sudo_t;
 
 	##############################
 	#
@@ -61,36 +66,31 @@ template(`sudo_role_template',`
 	allow $1_sudo_t self:sem create_sem_perms;
 	allow $1_sudo_t self:msgq create_msgq_perms;
 	allow $1_sudo_t self:msg { send receive };
+	allow $1_sudo_t self:netlink_selinux_socket create_socket_perms;
 	allow $1_sudo_t self:unix_dgram_socket create_socket_perms;
 	allow $1_sudo_t self:unix_stream_socket create_stream_socket_perms;
 	allow $1_sudo_t self:unix_dgram_socket sendto;
 	allow $1_sudo_t self:unix_stream_socket connectto;
 	allow $1_sudo_t self:key manage_key_perms;
+	dontaudit $1_sudo_t self:capability { dac_read_search sys_ptrace };
 
-	allow $1_sudo_t $3:key search;
+	# allow getting the process group of the parent process
+	allow $1_sudo_t $2:process getpgid;
+	allow $1_sudo_t $2:unix_stream_socket rw_socket_perms;
 
-	# Transmit SIGWINCH to children
-	allow $1_sudo_t $3:process signal;
+	# allow accessing /proc/pid/stat of the calling domain
+	ps_process_pattern($1_sudo_t, $2)
 
-	allow $1_sudo_t $3:dir search;
-	allow $1_sudo_t $3:file { open read };
-
-
-	# Enter this derived domain from the user domain
-	domtrans_pattern($3, sudo_exec_t, $1_sudo_t)
+	dontaudit $1_sudo_t $3:socket_class_set { read write };
 
 	# By default, revert to the calling domain when a shell is executed.
-	corecmd_shell_domtrans($1_sudo_t, $3)
-	corecmd_bin_domtrans($1_sudo_t, $3)
-	allow $3 $1_sudo_t:fd use;
-	allow $3 $1_sudo_t:fifo_file rw_fifo_file_perms;
-	allow $3 $1_sudo_t:process signal_perms;
+	corecmd_shell_domtrans($1_sudo_t, $2)
+	corecmd_bin_domtrans($1_sudo_t, $2)
 
-	kernel_getattr_proc($1_sudo_t)
-	kernel_read_crypto_sysctls($1_sudo_t)
 	kernel_read_kernel_sysctls($1_sudo_t)
 	kernel_read_system_state($1_sudo_t)
 	kernel_link_key($1_sudo_t)
+	kernel_dontaudit_getattr_proc($1_sudo_t)
 
 	corecmd_exec_all_executables($1_sudo_t)
 
@@ -113,23 +113,24 @@ template(`sudo_role_template',`
 
 	fs_search_auto_mountpoints($1_sudo_t)
 	fs_getattr_xattr_fs($1_sudo_t)
-	fs_getattr_cgroup($1_sudo_t)
-	fs_getattr_tmpfs($1_sudo_t)
-	fs_search_cgroup_dirs($1_sudo_t)
+
+	selinux_validate_context($1_sudo_t)
+	selinux_compute_relabel_context($1_sudo_t)
 
 	term_getattr_pty_fs($1_sudo_t)
 	term_dontaudit_getattr_unallocated_ttys($1_sudo_t)
 	term_relabel_all_ttys($1_sudo_t)
 	term_relabel_all_ptys($1_sudo_t)
 
-	auth_run_chk_passwd($1_sudo_t, $2)
-	# sudo stores a token in the pam_pid directory
-	auth_manage_pam_pid($1_sudo_t)
+	auth_run_chk_passwd($1_sudo_t, $4)
+	# sudo stores a token in the pam runtime directory
+	auth_manage_pam_runtime_dirs($1_sudo_t)
+	auth_manage_pam_runtime_files($1_sudo_t)
 	auth_use_pam($1_sudo_t)
-	auth_pid_filetrans_pam_var_run($1_sudo_t, dir, "sudo")
+	auth_runtime_filetrans_pam_runtime($1_sudo_t, dir, "sudo")
 
-	init_rw_utmp($1_sudo_t)
 	init_getpgid($1_sudo_t)
+	init_rw_utmp($1_sudo_t)
 
 	logging_send_audit_msgs($1_sudo_t)
 	logging_send_syslog_msg($1_sudo_t)
@@ -148,12 +149,46 @@ template(`sudo_role_template',`
 	userdom_manage_user_tmp_symlinks($1_sudo_t)
 	userdom_setattr_user_ptys($1_sudo_t)
 	userdom_use_user_terminals($1_sudo_t)
+	userdom_dontaudit_rw_user_tmp_pipes($1_sudo_t)
 	# for some PAM modules and for cwd
 	userdom_dontaudit_search_user_home_content($1_sudo_t)
 	userdom_dontaudit_search_user_home_dirs($1_sudo_t)
+	# allow forwarding signals to the child process
+	userdom_signal_all_users($1_sudo_t)
 
-	ifdef(`hide_broken_symptoms', `
-		dontaudit $1_sudo_t $3:socket_class_set { read write };
+	tunable_policy(`allow_polyinstantiation',`
+		allow $1_sudo_t self:capability sys_admin;
+		fs_mount_xattr_fs($1_sudo_t)
+		fs_unmount_xattr_fs($1_sudo_t)
+	')
+
+	tunable_policy(`sudo_allow_user_exec_domains',`
+		allow $1_sudo_t $3:key search;
+
+		# allow accessing /proc/pid/stat
+		ps_process_pattern($1_sudo_t, $3)
+
+		# Transmit SIGWINCH to children
+		allow $1_sudo_t $3:process signal;
+
+		# Enter this derived domain from the user domain
+		domtrans_pattern($3, sudo_exec_t, $1_sudo_t)
+
+		allow $3 $1_sudo_t:fd use;
+		allow $3 $1_sudo_t:fifo_file rw_fifo_file_perms;
+		allow $3 $1_sudo_t:process signal_perms;
+	',`
+		allow $1_sudo_t $2:key search;
+
+		# Transmit SIGWINCH to children
+		allow $1_sudo_t $2:process signal;
+
+		# Enter this derived domain from the user domain
+		domtrans_pattern($2, sudo_exec_t, $1_sudo_t)
+
+		allow $2 $1_sudo_t:fd use;
+		allow $2 $1_sudo_t:fifo_file rw_fifo_file_perms;
+		allow $2 $1_sudo_t:process signal_perms;
 	')
 
 	tunable_policy(`use_nfs_home_dirs',`
@@ -165,20 +200,17 @@ template(`sudo_role_template',`
 	')
 
 	optional_policy(`
-		dbus_system_bus_client($1_sudo_t)
-		
+		auth_use_pam_systemd($1_sudo_t)
 
 		ifdef(`init_systemd',`
 			init_dbus_chat($1_sudo_t)
-			systemd_dbus_chat_logind($1_sudo_t)
-			systemd_read_logind_sessions_files($1_sudo_t)
-			systemd_read_logind_state($1_sudo_t)
 		')
 	')
 
 	optional_policy(`
 		fprintd_dbus_chat($1_sudo_t)
 	')
+
 ')
 
 ########################################
@@ -197,4 +229,23 @@ interface(`sudo_sigchld',`
 	')
 
 	allow $1 sudodomain:process sigchld;
+')
+
+########################################
+## <summary>
+##	Execute sudo in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`sudo_exec',`
+	gen_require(`
+		type sudo_exec_t;
+	')
+
+	can_exec($1, sudo_exec_t)
+	corecmd_search_bin($1)
 ')

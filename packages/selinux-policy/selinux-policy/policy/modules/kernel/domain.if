@@ -185,7 +185,7 @@ interface(`domain_dyntrans_type',`
 
 ########################################
 ## <summary>
-##	Makes caller and execption to the constraint
+##	Makes caller and exception to the constraint
 ##	preventing changing to the system user
 ##	identity and system role.
 ## </summary>
@@ -1040,7 +1040,7 @@ interface(`domain_dontaudit_rw_all_udp_sockets',`
 
 ########################################
 ## <summary>
-##	Do not audit attempts to get attribues of
+##	Do not audit attempts to get attributes of
 ##	all domains IPSEC key management sockets.
 ## </summary>
 ## <param name="domain">
@@ -1059,7 +1059,7 @@ interface(`domain_dontaudit_getattr_all_key_sockets',`
 
 ########################################
 ## <summary>
-##	Do not audit attempts to get attribues of
+##	Do not audit attempts to get attributes of
 ##	all domains packet sockets.
 ## </summary>
 ## <param name="domain">
@@ -1078,7 +1078,7 @@ interface(`domain_dontaudit_getattr_all_packet_sockets',`
 
 ########################################
 ## <summary>
-##	Do not audit attempts to get attribues of
+##	Do not audit attempts to get attributes of
 ##	all domains raw sockets.
 ## </summary>
 ## <param name="domain">
@@ -1426,9 +1426,9 @@ interface(`domain_entry_file_spec_domtrans',`
 ##	exploiting null deref bugs in the kernel.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed access.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`domain_mmap_low',`
@@ -1452,9 +1452,9 @@ interface(`domain_mmap_low',`
 ##	exploiting null deref bugs in the kernel.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed access.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`domain_mmap_low_uncond',`
@@ -1482,7 +1482,7 @@ interface(`domain_mmap_low_uncond',`
 interface(`domain_all_recvfrom_all_domains',`
 	gen_require(`
 		attribute domain;
- 	')
+	')
 
 	corenet_all_recvfrom_labeled($1, domain)
 ')
@@ -1493,7 +1493,7 @@ interface(`domain_all_recvfrom_all_domains',`
 ## </summary>
 ## <desc>
 ##	<p>
-##	When setting up IMA/EVM key(s) are added to the 
+##	When setting up IMA/EVM key(s) are added to the
 ##	kernel keyring but the type of the key is the domain
 ##	adding the key.  This interface will allow all domains
 ##	search the key so IMA/EVM validation can happen.

@@ -115,12 +115,12 @@ interface(`firstboot_rw_pipes',`
 		type firstboot_t;
 	')
 
-	allow $1 firstboot_t:fifo_file { read write };
+	allow $1 firstboot_t:fifo_file rw_inherited_fifo_file_perms;
 ')
 
 ########################################
 ## <summary>
-## 	Do not audit attemps to read and
+## 	Do not audit attempts to read and
 ##	write firstboot unnamed pipes.
 ## </summary>
 ## <param name="domain">
@@ -139,7 +139,7 @@ interface(`firstboot_dontaudit_rw_pipes',`
 
 ########################################
 ## <summary>
-## 	Do not audit attemps to read and
+## 	Do not audit attempts to read and
 ##	write firstboot unix domain
 ##	stream sockets.
 ## </summary>

@@ -1,4 +1,4 @@
-policy_module(rdisc, 1.10.1)
+policy_module(rdisc)
 
 ########################################
 #
@@ -51,6 +51,3 @@ optional_policy(`
 	seutil_sigchld_newrole(rdisc_t)
 ')
 
-optional_policy(`
-	udev_read_db(rdisc_t)
-')

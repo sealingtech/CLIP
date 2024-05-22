@@ -117,45 +117,6 @@ interface(`vhostmd_manage_tmpfs_files',`
 
 ########################################
 ## <summary>
-##	Read vhostmd pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`vhostmd_read_pid_files',`
-	gen_require(`
-		type vhostmd_runtime_t;
-	')
-
-	files_search_pids($1)
-	allow $1 vhostmd_runtime_t:file read_file_perms;
-')
-
-########################################
-## <summary>
-##	Create, read, write, and delete
-##	vhostmd pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`vhostmd_manage_pid_files',`
-	gen_require(`
-		type vhostmd_runtime_t;
-	')
-
-	files_search_pids($1)
-	manage_files_pattern($1, vhostmd_runtime_t, vhostmd_runtime_t)
-')
-
-########################################
-## <summary>
 ##	Connect to vhostmd with a unix
 ##	domain stream socket.
 ## </summary>
@@ -170,7 +131,7 @@ interface(`vhostmd_stream_connect',`
 		type vhostmd_t, vhostmd_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, vhostmd_runtime_t, vhostmd_runtime_t, vhostmd_t)
 ')
 
@@ -224,6 +185,6 @@ interface(`vhostmd_admin',`
 	fs_search_tmpfs($1)
 	admin_pattern($1, vhostmd_tmpfs_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, vhostmd_runtime_t)
 ')

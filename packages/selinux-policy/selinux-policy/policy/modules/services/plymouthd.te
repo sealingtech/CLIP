@@ -1,4 +1,4 @@
-policy_module(plymouthd, 1.8.0)
+policy_module(plymouthd)
 
 ########################################
 #
@@ -14,7 +14,7 @@ type plymouthd_exec_t;
 init_daemon_domain(plymouthd_t, plymouthd_exec_t)
 
 type plymouthd_runtime_t alias plymouthd_var_run_t;
-files_pid_file(plymouthd_runtime_t)
+files_runtime_file(plymouthd_runtime_t)
 
 type plymouthd_spool_t;
 files_type(plymouthd_spool_t)
@@ -33,14 +33,12 @@ logging_log_file(plymouthd_var_log_t)
 # Daemon local policy
 #
 
-allow plymouthd_t self:capability { sys_admin sys_chroot sys_tty_config };
-dontaudit plymouthd_t self:capability { dac_read_search   };
-fs_search_tmpfs(plymouthd_t)
+allow plymouthd_t self:capability { sys_admin sys_tty_config };
+dontaudit plymouthd_t self:capability dac_override;
 allow plymouthd_t self:capability2 block_suspend;
 allow plymouthd_t self:process { signal getsched };
 allow plymouthd_t self:fifo_file rw_fifo_file_perms;
 allow plymouthd_t self:unix_stream_socket create_stream_socket_perms;
-allow plymouthd_t self:netlink_kobject_uevent_socket { bind create getattr read setopt };
 
 manage_dirs_pattern(plymouthd_t, plymouthd_spool_t, plymouthd_spool_t)
 manage_files_pattern(plymouthd_t, plymouthd_spool_t, plymouthd_spool_t)
@@ -59,7 +57,7 @@ logging_log_filetrans(plymouthd_t, plymouthd_var_log_t, { file dir })
 
 manage_dirs_pattern(plymouthd_t, plymouthd_runtime_t, plymouthd_runtime_t)
 manage_files_pattern(plymouthd_t, plymouthd_runtime_t, plymouthd_runtime_t)
-files_pid_filetrans(plymouthd_t, plymouthd_runtime_t, { file dir })
+files_runtime_filetrans(plymouthd_t, plymouthd_runtime_t, { file dir })
 
 kernel_read_system_state(plymouthd_t)
 kernel_request_load_module(plymouthd_t)
@@ -85,8 +83,6 @@ miscfiles_read_localization(plymouthd_t)
 miscfiles_read_fonts(plymouthd_t)
 miscfiles_manage_fonts_cache(plymouthd_t)
 
-init_signal(plymouthd_t)
-
 optional_policy(`
 	gnome_read_generic_home_content(plymouthd_t)
 ')
@@ -97,11 +93,6 @@ optional_policy(`
 
 optional_policy(`
 	xserver_read_xdm_state(plymouthd_t)
-')
-
-optional_policy(`
-	udev_read_pid_files(plymouthd_t)
-	udev_search_pids(plymouthd_t)
 ')
 
 ########################################
@@ -130,13 +121,6 @@ init_use_fds(plymouth_t)
 miscfiles_read_localization(plymouth_t)
 
 sysnet_read_config(plymouth_t)
-
-ifdef(`hide_broken_symptoms',`
-	optional_policy(`
-		hal_dontaudit_write_log(plymouth_t)
-		hal_dontaudit_rw_pipes(plymouth_t)
-	')
-')
 
 optional_policy(`
 	lvm_domtrans(plymouth_t)

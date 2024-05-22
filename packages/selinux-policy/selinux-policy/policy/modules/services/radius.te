@@ -1,4 +1,4 @@
-policy_module(radius, 1.18.1)
+policy_module(radius)
 
 ########################################
 #
@@ -22,7 +22,7 @@ type radiusd_log_t;
 logging_log_file(radiusd_log_t)
 
 type radiusd_runtime_t alias radiusd_var_run_t;
-files_pid_file(radiusd_runtime_t)
+files_runtime_file(radiusd_runtime_t)
 
 type radiusd_var_lib_t;
 files_type(radiusd_var_lib_t)
@@ -32,9 +32,9 @@ files_type(radiusd_var_lib_t)
 # Local policy
 #
 
-allow radiusd_t self:capability { chown dac_override fsetid kill setgid setuid sys_resource sys_tty_config };
+allow radiusd_t self:capability { chown dac_override dac_read_search fsetid kill setgid setuid sys_resource sys_tty_config };
 dontaudit radiusd_t self:capability sys_tty_config;
-allow radiusd_t self:process { getsched setrlimit setsched sigkill signal };
+allow radiusd_t self:process { getcap getsched setrlimit setsched sigkill signal };
 allow radiusd_t self:fifo_file rw_fifo_file_perms;
 allow radiusd_t self:unix_stream_socket { accept listen };
 allow radiusd_t self:tcp_socket { accept listen };
@@ -59,7 +59,7 @@ manage_files_pattern(radiusd_t, radiusd_var_lib_t, radiusd_var_lib_t)
 manage_sock_files_pattern(radiusd_t, radiusd_runtime_t, radiusd_runtime_t)
 manage_dirs_pattern(radiusd_t, radiusd_runtime_t, radiusd_runtime_t)
 manage_files_pattern(radiusd_t, radiusd_runtime_t, radiusd_runtime_t)
-files_pid_filetrans(radiusd_t, radiusd_runtime_t, { file sock_file dir })
+files_runtime_filetrans(radiusd_t, radiusd_runtime_t, { file sock_file dir })
 
 kernel_read_kernel_sysctls(radiusd_t)
 kernel_read_system_state(radiusd_t)
@@ -137,6 +137,3 @@ optional_policy(`
 	seutil_sigchld_newrole(radiusd_t)
 ')
 
-optional_policy(`
-	udev_read_db(radiusd_t)
-')

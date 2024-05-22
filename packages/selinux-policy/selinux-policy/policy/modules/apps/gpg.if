@@ -4,18 +4,29 @@
 ## <summary>
 ##	Role access for gpg.
 ## </summary>
-## <param name="role">
+## <param name="role_prefix">
 ##	<summary>
-##	Role allowed access.
+##	The prefix of the user role (e.g., user
+##	is the prefix for user_r).
 ##	</summary>
 ## </param>
-## <param name="domain">
+## <param name="user_domain">
 ##	<summary>
 ##	User domain for the role.
 ##	</summary>
 ## </param>
+## <param name="user_exec_domain">
+##	<summary>
+##	User exec domain for execute and transition access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access
+##	</summary>
+## </param>
 #
-interface(`gpg_role',`
+template(`gpg_role',`
 	gen_require(`
 		attribute_role gpg_roles, gpg_agent_roles, gpg_helper_roles, gpg_pinentry_roles;
 		type gpg_t, gpg_exec_t, gpg_agent_t;
@@ -23,21 +34,21 @@ interface(`gpg_role',`
 		type gpg_pinentry_t, gpg_pinentry_tmp_t, gpg_secret_t;
 	')
 
-	roleattribute $1 gpg_roles;
-	roleattribute $1 gpg_agent_roles;
-	roleattribute $1 gpg_helper_roles;
-	roleattribute $1 gpg_pinentry_roles;
+	roleattribute $4 gpg_roles;
+	roleattribute $4 gpg_agent_roles;
+	roleattribute $4 gpg_helper_roles;
+	roleattribute $4 gpg_pinentry_roles;
 
-	domtrans_pattern($2, gpg_exec_t, gpg_t)
-	domtrans_pattern($2, gpg_agent_exec_t, gpg_agent_t)
+	domtrans_pattern($3, gpg_exec_t, gpg_t)
+	domtrans_pattern($3, gpg_agent_exec_t, gpg_agent_t)
 
-	allow $2 self:process setrlimit;
-	allow $2 { gpg_t gpg_agent_t gpg_helper_t gpg_pinentry_t }:process { ptrace signal_perms };
-	ps_process_pattern($2, { gpg_t gpg_agent_t gpg_helper_t gpg_pinentry_t })
+	allow $3 self:process setrlimit;
+	allow $3 { gpg_t gpg_agent_t gpg_helper_t gpg_pinentry_t }:process { ptrace signal_perms };
+	ps_process_pattern($3, { gpg_t gpg_agent_t gpg_helper_t gpg_pinentry_t })
 
-	allow gpg_pinentry_t $2:process signull;
-	allow gpg_helper_t $2:fd use;
-	allow { gpg_t gpg_agent_t gpg_helper_t gpg_pinentry_t } $2:fifo_file { read write };
+	allow gpg_pinentry_t $3:process signull;
+	allow gpg_helper_t $3:fd use;
+	allow { gpg_t gpg_agent_t gpg_helper_t gpg_pinentry_t } $3:fifo_file rw_inherited_fifo_file_perms;
 
 	allow $2 { gpg_agent_tmp_t gpg_secret_t }:dir { manage_dir_perms relabel_dir_perms };
 	allow $2 { gpg_agent_tmp_t gpg_secret_t }:file { manage_file_perms relabel_file_perms };
@@ -47,7 +58,12 @@ interface(`gpg_role',`
 	userdom_user_home_dir_filetrans($2, gpg_secret_t, dir, ".gnupg")
 
 	optional_policy(`
-		gpg_pinentry_dbus_chat($2)
+		gpg_pinentry_dbus_chat($3)
+	')
+
+	optional_policy(`
+		systemd_user_app_status($1, gpg_t)
+		systemd_user_app_status($1, gpg_agent_t)
 	')
 ')
 
@@ -142,6 +158,24 @@ interface(`gpg_exec_agent',`
 	can_exec($1, gpg_agent_exec_t)
 ')
 
+########################################
+## <summary>
+##	Do not audit attempts to execute the gpg-agent.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`gpg_dontaudit_exec_agent',`
+	gen_require(`
+		type gpg_agent_exec_t;
+	')
+
+	dontaudit $1 gpg_agent_exec_t:file exec_file_perms;
+')
+
 ######################################
 ## <summary>
 ##	Make gpg executable files an
@@ -159,6 +193,44 @@ interface(`gpg_entry_type',`
 	')
 
 	domain_entry_file($1, gpg_exec_t)
+')
+
+########################################
+## <summary>
+##	Execute the gpg_agent in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`gpg_agent_exec',`
+	gen_require(`
+		type gpg_agent_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	can_exec($1, gpg_agent_exec_t)
+')
+
+######################################
+## <summary>
+##	Make gpg_agent executable files an
+##	entrypoint for the specified domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	The domain for which gpg_agent_exec_t is an entrypoint.
+##	</summary>
+## </param>
+#
+interface(`gpg_agent_entry_type',`
+	gen_require(`
+		type gpg_agent_exec_t;
+	')
+
+	domain_entry_file($1, gpg_agent_exec_t)
 ')
 
 ########################################
@@ -246,6 +318,22 @@ interface(`gpg_search_agent_tmp_dirs',`
 ##	Domain allowed access.
 ##	</summary>
 ## </param>
+## <param name="file_type">
+##	<summary>
+##	Type to which the created node will be transitioned.
+##	</summary>
+## </param>
+## <param name="class">
+##	<summary>
+##	Object class(es) (single or set including {}) for which this
+##	the transition will occur.
+##	</summary>
+## </param>
+## <param name="name" optional="true">
+##	<summary>
+##	The name of the object being created.
+##	</summary>
+## </param>
 #
 interface(`gpg_agent_tmp_filetrans',`
 	gen_require(`
@@ -265,6 +353,22 @@ interface(`gpg_agent_tmp_filetrans',`
 ##	Domain allowed access.
 ##	</summary>
 ## </param>
+## <param name="file_type">
+##	<summary>
+##	Type to which the created node will be transitioned.
+##	</summary>
+## </param>
+## <param name="class">
+##	<summary>
+##	Object class(es) (single or set including {}) for which this
+##	the transition will occur.
+##	</summary>
+## </param>
+## <param name="name" optional="true">
+##	<summary>
+##	The name of the object being created.
+##	</summary>
+## </param>
 #
 interface(`gpg_runtime_filetrans',`
 	gen_require(`
@@ -277,11 +381,47 @@ interface(`gpg_runtime_filetrans',`
 
 ########################################
 ## <summary>
+##	Do not audit attempt to getattr gpg runtime dirs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`gpg_dontaudit_getattr_gpg_runtime_dirs',`
+	gen_require(`
+		type gpg_runtime_t;
+	')
+
+	files_dontaudit_search_runtime($1)
+
+	dontaudit $1 gpg_runtime_t:dir getattr;
+')
+
+########################################
+## <summary>
 ##	filetrans in gpg_secret_t dirs
 ## </summary>
 ## <param name="domain">
 ##	<summary>
 ##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="file_type">
+##	<summary>
+##	Type to which the created node will be transitioned.
+##	</summary>
+## </param>
+## <param name="class">
+##	<summary>
+##	Object class(es) (single or set including {}) for which this
+##	the transition will occur.
+##	</summary>
+## </param>
+## <param name="name" optional="true">
+##	<summary>
+##	The name of the object being created.
 ##	</summary>
 ## </param>
 #
@@ -318,6 +458,27 @@ interface(`gpg_pinentry_dbus_chat',`
 
 ########################################
 ## <summary>
+##	Do not audit attempts to search gpg
+##	user secrets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`gpg_dontaudit_search_user_secrets',`
+	gen_require(`
+		type gpg_secret_t;
+	')
+
+	userdom_dontaudit_search_user_home_dirs($1)
+
+	dontaudit $1 gpg_secret_t:dir search_dir_perms;
+')
+
+########################################
+## <summary>
 ##	List gpg user secrets.
 ## </summary>
 ## <param name="domain">
@@ -333,4 +494,24 @@ interface(`gpg_list_user_secrets',`
 
 	list_dirs_pattern($1, gpg_secret_t, gpg_secret_t)
 	userdom_search_user_home_dirs($1)
+')
+
+########################################
+## <summary>
+##	Do not audit attempt to search gpg user secrets dirs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`gpg_dontaudit_search_user_secrets_dirs',`
+	gen_require(`
+		type gpg_secret_t;
+	')
+
+	userdom_dontaudit_search_user_home_dirs($1)
+
+	dontaudit $1 gpg_secret_t:dir search;
 ')

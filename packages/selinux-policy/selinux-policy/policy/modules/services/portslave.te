@@ -1,4 +1,4 @@
-policy_module(portslave, 1.10.1)
+policy_module(portslave)
 
 ########################################
 #
@@ -86,8 +86,8 @@ ppp_read_home_files(portslave_t)
 ppp_read_rw_config(portslave_t)
 ppp_exec(portslave_t)
 ppp_read_secrets(portslave_t)
-ppp_manage_pid_files(portslave_t)
-ppp_pid_filetrans(portslave_t, file)
+ppp_manage_runtime_files(portslave_t)
+ppp_runtime_filetrans(portslave_t, file)
 
 ssh_exec(portslave_t)
 
@@ -103,6 +103,3 @@ optional_policy(`
 	seutil_sigchld_newrole(portslave_t)
 ')
 
-optional_policy(`
-	udev_read_db(portslave_t)
-')

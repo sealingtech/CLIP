@@ -5,9 +5,9 @@
 ##	Execute a domain transition to run certmonger.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`certmonger_domtrans',`
@@ -57,25 +57,6 @@ interface(`certmonger_initrc_domtrans',`
 	')
 
 	init_labeled_script_domtrans($1, certmonger_initrc_exec_t)
-')
-
-########################################
-## <summary>
-##	Read certmonger PID files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`certmonger_read_pid_files',`
-	gen_require(`
-		type certmonger_runtime_t;
-	')
-
-	files_search_pids($1)
-	allow $1 certmonger_runtime_t:file read_file_perms;
 ')
 
 ########################################
@@ -167,6 +148,6 @@ interface(`certmonger_admin',`
 	files_search_var_lib($1)
 	admin_pattern($1, certmonger_var_lib_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, certmonger_runtime_t)
 ')

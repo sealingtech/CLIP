@@ -1,4 +1,4 @@
-policy_module(cpucontrol, 1.8.0)
+policy_module(cpucontrol)
 
 ########################################
 #
@@ -19,7 +19,7 @@ type cpuspeed_exec_t;
 init_system_domain(cpuspeed_t, cpuspeed_exec_t)
 
 type cpuspeed_runtime_t alias cpuspeed_var_run_t;
-files_pid_file(cpuspeed_runtime_t)
+files_runtime_file(cpuspeed_runtime_t)
 
 ########################################
 #
@@ -54,10 +54,6 @@ optional_policy(`
 	seutil_sigchld_newrole(cpucontrol_domain)
 ')
 
-optional_policy(`
-	udev_read_db(cpucontrol_domain)
-')
-
 ########################################
 #
 # Loader local policy
@@ -75,10 +71,6 @@ kernel_read_proc_symlinks(cpucontrol_t)
 dev_read_sysfs(cpucontrol_t)
 dev_rw_cpu_microcode(cpucontrol_t)
 
-optional_policy(`
-	rhgb_use_ptys(cpucontrol_t)
-')
-
 ########################################
 #
 # Scaling local policy
@@ -88,7 +80,7 @@ allow cpuspeed_t self:process setsched;
 allow cpuspeed_t self:unix_dgram_socket create_socket_perms;
 
 allow cpuspeed_t cpuspeed_runtime_t:file manage_file_perms;
-files_pid_filetrans(cpuspeed_t, cpuspeed_runtime_t, file)
+files_runtime_filetrans(cpuspeed_t, cpuspeed_runtime_t, file)
 
 kernel_read_system_state(cpuspeed_t)
 

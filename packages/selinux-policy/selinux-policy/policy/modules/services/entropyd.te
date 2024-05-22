@@ -1,4 +1,4 @@
-policy_module(entropyd, 1.13.0)
+policy_module(entropyd)
 
 ########################################
 #
@@ -22,7 +22,7 @@ type entropyd_initrc_exec_t;
 init_script_file(entropyd_initrc_exec_t)
 
 type entropyd_runtime_t alias entropyd_var_run_t;
-files_pid_file(entropyd_runtime_t)
+files_runtime_file(entropyd_runtime_t)
 
 type entropyd_unit_t;
 init_unit_file(entropyd_unit_t)
@@ -38,11 +38,10 @@ allow entropyd_t self:process signal_perms;
 allow entropyd_t self:unix_stream_socket create_stream_socket_perms;
 
 manage_files_pattern(entropyd_t, entropyd_runtime_t, entropyd_runtime_t)
-files_pid_filetrans(entropyd_t, entropyd_runtime_t, file)
+files_runtime_filetrans(entropyd_t, entropyd_runtime_t, file)
 
 kernel_read_system_state(entropyd_t)
 kernel_rw_kernel_sysctl(entropyd_t)
-kernel_read_crypto_sysctls(entropyd_t)
 
 dev_read_sysfs(entropyd_t)
 dev_read_urand(entropyd_t)
@@ -55,6 +54,7 @@ files_read_usr_files(entropyd_t)
 
 fs_getattr_all_fs(entropyd_t)
 fs_search_auto_mountpoints(entropyd_t)
+fs_search_tmpfs(entropyd_t)
 
 domain_use_interactive_fds(entropyd_t)
 
@@ -87,6 +87,3 @@ optional_policy(`
 	seutil_sigchld_newrole(entropyd_t)
 ')
 
-optional_policy(`
-	udev_read_db(entropyd_t)
-')

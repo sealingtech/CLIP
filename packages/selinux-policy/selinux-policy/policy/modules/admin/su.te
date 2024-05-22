@@ -1,4 +1,14 @@
-policy_module(su, 1.15.1)
+policy_module(su)
+
+## <desc>
+##	<p>
+##	Determine whether the user application
+##	exec domain attribute should be respected
+##	for su access. If not enabled, only user
+##	domains themselves may use su.
+##	</p>
+## </desc>
+gen_tunable(su_allow_user_exec_domains, false)
 
 ########################################
 #

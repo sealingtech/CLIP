@@ -89,7 +89,7 @@ template(`qemu_domain_template',`
 	optional_policy(`
 		xserver_stream_connect($1_t)
 		xserver_read_xdm_tmp_files($1_t)
-		xserver_read_xdm_pid($1_t)
+		xserver_read_xdm_runtime_files($1_t)
 #		xserver_xdm_rw_shm($1_t)
 	')
 ')
@@ -109,7 +109,7 @@ template(`qemu_domain_template',`
 ##	</summary>
 ## </param>
 #
-template(`qemu_role',`
+interface(`qemu_role',`
 	gen_require(`
 		type qemu_t;
 	')
@@ -276,13 +276,13 @@ interface(`qemu_stream_connect',`
 		type qemu_t, qemu_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, qemu_runtime_t, qemu_runtime_t, qemu_t)
 ')
 
 ########################################
 ## <summary>
-##	Unlink qemu socket
+##	Unlink qemu runtime sockets.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -290,7 +290,7 @@ interface(`qemu_stream_connect',`
 ##	</summary>
 ## </param>
 #
-interface(`qemu_delete_pid_sock_file',`
+interface(`qemu_delete_runtime_sock_files',`
 	gen_require(`
 		type qemu_runtime_t;
 	')

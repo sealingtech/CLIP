@@ -100,44 +100,6 @@ interface(`psad_manage_config',`
 
 ########################################
 ## <summary>
-##	Read psad pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`psad_read_pid_files',`
-	gen_require(`
-		type psad_runtime_t;
-	')
-
-	files_search_pids($1)
-	read_files_pattern($1, psad_runtime_t, psad_runtime_t)
-')
-
-########################################
-## <summary>
-##	Read and write psad pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`psad_rw_pid_files',`
-	gen_require(`
-		type psad_runtime_t;
-	')
-
-	files_search_pids($1)
-	rw_files_pattern($1, psad_runtime_t, psad_runtime_t)
-')
-
-########################################
-## <summary>
 ##	Read psad log content.
 ## </summary>
 ## <param name="domain">
@@ -247,7 +209,7 @@ interface(`psad_admin',`
 	files_search_etc($1)
 	admin_pattern($1, psad_etc_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, psad_runtime_t)
 
 	logging_search_logs($1)

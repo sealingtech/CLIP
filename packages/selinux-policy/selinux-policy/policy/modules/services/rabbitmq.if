@@ -5,9 +5,9 @@
 ##	Execute rabbitmq in the rabbitmq domain.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`rabbitmq_domtrans',`
@@ -55,6 +55,6 @@ interface(`rabbitmq_admin',`
 	files_search_var_lib($1)
 	admin_pattern($1, rabbitmq_var_lib_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, rabbitmq_runtime_t)
 ')

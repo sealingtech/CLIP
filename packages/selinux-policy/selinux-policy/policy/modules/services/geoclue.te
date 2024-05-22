@@ -1,4 +1,4 @@
-policy_module(geoclue, 1.2.0)
+policy_module(geoclue)
 
 ########################################
 #
@@ -37,6 +37,10 @@ miscfiles_read_localization(geoclue_t)
 
 optional_policy(`
 	avahi_dbus_chat(geoclue_t)
+')
+
+optional_policy(`
+	low_mem_mon_dbus_chat(geoclue_t)
 ')
 
 optional_policy(`

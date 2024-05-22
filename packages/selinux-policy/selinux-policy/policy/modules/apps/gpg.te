@@ -1,4 +1,4 @@
-policy_module(gpg, 2.16.2)
+policy_module(gpg)
 
 ########################################
 #
@@ -38,7 +38,7 @@ userdom_user_application_domain(gpg_t, gpg_exec_t)
 role gpg_roles types gpg_t;
 
 type gpg_runtime_t;
-files_pid_file(gpg_runtime_t)
+files_runtime_file(gpg_runtime_t)
 userdom_user_runtime_content(gpg_runtime_t)
 
 type gpg_agent_t;
@@ -83,9 +83,11 @@ allow gpg_t self:process { signal signull setrlimit getcap setcap getsched setsc
 dontaudit gpg_t self:netlink_audit_socket r_netlink_socket_perms;
 allow gpg_t self:fifo_file rw_fifo_file_perms;
 allow gpg_t self:tcp_socket { accept listen };
+allow gpg_t self:unix_stream_socket create_stream_socket_perms;
 
 manage_dirs_pattern(gpg_t, gpg_runtime_t, gpg_runtime_t)
 userdom_user_runtime_filetrans(gpg_t, gpg_runtime_t, dir, "gnupg")
+manage_sock_files_pattern(gpg_t, gpg_runtime_t, gpg_runtime_t)
 
 manage_dirs_pattern(gpg_t, gpg_agent_tmp_t, gpg_agent_tmp_t)
 manage_files_pattern(gpg_t, gpg_agent_tmp_t, gpg_agent_tmp_t)
@@ -103,7 +105,6 @@ gpg_stream_connect_agent(gpg_t)
 domtrans_pattern(gpg_t, gpg_agent_exec_t, gpg_agent_t)
 domtrans_pattern(gpg_t, gpg_helper_exec_t, gpg_helper_t)
 
-kernel_read_crypto_sysctls(gpg_t)
 kernel_read_sysctl(gpg_t)
 # read /proc/cpuinfo
 kernel_read_system_state(gpg_t)
@@ -135,6 +136,7 @@ auth_use_nsswitch(gpg_t)
 logging_send_syslog_msg(gpg_t)
 
 miscfiles_read_localization(gpg_t)
+miscfiles_read_generic_certs(gpg_t)
 
 userdom_use_user_terminals(gpg_t)
 
@@ -231,6 +233,7 @@ allow gpg_agent_t gpg_secret_t:dir watch;
 
 manage_dirs_pattern(gpg_agent_t, gpg_runtime_t, gpg_runtime_t)
 userdom_user_runtime_filetrans(gpg_agent_t, gpg_runtime_t, dir, "gnupg")
+manage_sock_files_pattern(gpg_agent_t, gpg_runtime_t, gpg_runtime_t)
 allow gpg_agent_t gpg_runtime_t:dir watch;
 
 manage_dirs_pattern(gpg_agent_t, gpg_agent_tmp_t, gpg_agent_tmp_t)
@@ -244,7 +247,6 @@ filetrans_pattern(gpg_agent_t, gpg_runtime_t, gpg_agent_tmp_t, sock_file)
 domtrans_pattern(gpg_agent_t, gpg_pinentry_exec_t, gpg_pinentry_t)
 
 kernel_dontaudit_search_sysctl(gpg_agent_t)
-kernel_read_crypto_sysctls(gpg_agent_t)
 kernel_read_system_state(gpg_agent_t)
 
 auth_use_nsswitch(gpg_agent_t)
@@ -264,11 +266,8 @@ miscfiles_read_localization(gpg_agent_t)
 userdom_use_user_terminals(gpg_agent_t)
 userdom_search_user_home_dirs(gpg_agent_t)
 userdom_search_user_runtime(gpg_agent_t)
+userdom_dontaudit_read_user_tmp_files(gpg_agent_t)
 userdom_user_runtime_filetrans(gpg_agent_t, gpg_agent_tmp_t, { dir file sock_file })
-
-ifdef(`hide_broken_symptoms',`
-	userdom_dontaudit_read_user_tmp_files(gpg_agent_t)
-')
 
 tunable_policy(`gpg_agent_env_file',`
 	userdom_manage_user_home_content_dirs(gpg_agent_t)
@@ -359,8 +358,6 @@ miscfiles_read_localization(gpg_pinentry_t)
 
 userdom_use_user_terminals(gpg_pinentry_t)
 
-xdg_read_data_files(gpg_pinentry_t)
-
 tunable_policy(`use_nfs_home_dirs',`
 	fs_read_nfs_files(gpg_pinentry_t)
 ')
@@ -380,6 +377,10 @@ optional_policy(`
 
 optional_policy(`
 	pulseaudio_run(gpg_pinentry_t, gpg_pinentry_roles)
+')
+
+optional_policy(`
+	xdg_read_data_files(gpg_pinentry_t)
 ')
 
 optional_policy(`

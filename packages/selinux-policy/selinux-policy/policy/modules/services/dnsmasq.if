@@ -102,9 +102,9 @@ interface(`dnsmasq_kill',`
 ##	Read dnsmasq config files.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed access.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`dnsmasq_read_config',`
@@ -121,9 +121,9 @@ interface(`dnsmasq_read_config',`
 ##	Write dnsmasq config files.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed access.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`dnsmasq_write_config',`
@@ -137,7 +137,7 @@ interface(`dnsmasq_write_config',`
 
 ########################################
 ## <summary>
-##	Delete dnsmasq pid files.
+##	Create dnsmasq runtime directories.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -145,70 +145,12 @@ interface(`dnsmasq_write_config',`
 ##	</summary>
 ## </param>
 #
-#
-interface(`dnsmasq_delete_pid_files',`
+interface(`dnsmasq_create_runtime_dirs',`
 	gen_require(`
 		type dnsmasq_runtime_t;
 	')
 
-	delete_files_pattern($1, dnsmasq_runtime_t, dnsmasq_runtime_t)
-')
-
-########################################
-## <summary>
-##	Create, read, write, and delete
-##	dnsmasq pid files
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`dnsmasq_manage_pid_files',`
-	gen_require(`
-		type dnsmasq_runtime_t;
-	')
-
-	files_search_pids($1)
-	manage_files_pattern($1, dnsmasq_runtime_t, dnsmasq_runtime_t)
-')
-
-########################################
-## <summary>
-##	Read dnsmasq pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-#
-interface(`dnsmasq_read_pid_files',`
-	gen_require(`
-		type dnsmasq_runtime_t;
-	')
-
-	read_files_pattern($1, dnsmasq_runtime_t, dnsmasq_runtime_t)
-')
-
-########################################
-## <summary>
-##	Create dnsmasq pid directories.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`dnsmasq_create_pid_dirs',`
-	gen_require(`
-		type dnsmasq_runtime_t;
-	')
-
-	files_search_pids($1)
+	files_search_runtime($1)
 	allow $1 dnsmasq_runtime_t:dir create_dir_perms;
 ')
 
@@ -216,16 +158,11 @@ interface(`dnsmasq_create_pid_dirs',`
 ## <summary>
 ##	Create specified objects in specified
 ##	directories with a type transition to
-##	the dnsmasq pid file type.
+##	the dnsmasq runtime file type.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
 ##	Domain allowed access.
-##	</summary>
-## </param>
-## <param name="file_type">
-##	<summary>
-##	Directory to transition on.
 ##	</summary>
 ## </param>
 ## <param name="object">
@@ -239,12 +176,70 @@ interface(`dnsmasq_create_pid_dirs',`
 ##	</summary>
 ## </param>
 #
-interface(`dnsmasq_spec_filetrans_pid',`
+interface(`dnsmasq_virt_runtime_filetrans_runtime',`
 	gen_require(`
 		type dnsmasq_runtime_t;
 	')
 
-	filetrans_pattern($1, $2, dnsmasq_runtime_t, $3, $4)
+	virt_runtime_filetrans($1, dnsmasq_runtime_t, $2, $3)
+')
+
+########################################
+## <summary>
+##	Read dnsmasq runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+#
+interface(`dnsmasq_read_runtime_files',`
+	gen_require(`
+		type dnsmasq_runtime_t;
+	')
+
+	read_files_pattern($1, dnsmasq_runtime_t, dnsmasq_runtime_t)
+')
+
+########################################
+## <summary>
+##	Delete dnsmasq runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+#
+interface(`dnsmasq_delete_runtime_files',`
+	gen_require(`
+		type dnsmasq_runtime_t;
+	')
+
+	delete_files_pattern($1, dnsmasq_runtime_t, dnsmasq_runtime_t)
+')
+
+########################################
+## <summary>
+##	Create, read, write, and delete
+##	dnsmasq runtime files
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`dnsmasq_manage_runtime_files',`
+	gen_require(`
+		type dnsmasq_runtime_t;
+	')
+
+	files_search_runtime($1)
+	manage_files_pattern($1, dnsmasq_runtime_t, dnsmasq_runtime_t)
 ')
 
 ########################################
@@ -281,6 +276,6 @@ interface(`dnsmasq_admin',`
 	logging_search_logs($1)
 	admin_pattern($1, dnsmasq_var_log_t)
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, dnsmasq_runtime_t)
 ')

@@ -25,7 +25,7 @@ template(`milter_template',`
 	init_daemon_domain($1_milter_t, $1_milter_exec_t)
 
 	type $1_milter_data_t, milter_data_type;
-	files_pid_file($1_milter_data_t)
+	files_runtime_file($1_milter_data_t)
 
 	########################################
 	#
@@ -54,7 +54,7 @@ interface(`milter_stream_connect_all',`
 		attribute milter_data_type, milter_domains;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, milter_data_type, milter_data_type, milter_domains)
 ')
 
@@ -96,6 +96,24 @@ interface(`milter_manage_spamass_state',`
 	manage_files_pattern($1, spamass_milter_state_t, spamass_milter_state_t)
 	manage_dirs_pattern($1, spamass_milter_state_t, spamass_milter_state_t)
 	manage_lnk_files_pattern($1, spamass_milter_state_t, spamass_milter_state_t)
+')
+
+########################################
+## <summary>
+##	create spamass milter state dir
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`milter_var_lib_filetrans_spamass_state',`
+	gen_require(`
+		type spamass_milter_state_t;
+	')
+
+	files_var_lib_filetrans($1, spamass_milter_state_t, dir, "spamass-milter")
 ')
 
 ########################################

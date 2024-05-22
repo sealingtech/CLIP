@@ -1,4 +1,4 @@
-policy_module(tpm2, 1.1.2)
+policy_module(tpm2)
 
 ########################################
 #
@@ -23,12 +23,13 @@ application_domain(tpm2_t, tpm2_exec_t)
 
 allow tpm2_abrmd_t self:process signal;
 allow tpm2_abrmd_t self:unix_stream_socket create_socket_perms;
-allow tpm2_abrmd_t self:fifo_file { read write };
+allow tpm2_abrmd_t self:fifo_file rw_inherited_fifo_file_perms;
 
 dev_rw_tpm(tpm2_abrmd_t)
 
-kernel_read_crypto_sysctls(tpm2_abrmd_t)
 kernel_read_system_state(tpm2_abrmd_t)
+
+logging_send_syslog_msg(tpm2_abrmd_t)
 
 optional_policy(`
 	dbus_system_domain(tpm2_abrmd_t, tpm2_abrmd_exec_t)
@@ -46,7 +47,6 @@ dev_rw_tpm(tpm2_t)
 
 files_read_etc_files(tpm2_t)
 
-kernel_read_crypto_sysctls(tpm2_t)
 kernel_read_system_state(tpm2_t)
 
 miscfiles_read_generic_certs(tpm2_t)

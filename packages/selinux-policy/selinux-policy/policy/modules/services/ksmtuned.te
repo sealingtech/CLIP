@@ -1,4 +1,4 @@
-policy_module(ksmtuned, 1.6.0)
+policy_module(ksmtuned)
 
 ########################################
 #
@@ -16,7 +16,7 @@ type ksmtuned_log_t;
 logging_log_file(ksmtuned_log_t)
 
 type ksmtuned_runtime_t alias ksmtuned_var_run_t;
-files_pid_file(ksmtuned_runtime_t)
+files_runtime_file(ksmtuned_runtime_t)
 
 ########################################
 #
@@ -24,6 +24,7 @@ files_pid_file(ksmtuned_runtime_t)
 #
 
 allow ksmtuned_t self:capability { sys_ptrace sys_tty_config };
+allow ksmtuned_t self:cap_userns sys_ptrace;
 allow ksmtuned_t self:fifo_file rw_fifo_file_perms;
 
 manage_dirs_pattern(ksmtuned_t, ksmtuned_log_t, ksmtuned_log_t)
@@ -33,7 +34,7 @@ setattr_files_pattern(ksmtuned_t, ksmtuned_log_t, ksmtuned_log_t)
 logging_log_filetrans(ksmtuned_t, ksmtuned_log_t, { file dir })
 
 manage_files_pattern(ksmtuned_t, ksmtuned_runtime_t, ksmtuned_runtime_t)
-files_pid_filetrans(ksmtuned_t, ksmtuned_runtime_t, file)
+files_runtime_filetrans(ksmtuned_t, ksmtuned_runtime_t, file)
 
 kernel_read_system_state(ksmtuned_t)
 

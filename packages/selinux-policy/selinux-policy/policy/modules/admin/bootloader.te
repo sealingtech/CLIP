@@ -1,4 +1,4 @@
-policy_module(bootloader, 1.20.1)
+policy_module(bootloader)
 
 ########################################
 #
@@ -42,6 +42,7 @@ dev_node(bootloader_tmp_t)
 #
 
 allow bootloader_t self:capability { chown dac_override dac_read_search fsetid mknod setgid sys_admin sys_rawio };
+dontaudit bootloader_t self:capability { net_admin sys_resource };
 allow bootloader_t self:process { signal_perms execmem };
 allow bootloader_t self:fifo_file rw_fifo_file_perms;
 
@@ -67,6 +68,7 @@ kernel_read_software_raid_state(bootloader_t)
 kernel_read_kernel_sysctls(bootloader_t)
 kernel_search_debugfs(bootloader_t)
 kernel_setsched(bootloader_t)
+kernel_dontaudit_getattr_proc(bootloader_t)
 # for grub-probe
 kernel_request_load_module(bootloader_t)
 
@@ -82,6 +84,8 @@ dev_dontaudit_rw_generic_dev_nodes(bootloader_t)
 dev_read_rand(bootloader_t)
 dev_read_urand(bootloader_t)
 dev_read_sysfs(bootloader_t)
+# newer versions of grub use efivarfs to modify EFI variables; dontaudit legacy /sys/fs/efi/vars access
+dev_dontaudit_write_sysfs_files(bootloader_t)
 # needed on some hardware
 dev_rw_nvram(bootloader_t)
 
@@ -90,8 +94,10 @@ fs_getattr_dos_fs(bootloader_t)
 fs_getattr_tmpfs(bootloader_t)
 fs_read_tmpfs_symlinks(bootloader_t)
 #Needed for EFI
+fs_getattr_efivarfs(bootloader_t)
 fs_manage_dos_files(bootloader_t)
 fs_mmap_read_dos_files(bootloader_t)
+fs_search_cgroup_dirs(bootloader_t)
 
 mls_file_read_all_levels(bootloader_t)
 mls_file_write_all_levels(bootloader_t)
@@ -104,6 +110,7 @@ corecmd_exec_all_executables(bootloader_t)
 
 domain_use_interactive_fds(bootloader_t)
 
+files_getattr_boot_fs(bootloader_t)
 files_create_boot_dirs(bootloader_t)
 files_getattr_default_dirs(bootloader_t)
 files_manage_boot_files(bootloader_t)
@@ -116,7 +123,7 @@ files_read_var_files(bootloader_t)
 files_read_kernel_modules(bootloader_t)
 files_search_mnt(bootloader_t)
 # for nscd
-files_dontaudit_search_pids(bootloader_t)
+files_dontaudit_search_runtime(bootloader_t)
 # for blkid.tab
 files_manage_etc_runtime_files(bootloader_t)
 files_etc_filetrans_etc_runtime(bootloader_t, file)
@@ -153,15 +160,17 @@ miscfiles_read_localization(bootloader_t)
 mount_rw_runtime_files(bootloader_t)
 
 selinux_getattr_fs(bootloader_t)
+selinux_use_status_page(bootloader_t)
 seutil_read_bin_policy(bootloader_t)
 seutil_read_file_contexts(bootloader_t)
 seutil_read_loadpolicy(bootloader_t)
 seutil_dontaudit_search_config(bootloader_t)
 
-udev_read_pid_files(bootloader_t)
+udev_read_runtime_files(bootloader_t)
 
 userdom_use_user_terminals(bootloader_t)
-userdom_dontaudit_search_user_home_dirs(bootloader_t)
+userdom_dontaudit_manage_user_home_dirs(bootloader_t)
+userdom_dontaudit_write_user_home_content_files(bootloader_t)
 
 ifdef(`distro_debian',`
 	allow bootloader_t bootloader_tmp_t:{ dir file } { relabelfrom relabelto };
@@ -180,6 +189,8 @@ ifdef(`distro_debian',`
 
 	libs_relabelto_lib_files(bootloader_t)
 
+	apt_use_fds(bootloader_t)
+	apt_use_ptys(bootloader_t)
 	# for apt-cache
 	apt_read_db(bootloader_t)
 	apt_manage_cache(bootloader_t)
@@ -209,21 +220,19 @@ ifdef(`distro_redhat',`
 	')
 ')
 
+ifdef(`init_systemd',`
+	# these rules are required by systemd-boot-update
+	fs_getattr_cgroup(bootloader_t)
+	init_read_state(bootloader_t)
+	init_rw_inherited_stream_socket(bootloader_t)
+')
+
 optional_policy(`
 	fstools_exec(bootloader_t)
 ')
 
 optional_policy(`
 	gpm_getattr_gpmctl(bootloader_t)
-')
-
-optional_policy(`
-	hal_dontaudit_append_lib_files(bootloader_t)
-	hal_write_log(bootloader_t)
-')
-
-optional_policy(`
-	kudzu_domtrans(bootloader_t)
 ')
 
 optional_policy(`
@@ -244,7 +253,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	raid_read_mdadm_pid(bootloader_t)
+	raid_read_mdadm_runtime_files(bootloader_t)
 ')
 
 optional_policy(`

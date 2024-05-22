@@ -1,9 +1,17 @@
-policy_module(sysnetwork, 1.25.3)
+policy_module(sysnetwork)
 
 ########################################
 #
 # Declarations
 #
+
+## <desc>
+##      <p>
+##      Determine whether DHCP client
+##      can manage samba
+##      </p>
+## </desc>
+gen_tunable(dhcpc_manage_samba, false)
 
 attribute_role dhcpc_roles;
 roleattribute system_r dhcpc_roles;
@@ -22,7 +30,7 @@ init_daemon_domain(dhcpc_t, dhcpc_exec_t)
 role dhcpc_roles types dhcpc_t;
 
 type dhcpc_runtime_t alias dhcpc_var_run_t;
-files_pid_file(dhcpc_runtime_t)
+files_runtime_file(dhcpc_runtime_t)
 
 type dhcpc_state_t;
 files_type(dhcpc_state_t)
@@ -36,24 +44,29 @@ init_system_domain(ifconfig_t, ifconfig_exec_t)
 role system_r types ifconfig_t;
 
 type ifconfig_runtime_t;
-files_pid_file(ifconfig_runtime_t)
+files_runtime_file(ifconfig_runtime_t)
+
+optional_policy(`
+	container_mountpoint(ifconfig_runtime_t)
+')
 
 type net_conf_t;
-files_type(net_conf_t)
+files_config_file(net_conf_t)
 
 ifdef(`distro_debian',`
-	init_daemon_pid_file(net_conf_t, dir, "network")
+	init_daemon_runtime_file(net_conf_t, dir, "network")
 ')
 
 ########################################
 #
 # DHCP client local policy
 #
-allow dhcpc_t self:capability { dac_override fsetid net_admin net_bind_service net_raw setpcap sys_nice sys_resource sys_tty_config };
+allow dhcpc_t self:capability { dac_override fsetid net_admin net_bind_service net_raw setgid setpcap setuid sys_chroot sys_nice sys_resource sys_tty_config };
 dontaudit dhcpc_t self:capability { sys_ptrace sys_tty_config };
 # for access("/etc/bashrc", X_OK) on Red Hat
 dontaudit dhcpc_t self:capability { dac_read_search sys_module };
-allow dhcpc_t self:process { getsched getcap setcap setfscreate ptrace signal_perms };
+allow dhcpc_t self:process { getsched getcap setcap setfscreate ptrace signal_perms setrlimit };
+allow dhcpc_t self:cap_userns { net_bind_service };
 
 allow dhcpc_t self:fifo_file rw_fifo_file_perms;
 allow dhcpc_t self:tcp_socket create_stream_socket_perms;
@@ -62,6 +75,7 @@ allow dhcpc_t self:packet_socket create_socket_perms;
 allow dhcpc_t self:netlink_generic_socket create_socket_perms;
 allow dhcpc_t self:netlink_route_socket create_netlink_socket_perms;
 allow dhcpc_t self:rawip_socket create_socket_perms;
+allow dhcpc_t self:unix_dgram_socket { create_socket_perms sendto };
 
 allow dhcpc_t dhcp_etc_t:dir list_dir_perms;
 read_lnk_files_pattern(dhcpc_t, dhcp_etc_t, dhcp_etc_t)
@@ -74,8 +88,9 @@ allow dhcpc_t dhcpc_state_t:file map;
 
 # create pid file
 manage_files_pattern(dhcpc_t, dhcpc_runtime_t, dhcpc_runtime_t)
+manage_sock_files_pattern(dhcpc_t, dhcpc_runtime_t, dhcpc_runtime_t)
 create_dirs_pattern(dhcpc_t, dhcpc_runtime_t, dhcpc_runtime_t)
-files_pid_filetrans(dhcpc_t, dhcpc_runtime_t, { file dir })
+files_runtime_filetrans(dhcpc_t, dhcpc_runtime_t, { file dir })
 
 # Allow read/write to /etc/resolv.conf and /etc/ntp.conf. Note that any files
 # in /etc created by dhcpcd will be labelled net_conf_t.
@@ -115,6 +130,7 @@ corenet_udp_bind_all_unreserved_ports(dhcpc_t)
 corenet_tcp_connect_all_ports(dhcpc_t)
 corenet_sendrecv_dhcpd_client_packets(dhcpc_t)
 corenet_sendrecv_all_server_packets(dhcpc_t)
+corenet_sendrecv_icmp_packets(dhcpc_t)
 
 dev_read_sysfs(dhcpc_t)
 # for SSP:
@@ -133,6 +149,7 @@ files_getattr_generic_locks(dhcpc_t)
 files_manage_var_files(dhcpc_t)
 
 fs_getattr_all_fs(dhcpc_t)
+fs_getattr_nsfs_files(dhcpc_t)
 fs_search_auto_mountpoints(dhcpc_t)
 fs_search_cgroup_dirs(dhcpc_t)
 
@@ -170,6 +187,10 @@ ifdef(`init_systemd',`
 	init_stream_connect(dhcpc_t)
 	init_get_all_units_status(dhcpc_t)
 	init_search_units(dhcpc_t)
+
+	optional_policy(`
+		systemd_dbus_chat_resolved(dhcpc_t)
+	')
 ')
 
 optional_policy(`
@@ -195,19 +216,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	hal_dontaudit_rw_dgram_sockets(dhcpc_t)
-')
-
-optional_policy(`
-	hotplug_getattr_config_dirs(dhcpc_t)
-	hotplug_search_config(dhcpc_t)
-
-	ifdef(`distro_redhat',`
-		logging_domtrans_syslog(dhcpc_t)
-	')
-')
-
-optional_policy(`
 	modutils_run(dhcpc_t, dhcpc_roles)
 ')
 
@@ -219,19 +227,19 @@ optional_policy(`
 
 optional_policy(`
 	networkmanager_domtrans(dhcpc_t)
-	networkmanager_read_pid_files(dhcpc_t)
+	networkmanager_read_runtime_files(dhcpc_t)
 	networkmanager_manage_lib_files(dhcpc_t)
 	networkmanager_stream_connect(dhcpc_t)
 ')
 
 optional_policy(`
-	nis_read_ypbind_pid(dhcpc_t)
+	nis_read_ypbind_runtime_files(dhcpc_t)
 ')
 
 optional_policy(`
 	nscd_initrc_domtrans(dhcpc_t)
 	nscd_domtrans(dhcpc_t)
-	nscd_read_pid(dhcpc_t)
+	nscd_read_runtime_files(dhcpc_t)
 ')
 
 optional_policy(`
@@ -241,21 +249,21 @@ optional_policy(`
 ')
 
 optional_policy(`
-	pcmcia_stub(dhcpc_t)
-	dev_rw_cardmgr(dhcpc_t)
-')
-
-optional_policy(`
-	samba_manage_config(dhcpc_t)
+	tunable_policy(`dhcpc_manage_samba',`
+		samba_manage_config(dhcpc_t)
+		samba_manage_var_files(dhcpc_t)
+		init_exec_script_files(dhcpc_t)
+		init_get_system_status(dhcpc_t)
+		samba_stop(dhcpc_t)
+		samba_start(dhcpc_t)
+		samba_reload(dhcpc_t)
+		samba_status(dhcpc_t)
+	')
 ')
 
 optional_policy(`
 	seutil_sigchld_newrole(dhcpc_t)
 	seutil_dontaudit_search_config(dhcpc_t)
-')
-
-optional_policy(`
-	udev_read_db(dhcpc_t)
 ')
 
 optional_policy(`
@@ -310,7 +318,7 @@ allow ifconfig_t ifconfig_runtime_t:dir mounton;
 allow ifconfig_t ifconfig_runtime_t:file mounton;
 manage_files_pattern(ifconfig_t, ifconfig_runtime_t, ifconfig_runtime_t)
 create_dirs_pattern(ifconfig_t, ifconfig_runtime_t, ifconfig_runtime_t)
-files_pid_filetrans(ifconfig_t, ifconfig_runtime_t, dir)
+files_runtime_filetrans(ifconfig_t, ifconfig_runtime_t, dir)
 
 kernel_use_fds(ifconfig_t)
 kernel_read_system_state(ifconfig_t)
@@ -318,10 +326,12 @@ kernel_read_network_state(ifconfig_t)
 kernel_request_load_module(ifconfig_t)
 kernel_search_network_sysctl(ifconfig_t)
 kernel_rw_net_sysctls(ifconfig_t)
+kernel_search_debugfs(ifconfig_t)
 
 corenet_rw_tun_tap_dev(ifconfig_t)
 
 dev_read_sysfs(ifconfig_t)
+dev_dontaudit_rw_cardmgr(ifconfig_t)
 # for IPSEC setup:
 dev_read_urand(ifconfig_t)
 
@@ -371,28 +381,13 @@ ifdef(`distro_ubuntu',`
 	')
 ')
 
-ifdef(`hide_broken_symptoms',`
-	optional_policy(`
-		dev_dontaudit_rw_cardmgr(ifconfig_t)
-	')
-
-	optional_policy(`
-		udev_dontaudit_rw_dgram_sockets(ifconfig_t)
-	')
-')
-
 optional_policy(`
-	devicekit_read_pid_files(ifconfig_t)
+	devicekit_read_runtime_files(ifconfig_t)
 	devicekit_append_inherited_log_files(ifconfig_t)
 ')
 
 optional_policy(`
-	hal_dontaudit_rw_pipes(ifconfig_t)
-	hal_dontaudit_rw_dgram_sockets(ifconfig_t)
-')
-
-optional_policy(`
-	ipsec_write_pid(ifconfig_t)
+	ipsec_write_runtime_files(ifconfig_t)
 	ipsec_setcontext_default_spd(ifconfig_t)
 ')
 
@@ -406,6 +401,10 @@ optional_policy(`
 
 optional_policy(`
 	ppp_use_fds(ifconfig_t)
+')
+
+optional_policy(`
+        udev_dontaudit_rw_dgram_sockets(ifconfig_t)
 ')
 
 optional_policy(`

@@ -1,4 +1,4 @@
-policy_module(dbadm, 1.1.0)
+policy_module(dbadm)
 
 ########################################
 #
@@ -51,6 +51,10 @@ tunable_policy(`dbadm_manage_user_files',`
 tunable_policy(`dbadm_read_user_files',`
 	userdom_read_user_home_content_files(dbadm_t)
 	userdom_read_user_tmp_files(dbadm_t)
+')
+
+optional_policy(`
+	dbus_role_template(dbadm, dbadm_r, dbadm_t)
 ')
 
 optional_policy(`

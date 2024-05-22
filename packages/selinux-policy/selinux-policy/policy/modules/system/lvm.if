@@ -68,9 +68,9 @@ interface(`lvm_run',`
 ##      Send lvm a null signal.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`lvm_signull',`
@@ -174,39 +174,40 @@ interface(`lvm_create_lock_dirs',`
 
 ########################################
 ## <summary>
-##      Read and write a lvm unnamed pipe.
+##	Manage lvm_lock_t files.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
+## <rolecap/>
 #
-interface(`lvm_rw_inherited_pid_pipes',`
+interface(`lvm_manage_lock_files',`
+	gen_require(`
+		type lvm_lock_t;
+	')
+
+	manage_files_pattern($1, lvm_lock_t, lvm_lock_t)
+')
+
+########################################
+## <summary>
+##	Manage LVM runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`lvm_manage_runtime_files',`
 	gen_require(`
 		type lvm_runtime_t;
 	')
 
-	allow $1 lvm_runtime_t:fifo_file rw_inherited_fifo_file_perms;
-')
-
-######################################
-## <summary>
-##	Execute a domain transition to run clvmd.
-## </summary>
-## <param name="domain">
-## <summary>
-##	Domain allowed to transition.
-## </summary>
-## </param>
-#
-interface(`lvm_domtrans_clvmd',`
-	gen_require(`
-		type clvmd_t, clvmd_exec_t;
-	')
-
-	corecmd_search_bin($1)
-	domtrans_pattern($1, clvmd_exec_t, clvmd_t)
+	manage_files_pattern($1, lvm_runtime_t, lvm_runtime_t)
 ')
 
 ######################################
@@ -227,14 +228,11 @@ interface(`lvm_domtrans_clvmd',`
 #
 interface(`lvm_admin',`
 	gen_require(`
-		type clvmd_t, clvmd_initrc_exec_t, lvm_t, lvm_unit_t;
-		type lvm_etc_t, lvm_lock_t, lvm_metadata_t;
-		type lvm_var_lib_t, lvm_runtime_t, clvmd_runtime_t, lvm_tmp_t;
+		type lvm_t, lvm_etc_t, lvm_lock_t, lvm_metadata_t;
+		type lvm_var_lib_t, lvm_runtime_t, lvm_tmp_t;
 	')
 
-	admin_process_pattern($1, { clvmd_t lvm_t })
-
-	init_startstop_service($1, $2, clvmd_t, clvmd_initrc_exec_t, lvm_unit_t)
+	admin_process_pattern($1, lvm_t)
 
 	files_search_etc($1)
 	admin_pattern($1, { lvm_etc_t lvm_metadata_t })
@@ -245,8 +243,8 @@ interface(`lvm_admin',`
 	files_search_var_lib($1)
 	admin_pattern($1, lvm_var_lib_t)
 
-	files_search_pids($1)
-	admin_pattern($1, { lvm_runtime_t clvmd_runtime_t })
+	files_search_runtime($1)
+	admin_pattern($1, lvm_runtime_t)
 
 	files_search_tmp($1)
 	admin_pattern($1, lvm_tmp_t)

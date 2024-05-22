@@ -100,7 +100,7 @@ define(`create_netlink_socket_perms', `{ create_socket_perms nlmsg_read nlmsg_wr
 #
 # Permissions for using netlink sockets for operations that modify state.
 #
-define(`rw_netlink_socket_perms', `{ create_socket_perms nlmsg_read nlmsg_write }')
+define(`rw_netlink_socket_perms', `{ rw_socket_perms nlmsg_read nlmsg_write }')
 
 #
 # Permissions for using netlink sockets for operations that observe state.
@@ -142,23 +142,21 @@ define(`manage_dir_perms',`{ create open getattr setattr read write link unlink 
 define(`relabelfrom_dir_perms',`{ getattr relabelfrom }')
 define(`relabelto_dir_perms',`{ getattr relabelto }')
 define(`relabel_dir_perms',`{ getattr relabelfrom relabelto }')
+define(`mounton_dir_perms',`{ getattr mounton }')
 
 #
 # Regular file (file)
 #
 define(`getattr_file_perms',`{ getattr }')
 define(`setattr_file_perms',`{ setattr }')
+define(`read_inherited_file_perms',`{ getattr read lock ioctl }')
 define(`read_file_perms',`{ getattr open read lock ioctl }')
-# deprecated 20171213
-define(`mmap_file_perms',`
-	{ getattr open map read execute ioctl }
-	refpolicywarn(`mmap_file_perms is deprecated, please use mmap_exec_file_perms instead')
-')
 define(`mmap_read_inherited_file_perms',`{ getattr map read ioctl }')
 define(`mmap_read_file_perms',`{ getattr open map read ioctl }')
 define(`mmap_exec_inherited_file_perms',`{ getattr map read execute ioctl }')
 define(`mmap_exec_file_perms',`{ getattr open map read execute ioctl }')
 define(`exec_file_perms',`{ getattr open map read execute ioctl execute_no_trans }')
+define(`append_inherited_file_perms',`{ getattr append lock ioctl }')
 define(`append_file_perms',`{ getattr open append lock ioctl }')
 define(`write_inherited_file_perms',`{ getattr write append lock ioctl }')
 define(`write_file_perms',`{ getattr open write append lock ioctl }')
@@ -170,9 +168,11 @@ define(`create_file_perms',`{ getattr create open }')
 define(`rename_file_perms',`{ getattr rename }')
 define(`delete_file_perms',`{ getattr unlink }')
 define(`manage_file_perms',`{ create open getattr setattr read write append rename link unlink ioctl lock }')
+define(`mmap_manage_file_perms',`{ create open map getattr setattr read write append rename link unlink ioctl lock }')
 define(`relabelfrom_file_perms',`{ getattr relabelfrom }')
 define(`relabelto_file_perms',`{ getattr relabelto }')
 define(`relabel_file_perms',`{ getattr relabelfrom relabelto }')
+define(`mounton_file_perms',`{ getattr mounton }')
 
 #
 # Symbolic link (lnk_file)
@@ -182,11 +182,11 @@ define(`setattr_lnk_file_perms',`{ setattr }')
 define(`read_lnk_file_perms',`{ getattr read }')
 define(`append_lnk_file_perms',`{ getattr append lock ioctl }')
 define(`write_lnk_file_perms',`{ getattr append write lock ioctl }')
-define(`rw_lnk_file_perms',`{ getattr read write lock ioctl }')
+define(`rw_lnk_file_perms',`{ getattr read write append lock ioctl }')
 define(`create_lnk_file_perms',`{ create getattr }')
 define(`rename_lnk_file_perms',`{ getattr rename }')
 define(`delete_lnk_file_perms',`{ getattr unlink }')
-define(`manage_lnk_file_perms',`{ create read write getattr setattr link unlink rename ioctl lock }')
+define(`manage_lnk_file_perms',`{ create read write append getattr setattr link unlink rename ioctl lock }')
 define(`relabelfrom_lnk_file_perms',`{ getattr relabelfrom }')
 define(`relabelto_lnk_file_perms',`{ getattr relabelto }')
 define(`relabel_lnk_file_perms',`{ getattr relabelfrom relabelto }')
@@ -198,6 +198,7 @@ define(`getattr_fifo_file_perms',`{ getattr }')
 define(`setattr_fifo_file_perms',`{ setattr }')
 define(`read_fifo_file_perms',`{ getattr open read lock ioctl }')
 define(`append_fifo_file_perms',`{ getattr open append lock ioctl }')
+define(`write_inherited_fifo_file_perms',`{ getattr write append lock ioctl }')
 define(`write_fifo_file_perms',`{ getattr open write append lock ioctl }')
 define(`rw_inherited_fifo_file_perms',`{ getattr read write append ioctl lock }')
 define(`rw_fifo_file_perms',`{ open rw_inherited_fifo_file_perms }')
@@ -276,12 +277,6 @@ define(`rw_term_perms', `{ rw_inherited_term_perms open }')
 #
 define(`client_stream_socket_perms', `{ create ioctl read getattr write setattr append bind getopt setopt shutdown }')
 define(`server_stream_socket_perms', `{ client_stream_socket_perms listen accept }')
-
-
-#
-# Service
-#
-define(`manage_service_perms', `{ start stop status reload enable disable } ')
 
 #
 # Keys

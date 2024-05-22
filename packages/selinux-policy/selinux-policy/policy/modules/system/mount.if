@@ -61,12 +61,27 @@ interface(`mount_exec',`
 		type mount_exec_t;
 	')
 
-	# cjp: this should be removed:
-	allow $1 mount_exec_t:dir list_dir_perms;
-
 	allow $1 mount_exec_t:lnk_file read_lnk_file_perms;
 	corecmd_search_bin($1)
 	can_exec($1, mount_exec_t)
+')
+
+########################################
+## <summary>
+##	Read the process state (/proc/pid) of mount.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`mount_read_state',`
+	gen_require(`
+		type mount_t;
+	')
+
+	ps_process_pattern($1, mount_t)
 ')
 
 ########################################
@@ -191,9 +206,9 @@ interface(`mount_rw_loopback_files',`
 ##	List mount runtime files.
 ## </summary>
 ## <param name="domain">
-##     <summary>
-##     Domain allowed access.
-##     </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`mount_list_runtime',`
@@ -209,9 +224,9 @@ interface(`mount_list_runtime',`
 ##	Watch mount runtime dirs.
 ## </summary>
 ## <param name="domain">
-##     <summary>
-##     Domain allowed access.
-##     </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`mount_watch_runtime_dirs',`
@@ -224,12 +239,48 @@ interface(`mount_watch_runtime_dirs',`
 
 ########################################
 ## <summary>
+##	Watch mount runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`mount_watch_runtime_files',`
+	gen_require(`
+		type mount_runtime_t;
+	')
+
+	allow $1 mount_runtime_t:file watch;
+')
+
+########################################
+## <summary>
+##	Watch reads on mount runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`mount_watch_reads_runtime_files',`
+	gen_require(`
+		type mount_runtime_t;
+	')
+
+	allow $1 mount_runtime_t:file watch_reads;
+')
+
+########################################
+## <summary>
 ##     Getattr on mount_runtime_t files
 ## </summary>
 ## <param name="domain">
-##     <summary>
-##     Domain allowed access.
-##     </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`mount_getattr_runtime_files',`
@@ -238,6 +289,24 @@ interface(`mount_getattr_runtime_files',`
 	')
 
 	allow $1 mount_runtime_t:file getattr;
+')
+
+########################################
+## <summary>
+##	Read mount runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`mount_read_runtime_files',`
+	gen_require(`
+		type mount_runtime_t;
+	')
+
+	read_files_pattern($1, mount_runtime_t, mount_runtime_t)
 ')
 
 ########################################
@@ -258,3 +327,20 @@ interface(`mount_rw_runtime_files',`
 	rw_files_pattern($1, mount_runtime_t, mount_runtime_t)
 ')
 
+########################################
+## <summary>
+##	Manage mount runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`mount_manage_runtime_files',`
+	gen_require(`
+		type mount_runtime_t;
+	')
+
+	manage_files_pattern($1, mount_runtime_t, mount_runtime_t)
+')

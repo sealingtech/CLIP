@@ -1,4 +1,4 @@
-policy_module(amtu, 1.4.0)
+policy_module(amtu)
 
 ########################################
 #
@@ -31,7 +31,7 @@ logging_send_audit_msgs(amtu_t)
 userdom_use_user_terminals(amtu_t)
 
 optional_policy(`
-	nscd_dontaudit_search_pid(amtu_t)
+	nscd_dontaudit_search_runtime(amtu_t)
 ')
 
 optional_policy(`

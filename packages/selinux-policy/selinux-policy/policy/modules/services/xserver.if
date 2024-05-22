@@ -5,18 +5,29 @@
 ##	Rules required for using the X Windows server
 ##	and environment, for restricted users.
 ## </summary>
-## <param name="role">
+## <param name="role_prefix">
 ##	<summary>
-##	Role allowed access.
+##	The prefix of the user role (e.g., user
+##	is the prefix for user_r).
 ##	</summary>
 ## </param>
-## <param name="domain">
+## <param name="user_domain">
 ##	<summary>
-##	Domain allowed access.
+##	User domain for the role.
+##	</summary>
+## </param>
+## <param name="user_exec_domain">
+##	<summary>
+##	User exec domain for execute and transition access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access
 ##	</summary>
 ## </param>
 #
-interface(`xserver_restricted_role',`
+template(`xserver_restricted_role',`
 	gen_require(`
 		type xserver_t, xserver_tmp_t, xserver_tmpfs_t;
 		type user_fonts_t, user_fonts_cache_t, user_fonts_config_t;
@@ -25,18 +36,13 @@ interface(`xserver_restricted_role',`
 		type xdm_t, xdm_tmp_t;
 	')
 
-	role $1 types { xserver_t xauth_t iceauth_t };
+	role $4 types { xserver_t xauth_t iceauth_t };
 
 	# Xserver read/write client shm
 	allow xserver_t $2:fd use;
 	allow xserver_t $2:shm rw_shm_perms;
 
 	allow xserver_t $2:process signal;
-
-	allow xserver_t $2:shm rw_shm_perms;
-
-	# MJM: why is this not in upstream?
-	allow xserver_t $2:unix_stream_socket { accept getopt read shutdown write };
 
 	allow $2 user_fonts_t:dir list_dir_perms;
 	allow $2 user_fonts_t:file read_file_perms;
@@ -51,8 +57,9 @@ interface(`xserver_restricted_role',`
 	files_search_tmp($2)
 
 	# Communicate via System V shared memory.
+	allow $2 xserver_t:fd use;
 	allow $2 xserver_t:shm r_shm_perms;
-	allow $2 xserver_tmpfs_t:file read_file_perms;
+	allow $2 xserver_tmpfs_t:file { map read_file_perms };
 
 	# allow ps to show iceauth
 	ps_process_pattern($2, iceauth_t)
@@ -73,17 +80,13 @@ interface(`xserver_restricted_role',`
 
 	# for when /tmp/.X11-unix is created by the system
 	allow $2 xdm_t:fd use;
-	allow $2 xdm_t:fifo_file { getattr read write ioctl };
+	allow $2 xdm_t:fifo_file rw_inherited_fifo_file_perms;
 	allow $2 xdm_tmp_t:dir search;
 	allow $2 xdm_tmp_t:sock_file { read write };
 	dontaudit $2 xdm_t:tcp_socket { read write };
 
-	# Client read xserver shm
-	allow $2 xserver_t:fd use;
-	allow $2 xserver_tmpfs_t:file read_file_perms;
-
 	# Read /tmp/.X0-lock
-	allow $2 xserver_tmp_t:file { getattr read };
+	allow $2 xserver_tmp_t:file read_inherited_file_perms;
 
 	dev_rw_xserver_misc($2)
 	dev_map_xserver_misc($2)
@@ -96,22 +99,19 @@ interface(`xserver_restricted_role',`
 	dev_dontaudit_rw_dri($2)
 	# GNOME checks for usb and other devices:
 	dev_rw_usbfs($2)
-	dev_rw_dri($2)
 
 	miscfiles_read_fonts($2)
+	miscfiles_watch_fonts_dirs($2)
 
-	logging_send_syslog_msg($2)
-
-	udev_read_pid_files($2)
-
-	xserver_common_x_domain_template(user, $2)
+	xserver_common_x_domain_template(user, $2)  #selint-disable:S-004
 	xserver_domtrans($2)
 	xserver_unconfined($2)
 	xserver_xsession_entry_type($2)
 	xserver_dontaudit_write_log($2)
 	xserver_stream_connect_xdm($2)
+	xserver_use_user_fonts($2)
 	# certain apps want to read xdm.pid file
-	xserver_read_xdm_pid($2)
+	xserver_read_xdm_runtime_files($2)
 	# gnome-session creates socket under /tmp/.ICE-unix/
 	xserver_create_xdm_tmp_sockets($2)
 	# Needed for escd, remove if we get escd policy
@@ -121,16 +121,23 @@ interface(`xserver_restricted_role',`
 	xserver_user_home_dir_filetrans_user_xsession_log($2)
 	xserver_manage_xsession_log($2)
 
-	# MJM: if the userdom does not have this then the first login
-	# succeeds but subsequent ones fail
-	tunable_policy(`xserver_gnome_xdm',`
-		allow $2 self:process execmem;
-	')
-
 	# Client write xserver shm
 	tunable_policy(`allow_write_xshm',`
 		allow $2 xserver_t:shm rw_shm_perms;
+	')
+
+	tunable_policy(`allow_write_xshm || xserver_client_writes_xserver_tmpfs',`
 		allow $2 xserver_tmpfs_t:file rw_file_perms;
+	')
+
+	tunable_policy(`xserver_allow_dri',`
+		dev_rw_dri($2)
+	')
+
+	optional_policy(`
+		systemd_user_app_status($1, iceauth_t)
+		systemd_user_app_status($1, xauth_t)
+		systemd_user_app_status($1, xserver_t)
 	')
 ')
 
@@ -139,38 +146,55 @@ interface(`xserver_restricted_role',`
 ##	Rules required for using the X Windows server
 ##	and environment.
 ## </summary>
-## <param name="role">
+## <param name="role_prefix">
 ##	<summary>
-##	Role allowed access.
+##	The prefix of the user role (e.g., user
+##	is the prefix for user_r).
 ##	</summary>
 ## </param>
-## <param name="domain">
+## <param name="user_domain">
 ##	<summary>
-##	Domain allowed access.
+##	User domain for the role.
+##	</summary>
+## </param>
+## <param name="user_exec_domain">
+##	<summary>
+##	User exec domain for execute and transition access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access
 ##	</summary>
 ## </param>
 #
-interface(`xserver_role',`
+template(`xserver_role',`
 	gen_require(`
 		type iceauth_home_t, xserver_t, xserver_tmp_t, xserver_tmpfs_t, xauth_home_t;
 		type user_fonts_t, user_fonts_cache_t, user_fonts_config_t;
-		type mesa_shader_cache_t;
+		type mesa_shader_cache_t, xdm_t;
 	')
 
-	xserver_restricted_role($1, $2)
+	xserver_restricted_role($1, $2, $3, $4)
 
 	# Communicate via System V shared memory.
-	allow $2 xserver_t:shm rw_shm_perms;
-	allow $2 xserver_tmpfs_t:file rw_file_perms;
+	tunable_policy(`allow_write_xshm',`
+		# Communicate via System V shared memory.
+		allow $2 xserver_t:shm rw_shm_perms;
+	')
+
+	tunable_policy(`allow_write_xshm || xserver_client_writes_xserver_tmpfs',`
+		allow $2 xserver_tmpfs_t:file rw_file_perms;
+	')
 
 	# XCB Event Queue: used by the Qt library for example
 	allow $2 xserver_tmp_t:file rw_file_perms;
 
 	allow $2 iceauth_home_t:file manage_file_perms;
-	allow $2 iceauth_home_t:file { relabelfrom relabelto };
+	allow $2 iceauth_home_t:file relabel_file_perms;
 
 	allow $2 xauth_home_t:file manage_file_perms;
-	allow $2 xauth_home_t:file { relabelfrom relabelto };
+	allow $2 xauth_home_t:file relabel_file_perms;
 
 	manage_dirs_pattern($2, user_fonts_t, user_fonts_t)
 	manage_files_pattern($2, user_fonts_t, user_fonts_t)
@@ -196,39 +220,14 @@ interface(`xserver_role',`
 	xserver_user_home_dir_filetrans_user_iceauth($2, ".ICEauthority")
 
 	xserver_read_xkb_libs($2)
-	xserver_map_xkb_libs($2)
 
-	xserver_stream_rw_xdm($2)
+	allow $2 xdm_t:unix_stream_socket accept;
 
 	optional_policy(`
-		xdg_manage_all_cache($2)
-		xdg_relabel_all_cache($2)
-		xdg_manage_all_config($2)
-		xdg_relabel_all_config($2)
-		xdg_manage_all_data($2)
-		xdg_relabel_all_data($2)
+		systemd_user_app_status($1, xserver_t)
+	')
 
-		xdg_generic_user_home_dir_filetrans_cache($2, dir, ".cache")
-		xdg_generic_user_home_dir_filetrans_config($2, dir, ".config")
-		xdg_generic_user_home_dir_filetrans_data($2, dir, ".local")
-
-		xdg_generic_user_home_dir_filetrans_documents($2, dir, "Documents")
-		xdg_generic_user_home_dir_filetrans_downloads($2, dir, "Downloads")
-		xdg_generic_user_home_dir_filetrans_music($2, dir, "Music")
-		xdg_generic_user_home_dir_filetrans_pictures($2, dir, "Pictures")
-		xdg_generic_user_home_dir_filetrans_videos($2, dir, "Videos")
-
-		xdg_manage_documents($2)
-		xdg_relabel_documents($2)
-		xdg_manage_downloads($2)
-		xdg_relabel_downloads($2)
-		xdg_manage_music($2)
-		xdg_relabel_music($2)
-		xdg_manage_pictures($2)
-		xdg_relabel_pictures($2)
-		xdg_manage_videos($2)
-		xdg_relabel_videos($2)
-
+	optional_policy(`
 		xdg_cache_filetrans($2, mesa_shader_cache_t, dir, "mesa_shader_cache")
 	')
 ')
@@ -265,7 +264,7 @@ interface(`xserver_ro_session',`
 	allow $1 xserver_t:process signal;
 
 	# Read /tmp/.X0-lock
-	allow $1 xserver_tmp_t:file { getattr read };
+	allow $1 xserver_tmp_t:file read_inherited_file_perms;
 
 	# Client read xserver shm
 	allow $1 xserver_t:fd use;
@@ -278,8 +277,8 @@ interface(`xserver_ro_session',`
 #######################################
 ## <summary>
 ##	Create sessions on the X server, with read and write
-##	access to the X server shared
-##	memory segments.
+##	access to the X server shared memory segments, but
+##	do not bypass existing tunable policy logic.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -298,8 +297,14 @@ interface(`xserver_rw_session',`
 	')
 
 	xserver_ro_session($1,$2)
-	allow $1 xserver_t:shm rw_shm_perms;
-	allow $1 xserver_tmpfs_t:file rw_file_perms;
+
+	tunable_policy(`allow_write_xshm',`
+		allow $1 xserver_t:shm rw_shm_perms;
+	')
+
+	tunable_policy(`allow_write_xshm || xserver_client_writes_xserver_tmpfs',`
+		allow $1 xserver_tmpfs_t:file rw_file_perms;
+	')
 ')
 
 #######################################
@@ -362,7 +367,7 @@ template(`xserver_common_x_domain_template',`
 		attribute input_xevent_type;
 
 		class x_drawable all_x_drawable_perms;
-		class x_property all_x_property_perms;
+		#class x_property all_x_property_perms;
 		class x_event all_x_event_perms;
 		class x_synthetic_event all_x_synthetic_event_perms;
 	')
@@ -468,7 +473,7 @@ template(`xserver_user_x_domain_template',`
 
 	# for when /tmp/.X11-unix is created by the system
 	allow $2 xdm_t:fd use;
-	allow $2 xdm_t:fifo_file { getattr read write ioctl };
+	allow $2 xdm_t:fifo_file rw_inherited_fifo_file_perms;
 	allow $2 xdm_tmp_t:dir search_dir_perms;
 	allow $2 xdm_tmp_t:sock_file { read write };
 	dontaudit $2 xdm_t:tcp_socket { read write };
@@ -494,6 +499,9 @@ template(`xserver_user_x_domain_template',`
 	# Client write xserver shm
 	tunable_policy(`allow_write_xshm',`
 		allow $2 xserver_t:shm rw_shm_perms;
+	')
+
+	tunable_policy(`allow_write_xshm || xserver_client_writes_xserver_tmpfs',`
 		allow $2 xserver_tmpfs_t:file rw_file_perms;
 	')
 ')
@@ -525,7 +533,7 @@ interface(`xserver_use_user_fonts',`
 	')
 
 	# Read per user fonts
-	allow $1 user_fonts_t:dir list_dir_perms;
+	allow $1 user_fonts_t:dir { list_dir_perms watch };
 	allow $1 user_fonts_t:file { map read_file_perms };
 
 	# Manipulate the global font cache
@@ -538,9 +546,7 @@ interface(`xserver_use_user_fonts',`
 	allow $1 user_fonts_config_t:file read_file_perms;
 
 	userdom_search_user_home_dirs($1)
-	optional_policy(`
-		xdg_search_cache_dirs($1)
-	')
+	xdg_search_cache_dirs($1)
 ')
 
 ########################################
@@ -725,9 +731,9 @@ interface(`xserver_rw_console',`
 ##      Create the X windows console named pipes.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`xserver_create_console_pipes',`
@@ -743,9 +749,9 @@ interface(`xserver_create_console_pipes',`
 ##      relabel the X windows console named pipes.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`xserver_relabel_console_pipes',`
@@ -753,7 +759,40 @@ interface(`xserver_relabel_console_pipes',`
 		type xconsole_device_t;
 	')
 
-	allow $1 xconsole_device_t:fifo_file { getattr relabelfrom relabelto };
+	allow $1 xconsole_device_t:fifo_file relabel_fifo_file_perms;
+')
+
+########################################
+## <summary>
+##	Create xdm authorization files
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="file_type">
+##	<summary>
+##	The type of the object to be created
+##	</summary>
+## </param>
+## <param name="object_class">
+##	<summary>
+##	The object class.
+##	</summary>
+## </param>
+## <param name="name" optional="true">
+##	<summary>
+##	The name of the object being created.
+##	</summary>
+## </param>
+#
+interface(`xserver_xdm_auth_filetrans',`
+	gen_require(`
+		type xdm_auth_t;
+	')
+
+	filetrans_pattern($1, xdm_auth_t, $2, $3, $4)
 ')
 
 ########################################
@@ -826,7 +865,7 @@ interface(`xserver_rw_xdm_pipes',`
 		type xdm_t;
 	')
 
-	allow $1 xdm_t:fifo_file { getattr read write };
+	allow $1 xdm_t:fifo_file rw_inherited_fifo_file_perms;
 ')
 
 ########################################
@@ -912,21 +951,6 @@ interface(`xserver_setsched_xdm',`
 
 ########################################
 ## <summary>
-##	Create, read, write, and delete
-##	xdm_spool files.
-## </summary>
-## <param name="domain" unused="true">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`xserver_manage_xdm_spool_files',`
-	refpolicywarn(`$0() has been deprecated.')
-')
-
-########################################
-## <summary>
 ##	Connect to XDM over a unix domain
 ##	stream socket.
 ## </summary>
@@ -943,25 +967,6 @@ interface(`xserver_stream_connect_xdm',`
 
 	files_search_tmp($1)
 	stream_connect_pattern($1, xdm_tmp_t, xdm_tmp_t, xdm_t)
-')
-
-########################################
-## <summary>
-##	Connect to XDM over a unix domain
-##	stream socket.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`xserver_stream_rw_xdm',`
-	gen_require(`
-		type xdm_t;
-	')
-
-	allow $1 xdm_t:unix_stream_socket { getattr ioctl read write };
 ')
 
 ########################################
@@ -1044,7 +1049,7 @@ interface(`xserver_delete_xdm_tmp_sockets',`
 
 ########################################
 ## <summary>
-##	Read XDM pid files.
+##	Read XDM runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -1052,13 +1057,13 @@ interface(`xserver_delete_xdm_tmp_sockets',`
 ##	</summary>
 ## </param>
 #
-interface(`xserver_read_xdm_pid',`
+interface(`xserver_read_xdm_runtime_files',`
 	gen_require(`
 		type xdm_var_run_t;
 	')
 
-	files_search_pids($1)
-	allow $1 xdm_var_run_t:file read_file_perms;
+	files_search_runtime($1)
+	read_files_pattern($1, xdm_var_run_t, xdm_var_run_t)
 ')
 
 ########################################
@@ -1272,24 +1277,6 @@ interface(`xserver_delete_log',`
 
 ########################################
 ## <summary>
-##	Map X keyboard extension libraries.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`xserver_map_xkb_libs',`
-	gen_require(`
-		type xkb_var_lib_t;
-	')
-
-	allow $1 xkb_var_lib_t:file map;
-')
-
-########################################
-## <summary>
 ##	Read X keyboard extension libraries.
 ## </summary>
 ## <param name="domain">
@@ -1307,6 +1294,7 @@ interface(`xserver_read_xkb_libs',`
 	allow $1 xkb_var_lib_t:dir list_dir_perms;
 	read_files_pattern($1, xkb_var_lib_t, xkb_var_lib_t)
 	read_lnk_files_pattern($1, xkb_var_lib_t, xkb_var_lib_t)
+	allow $1 xkb_var_lib_t:file map;
 ')
 
 ########################################
@@ -1314,9 +1302,9 @@ interface(`xserver_read_xkb_libs',`
 ##      Create xdm temporary directories.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain to allow access.
-##      </summary>
+##	<summary>
+##	Domain to allow access.
+##	</summary>
 ## </param>
 #
 interface(`xserver_create_xdm_tmp_dirs',`
@@ -1342,7 +1330,7 @@ interface(`xserver_read_xdm_tmp_files',`
 		type xdm_tmp_t;
 	')
 
- 	files_search_tmp($1)
+	files_search_tmp($1)
 	read_files_pattern($1, xdm_tmp_t, xdm_tmp_t)
 ')
 
@@ -1454,7 +1442,7 @@ interface(`xserver_domtrans',`
 		type xserver_t, xserver_exec_t;
 	')
 
- 	allow $1 xserver_t:process siginh;
+	allow $1 xserver_t:process siginh;
 	domtrans_pattern($1, xserver_exec_t, xserver_t)
 ')
 
@@ -1499,9 +1487,9 @@ interface(`xserver_kill',`
 ##      Allow reading xserver_t files to get cgroup and sessionid
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`xserver_read_state',`
@@ -1529,7 +1517,9 @@ interface(`xserver_rw_shm',`
 		type xserver_t;
 	')
 
-	allow $1 xserver_t:shm rw_shm_perms;
+	tunable_policy(`allow_write_xshm',`
+		allow $1 xserver_t:shm rw_shm_perms;
+	')
 ')
 
 ########################################
@@ -1611,7 +1601,7 @@ interface(`xserver_read_tmp_files',`
 
 ########################################
 ## <summary>
-##	Map X server temporary files.
+##      talk to xserver_t by dbus
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -1619,27 +1609,10 @@ interface(`xserver_read_tmp_files',`
 ##	</summary>
 ## </param>
 #
-interface(`xserver_map_tmp_files',`
-	gen_require(`
-		type xserver_tmp_t;
-	')
-
-	allow $1 xserver_tmp_t:file map;
-')
-
-########################################
-## <summary>
-##      talk to xserver_t by dbus
-## </summary>
-## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
-## </param>
-#
 interface(`xserver_dbus_chat',`
 	gen_require(`
 		type xserver_t;
+		class dbus send_msg;
 	')
 
 	allow $1 xserver_t:dbus send_msg;
@@ -1745,8 +1718,27 @@ interface(`xserver_rw_mesa_shader_cache',`
 	rw_dirs_pattern($1, mesa_shader_cache_t, mesa_shader_cache_t)
 	rw_files_pattern($1, mesa_shader_cache_t, mesa_shader_cache_t)
 	allow $1 mesa_shader_cache_t:file map;
+	xdg_search_cache_dirs($1)
+')
 
-	optional_policy(`
-		xdg_search_cache_dirs($1)
+########################################
+## <summary>
+##	Manage the mesa shader cache.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`xserver_manage_mesa_shader_cache',`
+	gen_require(`
+		type mesa_shader_cache_t;
 	')
+
+	manage_dirs_pattern($1, mesa_shader_cache_t, mesa_shader_cache_t)
+	manage_files_pattern($1, mesa_shader_cache_t, mesa_shader_cache_t)
+	allow $1 mesa_shader_cache_t:file map;
+
+	xdg_search_cache_dirs($1)
 ')

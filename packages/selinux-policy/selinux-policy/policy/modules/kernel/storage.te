@@ -1,4 +1,4 @@
-policy_module(storage, 1.18.1)
+policy_module(storage)
 
 ########################################
 #
@@ -26,6 +26,10 @@ neverallow ~{ fixed_disk_raw_write storage_unconfined_type } fixed_disk_device_t
 #
 type fuse_device_t;
 dev_node(fuse_device_t)
+
+optional_policy(`
+	container_mountpoint(fuse_device_t)
+')
 
 #
 # scsi_generic_device_t is the type of /dev/sg*
@@ -55,5 +59,5 @@ dev_node(tape_device_t)
 # Unconfined access to this module
 #
 
-allow storage_unconfined_type { fixed_disk_device_t removable_device_t }:blk_file { manage_blk_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod };
-allow storage_unconfined_type { scsi_generic_device_t tape_device_t }:chr_file { manage_chr_file_perms relabelfrom relabelto map execute quotaon mounton execmod audit_access };
+allow storage_unconfined_type { fixed_disk_device_t removable_device_t }:blk_file { manage_blk_file_perms relabel_blk_file_perms map execute quotaon mounton execmod };
+allow storage_unconfined_type { scsi_generic_device_t tape_device_t }:chr_file { manage_chr_file_perms relabel_chr_file_perms map execute quotaon mounton execmod };

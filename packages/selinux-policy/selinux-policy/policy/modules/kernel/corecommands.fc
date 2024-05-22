@@ -54,7 +54,7 @@ ifdef(`distro_redhat',`
 
 /etc/mail/make			--	gen_context(system_u:object_r:bin_t,s0)
 
-/etc/mcelog/.*-error-trigger	--	gen_context(system_u:object_r:bin_t,s0)
+/etc/mcelog/.*-trigger		--	gen_context(system_u:object_r:bin_t,s0)
 /etc/mcelog/.*\.local		--	gen_context(system_u:object_r:bin_t,s0)
 
 ifdef(`distro_redhat',`
@@ -109,6 +109,8 @@ ifdef(`distro_redhat',`
 /etc/xen/qemu-ifup		--	gen_context(system_u:object_r:bin_t,s0)
 /etc/xen/scripts(/.*)?			gen_context(system_u:object_r:bin_t,s0)
 
+/etc/zfs/zfs-functions		--      gen_context(system_u:object_r:bin_t,s0)
+
 ifdef(`distro_debian',`
 /etc/mysql/debian-start		--	gen_context(system_u:object_r:bin_t,s0)
 ')
@@ -121,6 +123,9 @@ ifdef(`distro_debian',`
 /opt/(.*/)?libexec(/.*)?		gen_context(system_u:object_r:bin_t,s0)
 
 /opt/(.*/)?sbin(/.*)?			gen_context(system_u:object_r:bin_t,s0)
+
+/opt/brother/Printers/[^/]+/lpd(/.*)?	gen_context(system_u:object_r:bin_t,s0)
+/opt/brother/Printers/[^/]+/cupswrapper(/.*)?	gen_context(system_u:object_r:bin_t,s0)
 
 /opt/google/talkplugin(/.*)?		gen_context(system_u:object_r:bin_t,s0)
 
@@ -155,6 +160,7 @@ ifdef(`distro_gentoo',`
 /usr/bin/sesh			--	gen_context(system_u:object_r:shell_exec_t,s0)
 /usr/bin/scponly		--	gen_context(system_u:object_r:shell_exec_t,s0)
 /usr/bin/scponlyc		--	gen_context(system_u:object_r:shell_exec_t,s0)
+/usr/bin/sh			--	gen_context(system_u:object_r:shell_exec_t,s0)
 /usr/bin/smrsh			--	gen_context(system_u:object_r:shell_exec_t,s0)
 /usr/bin/tcsh			--	gen_context(system_u:object_r:shell_exec_t,s0)
 /usr/bin/yash			--	gen_context(system_u:object_r:shell_exec_t,s0)
@@ -172,9 +178,11 @@ ifdef(`distro_gentoo',`
 /usr/lib/bluetooth/.*		--	gen_context(system_u:object_r:bin_t,s0)
 /usr/lib/bridge-utils/.*\.sh	--	gen_context(system_u:object_r:bin_t,s0)
 /usr/lib/ccache/bin(/.*)?		gen_context(system_u:object_r:bin_t,s0)
+/usr/lib/cloud-init(/.*)?		gen_context(system_u:object_r:bin_t,s0)
 /usr/lib/dhcpcd/dhcpcd-hooks(/.*)?	gen_context(system_u:object_r:bin_t,s0)
 /usr/lib/dhcpcd/dhcpcd-run-hooks --	gen_context(system_u:object_r:bin_t,s0)
 /usr/lib/dovecot/.+			gen_context(system_u:object_r:bin_t,s0)
+/usr/lib/dracut(/.*)?			gen_context(system_u:object_r:bin_t,s0)
 /usr/lib/fence(/.*)?			gen_context(system_u:object_r:bin_t,s0)
 /usr/lib/pgsql/test/regress/.*\.sh --	gen_context(system_u:object_r:bin_t,s0)
 /usr/lib/qt.*/bin(/.*)?			gen_context(system_u:object_r:bin_t,s0)
@@ -304,7 +312,6 @@ ifdef(`distro_debian',`
 /usr/sbin/sesh			--	gen_context(system_u:object_r:shell_exec_t,s0)
 /usr/sbin/smrsh			--	gen_context(system_u:object_r:shell_exec_t,s0)
 
-/usr/share/mdadm/checkarray	--	gen_context(system_u:object_r:bin_t,s0)
 /usr/share/(.*/)?bin(/.*)?		gen_context(system_u:object_r:bin_t,s0)
 /usr/share/ajaxterm/ajaxterm\.py.* --	gen_context(system_u:object_r:bin_t,s0)
 /usr/share/ajaxterm/qweb\.py.* --	gen_context(system_u:object_r:bin_t,s0)
@@ -320,6 +327,7 @@ ifdef(`distro_debian',`
 /usr/share/cluster/.*\.sh		gen_context(system_u:object_r:bin_t,s0)
 /usr/share/cluster/ocf-shellfuncs --	gen_context(system_u:object_r:bin_t,s0)
 /usr/share/cluster/svclib_nfslock --	gen_context(system_u:object_r:bin_t,s0)
+/usr/share/cockpit/motd/update-motd    -- gen_context(system_u:object_r:bin_t,s0)
 /usr/share/cvs/contrib/rcs2log	--	gen_context(system_u:object_r:bin_t,s0)
 /usr/share/e16/misc(/.*)?		gen_context(system_u:object_r:bin_t,s0)
 /usr/share/gedit/plugins/externaltools/tools(/.*)? gen_context(system_u:object_r:bin_t,s0)
@@ -461,9 +469,6 @@ ifdef(`distro_suse', `
 /var/qmail/bin(/.*)?			gen_context(system_u:object_r:bin_t,s0)
 /var/qmail/rc			--	gen_context(system_u:object_r:bin_t,s0)
 
-/usr/lib/dracut(/.*)?                          gen_context(system_u:object_r:bin_t,s0)
-
 ifdef(`distro_suse',`
 /var/lib/samba/bin/.+			gen_context(system_u:object_r:bin_t,s0)
 ')
-

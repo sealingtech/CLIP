@@ -1,4 +1,4 @@
-policy_module(apache, 2.18.3)
+policy_module(apache)
 
 ########################################
 #
@@ -108,7 +108,7 @@ gen_tunable(httpd_dbus_avahi, false)
 
 ## <desc>
 ##	<p>
-##	Determine wether httpd can use support.
+##	Determine whether httpd can use support.
 ##	</p>
 ## </desc>
 gen_tunable(httpd_enable_cgi, false)
@@ -304,7 +304,7 @@ type httpd_rotatelogs_exec_t;
 init_daemon_domain(httpd_rotatelogs_t, httpd_rotatelogs_exec_t)
 
 type httpd_runtime_t alias httpd_var_run_t;
-files_pid_file(httpd_runtime_t)
+files_runtime_file(httpd_runtime_t)
 
 type httpd_squirrelmail_t;
 files_type(httpd_squirrelmail_t)
@@ -378,7 +378,7 @@ allow httpd_t self:unix_stream_socket { accept connectto listen };
 allow httpd_t self:tcp_socket { accept listen };
 
 manage_dirs_pattern(httpd_t, httpd_cache_t, httpd_cache_t)
-manage_files_pattern(httpd_t, httpd_cache_t, httpd_cache_t)
+mmap_manage_files_pattern(httpd_t, httpd_cache_t, httpd_cache_t)
 manage_lnk_files_pattern(httpd_t, httpd_cache_t, httpd_cache_t)
 files_var_filetrans(httpd_t, httpd_cache_t, dir)
 
@@ -389,7 +389,7 @@ read_lnk_files_pattern(httpd_t, httpd_config_t, httpd_config_t)
 allow httpd_t httpd_htaccess_type:file read_file_perms;
 
 allow httpd_t httpd_ro_content:dir list_dir_perms;
-allow httpd_t httpd_ro_content:file read_file_perms;
+allow httpd_t httpd_ro_content:file { map read_file_perms };
 allow httpd_t httpd_ro_content:lnk_file read_lnk_file_perms;
 
 allow httpd_t httpd_keytab_t:file read_file_perms;
@@ -414,7 +414,7 @@ read_lnk_files_pattern(httpd_t, httpd_modules_t, httpd_modules_t)
 allow httpd_t httpd_rotatelogs_t:process signal_perms;
 
 manage_dirs_pattern(httpd_t, httpd_squirrelmail_t, httpd_squirrelmail_t)
-manage_files_pattern(httpd_t, httpd_squirrelmail_t, httpd_squirrelmail_t)
+mmap_manage_files_pattern(httpd_t, httpd_squirrelmail_t, httpd_squirrelmail_t)
 manage_lnk_files_pattern(httpd_t, httpd_squirrelmail_t, httpd_squirrelmail_t)
 
 allow httpd_t httpd_suexec_exec_t:file read_file_perms;
@@ -425,6 +425,7 @@ allow httpd_t httpd_sys_script_t:process signull;
 
 manage_dirs_pattern(httpd_t, httpd_tmp_t, httpd_tmp_t)
 manage_files_pattern(httpd_t, httpd_tmp_t, httpd_tmp_t)
+allow httpd_t httpd_tmp_t:file map;
 manage_sock_files_pattern(httpd_t, httpd_tmp_t, httpd_tmp_t)
 manage_lnk_files_pattern(httpd_t, httpd_tmp_t, httpd_tmp_t)
 files_tmp_filetrans(httpd_t, httpd_tmp_t, { file dir lnk_file sock_file })
@@ -438,7 +439,7 @@ manage_sock_files_pattern(httpd_t, httpd_tmpfs_t, httpd_tmpfs_t)
 fs_tmpfs_filetrans(httpd_t, httpd_tmpfs_t, { dir file lnk_file sock_file fifo_file })
 
 manage_dirs_pattern(httpd_t, httpd_var_lib_t, httpd_var_lib_t)
-manage_files_pattern(httpd_t, httpd_var_lib_t, httpd_var_lib_t)
+mmap_manage_files_pattern(httpd_t, httpd_var_lib_t, httpd_var_lib_t)
 manage_lnk_files_pattern(httpd_t, httpd_var_lib_t, httpd_var_lib_t)
 files_var_lib_filetrans(httpd_t, httpd_var_lib_t, { dir file })
 
@@ -446,7 +447,7 @@ setattr_dirs_pattern(httpd_t, httpd_runtime_t, httpd_runtime_t)
 manage_dirs_pattern(httpd_t, httpd_runtime_t, httpd_runtime_t)
 manage_files_pattern(httpd_t, httpd_runtime_t, httpd_runtime_t)
 manage_sock_files_pattern(httpd_t, httpd_runtime_t, httpd_runtime_t)
-files_pid_filetrans(httpd_t, httpd_runtime_t, { file sock_file dir })
+files_runtime_filetrans(httpd_t, httpd_runtime_t, { file sock_file dir })
 
 manage_dirs_pattern(httpd_t, squirrelmail_spool_t, squirrelmail_spool_t)
 manage_files_pattern(httpd_t, squirrelmail_spool_t, squirrelmail_spool_t)
@@ -484,20 +485,21 @@ dev_read_sysfs(httpd_t)
 dev_read_rand(httpd_t)
 dev_read_urand(httpd_t)
 dev_rw_crypto(httpd_t)
+dev_rwx_zero(httpd_t)
 
 domain_use_interactive_fds(httpd_t)
 
 fs_getattr_all_fs(httpd_t)
 fs_search_auto_mountpoints(httpd_t)
 
-fs_getattr_all_fs(httpd_t)
 fs_read_anon_inodefs_files(httpd_t)
 fs_rw_inherited_hugetlbfs_files(httpd_t)
+fs_mmap_rw_hugetlbfs_files(httpd_t)
 fs_read_iso9660_files(httpd_t)
-fs_search_auto_mountpoints(httpd_t)
 
-files_dontaudit_getattr_all_pids(httpd_t)
+files_dontaudit_getattr_all_runtime_files(httpd_t)
 files_read_usr_files(httpd_t)
+files_map_usr_files(httpd_t)
 files_list_mnt(httpd_t)
 files_search_spool(httpd_t)
 files_read_var_symlinks(httpd_t)
@@ -506,12 +508,13 @@ files_search_home(httpd_t)
 files_getattr_home_dir(httpd_t)
 files_read_etc_runtime_files(httpd_t)
 files_read_var_lib_symlinks(httpd_t)
+files_map_etc_files(httpd_t)
 
 auth_use_nsswitch(httpd_t)
 
 init_rw_inherited_script_tmp_files(httpd_t)
 
-libs_read_lib_files(httpd_t)
+libs_exec_lib_files(httpd_t)
 
 logging_send_syslog_msg(httpd_t)
 
@@ -530,10 +533,6 @@ ifdef(`TODO',`
 
 		logging_send_audit_msgs(httpd_t)
 	')
-')
-
-ifdef(`hide_broken_symptoms',`
-	libs_exec_lib_files(httpd_t)
 ')
 
 ifdef(`init_systemd', `
@@ -575,7 +574,7 @@ tunable_policy(`httpd_builtin_scripting',`
 	exec_files_pattern(httpd_t, httpd_script_exec_type, httpd_script_exec_type)
 
 	allow httpd_t httpdcontent:dir list_dir_perms;
-	allow httpd_t httpdcontent:file read_file_perms;
+	allow httpd_t httpdcontent:file { map read_file_perms };
 	allow httpd_t httpdcontent:lnk_file read_lnk_file_perms;
 
 	allow httpd_t httpd_ra_content:dir { list_dir_perms add_entry_dir_perms setattr_dir_perms };
@@ -615,7 +614,7 @@ tunable_policy(`httpd_enable_cgi && httpd_unified && httpd_builtin_scripting',`
 	domtrans_pattern(httpd_t, httpdcontent, httpd_sys_script_t)
 
 	manage_dirs_pattern(httpd_t, httpdcontent, httpdcontent)
-	manage_files_pattern(httpd_t, httpdcontent, httpdcontent)
+	mmap_manage_files_pattern(httpd_t, httpdcontent, httpdcontent)
 	manage_fifo_files_pattern(httpd_t, httpdcontent, httpdcontent)
 	manage_lnk_files_pattern(httpd_t, httpdcontent, httpdcontent)
 	manage_sock_files_pattern(httpd_t, httpdcontent, httpdcontent)
@@ -754,7 +753,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	ccs_read_config(httpd_t)
+	certbot_read_lib(httpd_t)
 ')
 
 optional_policy(`
@@ -811,8 +810,10 @@ optional_policy(`
 ')
 
 optional_policy(`
+	mailman_stream_connect_cgi(httpd_t)
 	mailman_signal_cgi(httpd_t)
 	mailman_domtrans_cgi(httpd_t)
+	mailman_map_data_files(httpd_t)
 	mailman_read_data_files(httpd_t)
 	mailman_search_data(httpd_t)
 	mailman_read_archive(httpd_t)
@@ -826,7 +827,7 @@ optional_policy(`
 	')
 
 	tunable_policy(`httpd_manage_ipa',`
-		memcached_manage_pid_files(httpd_t)
+		memcached_manage_runtime_files(httpd_t)
 	')
 ')
 
@@ -851,7 +852,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	pcscd_read_pid_files(httpd_t)
+	pcscd_read_runtime_files(httpd_t)
 ')
 
 optional_policy(`
@@ -896,19 +897,19 @@ optional_policy(`
 ')
 
 optional_policy(`
-	udev_read_db(httpd_t)
+	sympa_manage_runtime_sock_files(httpd_t)
+	sympa_map_var_files(httpd_t)
+	sympa_read_conf(httpd_t)
+	sympa_read_var_files(httpd_t)
 ')
 
-optional_policy(`
-	yam_read_content(httpd_t)
-')
 
 ########################################
 #
 # Helper local policy
 #
 
-read_files_pattern(httpd_helper_t, httpd_config_t, httpd_config_t)
+mmap_read_files_pattern(httpd_helper_t, httpd_config_t, httpd_config_t)
 
 append_files_pattern(httpd_helper_t, httpd_log_t, httpd_log_t)
 read_lnk_files_pattern(httpd_helper_t, httpd_log_t, httpd_log_t)
@@ -967,7 +968,7 @@ fs_read_iso9660_files(httpd_suexec_t)
 fs_search_auto_mountpoints(httpd_suexec_t)
 
 files_read_usr_files(httpd_suexec_t)
-files_dontaudit_search_pids(httpd_suexec_t)
+files_dontaudit_search_runtime(httpd_suexec_t)
 files_search_home(httpd_suexec_t)
 
 auth_use_nsswitch(httpd_suexec_t)
@@ -1244,6 +1245,8 @@ files_read_var_symlinks(httpd_sys_script_t)
 files_search_var_lib(httpd_sys_script_t)
 files_search_spool(httpd_sys_script_t)
 
+miscfiles_read_generic_certs(httpd_sys_script_t)
+
 apache_domtrans_rotatelogs(httpd_sys_script_t)
 
 auth_use_nsswitch(httpd_sys_script_t)
@@ -1251,7 +1254,7 @@ auth_use_nsswitch(httpd_sys_script_t)
 logging_send_syslog_msg(httpd_sys_script_t)
 
 ifdef(`init_systemd', `
-	init_search_pids(httpd_sys_script_t)
+	init_search_runtime(httpd_sys_script_t)
 ')
 
 tunable_policy(`httpd_enable_homedirs',`
@@ -1324,6 +1327,11 @@ optional_policy(`
 		rpc_manage_nfs_rw_content(httpd_t)
 		rpc_read_nfs_content(httpd_t)
 	')
+')
+
+optional_policy(`
+	sympa_manage_var_files(httpd_sys_script_t)
+	sympa_read_conf(httpd_sys_script_t)
 ')
 
 ########################################

@@ -1,4 +1,4 @@
-policy_module(wireguard, 1.0.0)
+policy_module(wireguard)
 
 ########################################
 #
@@ -20,7 +20,7 @@ type wireguard_initrc_exec_t;
 init_unit_file(wireguard_initrc_exec_t)
 
 type wireguard_runtime_t;
-files_pid_file(wireguard_runtime_t)
+files_runtime_file(wireguard_runtime_t)
 
 type wireguard_unit_t;
 init_unit_file(wireguard_unit_t)
@@ -46,7 +46,7 @@ manage_files_pattern(wireguard_t, wireguard_etc_t, wireguard_etc_t)
 files_read_etc_files(wireguard_t)
 
 manage_files_pattern(wireguard_t, wireguard_runtime_t, wireguard_runtime_t)
-files_pid_filetrans(wireguard_t, wireguard_runtime_t, dir)
+files_runtime_filetrans(wireguard_t, wireguard_runtime_t, dir)
 
 manage_dirs_pattern(wireguard_t, wireguard_tmp_t, wireguard_tmp_t)
 manage_files_pattern(wireguard_t, wireguard_tmp_t, wireguard_tmp_t)
@@ -63,6 +63,7 @@ domain_use_interactive_fds(wireguard_t)
 
 # wg-quick tries to read /proc/filesystem when running "stat" and "mv" commands
 kernel_dontaudit_read_system_state(wireguard_t)
+kernel_dontaudit_search_kernel_sysctl(wireguard_t)
 
 miscfiles_read_localization(wireguard_t)
 
@@ -70,3 +71,9 @@ miscfiles_read_localization(wireguard_t)
 sysnet_run_ifconfig(wireguard_t, wireguard_roles)
 
 userdom_use_user_terminals(wireguard_t)
+
+# wg-quick can be configured to run iptables and other networking
+# config tools when bringing up/down the wg interfaces
+optional_policy(`
+	iptables_domtrans(wireguard_t)
+')

@@ -85,6 +85,25 @@ interface(`sysnet_dontaudit_use_dhcpc_fds',`
 
 ########################################
 ## <summary>
+##      Do not audit attempts to read/write to the
+##      dhcp unix datagram socket descriptors.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain to not audit.
+##      </summary>
+## </param>
+#
+interface(`sysnet_dontaudit_rw_dhcpc_dgram_sockets',`
+        gen_require(`
+                type dhcpc_t;
+        ')
+
+        dontaudit $1 dhcpc_t:unix_dgram_socket { read write };
+')
+
+########################################
+## <summary>
 ##	Do not audit attempts to read/write to the
 ##	dhcp unix stream socket descriptors.
 ## </summary>
@@ -346,10 +365,13 @@ interface(`sysnet_read_config',`
 	')
 
 	files_search_etc($1)
+	files_search_runtime($1)
+	allow $1 net_conf_t:dir list_dir_perms;
 	allow $1 net_conf_t:file read_file_perms;
+	allow $1 net_conf_t:lnk_file read_lnk_file_perms;
 
 	ifdef(`distro_debian',`
-		files_search_pids($1)
+		files_search_runtime($1)
 		allow $1 net_conf_t:dir list_dir_perms;
 		read_files_pattern($1, net_conf_t, net_conf_t)
 	')
@@ -375,9 +397,9 @@ interface(`sysnet_read_config',`
 ##     </p>
 ## </desc>
 ## <param name="domain">
-##     <summary>
-##     Domain allowed access.
-##     </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`sysnet_mmap_config_files',`
@@ -387,6 +409,31 @@ interface(`sysnet_mmap_config_files',`
 
 	files_search_etc($1)
 	allow $1 net_conf_t:file map;
+')
+
+#######################################
+## <summary>
+##	map network config files.
+## </summary>
+## <desc>
+##	<p>
+##	Allow the specified domain to mmap the
+##	general network configuration files.
+##	</p>
+## </desc>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`sysnet_mmap_read_config',`
+	gen_require(`
+		type net_conf_t;
+	')
+
+	files_search_etc($1)
+	allow $1 net_conf_t:file mmap_read_file_perms;
 ')
 
 #######################################
@@ -442,6 +489,7 @@ interface(`sysnet_create_config',`
 	')
 
 	files_search_etc($1)
+	allow $1 net_conf_t:dir { add_entry_dir_perms create_dir_perms };
 	allow $1 net_conf_t:file create_file_perms;
 ')
 
@@ -461,7 +509,7 @@ interface(`sysnet_relabel_config',`
 	')
 
 	files_search_etc($1)
-	allow $1 net_conf_t:file { relabelfrom relabelto };
+	allow $1 net_conf_t:file relabel_file_perms;
 ')
 
 #######################################
@@ -490,6 +538,35 @@ interface(`sysnet_etc_filetrans_config',`
 
 #######################################
 ## <summary>
+##	Create files in /run with the type used for
+##	the network config files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="object">
+##	<summary>
+##	The object class of the object being created.
+##	</summary>
+## </param>
+## <param name="name" optional="true">
+##	<summary>
+##	The name of the object being created.
+##	</summary>
+## </param>
+#
+interface(`sysnet_runtime_filetrans_config',`
+	gen_require(`
+		type net_conf_t;
+	')
+
+	files_runtime_filetrans($1, net_conf_t, $2, $3)
+')
+
+#######################################
+## <summary>
 ##	Create, read, write, and delete network config files.
 ## </summary>
 ## <param name="domain">
@@ -507,18 +584,40 @@ interface(`sysnet_manage_config',`
 	allow $1 net_conf_t:file manage_file_perms;
 
 	ifdef(`distro_debian',`
-		files_search_pids($1)
+		files_search_runtime($1)
 		manage_files_pattern($1, net_conf_t, net_conf_t)
 	')
 
 	ifdef(`distro_redhat',`
 		manage_files_pattern($1, net_conf_t, net_conf_t)
 	')
+
+	ifdef(`init_systemd',`
+		manage_files_pattern($1, net_conf_t, net_conf_t)
+	')
 ')
 
 #######################################
 ## <summary>
-##	Read the dhcp client pid file.
+##     Watch a network config dir
+## </summary>
+## <param name="domain">
+##     <summary>
+##     Domain allowed access.
+##     </summary>
+## </param>
+#
+interface(`sysnet_watch_config_dirs',`
+	gen_require(`
+		type net_conf_t;
+	')
+
+	allow $1 net_conf_t:dir watch;
+')
+
+#######################################
+## <summary>
+##	Read dhcp client runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -526,18 +625,18 @@ interface(`sysnet_manage_config',`
 ##	</summary>
 ## </param>
 #
-interface(`sysnet_read_dhcpc_pid',`
+interface(`sysnet_read_dhcpc_runtime_files',`
 	gen_require(`
 		type dhcpc_runtime_t;
 	')
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	allow $1 dhcpc_runtime_t:file read_file_perms;
 ')
 
 #######################################
 ## <summary>
-##	Delete the dhcp client pid file.
+##	Delete the dhcp client runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -545,12 +644,30 @@ interface(`sysnet_read_dhcpc_pid',`
 ##	</summary>
 ## </param>
 #
-interface(`sysnet_delete_dhcpc_pid',`
+interface(`sysnet_delete_dhcpc_runtime_files',`
 	gen_require(`
 		type dhcpc_runtime_t;
 	')
 
 	allow $1 dhcpc_runtime_t:file unlink;
+')
+
+#######################################
+## <summary>
+##	Create, read, write, and delete dhcp client runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`sysnet_manage_dhcpc_runtime_files',`
+	gen_require(`
+		type dhcpc_runtime_t;
+	')
+
+	manage_files_pattern($1, dhcpc_runtime_t, dhcpc_runtime_t)
 ')
 
 #######################################
@@ -655,6 +772,62 @@ interface(`sysnet_signull_ifconfig',`
 	')
 
 	allow $1 ifconfig_t:process signull;
+')
+
+########################################
+## <summary>
+##	Create the /run/netns directory with
+##	an automatic type transition.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`sysnet_create_netns_dirs',`
+	gen_require(`
+		type ifconfig_runtime_t;
+	')
+
+	files_runtime_filetrans($1, ifconfig_runtime_t, dir, "netns")
+')
+
+########################################
+## <summary>
+##	Create an object in the /run/netns
+##	directory with a private type.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="private type">
+##	<summary>
+##	The type of the object to be created.
+##	</summary>
+## </param>
+## <param name="object">
+##	<summary>
+##	The object class of the object being created.
+##	</summary>
+## </param>
+## <param name="name" optional="true">
+##	<summary>
+##	The name of the object being created.
+##	</summary>
+## </param>
+#
+interface(`sysnet_netns_filetrans',`
+	gen_require(`
+		type ifconfig_runtime_t;
+	')
+
+	search_dirs_pattern($1, ifconfig_runtime_t, ifconfig_runtime_t)
+
+	allow $1 ifconfig_runtime_t:dir create_dir_perms;
+	filetrans_pattern($1, ifconfig_runtime_t, $2, $3, $4)
 ')
 
 ########################################
@@ -773,7 +946,7 @@ interface(`sysnet_dns_name_resolve',`
 
 	optional_policy(`
 	# for /etc/resolv.conf symlink
-		networkmanager_read_pid_files($1)
+		networkmanager_read_runtime_files($1)
 	')
 
 	optional_policy(`
@@ -783,6 +956,7 @@ interface(`sysnet_dns_name_resolve',`
 	ifdef(`init_systemd',`
 		optional_policy(`
 			systemd_dbus_chat_resolved($1)
+			systemd_stream_connect_resolved($1)
 		')
 		# This seems needed when the mymachines NSS module is used
 		optional_policy(`

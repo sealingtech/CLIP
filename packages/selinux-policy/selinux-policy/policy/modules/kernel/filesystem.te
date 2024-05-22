@@ -1,13 +1,15 @@
-policy_module(filesystem, 1.27.4)
+policy_module(filesystem)
 
 ########################################
 #
 # Declarations
 #
 
+attribute filesystem_image_file_type;
 attribute filesystem_type;
 attribute filesystem_unconfined_type;
 attribute noxattrfs;
+attribute pseudofs;
 attribute xattrfs;
 
 ##############################
@@ -23,6 +25,7 @@ sid fs gen_context(system_u:object_r:fs_t,s0)
 # Requires that a security xattr handler exist for the filesystem.
 fs_use_xattr btrfs gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr encfs gen_context(system_u:object_r:fs_t,s0);
+fs_use_xattr erofs gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr ext2 gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr ext3 gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr ext4 gen_context(system_u:object_r:fs_t,s0);
@@ -36,6 +39,8 @@ fs_use_xattr jfs gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr lustre gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr overlay gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr squashfs gen_context(system_u:object_r:fs_t,s0);
+fs_use_xattr ubifs gen_context(system_u:object_r:fs_t,s0);
+fs_use_xattr virtiofs gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr xfs gen_context(system_u:object_r:fs_t,s0);
 fs_use_xattr zfs gen_context(system_u:object_r:fs_t,s0);
 
@@ -73,17 +78,30 @@ files_mountpoint(bpf_t)
 dev_associate_sysfs(bpf_t)
 genfscon bpf / gen_context(system_u:object_r:bpf_t,s0)
 
+optional_policy(`
+	kubernetes_mountpoint(bpf_t)
+')
+
 type capifs_t;
 fs_type(capifs_t)
 files_mountpoint(capifs_t)
 genfscon capifs / gen_context(system_u:object_r:capifs_t,s0)
 
+attribute cgroup_types;
 type cgroup_t;
+typeattribute cgroup_t cgroup_types;
 fs_type(cgroup_t)
 files_mountpoint(cgroup_t)
 dev_associate_sysfs(cgroup_t)
 genfscon cgroup / gen_context(system_u:object_r:cgroup_t,s0)
 genfscon cgroup2 / gen_context(system_u:object_r:cgroup_t,s0)
+# When running under systemd, the cgroup file memory.pressure will have this
+# separate label, to allow unprivileged process to access it without accessing
+# the rest of the cgroup tree.
+type memory_pressure_t;
+typeattribute memory_pressure_t cgroup_types;
+files_type(memory_pressure_t)
+dev_associate_sysfs(memory_pressure_t)
 
 type configfs_t;
 fs_type(configfs_t)
@@ -100,7 +118,7 @@ files_mountpoint(ecryptfs_t)
 genfscon ecryptfs / gen_context(system_u:object_r:ecryptfs_t,s0)
 
 type efivarfs_t;
-fs_noxattr_type(efivarfs_t)
+fs_pseudo_type(efivarfs_t)
 files_mountpoint(efivarfs_t)
 genfscon efivarfs / gen_context(system_u:object_r:efivarfs_t,s0)
 
@@ -152,9 +170,9 @@ dev_associate_sysfs(pstore_t)
 genfscon pstore / gen_context(system_u:object_r:pstore_t,s0)
 
 type ramfs_t;
-fs_type(ramfs_t)
+fs_xattr_type(ramfs_t)
 files_mountpoint(ramfs_t)
-genfscon ramfs / gen_context(system_u:object_r:ramfs_t,s0)
+fs_use_trans ramfs gen_context(system_u:object_r:ramfs_t,s0);
 
 type romfs_t;
 fs_type(romfs_t)
@@ -184,6 +202,16 @@ genfscon tracefs / gen_context(system_u:object_r:tracefs_t,s0)
 optional_policy(`
 	init_mountpoint(tracefs_t)
 ')
+
+
+#
+# virtiofs_t is the default type for virtio file systems
+# and their files.
+#
+type virtiofs_t;
+fs_noxattr_type(virtiofs_t)
+files_mountpoint(virtiofs_t)
+genfscon virtiofs / gen_context(system_u:object_r:virtiofs_t,s0)
 
 type vmblock_t;
 fs_noxattr_type(vmblock_t)
@@ -269,6 +297,10 @@ genfscon fuse / gen_context(system_u:object_r:fusefs_t,s0)
 genfscon fuseblk / gen_context(system_u:object_r:fusefs_t,s0)
 genfscon fusectl / gen_context(system_u:object_r:fusefs_t,s0)
 
+optional_policy(`
+	container_mountpoint(fusefs_t)
+')
+
 #
 # iso9660_t is the type for CD filesystems
 # and their files.
@@ -330,10 +362,10 @@ allow filesystem_unconfined_type filesystem_type:filesystem { mount remount unmo
 # Create/access other files. fs_type is to pick up various
 # pseudo filesystem types that are applied to both the filesystem
 # and its files.
-allow filesystem_unconfined_type filesystem_type:file { manage_file_perms relabelfrom relabelto map execute quotaon mounton execute_no_trans entrypoint audit_access execmod watch };
-allow filesystem_unconfined_type filesystem_type:lnk_file  { manage_lnk_file_perms relabelfrom relabelto append map execute quotaon mounton open audit_access execmod watch };
-allow filesystem_unconfined_type filesystem_type:sock_file { manage_sock_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
-allow filesystem_unconfined_type filesystem_type:fifo_file { manage_fifo_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
-allow filesystem_unconfined_type filesystem_type:blk_file { manage_blk_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
-allow filesystem_unconfined_type filesystem_type:chr_file { manage_chr_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
-allow filesystem_unconfined_type filesystem_type:dir { manage_dir_perms relabelfrom relabelto append map execute quotaon mounton add_name remove_name reparent search rmdir audit_access execmod watch };
+allow filesystem_unconfined_type filesystem_type:file { manage_file_perms relabel_file_perms exec_file_perms quotaon mounton entrypoint execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow filesystem_unconfined_type filesystem_type:lnk_file  { manage_lnk_file_perms relabel_lnk_file_perms append map execute quotaon mounton open execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow filesystem_unconfined_type filesystem_type:sock_file { manage_sock_file_perms relabel_sock_file_perms map execute quotaon mounton execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow filesystem_unconfined_type filesystem_type:fifo_file { manage_fifo_file_perms relabel_fifo_file_perms map execute quotaon mounton execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow filesystem_unconfined_type filesystem_type:blk_file { manage_blk_file_perms relabel_blk_file_perms map execute quotaon mounton execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow filesystem_unconfined_type filesystem_type:chr_file { manage_chr_file_perms relabel_chr_file_perms map execute quotaon mounton execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow filesystem_unconfined_type filesystem_type:dir { manage_dir_perms relabel_dir_perms append map execute quotaon mounton add_name remove_name reparent search rmdir execmod watch watch_mount watch_reads watch_sb watch_with_perm };

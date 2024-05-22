@@ -4,43 +4,78 @@
 ## <summary>
 ##	Role access for pulseaudio.
 ## </summary>
-## <param name="role">
+## <param name="role_prefix">
 ##	<summary>
-##	Role allowed access.
+##	The prefix of the user role (e.g., user
+##	is the prefix for user_r).
 ##	</summary>
 ## </param>
-## <param name="domain">
+## <param name="user_domain">
 ##	<summary>
 ##	User domain for the role.
 ##	</summary>
 ## </param>
+## <param name="user_exec_domain">
+##	<summary>
+##	User exec domain for execute and transition access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access
+##	</summary>
+## </param>
 #
-interface(`pulseaudio_role',`
+template(`pulseaudio_role',`
 	gen_require(`
 		attribute pulseaudio_tmpfsfile;
 		type pulseaudio_t, pulseaudio_home_t, pulseaudio_tmpfs_t;
 		type pulseaudio_tmp_t;
 	')
 
-	pulseaudio_run($2, $1)
+	pulseaudio_run($2, $4)
+	pulseaudio_domtrans($3)
 
-	allow $2 pulseaudio_t:process { ptrace signal_perms };
-	allow $2 pulseaudio_t:fd use;
-	ps_process_pattern($2, pulseaudio_t)
+	allow $3 pulseaudio_t:process { ptrace signal_perms };
+	allow $3 pulseaudio_t:fd use;
+	ps_process_pattern($3, pulseaudio_t)
 
 	allow $2 pulseaudio_home_t:dir { manage_dir_perms relabel_dir_perms };
 	allow $2 pulseaudio_home_t:file { manage_file_perms relabel_file_perms };
 	allow $2 pulseaudio_home_t:lnk_file { manage_lnk_file_perms relabel_lnk_file_perms };
 
 	allow $2 { pulseaudio_tmpfs_t pulseaudio_tmpfsfile }:dir { manage_dir_perms relabel_dir_perms };
-	allow $2 { pulseaudio_tmpfs_t pulseaudio_tmpfsfile }:file { manage_file_perms relabel_file_perms map };
+	allow $2 { pulseaudio_tmpfs_t pulseaudio_tmpfsfile }:file { mmap_manage_file_perms relabel_file_perms };
 
 	allow $2 pulseaudio_tmp_t:dir { manage_dir_perms relabel_dir_perms };
 	allow $2 pulseaudio_tmp_t:file { manage_file_perms relabel_file_perms };
 	allow $2 pulseaudio_tmp_t:sock_file { manage_sock_file_perms relabel_sock_file_perms };
 
-	allow pulseaudio_t $2:unix_stream_socket connectto;
-	allow pulseaudio_t $2:process signull;
+	allow pulseaudio_t $3:unix_stream_socket connectto;
+	allow pulseaudio_t $3:process signull;
+
+	optional_policy(`
+		systemd_user_app_status($1, pulseaudio_t)
+	')
+')
+
+########################################
+## <summary>
+##	Connect to pulseaudio and manage
+##	pulseaudio config data.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`pulseaudio_client_domain',`
+	gen_require(`
+		attribute pulseaudio_client;
+	')
+
+	typeattribute $1 pulseaudio_client;
 ')
 
 ########################################
@@ -48,18 +83,15 @@ interface(`pulseaudio_role',`
 ##	Execute a domain transition to run pulseaudio.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`pulseaudio_domtrans',`
 	gen_require(`
-		attribute pulseaudio_client;
 		type pulseaudio_t, pulseaudio_exec_t;
 	')
-
-	typeattribute $1 pulseaudio_client;
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, pulseaudio_exec_t, pulseaudio_t)
@@ -87,6 +119,7 @@ interface(`pulseaudio_run',`
 		attribute_role pulseaudio_roles;
 	')
 
+	pulseaudio_client_domain($1)
 	pulseaudio_domtrans($1)
 	roleattribute $2 pulseaudio_roles;
 ')
@@ -96,9 +129,9 @@ interface(`pulseaudio_run',`
 ##	Execute pulseaudio in the caller domain.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed access.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`pulseaudio_exec',`
@@ -115,9 +148,9 @@ interface(`pulseaudio_exec',`
 ##	Do not audit attempts to execute pulseaudio.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain to not audit.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`pulseaudio_dontaudit_exec',`
@@ -172,9 +205,9 @@ interface(`pulseaudio_use_fds',`
 ##	file descriptors for pulseaudio.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`pulseaudio_dontaudit_use_fds',`
@@ -201,7 +234,7 @@ interface(`pulseaudio_stream_connect',`
 		type pulseaudio_t, pulseaudio_runtime_t, pulseaudio_tmp_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, { pulseaudio_tmp_t pulseaudio_runtime_t }, { pulseaudio_tmp_t pulseaudio_runtime_t }, pulseaudio_t)
 ')
 

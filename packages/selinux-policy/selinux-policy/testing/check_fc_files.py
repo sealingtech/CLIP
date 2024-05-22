@@ -242,11 +242,11 @@ def analyze_fc_file(fc_path):
                 reduced_path = new_reduced_path
 
             # * Remove optional characters like c?
-            reduced_path = re.sub(r'[-0-9A-Za-z_·]\?', '', reduced_path)
+            reduced_path = re.sub(r'[-0-9A-Za-z_@·]\?', '', reduced_path)
 
             # If the reduced path still ends with a special character, something went wrong.
             # Instead of guessing the possible buggy characters, list the allowed ones.
-            if reduced_path and not re.match(r'[-0-9A-Za-z_\]~·†∞]', reduced_path[-1]):
+            if reduced_path and not re.match(r'[-0-9A-Za-z_@\]~·†∞]', reduced_path[-1]):
                 if path != '/':
                     if reduced_path == path:
                         print(f"{prefix}unexpected end of file pattern for {path}")

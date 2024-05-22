@@ -11,7 +11,7 @@
 ########################################
 ## <summary>
 ##	Make the specified type usable for files
-##	that are exectuables, such as binary programs.
+##	that are executables, such as binary programs.
 ##	This does not include shared libraries.
 ## </summary>
 ## <param name="type">
@@ -32,7 +32,7 @@ interface(`corecmd_executable_file',`
 
 ########################################
 ## <summary>
-##	Make general progams in bin an entrypoint for
+##	Make general programs in bin an entrypoint for
 ##	the specified domain.
 ## </summary>
 ## <param name="domain">
@@ -122,6 +122,42 @@ interface(`corecmd_list_bin',`
 
 	corecmd_search_bin($1)
 	list_dirs_pattern($1, bin_t, bin_t)
+')
+
+########################################
+## <summary>
+##	Watch bin directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`corecmd_watch_bin_dirs', `
+	gen_require(`
+		type bin_t;
+	')
+
+	allow $1 bin_t:dir watch;
+')
+
+########################################
+## <summary>
+##	Mount on bin directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`corecmd_mounton_bin_dirs', `
+	gen_require(`
+		type bin_t;
+	')
+
+	allow $1 bin_t:dir mounton;
 ')
 
 ########################################
@@ -238,22 +274,6 @@ interface(`corecmd_dontaudit_write_bin_files',`
 
 ########################################
 ## <summary>
-##	Read symbolic links in bin directories.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`corecmd_read_bin_symlinks',`
-	refpolicywarn(`$0() has been deprecated, please use corecmd_search_bin() instead.')
-
-	corecmd_search_bin($1)
-')
-
-########################################
-## <summary>
 ##	Read pipes in bin directories.
 ## </summary>
 ## <param name="domain">
@@ -303,7 +323,7 @@ interface(`corecmd_read_bin_sockets',`
 ##	</p>
 ##	<p>
 ##	Typically, this interface should be used when the domain
-##	executes general system progams within the privileges
+##	executes general system programs within the privileges
 ##	of the source domain.  Some examples of these programs
 ##	are ls, cp, sed, python, and tar. This does not include
 ##	shells, such as bash.
@@ -385,6 +405,42 @@ interface(`corecmd_mmap_bin_files',`
 
 	corecmd_search_bin($1)
 	mmap_exec_files_pattern($1, bin_t, bin_t)
+')
+
+########################################
+## <summary>
+##	Create objects in bin directories
+##	with an automatic transition to a
+##	private type.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="file_type">
+##	<summary>
+##	The type of the object being created.
+##	</summary>
+## </param>
+## <param name="object">
+##	<summary>
+##	The object class of the object being created.
+##	</summary>
+## </param>
+## <param name="name" optional="true">
+##	<summary>
+##	The name of the object being created.
+##	</summary>
+## </param>
+#
+interface(`corecmd_bin_filetrans',`
+	gen_require(`
+		type bin_t;
+	')
+
+	corecmd_search_bin($1)
+	filetrans_pattern($1, bin_t, $2, $3, $4)
 ')
 
 ########################################
@@ -662,6 +718,26 @@ interface(`corecmd_read_all_executables',`
 
 	corecmd_search_bin($1)
 	read_files_pattern($1, exec_type, exec_type)
+')
+
+########################################
+## <summary>
+##	Mmap read-only all executable files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`corecmd_mmap_read_all_executables',`
+	gen_require(`
+		attribute exec_type;
+	')
+
+	corecmd_search_bin($1)
+	mmap_read_files_pattern($1, exec_type, exec_type)
 ')
 
 ########################################

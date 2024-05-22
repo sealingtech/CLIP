@@ -1,4 +1,4 @@
-policy_module(userdomain, 4.19.5)
+policy_module(userdomain)
 
 ########################################
 #
@@ -18,6 +18,13 @@ gen_tunable(allow_user_mysql_connect, false)
 ## </p>
 ## </desc>
 gen_tunable(allow_user_postgresql_connect, false)
+
+## <desc>
+## <p>
+## Allow all users to send syslog messages
+## </p>
+## </desc>
+gen_tunable(user_all_users_send_syslog, true)
 
 ## <desc>
 ## <p>
@@ -95,6 +102,9 @@ files_associate_tmp(user_home_t)
 files_poly_parent(user_home_t)
 files_mountpoint(user_home_t)
 
+type user_bin_t;
+userdom_user_home_content(user_bin_t)
+
 type user_cert_t;
 userdom_user_home_content(user_cert_t)
 
@@ -106,19 +116,10 @@ ubac_constrained(user_devpts_t)
 type user_tmp_t;
 files_tmp_file(user_tmp_t)
 userdom_user_home_content(user_tmp_t)
-userdom_user_runtime_content(user_tmp_t)
 
 type user_tmpfs_t;
 files_tmpfs_file(user_tmpfs_t)
 userdom_user_home_content(user_tmpfs_t)
-
-type admin_home_t;
-files_type(admin_home_t)
-files_associate_tmp(admin_home_t)
-fs_associate_tmpfs(admin_home_t)
-files_mountpoint(admin_home_t)
-files_poly_member(admin_home_t)
-files_poly_parent(admin_home_t)
 
 type user_tty_device_t;
 dev_node(user_tty_device_t)
@@ -139,7 +140,3 @@ files_poly_member(user_runtime_t)
 files_poly_parent(user_runtime_t)
 ubac_constrained(user_runtime_t)
 userdom_user_runtime_content(user_runtime_t)
-
-optional_policy(`
-	ssh_rw_tcp_sockets(userdomain)
-')

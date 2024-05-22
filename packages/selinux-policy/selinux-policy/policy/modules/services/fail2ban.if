@@ -5,9 +5,9 @@
 ##	Execute a domain transition to run fail2ban.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`fail2ban_domtrans',`
@@ -82,7 +82,7 @@ interface(`fail2ban_stream_connect',`
 		type fail2ban_t, fail2ban_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, fail2ban_runtime_t, fail2ban_runtime_t, fail2ban_t)
 ')
 
@@ -102,7 +102,7 @@ interface(`fail2ban_rw_inherited_tmp_files',`
 	')
 
 	files_search_tmp($1)
-	allow $1 fail2ban_tmp_t:file { read write };
+	allow $1 fail2ban_tmp_t:file rw_inherited_file_perms;
 ')
 
 ########################################
@@ -206,9 +206,9 @@ interface(`fail2ban_read_log',`
 ##	Append fail2ban log files.
 ## </summary>
 ## <param name="domain">
-## 	<summary>
+##	<summary>
 ##	Domain allowed access.
-## 	</summary>
+##	</summary>
 ## </param>
 #
 interface(`fail2ban_append_log',`
@@ -218,25 +218,6 @@ interface(`fail2ban_append_log',`
 
 	logging_search_logs($1)
 	allow $1 fail2ban_log_t:file append_file_perms;
-')
-
-########################################
-## <summary>
-##	Read fail2ban pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`fail2ban_read_pid_files',`
-	gen_require(`
-		type fail2ban_runtime_t;
-	')
-
-	files_search_pids($1)
-	allow $1 fail2ban_runtime_t:file read_file_perms;
 ')
 
 ########################################
@@ -271,7 +252,7 @@ interface(`fail2ban_admin',`
 	logging_list_logs($1)
 	admin_pattern($1, fail2ban_log_t)
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, fail2ban_runtime_t)
 
 	files_search_var_lib($1)

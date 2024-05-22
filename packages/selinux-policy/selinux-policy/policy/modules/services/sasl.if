@@ -15,8 +15,27 @@ interface(`sasl_connect',`
 		type saslauthd_t, saslauthd_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, saslauthd_runtime_t, saslauthd_runtime_t, saslauthd_t)
+')
+
+########################################
+## <summary>
+##	Read SASL keytab files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`sasl_read_keytab',`
+	gen_require(`
+		type saslauthd_keytab_t;
+	')
+
+	files_search_etc($1)
+	read_files_pattern($1, saslauthd_keytab_t, saslauthd_keytab_t)
 ')
 
 ########################################
@@ -50,6 +69,6 @@ interface(`sasl_admin',`
 	files_list_etc($1)
 	admin_pattern($1, saslauthd_keytab_t)
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, saslauthd_runtime_t)
 ')

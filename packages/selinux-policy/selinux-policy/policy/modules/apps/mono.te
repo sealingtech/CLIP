@@ -1,4 +1,4 @@
-policy_module(mono, 1.10.0)
+policy_module(mono)
 
 ########################################
 #
@@ -42,10 +42,6 @@ optional_policy(`
 
 optional_policy(`
 	cups_dbus_chat(mono_t)
-')
-
-optional_policy(`
-	hal_dbus_chat(mono_t)
 ')
 
 optional_policy(`

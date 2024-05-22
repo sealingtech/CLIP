@@ -99,7 +99,7 @@ interface(`mysql_stream_connect',`
 		type mysqld_t, mysqld_runtime_t, mysqld_db_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, { mysqld_db_t mysqld_runtime_t }, mysqld_runtime_t, mysqld_t)
 ')
 
@@ -243,6 +243,24 @@ interface(`mysql_manage_db_files',`
 
 ########################################
 ## <summary>
+##	create mysqld db dir.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`mysql_var_lib_filetrans_db_dir',`
+	gen_require(`
+		type mysqld_db_t;
+	')
+
+	files_var_lib_filetrans($1, mysqld_db_t, dir, "mysql")
+')
+
+########################################
+## <summary>
 ##	Create, read, write, and delete
 ##	mysqld home files.
 ## </summary>
@@ -325,7 +343,27 @@ interface(`mysql_write_log',`
 	')
 
 	logging_search_logs($1)
+	allow $1 mysqld_log_t:dir search_dir_perms;
 	allow $1 mysqld_log_t:file write_file_perms;
+')
+
+########################################
+## <summary>
+##	create mysqld log dir.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`mysql_log_filetrans_log_dir',`
+	gen_require(`
+		type mysqld_log_t;
+	')
+
+	logging_search_logs($1)
+	logging_log_filetrans($1, mysqld_log_t, dir, "mysql")
 ')
 
 ######################################
@@ -346,45 +384,6 @@ interface(`mysql_domtrans_mysql_safe',`
 
 	corecmd_search_bin($1)
 	domtrans_pattern($1, mysqld_safe_exec_t, mysqld_safe_t)
-')
-
-#####################################
-## <summary>
-##	Read mysqld pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`mysql_read_pid_files',`
-	gen_require(`
-		type mysqld_runtime_t;
-	')
-
-	files_search_pids($1)
-	read_files_pattern($1, mysqld_runtime_t, mysqld_runtime_t)
-')
-
-#####################################
-## <summary>
-##	Search mysqld pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-##
-#
-interface(`mysql_search_pid_files',`
-	gen_require(`
-		type mysqld_runtime_t;
-	')
-
-	files_search_pids($1)
-	search_dirs_pattern($1, mysqld_runtime_t, mysqld_runtime_t)
 ')
 
 ########################################
@@ -418,7 +417,7 @@ interface(`mysql_admin',`
 	init_startstop_service($1, $2, mysqld_t, mysqld_initrc_exec_t)
 	init_startstop_service($1, $2, mysqlmanagerd_t, mysqlmanagerd_initrc_exec_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, { mysqlmanagerd_runtime_t mysqld_runtime_t })
 
 	files_search_var_lib($1)

@@ -5,9 +5,9 @@
 ##	Execute a domain transition to run devicekit.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`devicekit_domtrans',`
@@ -35,7 +35,7 @@ interface(`devicekit_dgram_send',`
 		type devicekit_t, devicekit_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	dgram_send_pattern($1, devicekit_runtime_t, devicekit_runtime_t, devicekit_t)
 ')
 
@@ -201,7 +201,7 @@ interface(`devicekit_relabel_log_files',`
 
 ########################################
 ## <summary>
-##	Read devicekit PID files.
+##	Read devicekit runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -209,19 +209,19 @@ interface(`devicekit_relabel_log_files',`
 ##	</summary>
 ## </param>
 #
-interface(`devicekit_read_pid_files',`
+interface(`devicekit_read_runtime_files',`
 	gen_require(`
 		type devicekit_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	read_files_pattern($1, devicekit_runtime_t, devicekit_runtime_t)
 ')
 
 ########################################
 ## <summary>
 ##	Create, read, write, and delete
-##	devicekit PID files.
+##	devicekit runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -229,12 +229,12 @@ interface(`devicekit_read_pid_files',`
 ##	</summary>
 ## </param>
 #
-interface(`devicekit_manage_pid_files',`
+interface(`devicekit_manage_runtime_files',`
 	gen_require(`
 		type devicekit_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	manage_files_pattern($1, devicekit_runtime_t, devicekit_runtime_t)
 ')
 
@@ -274,6 +274,6 @@ interface(`devicekit_admin',`
 	logging_search_logs($1)
 	admin_pattern($1, devicekit_var_log_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, devicekit_runtime_t)
 ')

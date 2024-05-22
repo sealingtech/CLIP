@@ -52,7 +52,7 @@ interface(`samba_stream_connect_nmbd',`
 		type samba_var_t, nmbd_t, samba_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, { samba_runtime_t samba_var_t }, samba_runtime_t, nmbd_t)
 ')
 
@@ -326,6 +326,86 @@ interface(`samba_read_share_files',`
 
 	allow $1 samba_share_t:filesystem getattr;
 	read_files_pattern($1, samba_share_t, samba_share_t)
+')
+
+########################################
+## <summary>
+##	start samba daemon
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`samba_start',`
+	gen_require(`
+		type samba_unit_t;
+		class service start;
+	')
+
+	allow $1 samba_unit_t:file getattr;
+	allow $1 samba_unit_t:service start;
+')
+
+########################################
+## <summary>
+##	stop samba daemon
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`samba_stop',`
+	gen_require(`
+		type samba_unit_t;
+		class service stop;
+	')
+
+	allow $1 samba_unit_t:file getattr;
+	allow $1 samba_unit_t:service stop;
+')
+
+########################################
+## <summary>
+##	get status of samba daemon
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`samba_status',`
+	gen_require(`
+		type samba_unit_t;
+		class service status;
+	')
+
+	allow $1 samba_unit_t:file getattr;
+	allow $1 samba_unit_t:service status;
+')
+
+########################################
+## <summary>
+##	reload samba daemon
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`samba_reload',`
+	gen_require(`
+		type samba_unit_t;
+		class service reload;
+	')
+
+	allow $1 samba_unit_t:file getattr;
+	allow $1 samba_unit_t:service reload;
 ')
 
 ########################################
@@ -627,7 +707,7 @@ interface(`samba_run_winbind_helper',`
 
 ########################################
 ## <summary>
-##	Read winbind pid files.
+##	Read winbind runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -635,12 +715,12 @@ interface(`samba_run_winbind_helper',`
 ##	</summary>
 ## </param>
 #
-interface(`samba_read_winbind_pid',`
+interface(`samba_read_winbind_runtime_files',`
 	gen_require(`
 		type winbind_runtime_t, samba_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	read_files_pattern($1, { samba_runtime_t winbind_runtime_t }, winbind_runtime_t)
 ')
 
@@ -660,7 +740,7 @@ interface(`samba_stream_connect_winbind',`
 		type samba_var_t, winbind_t, winbind_runtime_t, samba_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, { samba_runtime_t samba_var_t winbind_runtime_t }, winbind_runtime_t, winbind_t)
 ')
 
@@ -708,7 +788,7 @@ interface(`samba_admin',`
 
 	files_list_spool($1)
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, { winbind_runtime_t samba_runtime_t swat_runtime_t })
 
 	files_list_tmp($1)

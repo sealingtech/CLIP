@@ -101,9 +101,9 @@ interface(`sssd_write_config',`
 ##	sssd configuration files.
 ## </summary>
 ## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`sssd_manage_config',`
@@ -157,7 +157,7 @@ interface(`sssd_manage_public_files',`
 
 ########################################
 ## <summary>
-##	Read sssd pid files.
+##	Read sssd runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -165,34 +165,13 @@ interface(`sssd_manage_public_files',`
 ##	</summary>
 ## </param>
 #
-interface(`sssd_read_pid_files',`
+interface(`sssd_read_runtime_files',`
 	gen_require(`
 		type sssd_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	allow $1 sssd_runtime_t:file read_file_perms;
-')
-
-########################################
-## <summary>
-##	Create, read, write, and delete
-##	sssd pid content.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`sssd_manage_pids',`
-	gen_require(`
-		type sssd_runtime_t;
-	')
-
-	files_search_pids($1)
-	manage_dirs_pattern($1, sssd_runtime_t, sssd_runtime_t)
-	manage_files_pattern($1, sssd_runtime_t, sssd_runtime_t)
 ')
 
 ########################################
@@ -311,7 +290,7 @@ interface(`sssd_stream_connect',`
 		type sssd_t, sssd_var_lib_t;
 	')
 
-	files_search_var_lib($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, sssd_var_lib_t, sssd_var_lib_t, sssd_t)
 ')
 
@@ -350,7 +329,7 @@ interface(`sssd_admin',`
 	files_search_var_lib($1)
 	admin_pattern($1, { sssd_var_lib_t sssd_public_t })
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, sssd_runtime_t)
 
 	logging_search_logs($1)

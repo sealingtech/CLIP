@@ -1,4 +1,4 @@
-policy_module(sxid, 1.10.1)
+policy_module(sxid)
 
 ########################################
 #
@@ -93,6 +93,3 @@ optional_policy(`
 	seutil_sigchld_newrole(sxid_t)
 ')
 
-optional_policy(`
-	udev_read_db(sxid_t)
-')

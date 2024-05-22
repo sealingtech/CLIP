@@ -143,9 +143,9 @@ interface(`ntp_initrc_domtrans',`
 ##      Read ntp conf files.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`ntp_read_conf_files',`
@@ -174,6 +174,25 @@ interface(`ntp_read_drift_files',`
 
 	files_search_var_lib($1)
 	read_files_pattern($1, ntp_drift_t, ntp_drift_t)
+')
+
+########################################
+## <summary>
+##	specified domain creates /var/lib/ntpsec/ with the correct type
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`ntp_filetrans_drift',`
+	gen_require(`
+		type ntp_drift_t;
+	')
+
+	files_search_var_lib($1)
+	files_var_lib_filetrans($1, ntp_drift_t, dir)
 ')
 
 ########################################
@@ -303,7 +322,7 @@ interface(`ntp_admin',`
 	files_list_var_lib($1)
 	admin_pattern($1, ntp_drift_t)
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, ntpd_pid_t)
 
 	ntp_run($1, $2)

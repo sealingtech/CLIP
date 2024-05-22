@@ -1,4 +1,4 @@
-policy_module(tuned, 1.7.0)
+policy_module(tuned)
 
 ########################################
 #
@@ -22,7 +22,7 @@ type tuned_log_t;
 logging_log_file(tuned_log_t)
 
 type tuned_runtime_t alias tuned_var_run_t;
-files_pid_file(tuned_runtime_t)
+files_runtime_file(tuned_runtime_t)
 
 ########################################
 #
@@ -48,7 +48,7 @@ logging_log_filetrans(tuned_t, tuned_log_t, file)
 
 manage_files_pattern(tuned_t, tuned_runtime_t, tuned_runtime_t)
 manage_dirs_pattern(tuned_t, tuned_runtime_t, tuned_runtime_t)
-files_pid_filetrans(tuned_t, tuned_runtime_t, { dir file })
+files_runtime_filetrans(tuned_t, tuned_runtime_t, { dir file })
 
 kernel_read_system_state(tuned_t)
 kernel_read_network_state(tuned_t)
@@ -77,14 +77,9 @@ logging_send_syslog_msg(tuned_t)
 
 miscfiles_read_localization(tuned_t)
 
-udev_read_pid_files(tuned_t)
+udev_read_runtime_files(tuned_t)
 
 userdom_dontaudit_search_user_home_dirs(tuned_t)
-
-# CLIP: this is missing from upstream
-optional_policy(`
-	dbus_connect_system_bus(tuned_t)
-')
 
 optional_policy(`
 	fstools_domtrans(tuned_t)

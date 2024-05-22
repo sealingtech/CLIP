@@ -85,7 +85,6 @@ interface(`rpm_run',`
 	')
 
 	rpm_domtrans($1)
-        allow rpm_script_t $1:fifo_file rw_fifo_file_perms;
 	roleattribute $2 rpm_roles;
 ')
 
@@ -341,6 +340,26 @@ interface(`rpm_manage_script_tmp_files',`
 
 #####################################
 ## <summary>
+##	Read rpm temporary files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`rpm_read_tmp_files',`
+	gen_require(`
+		type rpm_tmp_t;
+	')
+
+	files_search_tmp($1)
+	read_files_pattern($1, rpm_tmp_t, rpm_tmp_t)
+	read_lnk_files_pattern($1, rpm_tmp_t, rpm_tmp_t)
+')
+
+#####################################
+## <summary>
 ##	Append rpm temporary files.
 ## </summary>
 ## <param name="domain">
@@ -528,27 +547,8 @@ interface(`rpm_dontaudit_manage_db',`
 
 #####################################
 ## <summary>
-##	Read rpm pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`rpm_read_pid_files',`
-	gen_require(`
-		type rpm_runtime_t;
-	')
-
-	read_files_pattern($1, rpm_runtime_t, rpm_runtime_t)
-	files_search_pids($1)
-')
-
-#####################################
-## <summary>
 ##	Create, read, write, and delete
-##	rpm pid files.
+##	rpm runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -556,42 +556,13 @@ interface(`rpm_read_pid_files',`
 ##	</summary>
 ## </param>
 #
-interface(`rpm_manage_pid_files',`
+interface(`rpm_manage_runtime_files',`
 	gen_require(`
 		type rpm_runtime_t;
 	')
 
 	manage_files_pattern($1, rpm_runtime_t, rpm_runtime_t)
-	files_search_pids($1)
-')
-
-########################################
-## <summary>
-##	Create specified objects in pid directories
-##	with the rpm pid file type.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-## <param name="object_class">
-##	<summary>
-##	Class of the object being created.
-##	</summary>
-## </param>
-## <param name="name" optional="true">
-##	<summary>
-##	The name of the object being created.
-##	</summary>
-## </param>
-#
-interface(`rpm_pid_filetrans_rpm_pid',`
-	gen_require(`
-		type rpm_runtime_t;
-	')
-
-	files_pid_filetrans($1, rpm_runtime_t, $3, $4)
+	files_search_runtime($1)
 ')
 
 ########################################
@@ -641,7 +612,7 @@ interface(`rpm_admin',`
 	logging_list_logs($1)
 	admin_pattern($1, rpm_log_t)
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, rpm_runtime_t)
 
 	fs_search_tmpfs($1)

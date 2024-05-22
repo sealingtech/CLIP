@@ -1,4 +1,4 @@
-policy_module(livecd, 1.3.0)
+policy_module(livecd)
 
 ########################################
 #
@@ -32,9 +32,6 @@ files_tmp_filetrans(livecd_t, livecd_tmp_t, { dir file })
 sysnet_manage_config(livecd_t)
 sysnet_etc_filetrans_config(livecd_t)
 
-optional_policy(`
-	hal_dbus_chat(livecd_t)
-')
 optional_policy(`
 	mount_run(livecd_t, livecd_roles)
 ')

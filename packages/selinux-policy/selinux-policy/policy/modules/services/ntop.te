@@ -1,4 +1,4 @@
-policy_module(ntop, 1.14.1)
+policy_module(ntop)
 
 ########################################
 #
@@ -16,7 +16,7 @@ type ntop_initrc_exec_t;
 init_script_file(ntop_initrc_exec_t)
 
 type ntop_runtime_t alias ntop_var_run_t;
-files_pid_file(ntop_runtime_t)
+files_runtime_file(ntop_runtime_t)
 
 type ntop_tmp_t;
 files_tmp_file(ntop_tmp_t)
@@ -51,7 +51,7 @@ manage_files_pattern(ntop_t, ntop_var_lib_t, ntop_var_lib_t)
 files_var_lib_filetrans(ntop_t, ntop_var_lib_t, { file dir } )
 
 manage_files_pattern(ntop_t, ntop_runtime_t, ntop_runtime_t)
-files_pid_filetrans(ntop_t, ntop_runtime_t, file)
+files_runtime_filetrans(ntop_t, ntop_runtime_t, file)
 
 kernel_request_load_module(ntop_t)
 kernel_read_system_state(ntop_t)
@@ -101,6 +101,3 @@ optional_policy(`
 	seutil_sigchld_newrole(ntop_t)
 ')
 
-optional_policy(`
-	udev_read_db(ntop_t)
-')

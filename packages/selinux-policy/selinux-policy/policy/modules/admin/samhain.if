@@ -173,26 +173,6 @@ interface(`samhain_manage_log_files',`
 	manage_files_pattern($1, samhain_log_t, samhain_log_t)
 ')
 
-########################################
-## <summary>
-##	Create, read, write, and delete
-##	samhain pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`samhain_manage_pid_files',`
-	gen_require(`
-		type samhain_runtime_t;
-	')
-
-	files_search_pids($1)
-	manage_files_pattern($1, samhain_runtime_t, samhain_runtime_t)
-')
-
 #######################################
 ## <summary>
 ##	All of the rules required to
@@ -232,6 +212,6 @@ interface(`samhain_admin',`
 	logging_list_logs($1)
 	admin_pattern($1, samhain_log_t)
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, samhain_runtime_t)
 ')

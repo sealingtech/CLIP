@@ -1,4 +1,4 @@
-policy_module(devicekit, 1.12.2)
+policy_module(devicekit)
 
 ########################################
 #
@@ -18,7 +18,7 @@ type devicekit_disk_exec_t;
 dbus_system_domain(devicekit_disk_t, devicekit_disk_exec_t)
 
 type devicekit_runtime_t alias devicekit_var_run_t;
-files_pid_file(devicekit_runtime_t)
+files_runtime_file(devicekit_runtime_t)
 
 type devicekit_tmp_t;
 files_tmp_file(devicekit_tmp_t)
@@ -38,7 +38,7 @@ allow devicekit_t self:unix_dgram_socket create_socket_perms;
 
 manage_dirs_pattern(devicekit_t, devicekit_runtime_t, devicekit_runtime_t)
 manage_files_pattern(devicekit_t, devicekit_runtime_t, devicekit_runtime_t)
-files_pid_filetrans(devicekit_t, devicekit_runtime_t, { dir file })
+files_runtime_filetrans(devicekit_t, devicekit_runtime_t, { dir file })
 
 kernel_read_system_state(devicekit_t)
 
@@ -53,15 +53,8 @@ miscfiles_read_localization(devicekit_t)
 optional_policy(`
 	dbus_system_bus_client(devicekit_t)
 
-	allow devicekit_t { devicekit_disk_t devicekit_power_t }:dbus send_msg;
-')
-
-optional_policy(`
-	udev_read_db(devicekit_t)
-')
-
-optional_policy(`
-	xserver_dbus_chat_xdm(devicekit_power_t)
+	devicekit_dbus_chat_disk(devicekit_t)
+	devicekit_dbus_chat_power(devicekit_t)
 ')
 
 ########################################
@@ -71,7 +64,7 @@ optional_policy(`
 
 allow devicekit_disk_t self:capability { chown dac_override fowner fsetid net_admin setgid setuid sys_admin sys_nice sys_ptrace sys_rawio };
 allow devicekit_disk_t self:capability2 wake_alarm;
-allow devicekit_disk_t self:process { getsched signal_perms };
+allow devicekit_disk_t self:process { getsched setsched signal_perms };
 allow devicekit_disk_t self:fifo_file rw_fifo_file_perms;
 allow devicekit_disk_t self:netlink_kobject_uevent_socket create_socket_perms;
 
@@ -86,12 +79,11 @@ files_var_lib_filetrans(devicekit_disk_t, devicekit_var_lib_t, dir)
 allow devicekit_disk_t devicekit_runtime_t:dir mounton;
 manage_dirs_pattern(devicekit_disk_t, devicekit_runtime_t, devicekit_runtime_t)
 manage_files_pattern(devicekit_disk_t, devicekit_runtime_t, devicekit_runtime_t)
-files_pid_filetrans(devicekit_disk_t, devicekit_runtime_t, { dir file })
+files_runtime_filetrans(devicekit_disk_t, devicekit_runtime_t, { dir file })
 
 kernel_getattr_message_if(devicekit_disk_t)
 kernel_list_unlabeled(devicekit_disk_t)
 kernel_dontaudit_getattr_unlabeled_files(devicekit_disk_t)
-kernel_read_crypto_sysctls(devicekit_disk_t)
 kernel_read_fs_sysctls(devicekit_disk_t)
 kernel_read_network_state(devicekit_disk_t)
 kernel_read_software_raid_state(devicekit_disk_t)
@@ -138,6 +130,8 @@ fs_search_all(devicekit_disk_t)
 mls_file_read_all_levels(devicekit_disk_t)
 mls_file_write_to_clearance(devicekit_disk_t)
 
+mount_rw_runtime_files(devicekit_disk_t)
+
 storage_raw_read_fixed_disk(devicekit_disk_t)
 storage_raw_write_fixed_disk(devicekit_disk_t)
 storage_raw_read_removable_device(devicekit_disk_t)
@@ -156,12 +150,6 @@ userdom_search_user_home_dirs(devicekit_disk_t)
 
 optional_policy(`
 	dbus_system_bus_client(devicekit_disk_t)
-
-	allow devicekit_disk_t devicekit_t:dbus send_msg;
-
-	optional_policy(`
-		consolekit_dbus_chat(devicekit_disk_t)
-	')
 
 	optional_policy(`
 		policykit_dbus_chat(devicekit_disk_t)
@@ -201,9 +189,8 @@ optional_policy(`
 ')
 
 optional_policy(`
-	udev_domtrans(devicekit_disk_t)
-	udev_read_db(devicekit_disk_t)
-	udev_read_pid_files(devicekit_disk_t)
+	udev_domtrans_udevadm(devicekit_disk_t)
+	udev_read_runtime_files(devicekit_disk_t)
 ')
 
 optional_policy(`
@@ -238,7 +225,7 @@ logging_log_filetrans(devicekit_power_t, devicekit_var_log_t, file)
 
 manage_dirs_pattern(devicekit_power_t, devicekit_runtime_t, devicekit_runtime_t)
 manage_files_pattern(devicekit_power_t, devicekit_runtime_t, devicekit_runtime_t)
-files_pid_filetrans(devicekit_power_t, devicekit_runtime_t, { dir file })
+files_runtime_filetrans(devicekit_power_t, devicekit_runtime_t, { dir file })
 
 kernel_read_fs_sysctls(devicekit_power_t)
 kernel_read_network_state(devicekit_power_t)
@@ -302,16 +289,6 @@ optional_policy(`
 	dbus_system_bus_client(devicekit_power_t)
 	init_dbus_chat(devicekit_power_t)
 
-	allow devicekit_power_t devicekit_t:dbus send_msg;
-
-	optional_policy(`
-		consolekit_dbus_chat(devicekit_power_t)
-	')
-
-	optional_policy(`
-		hal_dbus_chat(devicekit_power_t)
-	')
-
 	optional_policy(`
 		networkmanager_dbus_chat(devicekit_power_t)
 	')
@@ -323,17 +300,14 @@ optional_policy(`
 	optional_policy(`
 		rpm_dbus_chat(devicekit_power_t)
 	')
+
+	optional_policy(`
+		xserver_dbus_chat_xdm(devicekit_power_t)
+	')
 ')
 
 optional_policy(`
 	fstools_domtrans(devicekit_power_t)
-')
-
-optional_policy(`
-	hal_domtrans_mac(devicekit_power_t)
-	hal_manage_log(devicekit_power_t)
-	hal_manage_pid_dirs(devicekit_power_t)
-	hal_manage_pid_files(devicekit_power_t)
 ')
 
 optional_policy(`
@@ -355,16 +329,11 @@ optional_policy(`
 ')
 
 optional_policy(`
-	readahead_domtrans(devicekit_power_t)
-')
-
-optional_policy(`
 	systemd_write_inherited_logind_inhibit_pipes(devicekit_power_t)
 ')
 
 optional_policy(`
-	udev_read_db(devicekit_power_t)
-	udev_manage_pid_files(devicekit_power_t)
+	udev_manage_runtime_files(devicekit_power_t)
 ')
 
 optional_policy(`

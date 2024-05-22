@@ -1,4 +1,4 @@
-policy_module(zebra, 1.17.1)
+policy_module(zebra)
 
 ########################################
 #
@@ -27,7 +27,7 @@ type zebra_log_t;
 logging_log_file(zebra_log_t)
 
 type zebra_runtime_t alias zebra_var_run_t;
-files_pid_file(zebra_runtime_t)
+files_runtime_file(zebra_runtime_t)
 
 type zebra_tmp_t;
 files_tmp_file(zebra_tmp_t)
@@ -42,7 +42,7 @@ dontaudit zebra_t self:capability sys_tty_config;
 allow zebra_t self:process { signal_perms getcap setcap };
 allow zebra_t self:fifo_file rw_fifo_file_perms;
 allow zebra_t self:unix_stream_socket { accept connectto listen };
-allow zebra_t self:netlink_route_socket rw_netlink_socket_perms;
+allow zebra_t self:netlink_route_socket create_netlink_socket_perms;
 allow zebra_t self:tcp_socket { connect connected_stream_socket_perms };
 allow zebra_t self:udp_socket create_socket_perms;
 allow zebra_t self:rawip_socket create_socket_perms;
@@ -64,7 +64,7 @@ files_tmp_filetrans(zebra_t, zebra_tmp_t, sock_file)
 manage_dirs_pattern(zebra_t, zebra_runtime_t, zebra_runtime_t)
 manage_files_pattern(zebra_t, zebra_runtime_t, zebra_runtime_t)
 manage_sock_files_pattern(zebra_t, zebra_runtime_t, zebra_runtime_t)
-files_pid_filetrans(zebra_t, zebra_runtime_t, { dir file sock_file })
+files_runtime_filetrans(zebra_t, zebra_runtime_t, { dir file sock_file })
 
 kernel_read_system_state(zebra_t)
 kernel_read_network_state(zebra_t)
@@ -132,6 +132,3 @@ optional_policy(`
 	seutil_sigchld_newrole(zebra_t)
 ')
 
-optional_policy(`
-	udev_read_db(zebra_t)
-')

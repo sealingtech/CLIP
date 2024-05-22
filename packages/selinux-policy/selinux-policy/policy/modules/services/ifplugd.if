@@ -5,9 +5,9 @@
 ##	Execute a domain transition to run ifplugd.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`ifplugd_domtrans',`
@@ -79,25 +79,6 @@ interface(`ifplugd_manage_config',`
 
 ########################################
 ## <summary>
-##	Read ifplugd pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`ifplugd_read_pid_files',`
-	gen_require(`
-		type ifplugd_runtime_t;
-	')
-
-	files_search_pids($1)
-	allow $1 ifplugd_runtime_t:file read_file_perms;
-')
-
-########################################
-## <summary>
 ##	All of the rules required to
 ##	administrate an ifplugd environment.
 ## </summary>
@@ -127,6 +108,6 @@ interface(`ifplugd_admin',`
 	files_list_etc($1)
 	admin_pattern($1, ifplugd_etc_t)
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, ifplugd_runtime_t)
 ')

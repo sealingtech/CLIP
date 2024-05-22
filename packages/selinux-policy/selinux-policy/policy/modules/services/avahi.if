@@ -129,13 +129,13 @@ interface(`avahi_stream_connect',`
 		type avahi_t, avahi_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, avahi_runtime_t, avahi_runtime_t, avahi_t)
 ')
 
 ########################################
 ## <summary>
-##	Create avahi pid directories.
+##	Set attributes of avahi runtime directories.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -143,37 +143,18 @@ interface(`avahi_stream_connect',`
 ##	</summary>
 ## </param>
 #
-interface(`avahi_create_pid_dirs',`
+interface(`avahi_setattr_runtime_dirs',`
 	gen_require(`
 		type avahi_runtime_t;
 	')
 
-	files_search_pids($1)
-	allow $1 avahi_runtime_t:dir create_dir_perms;
-')
-
-########################################
-## <summary>
-##	Set attributes of avahi pid directories.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`avahi_setattr_pid_dirs',`
-	gen_require(`
-		type avahi_runtime_t;
-	')
-
-	files_search_pids($1)
+	files_search_runtime($1)
 	allow $1 avahi_runtime_t:dir setattr_dir_perms;
 ')
 
 ########################################
 ## <summary>
-##	Create, read, and write avahi pid files.
+##	Create avahi runtime directories.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -181,19 +162,38 @@ interface(`avahi_setattr_pid_dirs',`
 ##	</summary>
 ## </param>
 #
-interface(`avahi_manage_pid_files',`
+interface(`avahi_create_runtime_dirs',`
 	gen_require(`
 		type avahi_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
+	allow $1 avahi_runtime_t:dir create_dir_perms;
+')
+
+########################################
+## <summary>
+##	Create, read, and write avahi runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`avahi_manage_runtime_files',`
+	gen_require(`
+		type avahi_runtime_t;
+	')
+
+	files_search_runtime($1)
 	manage_files_pattern($1, avahi_runtime_t, avahi_runtime_t)
 ')
 
 ########################################
 ## <summary>
 ##	Do not audit attempts to search
-##	avahi pid directories.
+##	avahi runtime directories.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -201,7 +201,7 @@ interface(`avahi_manage_pid_files',`
 ##	</summary>
 ## </param>
 #
-interface(`avahi_dontaudit_search_pid',`
+interface(`avahi_dontaudit_search_runtime',`
 	gen_require(`
 		type avahi_runtime_t;
 	')
@@ -212,7 +212,7 @@ interface(`avahi_dontaudit_search_pid',`
 ########################################
 ## <summary>
 ##	Create specified objects in generic
-##	pid directories with the avahi pid file type.
+##	runtime directories with the avahi runtime file type.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -230,12 +230,12 @@ interface(`avahi_dontaudit_search_pid',`
 ##	</summary>
 ## </param>
 #
-interface(`avahi_filetrans_pid',`
+interface(`avahi_filetrans_runtime',`
 	gen_require(`
 		type avahi_runtime_t;
 	')
 
-	files_pid_filetrans($1, avahi_runtime_t, $2, $3)
+	files_runtime_filetrans($1, avahi_runtime_t, $2, $3)
 ')
 
 ########################################
@@ -266,7 +266,7 @@ interface(`avahi_admin',`
 
 	init_startstop_service($1, $2, avahi_t, avahi_initrc_exec_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, avahi_runtime_t)
 
 	files_search_var_lib($1)

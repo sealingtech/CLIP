@@ -1,4 +1,4 @@
-policy_module(mpd, 1.5.1)
+policy_module(mpd)
 
 ########################################
 #
@@ -179,13 +179,10 @@ optional_policy(`
 
 optional_policy(`
 	dbus_system_bus_client(mpd_t)
-
-	optional_policy(`
-		consolekit_dbus_chat(mpd_t)
-	')
 ')
 
 optional_policy(`
+	pulseaudio_client_domain(mpd_t)
 	pulseaudio_domtrans(mpd_t)
 ')
 
@@ -194,10 +191,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	udev_read_db(mpd_t)
-')
-
-optional_policy(`
 	xserver_stream_connect(mpd_t)
-	xserver_read_xdm_pid(mpd_t)
+	xserver_read_xdm_runtime_files(mpd_t)
 ')

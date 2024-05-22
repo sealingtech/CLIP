@@ -1,4 +1,4 @@
-policy_module(smartmon, 1.16.0)
+policy_module(smartmon)
 
 ########################################
 #
@@ -21,7 +21,7 @@ type fsdaemon_initrc_exec_t;
 init_script_file(fsdaemon_initrc_exec_t)
 
 type fsdaemon_runtime_t alias fsdaemon_var_run_t;
-files_pid_file(fsdaemon_runtime_t)
+files_runtime_file(fsdaemon_runtime_t)
 
 type fsdaemon_var_lib_t;
 files_type(fsdaemon_var_lib_t)
@@ -33,17 +33,17 @@ ifdef(`enable_mls',`
 	init_ranged_daemon_domain(fsdaemon_t, fsdaemon_exec_t, mls_systemhigh)
 ')
 
-ifdef(`enable_mcs',`
-	init_ranged_daemon_domain(fsdaemon_t, fsdaemon_exec_t, mcs_systemhigh)
-')
+type smartmon_update_drivedb_t;
+type smartmon_update_drivedb_exec_t;
+init_system_domain(smartmon_update_drivedb_t, smartmon_update_drivedb_exec_t)
 
 ########################################
 #
 # Local policy
 #
 
-allow fsdaemon_t self:capability { dac_override kill setgid setpcap sys_admin sys_rawio };
-dontaudit fsdaemon_t self:capability sys_tty_config;
+allow fsdaemon_t self:capability { dac_override kill setgid setuid setpcap sys_admin sys_rawio };
+dontaudit fsdaemon_t self:capability { net_admin sys_tty_config };
 allow fsdaemon_t self:process { getcap setcap signal_perms };
 allow fsdaemon_t self:fifo_file rw_fifo_file_perms;
 allow fsdaemon_t self:unix_stream_socket { accept listen };
@@ -53,7 +53,7 @@ manage_files_pattern(fsdaemon_t, fsdaemon_tmp_t, fsdaemon_tmp_t)
 files_tmp_filetrans(fsdaemon_t, fsdaemon_tmp_t, { file dir })
 
 manage_files_pattern(fsdaemon_t, fsdaemon_runtime_t, fsdaemon_runtime_t)
-files_pid_filetrans(fsdaemon_t, fsdaemon_runtime_t, file)
+files_runtime_filetrans(fsdaemon_t, fsdaemon_runtime_t, file)
 
 manage_files_pattern(fsdaemon_t, fsdaemon_var_lib_t, fsdaemon_var_lib_t)
 
@@ -72,7 +72,6 @@ domain_use_interactive_fds(fsdaemon_t)
 files_exec_etc_files(fsdaemon_t)
 files_read_etc_files(fsdaemon_t)
 files_read_etc_runtime_files(fsdaemon_t)
-files_read_usr_files(fsdaemon_t)
 files_search_var_lib(fsdaemon_t)
 
 fs_getattr_all_fs(fsdaemon_t)
@@ -109,11 +108,15 @@ tunable_policy(`smartmon_3ware',`
 
 	storage_create_fixed_disk_dev(fsdaemon_t)
 	storage_delete_fixed_disk_dev(fsdaemon_t)
-	storage_dev_filetrans_fixed_disk(fsdaemon_t)
+	storage_dev_filetrans_fixed_disk(fsdaemon_t, blk_file)
 
 	selinux_validate_context(fsdaemon_t)
 
 	seutil_read_file_contexts(fsdaemon_t)
+')
+
+optional_policy(`
+	fstools_read_fsadm_db_files(fsdaemon_t)
 ')
 
 optional_policy(`
@@ -124,6 +127,48 @@ optional_policy(`
 	seutil_sigchld_newrole(fsdaemon_t)
 ')
 
+########################################
+#
+# smartmon_update_drivedb policy
+#
+
+allow smartmon_update_drivedb_t self:fifo_file rw_fifo_file_perms;
+allow smartmon_update_drivedb_t self:unix_stream_socket connectto;
+
+corecmd_exec_bin(smartmon_update_drivedb_t)
+corecmd_exec_shell(smartmon_update_drivedb_t)
+
+corenet_sendrecv_http_client_packets(smartmon_update_drivedb_t)
+corenet_tcp_connect_http_port(smartmon_update_drivedb_t)
+
+files_read_etc_files(smartmon_update_drivedb_t)
+
+kernel_dontaudit_read_system_state(smartmon_update_drivedb_t)
+
+miscfiles_read_generic_certs(smartmon_update_drivedb_t)
+miscfiles_read_localization(smartmon_update_drivedb_t)
+
+sysnet_dns_name_resolve(smartmon_update_drivedb_t)
+
+ifdef(`distro_gentoo',`
+	fstools_manage_fsadm_db_files(smartmon_update_drivedb_t)
+	fstools_watch_fsadm_db_dirs(smartmon_update_drivedb_t)
+')
+
 optional_policy(`
-	udev_read_db(fsdaemon_t)
+	cron_rw_inherited_system_job_tmp_files(smartmon_update_drivedb_t)
+	cron_system_entry(smartmon_update_drivedb_t, smartmon_update_drivedb_exec_t)
+')
+
+optional_policy(`
+	fstools_exec(smartmon_update_drivedb_t)
+')
+
+optional_policy(`
+	gpg_exec_agent(smartmon_update_drivedb_t)
+	gpg_exec(smartmon_update_drivedb_t)
+')
+
+optional_policy(`
+	xdg_read_config_files(smartmon_update_drivedb_t)
 ')

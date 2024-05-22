@@ -1,4 +1,4 @@
-policy_module(iscsi, 1.14.2)
+policy_module(iscsi)
 
 ########################################
 #
@@ -20,7 +20,7 @@ type iscsi_log_t;
 logging_log_file(iscsi_log_t)
 
 type iscsi_runtime_t alias iscsi_var_run_t;
-files_pid_file(iscsi_runtime_t)
+files_runtime_file(iscsi_runtime_t)
 
 type iscsi_tmp_t;
 files_tmp_file(iscsi_tmp_t)
@@ -62,12 +62,13 @@ read_files_pattern(iscsid_t, iscsi_var_lib_t, iscsi_var_lib_t)
 read_lnk_files_pattern(iscsid_t, iscsi_var_lib_t, iscsi_var_lib_t)
 
 manage_files_pattern(iscsid_t, iscsi_runtime_t, iscsi_runtime_t)
-files_pid_filetrans(iscsid_t, iscsi_runtime_t, file)
+files_runtime_filetrans(iscsid_t, iscsi_runtime_t, file)
 
 can_exec(iscsid_t, iscsid_exec_t)
 
 kernel_read_network_state(iscsid_t)
 kernel_read_system_state(iscsid_t)
+kernel_request_load_module(iscsid_t)
 kernel_setsched(iscsid_t)
 
 corenet_all_recvfrom_netlabel(iscsid_t)
@@ -88,6 +89,8 @@ dev_rw_userio_dev(iscsid_t)
 
 domain_use_interactive_fds(iscsid_t)
 domain_dontaudit_read_all_domains_state(iscsid_t)
+
+files_read_etc_runtime_files(iscsid_t)
 
 auth_use_nsswitch(iscsid_t)
 

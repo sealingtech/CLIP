@@ -912,6 +912,24 @@ interface(`corenet_tcp_bind_generic_node',`
 
 ########################################
 ## <summary>
+##	Do not audit denials on binding TCP sockets to generic nodes.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`corenet_dontaudit_tcp_bind_generic_node',`
+	gen_require(`
+		type node_t;
+	')
+
+	dontaudit $1 node_t:tcp_socket node_bind;
+')
+
+########################################
+## <summary>
 ##	Bind UDP sockets to generic nodes.
 ## </summary>
 ## <desc>
@@ -2738,7 +2756,7 @@ interface(`corenet_dontaudit_raw_recvfrom_unlabeled',`
 ##	Allow the specified domain to receive packets from an
 ##	unlabeled connection.  On machines that do not utilize
 ##	labeled networking, this will be required on all
-##	networking domains.  On machines tha do utilize
+##	networking domains.  On machines that do utilize
 ##	labeled networking, this will be required for any
 ##	networking domain that is allowed to receive
 ##	network traffic that does not have a label.

@@ -5,9 +5,9 @@
 ##	Execute a domain transition to run plymouthd.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`plymouthd_domtrans',`
@@ -24,9 +24,9 @@ interface(`plymouthd_domtrans',`
 ##	Execute plymouthd in the caller domain.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed access.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`plymouthd_exec',`
@@ -63,9 +63,9 @@ interface(`plymouthd_stream_connect',`
 ##	Execute plymouth in the caller domain.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed access.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`plymouthd_exec_plymouth',`
@@ -82,9 +82,9 @@ interface(`plymouthd_exec_plymouth',`
 ##	Execute a domain transition to run plymouth.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`plymouthd_domtrans_plymouth',`
@@ -233,7 +233,7 @@ interface(`plymouthd_manage_lib_files',`
 
 ########################################
 ## <summary>
-##	Read plymouthd pid files.
+##	Read plymouthd runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -241,19 +241,18 @@ interface(`plymouthd_manage_lib_files',`
 ##	</summary>
 ## </param>
 #
-interface(`plymouthd_read_pid_files',`
+interface(`plymouthd_read_runtime_files',`
 	gen_require(`
 		type plymouthd_runtime_t;
 	')
 
-	files_search_pids($1)
-	allow $1 plymouthd_runtime_t:dir search_dir_perms; 
-	allow $1 plymouthd_runtime_t:file read_file_perms;
+	files_search_runtime($1)
+	read_files_pattern($1, plymouthd_runtime_t, plymouthd_runtime_t)
 ')
 
 ########################################
 ## <summary>
-##	Delete the plymouthd pid files.
+##	Delete the plymouthd runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -261,12 +260,12 @@ interface(`plymouthd_read_pid_files',`
 ##	</summary>
 ## </param>
 #
-interface(`plymouthd_delete_pid_files',`
+interface(`plymouthd_delete_runtime_files',`
 	gen_require(`
 		type plymouthd_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	delete_files_pattern($1, plymouthd_runtime_t, plymouthd_runtime_t)
 ')
 
@@ -302,106 +301,6 @@ interface(`plymouthd_admin',`
 	files_search_var_lib($1)
 	admin_pattern($1, plymouthd_var_lib_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, plymouthd_runtime_t)
-')
-
-
-########################################
-## <summary>
-##      Allow the specified domain to read
-##      to plymouthd log files.
-## </summary>
-## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
-## </param>
-#
-interface(`plymouthd_read_log',`
-        gen_require(`
-                type plymouthd_var_log_t;
-        ')
-
-        logging_search_logs($1)
-        read_files_pattern($1, plymouthd_var_log_t, plymouthd_var_log_t)
-')
-
-#####################################
-## <summary>
-##  Allow the specified domain to create plymouthd's log files.
-## </summary>
-## <param name="domain">
-##  <summary>
-##  Domain allowed access.
-##  </summary>
-## </param>
-#
-interface(`plymouthd_create_log',`
-    gen_require(`
-        type plymouthd_var_log_t;
-    ')
-
-    logging_search_logs($1)
-    create_files_pattern($1, plymouthd_var_log_t, plymouthd_var_log_t)
-')
-
-########################################
-## <summary>
-##      Allow the specified domain to manage
-##      to plymouthd log files.
-## </summary>
-## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
-## </param>
-#
-interface(`plymouthd_manage_log',`
-        gen_require(`
-                type plymouthd_var_log_t;
-        ')
-
-        logging_search_logs($1)
-        manage_dirs_pattern($1, plymouthd_var_log_t, plymouthd_var_log_t)
-        manage_files_pattern($1, plymouthd_var_log_t, plymouthd_var_log_t)
-        read_lnk_files_pattern($1, plymouthd_var_log_t, plymouthd_var_log_t)
-')
-
-#######################################
-## <summary>
-##      Allow domain to create boot.log
-## </summary>
-## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
-## </param>
-#
-interface(`plymouthd_filetrans_named_content',`
-
-    gen_require(`
-        type plymouthd_var_log_t;
-    ')
-
-    logging_log_named_filetrans($1, plymouthd_var_log_t, file, "boot.log")
-')
-
-########################################
-## <summary>
-##  Allow domain to use a file descriptor
-##  from plymouthd.
-## </summary>
-## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
-## </param>
-#
-interface(`plymouth_use_plymouthd_fd', `
-        gen_require(`
-                type plymouthd_t;
-        ')
-
-        allow $1 plymouthd_t:fd use;
 ')

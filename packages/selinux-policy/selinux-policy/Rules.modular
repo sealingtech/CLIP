@@ -60,6 +60,17 @@ load: $(instpkg) $(appfiles)
 
 ########################################
 #
+# Load all configured modules and remove foreign ones
+#
+pure-load: $(instpkg) $(appfiles)
+# make sure two directories exist since they are not
+# created by semanage
+	@echo "Loading configured modules."
+	@$(INSTALL) -d -m 0755 $(policypath) $(dir $(fcpath))
+	$(verbose) $(SEMODULE) -s $(NAME) -i $(modpkgdir)/$(notdir $(base_pkg)) $(foreach mod,$(mod_pkgs),-i $(modpkgdir)/$(mod)) $(foreach omod,$(filter-out base $(notdir $(mod_mods:.te=)),$(shell $(SEMODULE) -l)),-r $(omod))
+
+########################################
+#
 # Install policy packages
 #
 $(modpkgdir)/%.pp: $(builddir)%.pp
@@ -108,8 +119,8 @@ $(tmpdir)/seusers: $(seusers)
 
 $(users_extra): $(m4support) $(user_files)
 	@test -d $(tmpdir) || mkdir -p $(tmpdir)
-	$(verbose) $(M4) $(M4PARAM) -D users_extra $^ | \
-		$(SED) -r -n -e 's/^[[:blank:]]*//g' -e '/^user/p' > $@
+	$(verbose) $(M4) $(M4PARAM) -D users_extra $^ > $(tmpdir)/$(@F).tmp
+	$(verbose) $(SED) -r -n -e 's/^[[:blank:]]*//g' -e '/^user/p' $(tmpdir)/$(@F).tmp > $@
 
 ########################################
 #
@@ -154,9 +165,10 @@ endif
 	$(verbose) $(M4) $(M4PARAM) -s $^ > $@
 
 $(tmpdir)/post_te_files.conf: M4PARAM += -D self_contained_policy
-$(tmpdir)/post_te_files.conf: $(m4support) $(tmpdir)/generated_definitions.conf $(base_post_te_files)
+$(tmpdir)/post_te_files.conf: $(m4support) $(tmpdir)/generated_definitions.conf $(base_post_te_files) $(tmpdir)/all_te_files.conf
 	@test -d $(tmpdir) || mkdir -p $(tmpdir)
-	$(verbose) $(M4) $(M4PARAM) $^ > $@
+	$(verbose) $(GREP) '^[[:blank:]]*user ' $(tmpdir)/all_te_files.conf > $@ || true
+	$(verbose) $(M4) $(M4PARAM) $(m4support) $(tmpdir)/generated_definitions.conf $(base_post_te_files) >> $@
 
 # extract attributes and put them first. extract post te stuff
 # like genfscon and put last.
@@ -166,14 +178,14 @@ $(tmpdir)/all_attrs_types.conf: $(tmpdir)/all_te_files.conf
 $(tmpdir)/all_post.conf: $(tmpdir)/all_te_files.conf $(tmpdir)/post_te_files.conf
 	$(verbose) cat $(tmpdir)/post_te_files.conf > $@
 # these have to run individually because order matters:
-	$(verbose) $(GREP) '^sid ' $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) '^fs_use_(xattr|task|trans)' $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) ^genfscon $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) ^portcon $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) ^netifcon $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) ^nodecon $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) ^ibpkeycon $(tmpdir)/all_te_files.conf >> $@ || true
-	$(verbose) $(GREP) ^ibendportcon $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*sid ' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*fs_use_(xattr|task|trans)' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*genfscon' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*portcon' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*netifcon' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*nodecon' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*ibpkeycon' $(tmpdir)/all_te_files.conf >> $@ || true
+	$(verbose) $(GREP) '^[[:blank:]]*ibendportcon' $(tmpdir)/all_te_files.conf >> $@ || true
 
 $(tmpdir)/only_te_rules.conf: $(tmpdir)/all_te_files.conf
 	$(verbose) $(comment_move_decl) $^ > $@
@@ -225,4 +237,4 @@ clean:
 	$(verbose) rm -f $(net_contexts) $(net_contexts_nft)
 	$(verbose) rm -fR $(tmpdir)
 
-.PHONY: default all policy base modules install load clean validate
+.PHONY: default all policy base modules install load pure-load clean validate

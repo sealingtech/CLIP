@@ -69,7 +69,7 @@ interface(`nis_use_ypbind_uncond',`
 ##	<p>
 ##	Allow the specified domain to use the ypbind service
 ##	to access Network Information Service (NIS) services.
-##	Information that can be retreived from NIS includes
+##	Information that can be retrieved from NIS includes
 ##	usernames, passwords, home directories, and groups.
 ##	If the network is configured to have a single sign-on
 ##	using NIS, it is likely that any program that does
@@ -212,7 +212,7 @@ interface(`nis_list_var_yp',`
 
 ########################################
 ## <summary>
-##	Read ypbind pid files.
+##	Read ypbind runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -220,31 +220,13 @@ interface(`nis_list_var_yp',`
 ##	</summary>
 ## </param>
 #
-interface(`nis_read_ypbind_pid',`
+interface(`nis_read_ypbind_runtime_files',`
 	gen_require(`
 		type ypbind_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	allow $1 ypbind_runtime_t:file read_file_perms;
-')
-
-########################################
-## <summary>
-##	Delete ypbind pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`nis_delete_ypbind_pid',`
-	gen_require(`
-		type ypbind_runtime_t;
-	')
-
-	allow $1 ypbind_runtime_t:file delete_file_perms;
 ')
 
 ########################################
@@ -358,7 +340,7 @@ interface(`nis_admin',`
 	files_list_tmp($1)
 	admin_pattern($1, { ypserv_tmp_t ypbind_tmp_t })
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, { ypserv_runtime_t ypbind_runtime_t yppasswdd_runtime_t })
 
 	files_list_etc($1)

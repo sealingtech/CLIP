@@ -1,4 +1,4 @@
-policy_module(bind, 1.21.1)
+policy_module(bind)
 
 ########################################
 #
@@ -51,8 +51,8 @@ type named_log_t;
 logging_log_file(named_log_t)
 
 type named_runtime_t alias named_var_run_t;
-files_pid_file(named_runtime_t)
-init_daemon_pid_file(named_runtime_t, dir, "named")
+files_runtime_file(named_runtime_t)
+init_daemon_runtime_file(named_runtime_t, dir, "named")
 
 type named_tmp_t;
 files_tmp_file(named_tmp_t)
@@ -76,12 +76,15 @@ role ndc_roles types ndc_t;
 
 allow named_t self:capability { chown dac_override fowner setgid setuid sys_chroot sys_nice sys_resource };
 dontaudit named_t self:capability sys_tty_config;
-allow named_t self:process { setsched getcap setcap setrlimit signal_perms };
+allow named_t self:process { setsched getsched getcap setcap setrlimit signal_perms };
 allow named_t self:fifo_file rw_fifo_file_perms;
 allow named_t self:unix_stream_socket { accept listen };
 allow named_t self:tcp_socket { accept listen };
+allow named_t self:anon_inode { create map read write };
+allow named_t self:io_uring sqpoll;
 
-allow named_t dnssec_t:file read_file_perms;
+manage_files_pattern(named_t, dnssec_t, dnssec_t)
+filetrans_pattern(named_t, named_conf_t, dnssec_t, dir, "cache")
 
 allow named_t named_conf_t:dir list_dir_perms;
 read_files_pattern(named_t, named_conf_t, named_conf_t)
@@ -104,7 +107,7 @@ files_tmp_filetrans(named_t, named_tmp_t, { file dir })
 manage_dirs_pattern(named_t, named_runtime_t, named_runtime_t)
 manage_files_pattern(named_t, named_runtime_t, named_runtime_t)
 manage_sock_files_pattern(named_t, named_runtime_t, named_runtime_t)
-files_pid_filetrans(named_t, named_runtime_t, { dir file sock_file })
+files_runtime_filetrans(named_t, named_runtime_t, { dir file sock_file })
 
 can_exec(named_t, named_exec_t)
 
@@ -149,6 +152,7 @@ domain_use_interactive_fds(named_t)
 
 files_read_etc_runtime_files(named_t)
 files_read_usr_files(named_t)
+files_map_usr_files(named_t)
 
 fs_getattr_all_fs(named_t)
 fs_search_auto_mountpoints(named_t)
@@ -206,18 +210,14 @@ optional_policy(`
 	seutil_sigchld_newrole(named_t)
 ')
 
-optional_policy(`
-	udev_read_db(named_t)
-')
-
 ########################################
 #
 # NDC local policy
 #
 
-allow ndc_t self:capability { dac_override net_admin };
+allow ndc_t self:capability { dac_override dac_read_search net_admin };
 allow ndc_t self:capability2 block_suspend;
-allow ndc_t self:process signal_perms;
+allow ndc_t self:process { signal_perms getsched setsched };
 allow ndc_t self:fifo_file rw_fifo_file_perms;
 allow ndc_t self:unix_stream_socket { accept listen };
 
@@ -233,6 +233,9 @@ allow ndc_t named_zone_t:dir search_dir_perms;
 
 kernel_read_kernel_sysctls(ndc_t)
 kernel_read_system_state(ndc_t)
+kernel_read_vm_overcommit_sysctl(ndc_t)
+
+dev_read_sysfs(ndc_t)
 
 corenet_all_recvfrom_netlabel(ndc_t)
 corenet_tcp_sendrecv_generic_if(ndc_t)
@@ -244,7 +247,7 @@ corenet_sendrecv_rndc_client_packets(ndc_t)
 
 domain_use_interactive_fds(ndc_t)
 
-files_search_pids(ndc_t)
+files_search_runtime(ndc_t)
 
 fs_getattr_xattr_fs(ndc_t)
 

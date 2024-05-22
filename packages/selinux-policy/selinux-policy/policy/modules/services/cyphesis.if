@@ -5,9 +5,9 @@
 ##	Execute a domain transition to run cyphesis.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`cyphesis_domtrans',`
@@ -50,7 +50,7 @@ interface(`cyphesis_admin',`
 	logging_search_logs($1)
 	admin_pattern($1, cyphesis_log_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, cyphesis_runtime_t)
 
 	files_search_tmp($1)

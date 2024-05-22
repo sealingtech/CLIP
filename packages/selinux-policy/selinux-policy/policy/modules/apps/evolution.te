@@ -1,4 +1,4 @@
-policy_module(evolution, 2.10.2)
+policy_module(evolution)
 
 ########################################
 #
@@ -303,6 +303,8 @@ stream_connect_pattern(evolution_alarm_t, evolution_server_orbit_tmp_t, evolutio
 
 kernel_dontaudit_read_system_state(evolution_alarm_t)
 
+corecmd_exec_bin(evolution_alarm_t)
+
 dev_read_urand(evolution_alarm_t)
 
 files_read_usr_files(evolution_alarm_t)
@@ -416,7 +418,7 @@ optional_policy(`
 
 allow evolution_server_t self:process { getsched signal };
 
-allow evolution_server_t self:fifo_file { read write };
+allow evolution_server_t self:fifo_file rw_inherited_fifo_file_perms;
 allow evolution_server_t self:unix_stream_socket { accept connectto listen };
 
 allow evolution_server_t evolution_home_t:dir manage_dir_perms;

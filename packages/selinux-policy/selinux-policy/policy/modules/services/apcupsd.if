@@ -6,9 +6,9 @@
 ##	run apcupsd.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`apcupsd_domtrans',`
@@ -41,25 +41,6 @@ interface(`apcupsd_initrc_domtrans',`
 
 ########################################
 ## <summary>
-##	Read apcupsd PID files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`apcupsd_read_pid_files',`
-	gen_require(`
-		type apcupsd_runtime_t;
-	')
-
-	files_search_pids($1)
-	allow $1 apcupsd_runtime_t:file read_file_perms;
-')
-
-########################################
-## <summary>
 ##	Read apcupsd log files.
 ## </summary>
 ## <param name="domain">
@@ -84,9 +65,9 @@ interface(`apcupsd_read_log',`
 ##	Append apcupsd log files.
 ## </summary>
 ## <param name="domain">
-## 	<summary>
+##	<summary>
 ##	Domain allowed access.
-## 	</summary>
+##	</summary>
 ## </param>
 #
 interface(`apcupsd_append_log',`
@@ -105,9 +86,9 @@ interface(`apcupsd_append_log',`
 ##	run httpd_apcupsd_cgi_script.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`apcupsd_cgi_script_domtrans',`
@@ -160,6 +141,6 @@ interface(`apcupsd_admin',`
 	files_list_tmp($1)
 	admin_pattern($1, apcupsd_tmp_t)
 
-	files_list_pids($1)
+	files_list_runtime($1)
 	admin_pattern($1, apcupsd_runtime_t)
 ')

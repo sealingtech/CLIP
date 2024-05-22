@@ -18,9 +18,7 @@ interface(`iptables_domtrans',`
 	corecmd_search_bin($1)
 	domtrans_pattern($1, iptables_exec_t, iptables_t)
 
-	ifdef(`hide_broken_symptoms', `
-		dontaudit iptables_t $1:socket_class_set { read write };
-	')
+        dontaudit iptables_t $1:socket_class_set { read write };
 ')
 
 ########################################
@@ -66,6 +64,25 @@ interface(`iptables_exec',`
 
 	corecmd_search_bin($1)
 	can_exec($1, iptables_exec_t)
+')
+
+########################################
+## <summary>
+##	Read the process state (/proc/pid)
+##	of iptables.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`iptables_read_state',`
+	gen_require(`
+		type iptables_t;
+	')
+
+	ps_process_pattern($1, iptables_t)
 ')
 
 ########################################
@@ -166,7 +183,61 @@ interface(`iptables_manage_config',`
 
 ########################################
 ## <summary>
-##	dontaudit reading iptables_runtime_t
+##	Get the attributes of iptables runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`iptables_getattr_runtime_files',`
+	gen_require(`
+		type iptables_runtime_t;
+	')
+
+	allow $1 iptables_runtime_t:file getattr;
+')
+
+########################################
+## <summary>
+##	Read iptables runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`iptables_read_runtime_files',`
+	gen_require(`
+		type iptables_runtime_t;
+	')
+
+	read_files_pattern($1, iptables_runtime_t, iptables_runtime_t)
+')
+
+########################################
+## <summary>
+##	Mount on iptables runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`iptables_mounton_runtime_files',`
+	gen_require(`
+		type iptables_runtime_t;
+	')
+
+	allow $1 iptables_runtime_t:file mounton;
+')
+
+########################################
+## <summary>
+##	Do not audit reading iptables runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -174,7 +245,7 @@ interface(`iptables_manage_config',`
 ##	</summary>
 ## </param>
 #
-interface(`iptables_dontaudit_read_pids',`
+interface(`iptables_dontaudit_read_runtime_files',`
 	gen_require(`
 		type iptables_runtime_t;
 	')
@@ -254,6 +325,6 @@ interface(`iptables_admin',`
 	files_search_tmp($1)
 	admin_pattern($1, iptables_tmp_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, iptables_runtime_t)
 ')

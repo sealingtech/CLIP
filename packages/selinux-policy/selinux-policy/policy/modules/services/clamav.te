@@ -1,4 +1,4 @@
-policy_module(clamav, 1.18.2)
+policy_module(clamav)
 
 ## <desc>
 ##	<p>
@@ -40,8 +40,7 @@ type clamd_initrc_exec_t;
 init_script_file(clamd_initrc_exec_t)
 
 type clamd_runtime_t;
-files_pid_file(clamd_runtime_t)
-typealias clamd_runtime_t alias clamd_var_run_t;
+files_runtime_file(clamd_runtime_t)
 
 type clamd_tmp_t;
 files_tmp_file(clamd_tmp_t)
@@ -76,7 +75,7 @@ logging_log_file(freshclam_var_log_t)
 
 allow clamd_t self:capability { chown fowner fsetid kill setgid setuid dac_override };
 dontaudit clamd_t self:capability sys_tty_config;
-allow clamd_t self:process signal;
+allow clamd_t self:process { signal getsched };
 allow clamd_t self:fifo_file rw_fifo_file_perms;
 allow clamd_t self:unix_stream_socket { accept connectto listen };
 allow clamd_t self:tcp_socket { listen accept };
@@ -102,14 +101,13 @@ logging_log_filetrans(clamd_t, clamd_var_log_t, { dir file })
 manage_dirs_pattern(clamd_t, clamd_runtime_t, clamd_runtime_t)
 manage_files_pattern(clamd_t, clamd_runtime_t, clamd_runtime_t)
 manage_sock_files_pattern(clamd_t, clamd_runtime_t, clamd_runtime_t)
-files_pid_filetrans(clamd_t, clamd_runtime_t, { dir file sock_file })
+files_runtime_filetrans(clamd_t, clamd_runtime_t, { dir file sock_file })
 
 read_files_pattern(clamd_t, clam_scannable_type, clam_scannable_type)
 read_lnk_files_pattern(clamd_t, clam_scannable_type, clam_scannable_type)
 list_dirs_pattern(clamd_t, clam_scannable_type, clam_scannable_type)
 
 kernel_dontaudit_list_proc(clamd_t)
-kernel_read_crypto_sysctls(clamd_t)
 kernel_read_sysctl(clamd_t)
 kernel_read_kernel_sysctls(clamd_t)
 kernel_read_system_state(clamd_t)
@@ -157,7 +155,7 @@ tunable_policy(`clamd_use_jit',`
 optional_policy(`
 	amavis_read_lib_files(clamd_t)
 	amavis_spool_filetrans(clamd_t, clamd_runtime_t, sock_file)
-	amavis_create_pid_files(clamd_t)
+	amavis_create_runtime_files(clamd_t)
 ')
 
 optional_policy(`
@@ -176,7 +174,7 @@ optional_policy(`
 # Freshclam local policy
 #
 
-allow freshclam_t self:capability { dac_override setgid setuid };
+allow freshclam_t self:capability { chown dac_override setgid setuid };
 allow freshclam_t self:fifo_file rw_fifo_file_perms;
 allow freshclam_t self:unix_stream_socket { accept listen };
 allow freshclam_t self:tcp_socket { accept listen };
@@ -189,7 +187,7 @@ manage_dirs_pattern(freshclam_t, clamd_var_lib_t, clamd_var_lib_t)
 manage_files_pattern(freshclam_t, clamd_var_lib_t, clamd_var_lib_t)
 
 manage_files_pattern(freshclam_t, clamd_runtime_t, clamd_runtime_t)
-files_pid_filetrans(freshclam_t, clamd_runtime_t, file)
+files_runtime_filetrans(freshclam_t, clamd_runtime_t, file)
 
 append_files_pattern(freshclam_t, freshclam_var_log_t, freshclam_var_log_t)
 create_files_pattern(freshclam_t, freshclam_var_log_t, freshclam_var_log_t)
@@ -201,7 +199,6 @@ stream_connect_pattern(freshclam_t, clamd_runtime_t, clamd_runtime_t, clamd_t)
 read_files_pattern(freshclam_t, clamd_var_log_t, clamd_var_log_t)
 
 kernel_dontaudit_list_proc(freshclam_t)
-kernel_read_crypto_sysctls(freshclam_t)
 kernel_read_kernel_sysctls(freshclam_t)
 kernel_read_network_state(freshclam_t)
 kernel_read_system_state(freshclam_t)
@@ -228,6 +225,7 @@ dev_read_urand(freshclam_t)
 domain_use_interactive_fds(freshclam_t)
 
 files_read_etc_runtime_files(freshclam_t)
+files_read_usr_files(freshclam_t)
 files_search_var_lib(freshclam_t)
 
 auth_use_nsswitch(freshclam_t)

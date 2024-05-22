@@ -1,4 +1,4 @@
-policy_module(policykit, 1.10.0)
+policy_module(policykit)
 
 ########################################
 #
@@ -32,7 +32,7 @@ type policykit_reload_t alias polkit_reload_t;
 files_type(policykit_reload_t)
 
 type policykit_runtime_t alias policykit_var_run_t;
-files_pid_file(policykit_runtime_t)
+files_runtime_file(policykit_runtime_t)
 
 type policykit_tmp_t;
 files_tmp_file(policykit_tmp_t)
@@ -69,7 +69,8 @@ miscfiles_read_localization(policykit_domain)
 #
 
 allow policykit_t self:capability { dac_override dac_read_search setgid setuid sys_nice sys_ptrace };
-allow policykit_t self:capability net_admin;
+# for changing buffer sizes
+dontaudit policykit_t self:capability net_admin;
 allow policykit_t self:process { getsched setsched signal };
 allow policykit_t self:unix_stream_socket { accept connectto listen };
 
@@ -79,18 +80,16 @@ manage_files_pattern(policykit_t, policykit_var_lib_t, policykit_var_lib_t)
 
 manage_dirs_pattern(policykit_t, policykit_runtime_t, policykit_runtime_t)
 manage_files_pattern(policykit_t, policykit_runtime_t, policykit_runtime_t)
-files_pid_filetrans(policykit_t, policykit_runtime_t, { file dir })
+files_runtime_filetrans(policykit_t, policykit_runtime_t, { file dir })
 
 can_exec(policykit_t, policykit_exec_t)
 
 domtrans_pattern(policykit_t, policykit_auth_exec_t, policykit_auth_t)
 domtrans_pattern(policykit_t, policykit_resolve_exec_t, policykit_resolve_t)
 
-kernel_read_crypto_sysctls(policykit_t)
 kernel_read_kernel_sysctls(policykit_t)
 kernel_read_system_state(policykit_t)
 
-dev_read_urand(policykit_t)
 dev_read_urand(policykit_t)
 
 domain_read_all_domains_state(policykit_t)
@@ -116,21 +115,12 @@ optional_policy(`
 	userdom_dbus_send_all_users(policykit_t)
 
 	optional_policy(`
-		consolekit_dbus_chat(policykit_t)
-	')
-
-	optional_policy(`
 		rpm_dbus_chat(policykit_t)
 	')
 
 	optional_policy(`
 		xserver_dbus_chat_xdm(policykit_t)
 	')
-')
-
-optional_policy(`
-	consolekit_read_pid_files(policykit_t)
-	consolekit_watch_runtime_dir(policykit_t)
 ')
 
 optional_policy(`
@@ -144,13 +134,17 @@ optional_policy(`
 
 optional_policy(`
 	# for /run/systemd/machines
+	systemd_connect_machined(policykit_t)
 	systemd_read_machines(policykit_t)
+	systemd_watch_machines_dirs(policykit_t)
 
 	# for /run/systemd/seats/seat*
 	systemd_read_logind_sessions_files(policykit_t)
+	systemd_watch_logind_sessions_dirs(policykit_t)
 
 	# for /run/systemd/users/*
-	systemd_read_logind_pids(policykit_t)
+	systemd_read_logind_runtime_files(policykit_t)
+	systemd_watch_logind_runtime_dirs(policykit_t)
 ')
 
 ########################################
@@ -175,7 +169,7 @@ manage_files_pattern(policykit_auth_t, policykit_var_lib_t, policykit_var_lib_t)
 
 manage_dirs_pattern(policykit_auth_t, policykit_runtime_t, policykit_runtime_t)
 manage_files_pattern(policykit_auth_t, policykit_runtime_t, policykit_runtime_t)
-files_pid_filetrans(policykit_auth_t, policykit_runtime_t, { file dir })
+files_runtime_filetrans(policykit_auth_t, policykit_runtime_t, { file dir })
 
 can_exec(policykit_auth_t, policykit_auth_exec_t)
 
@@ -208,16 +202,8 @@ optional_policy(`
 	dbus_all_session_bus_client(policykit_auth_t)
 
 	optional_policy(`
-		consolekit_dbus_chat(policykit_auth_t)
-	')
-
-	optional_policy(`
 		policykit_dbus_chat(policykit_auth_t)
 	')
-')
-
-optional_policy(`
-	hal_read_state(policykit_auth_t)
 ')
 
 optional_policy(`
@@ -227,7 +213,7 @@ optional_policy(`
 
 optional_policy(`
 	xserver_stream_connect(policykit_auth_t)
-	xserver_read_xdm_pid(policykit_auth_t)
+	xserver_read_xdm_runtime_files(policykit_auth_t)
 	xserver_rw_xsession_log(policykit_auth_t)
 ')
 
@@ -264,10 +250,6 @@ optional_policy(`
 
 optional_policy(`
 	dbus_system_bus_client(policykit_grant_t)
-
-	optional_policy(`
-		consolekit_dbus_chat(policykit_grant_t)
-	')
 ')
 
 ########################################
@@ -288,21 +270,10 @@ can_exec(policykit_resolve_t, policykit_resolve_exec_t)
 
 domtrans_pattern(policykit_resolve_t, policykit_auth_exec_t, policykit_auth_t)
 
-mcs_ptrace_all(policykit_resolve_t)
-
 auth_use_nsswitch(policykit_resolve_t)
 
 userdom_read_all_users_state(policykit_resolve_t)
 
 optional_policy(`
 	dbus_system_bus_client(policykit_resolve_t)
-
-	optional_policy(`
-		consolekit_dbus_chat(policykit_resolve_t)
-	')
 ')
-
-optional_policy(`
-	hal_read_state(policykit_resolve_t)
-')
-

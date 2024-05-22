@@ -1,3 +1,1562 @@
+* Mon Feb 26 2024 Chris PeBenito <pebenito@ieee.org> - 2.20240226
+Chris PeBenito (174):
+      tests.yml: Pin ubuntu 20.04.
+      tests.yml: Pin ubuntu 20.04.
+      fstools: Move lines.
+      munin: Move munin_rw_tcp_sockets() implementation.
+      munin: Whitespace change.
+      systemd: Tmpfilesd can correct seusers on files.
+      iscsi: Read initiatorname.iscsi.
+      lvm: Add fc entry for /etc/multipath/*
+      sysnetwork: Rename sysnet_dontaudit_rw_dhcpc_unix_dgram_sockets()
+      Define user_namespace object class.
+      chromium: Allow user namespace creation.
+      mozilla: Allow user namespace creation.
+      systemd: Allow user namespace creation.
+      container: Allow user namespace creation for all container engines.
+      Update eg25manager.te
+      switcheroo: Whitespace fix.
+      unconfined: Keys are linkable by systemd.
+      postgresql: Move lines
+      Add append to rw and manage lnk_file permission sets for consistency.
+      domain: Manage own fds.
+      systemd: systemd-cgroups reads kernel.cap_last_cap sysctl.
+      kernel: hv_utils shutdown on systemd systems.
+      Container: Minor fixes from interactive container use.
+      systemd: Minor coredump fixes.
+      rpm: Minor fixes
+      init: Allow nnp/nosuid transitions from systemd initrc_t.
+      selinuxutil: Semanage reads policy for export.
+      sysnetwork: ifconfig searches debugfs.
+      usermanage: Add sysctl access for groupadd to get number of groups.
+      files: Handle symlinks for /media and /srv.
+      cloudinit: Add support for installing RPMs and setting passwords.
+      kdump: Fixes from testing kdumpctl.
+      usermanage: Handle symlinks in /usr/share/cracklib.
+      unconfined: Add remaining watch_* permissions.
+      chronyd: Read /dev/urandom.
+      cloud-init: Allow use of sudo in runcmd.
+      cloud-init: Add systemd permissions.
+      cloud-init: Change udev rules
+      systemd: Updates for systemd-locale.
+      cloudinit: Add permissions derived from sysadm.
+
+Christian Göttsche (28):
+      git: add fcontext for default binary
+      init: only grant getattr in init_getattr_generic_units_files()
+      ci: bump SELint version to 1.5.0
+      SELint userspace class tweaks
+      systemd: reorder optional block
+      devicedisk: reorder optional block
+      access_vectors: define io_uring { cmd }
+      support/genhomedircon: support usr prefixed paths
+      fix misc typos
+      Support multi-line interface calls
+      policy_capabilities: remove estimated from released versions
+      Rules.monolithic: pre-compile fcontexts on install
+      Rules.modular: use temporary file to not ignore error
+      Makefile: use sepolgen-ifgen-attr-helper from test toolchain
+      Makefile: set PYTHONPATH for test toolchain
+      virt: label qemu configuration directory
+      selinuxutil: setfiles updates
+      selinuxutil: ignore getattr proc in newrole
+      userdom: permit reading PSI as admin
+      fs: mark memory pressure type as file
+      systemd: binfmt updates
+      vnstatd: update
+      fs: add support for virtiofs
+      systemd: generator updates
+      udev: update
+      systemd: logind update
+      consolesetup: update
+      libraries: drop space in empty line
+
+Christian Schneider (1):
+      systemd-generator: systemd_generator_t load kernel modules used for e.g.
+         zram-generator
+
+Corentin LABBE (20):
+      udev: permit to read hwdb
+      fstools: handle gentoo place for drivedb.h
+      mount: dbus interface must be optional
+      mcelog: add missing file context for triggers
+      munin: add file context for common functions file
+      rsyslog: add label for /var/empty/dev/log
+      munin: disk-plugin: transition to fsadm
+      munin: add fc for munin-node plugin state
+      usermanage: permit groupadd to read kernel sysctl
+      portage: Remove old binary location
+      portage: add go/hg source control files
+      portage: add new location for portage commands
+      portage: add missing go/hg context in new distfiles location
+      mandb: permit to read inherited cron files
+      selinuxutil: do not audit load_policy trying to use portage ptys
+      selinuxutil: permit run_init to read kernel sysctl
+      portage: add misc mising rules
+      smartmon: allow smartd to read fsadm_db_t files
+      smartmon: add domain for update-smart-drivedb
+      dovecot: add missing permissions
+
+Dave Sugar (46):
+      rng-tools updated to 6.15 (on RHEL9) seeing the following denials:
+      Allow local login to read /run/motd
+      Label pwhistory_helper
+      If domain can read system_dbusd_var_lib_t files, also allow symlinks
+      systemd-rfkill.socket reads /dev/rfkill (with ListenSocket=) option.
+      To allow setting for net.netfilter.nf_* in /etc/sysctl.d/*.conf
+      Allow iceauth write to xsession log
+      Allow system_dbusd_t to start/stop all units
+      Updates for utempter
+      Allow display manager to read hwdata
+      Allow search xdm_var_run_t directories along with reading files.
+      Solve issue with no keyboard/mouse on X login screen
+      separate label for /etc/security/opasswd
+      Fix some ssh agent denials
+      For systemd-hostnamed service to run
+      Allow rsyslog to drop capabilities
+      /var/lib/sddm should be xdm_var_lib_t
+      resolve lvm_t issues at shutdown with LUKS encrypted devices
+      Allow all users to (optionally) send syslog messages
+      Resolve some denials with colord
+      separate domain for journalctl during init
+      Use interface that already exists.
+      Separate label for /run/systemd/notify (#710)
+      Changes needed for dbus-broker-launch
+      Allow dbus-broker-launch to execute in same domain
+      dbus changes
+      Firewalld need to relabel direct.xml file
+      xguest ues systemd --user
+      Needed to allow environment variable to process started (for cockpit)
+      SELinux policy for cockpit
+      Fix denial while cleaning up pidfile symlink
+      allow system --user to execute systemd-tmpfiles in
+         <user>_systemd_tmpfiles_t domain
+      cockpit ssh as user
+      Allow sudo dbus chat w/sysemd-logind
+      The L+ tmpfiles option needs to read the symlink
+      Signal during logout
+      This seems important for administrative access
+      This works instead of allow exec on user_tmpfs_t!
+      admin can read/write web socket
+      Allow key manipulation
+      Add dontaudit to quiet down a bit
+      Add watches
+      Additional access for systemctl
+      Denial during cockpit use
+      Fix password changing from cockpit login screen
+      Resolve error when cockpit initiate shutdown
+
+David Sommerseth (1):
+      openvpn: Allow netlink genl
+
+Fabrice Fontaine (1):
+      policy/modules/services/smartmon.te: make fstools optional
+
+Florian Schmidt (1):
+      Add label and interfaces for kernel PSI files
+
+George Zenner (1):
+      Signed-off-by: George Zenner <zen@pyl.onl>
+
+Grzegorz Filo (3):
+      Shell functions used during boot by initrc_t shall be bin_t and defined in
+         corecommands.fc
+      Dir transition goes with dir create perms.
+      Keep context of blkid file/dir when created by zpool.
+
+Guido Trentalancia (53):
+      The pulseaudio daemon and client do not normally need to use the network
+         for most computer systems that need to play and record audio.
+      The kernel domain should be able to mounton runtime directories during
+         switch_root, otherwise parts of the boot process might fail on some
+         systems (for example, the udev daemon).
+      The kernel domain should be able to mounton default directories during
+         switch_root.
+      The pulseaudio module should be able to read alsa library directories.
+      Fix the pulseaudio module file transition for named sockets in tmp
+         directories.
+      Fix the dbus module so that automatic file type transitions are used not
+         only for files and directories, but also for named sockets.
+      Fix the dbus module so that temporary session named sockets can be read
+         and written in the role template and by system and session bus clients.
+      Update the dbus role template so that permissions to get the attributes of
+         the proc filesystem are included.
+      Let pulseaudio search debugfs directories, as currently done with other
+         modules.
+      Separate the tunable permissions to write xserver tmpfs files from the
+         tunable permissions to write X server shared memory.
+      Fix a security bug in the xserver module (interfaces) which was wrongly
+         allowing an interface to bypass existing tunable policy logic related
+         to X shared memory and xserver tmpfs files write permissions.
+      Add missing permissions to execute binary files for the evolution_alarm_t
+         domain.
+      Add the permissions to manage the fonts cache (fontconfig) to the window
+         manager role template.
+      Add permissions to watch libraries directories to the userdomain login
+         user template interface.
+      Update the xscreensaver module in order to work with the latest version
+         (tested with version 6.06).
+      Include the X server tmpfs rw permissions in the X shared memory write
+         access tunable policy under request from Christoper PeBenito.
+      Revert the following commit (ability to read /usr files), as it is no
+         longer needed, after the database file got its own label:
+      Update the kernel module to remove misplaced or at least really obsolete
+         permissions during kernel module loading.
+      Introduce a new "logging_syslog_can_network" boolean and make the
+         net_admin capability as well as all corenetwork permissions previously
+         granted to the syslog daemon conditional upon such boolean being true.
+      Let the openoffice domain manage fonts cache (fontconfig).
+      Update the openoffice module so that it can create Unix stream sockets
+         with its own label and use them both as a client and a server.
+      Let mplayer to act as a dbus session bus client (needed by the vlc media
+         player).
+      Add permissions to read device sysctls to mplayer.
+      Remove misplaced permission from mount interface mount_exec.
+      Remove a vulnerability introduced by a logging interface which allows to
+         execute log files.
+      Improved wording for the new xserver tunable policy booleans introduced
+         with the previous three commits.
+      Fix another security bug companion of the one fixed in the following
+         previous commit:
+      Fix another security bug similar to the ones that have been recently fixed
+         in the following two commits:
+      Remove duplicate permissions in the xserver module
+         xserver_restricted_role() interface.
+      Dbus creates Unix domain sockets (in addition to listening on and
+         connecting to them), so its policy module is modified accordingly.
+      Remove a logging interface from the userdomain module since it has now
+         been moved to the xscreensaver domain.
+      Create a new specific file label for the random seed file saved before
+         shutting down or rebooting the system and rework the interface needed
+         to manage such file.
+      Fix the shutdown policy in order to make use of the newly created file
+         label and interface needed to manage the random seed file.
+      Update the gpg module so that the application is able to fetch new keys
+         from the network.
+      Dbus creates Unix domain sockets not only for the system bus, but also for
+         the session bus (in addition to connecting to them), so its policy
+         module is modified accordingly.
+      Update the gnome module so that the gconf daemon is able to create Unix
+         domain sockets and accept or listen connections on them.
+      Fix the recently introduced "logging_syslog_can_network" tunable policy,
+         by including TCP/IP socket creation permissions.
+      Introduce a new interface in the mta module to manage the mail transport
+         agent configuration directories and files.
+      Add new gpg interfaces for gpg_agent execution and to avoid auditing
+         search operations on files and directories that are not strictly needed
+         and might pose a security risk.
+      Extend the scope of the "spamassassin_can_network" tunable policy boolean
+         to all network access (except the relative dontaudit rules).
+      Update the spamassassin module in order to better support the rules
+         updating script; this achieved by employing two distinct domains for
+         increased security and network isolation: a first domain is used for
+         fetching the updated rules from the network and second domain is used
+         for verifying the GPG signatures of the received rules.
+      Under request from Christopher PeBenito, merge the two spamassassin rules
+         updating SELinux domains introduced in the previous change in order to
+         reduce the non-swappable kernel memory used by the policy.
+      Introduce a new "dbus_can_network" boolean which controls whether or not
+         the dbus daemon can act as a server over TCP/IP networks and defaults
+         to false, as this is generally insecure, except when using the local
+         loopback interface.
+      Introduce two new booleans for the X server and X display manager domains
+         which control whether or not the respective domains allow the TCP/IP
+         server networking functionality.
+      The X display manager uses an authentication mechanism based on an
+         authorization file which is critical for X security.
+      Merge branch 'main' into x_fixes_pr2
+      Let openoffice perform temporary file transitions and manage link files.
+      Modify the gpg module so that gpg and the gpg_agent can manage
+         gpg_runtime_t socket files.
+      The LDAP server only needs to read generic certificate files, not manage
+         them.
+      Create new TLS Private Keys file contexts for the Apache HTTP server
+         according to the default locations:
+      Let the webadm role manage Private Keys and CSR for SSL Certificates used
+         by the HTTP daemon.
+      Let the certmonger module manage SSL Private Keys and CSR used for example
+         by the HTTP and/or Mail Transport daemons.
+      Additional file context fix for:
+
+Kai Meng (1):
+      devices:Add genfscon context for functionfs to mount
+
+Kenton Groombridge (106):
+      corenet: add portcon for kubernetes
+      kubernetes: initial policy module
+      sysadm: allow running kubernetes
+      crio: new policy module
+      crio, kubernetes: allow k8s admins to run CRI-O
+      container: add type for container plugins
+      various: fixes for kubernetes
+      kubernetes: add policy for kubectl
+      various: fixes for kubernetes
+      container, kernel: add tunable to allow spc to create NFS servers
+      container: add tunable to allow containers to use huge pages
+      container, kubernetes: add private type for generic container devices
+      container: add tunable to use dri devices
+      container, kubernetes: add rules for device plugins running as spc
+      various: allow using glusterfs as backing storage for k8s
+      container, miscfiles: transition to s0 for public content created by
+         containers
+      container: add tunable to allow spc to use tun-tap devices
+      container: correct admin_pattern() usage
+      systemd: add policy for systemd-pcrphase
+      hddtemp: add missing rules for interactive usage
+      netutils: minor fixes for nmap and traceroute
+      container: add rules required for metallb BGP speakers
+      filesystem, init: allow systemd to setattr on ramfs dirs
+      logging: allow domains sending syslog messages to connect to kernel unix
+         stream sockets
+      init, sysadm: allow sysadm to manage systemd runtime units
+      podman: allow podman to stop systemd transient units
+      userdom: allow admin users to use tcpdiag netlink sockets
+      container: allow container admins the sysadm capability in user namespaces
+      postfix: allow postfix master to map data files
+      sasl: add filecon for /etc/sasl2 keytab
+      obj_perm_sets: add mmap_manage_file_perms
+      various: use mmap_manage_file_perms
+      postfix, sasl: allow postfix smtp daemon to read SASL keytab
+      various: fixes for libvirtd and systemd-machined
+      portage: label eix cache as portage_cache_t
+      container: add missing filetrans and filecon for containerd/docker
+      container, init, systemd: add policy for quadlet
+      container: fixes for podman 4.4.0
+      container: fixes for podman run --log-driver=passthrough
+      node_exporter: various fixes
+      redis: add missing rules for runtime filetrans
+      podman, selinux: move lines, add missing rules for --network=host
+      netutils: fixes for iftop
+      kernel, zfs: add filetrans for kernel creating zpool cache file
+      zfs: allow sending signals to itself
+      zfs: add runtime filetrans for dirs
+      init: make init_runtime_t useable for systemd units
+      various: make /etc/machine-id etc_runtime_t
+      init, systemd: allow init to create userdb runtime symlinks
+      init: allow initrc_t to getcap
+      systemd: allow systemd-userdbd to getcap
+      logging: allow systemd-journald to list cgroups
+      fs, udev: allow systemd-udevd various cgroup perms
+      logging, systemd: allow relabelfrom,relabelto on systemd journal files by
+         systemd-journald
+      files, systemd: allow systemd-tmpfiles to relabel config file symlinks
+      systemd: add rules for systemd-zram-generator
+      systemd: allow systemd-pcrphase to read generic certs
+      fs, init: allow systemd-init to set the attributes of efivarfs files
+      init: allow systemd-init to set the attributes of unallocated terminals
+      systemd: allow systemd-resolved to bind to UDP port 5353
+      init: allow initrc_t to create netlink_kobject_uevent_sockets
+      raid: allow mdadm to read udev runtime files
+      raid: allow mdadm to create generic links in /dev/md
+      fstools: allow fsadm to read utab
+      glusterfs: allow glusterd to bind to all TCP unreserved ports
+      kubernetes: allow kubelet to read etc runtime files
+      chromium: allow chromium-naclhelper to create user namespaces
+      container: rework capabilities
+      container: allow watching FUSEFS dirs and files
+      glusterfs: add tunable to allow managing unlabeled files
+      sysadm: allow using networkctl
+      container: various fixes
+      container, kubernetes: add support for cilium
+      kubernetes: allow container engines to mount on DRI devices if enabled
+      init, systemd: label systemd-executor as init_exec_t
+      udev: allow reading kernel fs sysctls
+      init: allow all daemons to write to init runtime sockets
+      systemd: fixes for systemd-pcrphase
+      systemd: allow networkd to use netlink netfilter sockets
+      rpc: add filecon for /etc/exports.d
+      zed: allow managing /etc/exports.d/zfs.exports
+      zfs: dontaudit net_admin capability by zed
+      su: various fixes
+      kernel: allow delete and setattr on generic SCSI and USB devices
+      mount: make mount_runtime_t a kubernetes mountpoint
+      fstools: allow fsadm to ioctl cgroup dirs
+      fstools: allow reading container device blk files
+      container, kubernetes: add support for rook-ceph
+      kernel: dontaudit read fixed disk devices
+      container: add filecons for rook-ceph
+      init, systemd: allow systemd-pcrphase to write TPM measurements
+      systemd: add policy for systemd-machine-id-setup
+      container, kubernetes: allow kubernetes to use fuse-overlayfs
+      kubernetes: fix kubelet accounting
+      systemd: label systemd-pcrlock as systemd-pcrphase
+      zfs: allow zfs to write to exports
+      kernel: allow managing mouse devices
+      init: allow using system bus anon pidfs
+      systemd: label systemd-tpm2-setup as systemd-pcrphase
+      bootloader, init, udev: misc minor fixes
+      rpc: fix not labeling exports.d directory
+      dbus: allow the system bus to get the status of generic units
+      systemd: allow systemd generator to list exports
+      crio: allow reading container home content
+      container: allow spc to map kubernetes runtime files
+      kubernetes: allow kubelet to apply fsGroup to persistent volumes
+
+Luca Boccassi (4):
+      Set label systemd-oomd
+      Add separate label for cgroup's memory.pressure files
+      systemd: also allow to mounton memory.pressure
+      systemd: allow daemons to access memory.pressure
+
+Mathieu Tortuyaux (1):
+      container: fix cilium denial
+
+Oleksii Miroshko (1):
+      Fix templates parsing in gentemplates.sh
+
+Pat Riehecky (1):
+      container: set default context for local-path-provisioner
+
+Renato Caldas (1):
+      kubernetes: allow kubelet to read /proc/sys/vm files.
+
+Russell Coker (28):
+      This patch removes deprecated interfaces that were deprecated in the
+         20210203 release.  I think that 2 years of support for a deprecated
+         interface is enough and by the time we have the next release out it
+         will probably be more than 2 years since 20210203.
+      This patch removes deprecated interfaces that were deprecated in the
+         20210203 release.  I think that 2 years of support for a deprecated
+         interface is enough and by the time we have the next release out it
+         will probably be more than 2 years since 20210203.
+      eg25-manager (Debian package eg25-manager) is a daemon aimed at
+         configuring and monitoring the Quectel EG25 modem on a running system.
+         It is used on the PinePhone (Pro) and performs the following functions:
+           * power on/off   * startup configuration using AT commands   * AGPS
+         data upload   * status monitoring (and restart if it becomes
+         unavailable) Homepage: https://gitlab.com/mobian1/eg25-manager
+      iio-sensor-proxy (Debian package iio-sensor-proxy)  IIO sensors to D-Bus
+         proxy  Industrial I/O subsystem is intended to provide support for
+         devices  that in some sense are analog to digital or digital to analog
+         convertors  .  Devices that fall into this category are:   * ADCs   *
+         Accelerometers   * Gyros   * IMUs   * Capacitance to Digital Converters
+         (CDCs)   * Pressure Sensors   * Color, Light and Proximity Sensors   *
+         Temperature Sensors   * Magnetometers   * DACs   * DDS (Direct Digital
+         Synthesis)   * PLLs (Phase Locked Loops)   * Variable/Programmable Gain
+         Amplifiers (VGA, PGA)
+      Fixed dependency on unconfined_t
+      Comment sysfs better
+      Daemon to control authentication for Thunderbolt.
+      Daemon to monitor memory pressure and notify applications and change …
+         (#670)
+      switcheroo is a daemon to manage discrete vs integrated GPU use for apps
+      policy for power profiles daemon, used to change power settings
+      some misc userdomain fixes
+      debian motd.d directory (#689)
+      policy for the Reliability Availability servicability daemon (#690)
+      policy patches for anti-spam daemons (#698)
+      Added tmpfs file type for postgresql Small mysql stuff including
+         anon_inode
+      small ntp and dns changes (#703)
+      small network patches (#707)
+      small storage changes (#706)
+      allow jabbers to create sock file and allow matrixd to read sysfs (#705)
+      small systemd patches (#708)
+      misc small patches for cron policy (#701)
+      mon.te patches as well as some fstools patches related to it (#697)
+      misc small email changes (#704)
+      https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/
+      Label checkarray as mdadm_exec_t, allow it to read/write temp files
+         inherited from cron, and dontaudit ps type operations from it
+      Changes to eg25manager and modemmanager needed for firmware upload on
+         pinephonepro
+      patches for nspawn policy (#721)
+      Simple patch for Brother printer drivers as described in:
+         https://etbe.coker.com.au/2023/10/22/brother-mfc-j4440dw-printer/
+
+Yi Zhao (15):
+      systemd: add capability sys_resource to systemd_userdbd_t
+      systemd: allow systemd-sysctl to search directories on ramfs
+      systemd: allow systemd-resolved to search directories on tmpfs and ramfs
+      mount: allow mount_t to get attributes for all directories
+      loadkeys: do not audit attempts to get attributes for all directories
+      systemd: allow systemd-networkd to create file in /run/systemd directory
+      systemd: allow journalctl to create /var/lib/systemd/catalog
+      bind: fix for named service
+      systemd: use init_daemon_domain instead of init_system_domain for
+         systemd-networkd and systemd-resolved
+      rpm: fixes for dnf
+      lvm: set context for /run/cryptsetup
+      container: set context for /run/crun
+      systemd: allow systemd-hostnamed to read machine-id and localization files
+      systemd: allow systemd-rfkill to getopt from uevent sockets
+      udev: fix for systemd-udevd
+
+freedom1b2830 (1):
+      mplayer:vlc paths
+
+* Tue Nov 01 2022 Chris PeBenito <pebenito@ieee.org> - 2.20221101
+Chris PeBenito (46):
+      systemd: Drop systemd_detect_virt_t.
+      fstools: Handle resizes of the root filesystem.
+      mount: Get the attributes of all filesystems.
+      rpm: Add dnf and tdnf labeling.
+      logging: Change to systemd interface for tmpfilesd.
+      systemd: Remove systemd-run domain.
+      unconfined: Add missing capability2 perms.
+      lvm: Updates for multipath LVM.
+      locallogin: Use init file descriptors.
+      systemd: Misc fixes.
+      isns: Updates from testing.
+      container, docker: Fixes for containerd and kubernetes testing.
+      devices: Add type for SAS management devices.
+      devices: Add file context for /dev/vhost-vsock.
+      iptables: Ioctl cgroup dirs.
+      devices: Add type for infiniband devices.
+      storage: Add fc for /dev/ng*n* devices.
+      files: Add prerequisite access for files_mounton_non_security().
+      files: Make etc_runtime_t a config file.
+      systemd: Fixes for coredumps in containers.
+      container: Allow container engines to connect to http cache ports.
+      container: Getattr generic device nodes.
+      application: Allow apps to use init fds.
+      systemd: Misc updates.
+      filesystem: Move ecryptfs interface definitions.
+      mcs: Add additional SysV IPC constraints.
+      mcs: Collapse constraints.
+      mcs: Add additional socket constraints.
+      mcs: Add missing process permission constraints.
+      mcs: Remove duplicate node_bind constraint.
+      mcs: Reorganize file.
+      mls: Add setsockcreate constraint.
+      systemd: Add interface for systemctl exec.
+      Add cloud-init.
+      hypervkvp: Port updated module from Fedora policy.
+      init: Add tunable for systemd to create all its mountpoints.
+      Run Ci tests in parallel.
+      Revise userspace and SELint versions in CI
+      fapolicyd: Fix selint issue.
+      tests.yml: Remove irrelevant comment.
+      Drop audit_access allows.
+      sympa: Move lines.
+      sympa: Drop module version.
+      sympa, mta, exim: Revise interfaces.
+      sympa, logging; Fix lint errors.
+      container: Add missing UDP node bind access on container engines.
+
+Christian Göttsche (3):
+      Replace deprecated egrep usage
+      ci: update dependencies
+      ci: build SELint from source
+
+Daniel Burgener (1):
+      Drop explicit calls to seutil and kernel module interfaces in broad files
+         interfaces
+
+Dave Sugar (20):
+      ssh: allow ssh_keygen to read /usr/share/crypto-policies/
+      chronyd: Allow to read fips_enabled sysctl
+      chronyd: allow chronyd to read /usr/share/crypto-policies
+      systemd: init_t creates systemd-logind 'linger' directory
+      systemd: systemd-update-done fix startup issue
+      usbguard: Allow to read fips_enabled sysctl
+      firewalld: read to read fips_enabled sysctl
+      firewalld: create netfilter socket
+      firewalld: allow to load kernel modules
+      firewalld: write tmpfs files
+      firewalld: firewalld-cmd uses dbus
+      tpm2-abrmd: allow to send syslog messages
+      domain: move kernel_read_crypto_sysctls to a common location
+      fapolicyd: Initial SELinux policy
+      networkmanager: allow watch etc_t and lib_t
+      firewalld: allow watch on firewalld files
+      Seeing long delay during shutdown saying: 'A stop job is running for
+         Restore /run/initramfs on shutdown'
+      fix: issue #550 - compile failed when DIRECT_INITRC=y
+      fapolicyd: fagenrules chgrp's the compiled.rules
+      Add 'DIRECT_INITRC' config to automated tests
+
+Kenton Groombridge (95):
+      systemd: add separate type for user transient units
+      systemd: rename user runtime unit interfaces
+      docker, podman: use renamed user runtime unit status interface
+      systemd: rename status user mananger units interface
+      systemd: systemd-resolved is linked to libselinux
+      systemd: dontaudit systemd-generator getattr on all dirs
+      raid: allow mdadm to use user ptys
+      bootloader, files: allow bootloader to getattr on boot_t filesystems
+      matrixd: various fixes
+      container: add unconfined role
+      unconfined: use unconfined container role
+      podman: add interface to rangetrans when executing conmon
+      podman: rework conmon rules
+      podman: add file context for podman in /usr/libexec
+      container: rework combined role interfaces
+      podman: typealias podman_user_conmon_t to podman_conmon_user_t
+      fail2ban: allow fail2ban to getsched on its processes
+      modutils: allow kmod to write to kmsg
+      postfix: allow postfix-map to read certbot certs
+      postfix: allow postfix master to get the state of init
+      postfix: allow postfix master fsetid capability
+      bind: fixes for named working on dnssec files
+      sudo: allow sudo domains to create netlink selinux sockets
+      sysnetwork, systemd: allow DNS resolution over io.systemd.Resolve
+      container: allow containers to manipulate own fds
+      container: allow container engines to manage tmp symlinks
+      ssh: add tunable to allow sshd to use remote port forwarding
+      systemd: minor fixes to systemd user domains
+      init, systemd: allow unpriv users to read the catalog
+      container: add separate type for container engine units
+      container, podman: allow podman to restart container units
+      spamassassin: add file context for rspamd log directory
+      term, init: allow systemd to watch and watch reads on unallocated ttys
+      certbot: various fixes
+      systemd: add file transition for systemd-networkd runtime
+      systemd: add missing file context for /run/systemd/network
+      systemd: add file contexts for systemd-network-generator
+      systemd, udev: allow udev to read systemd-networkd runtime
+      systemd: allow systemd-networkd to read init runtime files
+      podman: add alias for conmon executable
+      systemd: ensure connecting to resolved allows searching init runtime
+      ssh: allow sshd to run setfiles when polyinstantiation is enabled
+      sudo: allow sudo domains to access caller's /proc/pid/stat
+      container: add file contexts for docker home config
+      files, init: allow systemd to remount etc filesystems
+      systemd: allow systemd-logind to read localization
+      init: fix possible typo
+      corecmd: label dracut lib as bin_t
+      sudo: various fixes
+      udev: various fixes for udevadm
+      bootloader, init: various fixes for systemd-boot
+      systemd: allow systemd-generator to read etc runtime files
+      systemd: add interface to read userdb runtime files
+      logging: various fixes for auditctl
+      screen: add interface to dontaudit runtime sock file
+      systemd: dontaudit systemd-tmpfiles getattr on screen sock file
+      systemd: dontaudit systemd-tmpfiles getattr on all dirs
+      fstools: fixes for fsadm with nfs
+      various: fixes for nfs
+      init: dontaudit initrc creating /dev/console during initrd
+      storage: include chr_files in fixed_disk_dev interfaces
+      systemd: allow systemd-userdbd to search default contexts
+      logging, systemd: allow auditctl to list userdb runtime dirs
+      bootloader, userdom: minor fixes for systemd-boot
+      systemd: allow systemd-resolved to read generic certs
+      sysadm: allow sysadm to rw ipmi devices
+      zfs: initial policy module
+      fstools, mount: remove legacy zfs rules
+      files, mount: remove legacy ZFS file contexts
+      sysadm: allow admin access to zfs
+      kernel: allow kthreads to read and write the zpool cache
+      systemd, zfs: allow systemd-generator to read zfs config
+      udev: allow reading ZFS config
+      zfs: various fixes
+      mta: add support for nullmailer
+      devices: add interface to rw infiniband devices
+      xdg: add interface to dontaudit searching xdg data dirs
+      opensm: initial policy
+      sysadm: allow opensm access
+      corenet: add portcon for glusterfs
+      glusterfs: various fixes
+      glusterfs: add type for gluster bricks
+      mount: allow mounting glusterfs volumes
+      selinuxutil: allow semanage, setfiles to inherit gluster fds
+      glusterfs, selinuxutil: make modifying fcontexts a tunable
+      glusterfs: add type for glusterd hooks
+      usermanage: add file context for chpasswd in /usr/bin
+      node_exporter: add file context for node_exporter in /usr/bin
+      usbguard: add file context for usbguard in /usr/bin
+      init: add file context for systemd units in dracut modules
+      git: add file contexts for other git utilities
+      dbus, init, mount, rpc: minor fixes for mount.nfs
+      zfs: allow reading exports
+      systemd: allow systemd-generator to use dns resolution
+      rpc: allow rpc admins to rw nfsd fs
+
+Pat Riehecky (2):
+      container: Boolean for ecryptfs
+      Clone `xguest_connect_network` for guest role
+
+Russell Coker (1):
+      Sympa list server
+
+Yi Zhao (16):
+      systemd: allow systemd user to watch /etc directories
+      logwatch: fixes for logwatch
+      postfix: allow postfix_local_t to search logwatch_cache_t
+      sysnetwork: allow systemd_networkd_t to read link file
+      logging: allow systemd-journal to manage syslogd_runtime_t sock_file
+      radius: fixes for freeradius
+      udev: allow udev_read_runtime_files to read link files
+      watchdog: allow watchdog to create /var/log/watchdog directory
+      systemd: allow systemd-resolved to manage link files
+      sysnetwork: fix privilege separation functionality of dhcpcd
+      sysnetwork: allow dhcpcd to send and receive messages from systemd
+         resolved
+      rpm: add label for dnf-automatic and dnf-3
+      systemd: allow systemd-backlight to read kernel sysctl settings
+      systemd: allow systemd-rfkill to get attributes of all fs
+      systemd: allow systemd-hostnamed to read selinux configuration files
+      systemd: add capability sys_admin to systemd_generator_t
+
+* Fri May 20 2022 Chris PeBenito <pebenito@ieee.org> - 2.20220520
+Björn Esser (1):
+      authlogin: add fcontext for tcb
+
+Chris PeBenito (118):
+         0xC0ncord/bugfix/systemd-user-exec-apps-hookup
+      systemd, ssh, ntp: Read fips_enabled crypto sysctl.
+      systemd: Unit generator fixes.
+      systemd: Revise tmpfiles factory to allow writing all configs.
+      systemd: User runtime reads user cgroup files.
+      logging: Add audit_control for journald.
+      udev: Manage EFI variables.
+      ntp: Handle symlink to drift directory.
+      logging: Allow auditd to stat() dispatcher executables.
+      Drop module versioning.
+      tests.yml: Disable policy_module() selint checks.
+      systemd: Change journal file context to MLS system high.
+      Revert "users: remove MCS categories from default users"
+      systemd: Add systemd-homed and systemd-userdbd.
+      systemd, ssh: Crypto sysctl use.
+      systemd: Additional fixes for fs getattrs.
+      systemd: Updates for generators and kmod-static-nodes.service.
+      domain: Allow lockdown for all domains.
+      postfix, spamassassin: Fix missed type renames after alias removals.
+      cron, dbus, policykit, postfix: Minor style fixes.
+      Make hide_broken_symptoms unconditional.
+      puppet: Style fixes.
+      matrixd: Cleanups.
+      matrixd: SELint fixes.
+      mailmain: Fix check_fc_files issue.
+      mailmain: Fix SELint issues.
+      postfix: Move lines.
+      apache: Remove unnecessary require in apache_exec().
+      seusers: Remove sddm.
+      Add a vulnerability handling process.
+
+Christian Goettsche (1):
+      check_fc_files: allow optional @ character
+
+Christian Göttsche (11):
+      filesystem: add fs_use_trans for ramfs
+      Ignore umask on when installing headers
+      Revert "tests.yml: Disable policy_module() selint checks."
+      build.conf: bump policy version in comment
+      flask: add new kernel security classes
+      policy_capabilities: add ioctl_skip_cloexec
+      policy.dtd: more strict bool/tunable and infoflow validation
+      Makefile: invoke python with -bb
+      Rules.monolithic: add target to generate CIL policy
+      Makefile: use override for adding options
+      Rules.modular: add pure-load target
+
+Dave Sugar (4):
+      Allow iscsid to request kernel module load
+      Allow iscsid to check fips_enabled
+      sshd: allow to run /usr/bin/fipscheck (to check fips state)
+      systemd: resolve error with systemd-sysctl
+
+Fabrice Fontaine (2):
+      policy/modules/services/samba.te: make crack optional
+      policy/modules/services/wireguard.te: make iptables optional
+
+Gao Xiang (1):
+      Add erofs as a SELinux capable file system
+
+Henrik Grindal Bakken (1):
+      snmp: Fix typo in /var/net-snmp rule
+
+Jonathan Davies (12):
+      chronyd.te: Added chronyd_hwtimestamp boolean for chronyd_t to access
+         net_admin capability, this is required for its `hwtimestamp` option,
+         which otherwise returns:
+      virt.te: Fixed typo in virtlogd_t virt_common_runtime_t
+         manage_files_pattern.
+      obfs4proxy: Added policy.
+      tor: Added interfaces and types for obfs4proxy support.
+      corenetwork.te.in: Added ntske port.
+      chronyd.te: Added support for bind/connect/recv/send NTS packets.
+      chronyd: Allow access to read certs.
+      obj_perm_sets.spt: Fixed typo in rw_netlink_socket_perms.
+      policy/*: Replaced rw_netlink_socket_perms with
+         create_netlink_socket_perms.
+      node_exporter: Added initial policy.
+      systemd.te: Added boolean for allowing dhcpd server packets.
+      systemd.if: Allowed reading systemd_userdbd_runtime_t symlinks in
+         systemd_stream_connect_userdb().
+
+Kenton Groombridge (174):
+      userdomain: add user exec domain attribute and interface
+      systemd: assign user exec attribute to systemd --user instances
+      systemd: add interface to support monitoring and output capturing of child
+         processes
+      wm: add user exec domain attribute to wm domains
+      ssh: add interface to execute and transition to ssh client
+      userdomain: add interface to allow mapping all user home content
+      git, roles: add policy for git client
+      apache, roles: use user exec domain attribute
+      screen, roles: use user exec domain attribute
+      git, roles: use user exec domain attribute
+      postgresql, roles: use user exec domain attribute
+      ssh, roles: use user exec domain attribute
+      sudo, roles: use user exec domain attribute
+      syncthing, roles: use user exec domain attribute
+      xscreensaver, roles: use user exec domain attribute
+      xserver, roles, various: use user exec domain attribute
+      authlogin, roles: use user exec domain attribute
+      bluetooth, roles: use user exec domain attribute
+      cdrecord, roles: use user exec domain attribute
+      chromium, roles: use user exec domain attribute
+      cron, roles: use user exec domain attribute
+      dirmngr, roles: use user exec domain attribute
+      evolution, roles: use user exec domain attribute
+      games, roles: use user exec domain attribute
+      gnome, roles: use user exec domain attribute
+      gpg, roles: use user exec domain attribute
+      irc, roles: use user exec domain attribute
+      java, roles: use user exec domain attribute
+      libmtp, roles: use user exec domain attribute
+      lpd, roles: use user exec domain attribute
+      mozilla, roles: use user exec domain attribute
+      mplayer, roles: use user exec domain attribute
+      mta, roles: use user exec domain attribute
+      openoffice, roles: use user exec domain attribute
+      pulseaudio, roles: use user exec domain attribute
+      pyzor, roles: use user exec domain attribute
+      razor, roles: use user exec domain attribute
+      rssh, roles: use user exec domain attribute
+      spamassassin, roles: use user exec domain attribute
+      su, roles: use user exec domain attribute
+      telepathy, roles: use user exec domain attribute
+      thunderbird, roles: use user exec domain attribute
+      tvtime, roles: use user exec domain attribute
+      uml, roles: use user exec domain attribute
+      userhelper, roles: use user exec domain attribute
+      vmware, roles: use user exec domain attribute
+      wireshark, roles: use user exec domain attribute
+      wm, roles: use user exec domain attribute
+      hadoop, roles: use user exec domain attribute
+      shutdown, roles: use user exec domain attribute
+      cryfs, roles: use user exec domain attribute
+      wine: use user exec domain attribute
+      mono: use user exec domain attribute
+      sudo: add tunable to control user exec domain access
+      su: add tunable to control user exec domain access
+      shutdown: add tunable to control user exec domain access
+      mpd, pulseaudio: split domtrans and client access
+      mcs: deprecate mcs overrides
+      mcs: restrict create, relabelto on mcs files
+      fs: add pseudofs attribute and interfaces
+      devices: make usbfs pseudofs instead of noxattrfs
+      git: fix typo in git hook exec access
+      dovecot, spamassassin: allow dovecot to execute spamc
+      mta, spamassassin: fixes for rspamd
+      certbot, various: allow various services to read certbot certs
+      usbguard, sysadm: misc fixes
+      ssh: fix for polyinstantiation
+      sysadm, systemd: fixes for systemd-networkd
+      asterisk: allow reading generic certs
+      bind: fixes for unbound
+      netutils: fix ping
+      policykit, systemd: allow policykit to watch systemd logins and sessions
+      spamassassin: fix file contexts for rspamd symlinks
+      mcs: add additional constraints to databases
+      mcs: constrain misc IPC objects
+      mcs: combine single-level object creation constraints
+      various: deprecate mcs override interfaces
+      corenet: make netlabel_peer_t mcs constrained
+      mcs: constrain context contain access
+      mcs: only constrain mcs_constrained_type for db accesses
+      guest, xguest: remove apache role access
+      wine: fix roleattribute statement
+      testing: accept '@' as a valid ending character in filecon checker
+      users: remove MCS categories from default users
+      various: remove various mcs ranged transitions
+      kernel: add various supporting interfaces for containers
+      kernel, rpc, systemd: deprecate kernel_mounton_proc
+      devices, kernel: deprecate dev_mounton_sysfs
+      devices: add interfaces to remount sysfs and device filesystems
+      init: add interface to run init bpf programs
+      systemd: add interface to dbus chat with systemd-machined
+      userdom: add interfaces to relabel generic user home content
+      init: add interface to setsched on init
+      init: allow systemd to renice all other domains
+      sysnetwork: add interfaces for /run/netns
+      container, virt: move svirt lxc domains to new container module
+      container: svirt_lxc_net_t is now container_t
+      container: fixup rules
+      container: add interface to identify container mountpoints
+      various: make various types a mountpoint for containers
+      container: add base attributes for containers and container engines
+      container: initial support for container engines
+      container, gpg, userdom: allow container engines to execute gpg
+      container: allow containers to use container ptys
+      container, mount: allow mount to getattr on container fs
+      various: various userns capability permissions
+      container: allow containers the chroot capability
+      container: allow containers various userns capabilities
+      container: allow containers to watch all container files
+      container, podman: initial support for podman
+      filesystem: add supporting FUSEFS interfaces
+      dbus: add supporting interfaces and rules for rootless podman
+      systemd: add private type for systemd user manager units
+      container: add role access templates
+      container, podman, systemd: initial support for rootless podman
+      container: add required admin rules
+      sysadm: allow container admin access
+      container: call podman access in container access
+      staff, unconfined: allow container user access
+      container: add policy for privileged containers
+      container: allow containers to read read-only container files
+      container: add tunable for containers to manage cgroups
+      container: add tunables for containers to use nfs and cifs
+      container: add tunable to allow engines to mounton non security
+      container, iptables: dontaudit iptables rw on /ptmx
+      xdg: add interface to search xdg data directories
+      container, podman: add policy for conmon
+      kernel: add filetrans interface for unlabeled dirs
+      container, docker: add initial support for docker
+      container: call docker access in container access
+      userdomain: add type for user bin files
+      systemd: allow systemd user managers to execute user bin files
+      systemd: use stream socket perms in systemd_user_app_status
+      systemd: add supporting interfaces for user daemons
+      rootlesskit: new policy module
+      container, docker, rootlesskit: add support for rootless docker
+      docker: call rootlesskit access in docker access
+      container: drop old commented rules
+      lxc_contexts: add ro_file and sandbox_lxc_process contexts
+      container: allow containers to getsession
+      docker: make rootlesskit optional
+      docker: add missing call to init_daemon_domain()
+      podman: add explicit range transition for conmon
+      init: split access for systemd runtime units
+      dbus: fixes for dbus-broker
+      dbus, policykit: add tunables for dbus-broker access
+      docker, podman: container units now have the runtime unit type
+      init: allow systemd to nnp_transition and nosuid_transition to daemon
+         domains
+      files, init: allow init to remount filesystems mounted on /boot
+      sudo: fixes for polyinstantiation
+      locallogin: fix for polyinstantiation
+      authlogin: dontaudit getcap chkpwd
+      systemd: various fixes
+      systemd: add support for systemd-resolved stubs
+      getty, locallogin: cgroup fixes
+      unconfined: fixes for bluetooth dbus chat and systemd
+      udev: allow udev to start the systemd system object
+      networkmanager: allow getting systemd system status
+      container, podman: allow podman to create and write config files
+      podman: allow system podman to interact with container transient units
+      podman: fix role associations
+      container, podman: allow containers to interact with conmon
+      podman: add rules for systemd container units
+      container, init: allow init to remount container filesystems
+      container: allow generic containers to read the vm_overcommit sysctl
+      container: add tunables to allow containers to access public content
+      container: add missing capabilities
+      container: also allow containers to watch public content
+      podman: allow podman to watch journal dirs
+      sysadm: allow sysadm to watch journal directories
+      git: add missing file contexts
+      udica-templates: initial commit of udica templates
+      makefile: add install target for udica templates
+      github: test install of udica templates
+
+Laurent Bigonville (2):
+      docker: On debian dockerd and docker-proxy are in /usr/sbin
+      container: On Debian, runc is installed in /usr/sbin
+
+Pedro (1):
+      File context for nginx cache files
+
+Russell Coker (8):
+      remove aliases from 20210203
+      dontaudit net_admin without hide_broken_symptoms
+      puppet V3
+      matrixd-synapse policy V3
+      mailman3 V3
+      certbot V3
+      init dbus patch for GetDynamicUsers with systemd_use_nss() V2
+      new sddm V2
+
+Vit Mojzis (1):
+      Improve error message on duplicate definition of interface
+
+Yi Zhao (24):
+      rpc: remove obsolete comment line
+      secadm: allow secadm to read selinux policy
+      rpcbind: allow sysadm to run rpcinfo
+      samba: allow smbd_t to send and receive messages from avahi over dbus
+      rpc: add dac_read_search capability for rpcd_t
+      bluetooth: fixes for bluetoothd
+      avahi: allow avahi_t to watch /etc/avahi directory
+      udev: allow udev_t to watch udev_rules_t dir
+      rpc: allow rpc.mountd to list/watch NFS server directory
+      usermanage: do not audit attempts to getattr of proc for passwd_t and
+         useradd_t
+      selinuxutil: allow setfiles_t to read kernel sysctl
+      rngd: fixes for rngd
+      dbus: allow dbus-daemon to map SELinux status page
+      bind: fixes for bind
+      passwd: allow passwd to map SELinux status page
+      ipsec: fixes for strongswan
+      samba: fixes for smbd/nmbd
+      ntp: allow ntpd to set rlimit_memlock
+      ssh: do not audit attempts by ssh-keygen to read proc
+      acpid: allow acpid to watch the directories in /dev
+      bluetooth: allow bluetoothd to create alg_socket
+      systemd: allow systemd-hostnamed to read udev runtime files
+      su: allow su to map SELinux status page
+      modutils: allow kmod_t to write keys
+
+* Wed Sep 08 2021 Chris PeBenito <pebenito@ieee.org> - 2.20210908
+Andreas Freimuth (2):
+      Prefer user_fonts_config_t over xdg_config_t
+      Set user_fonts_config_t for conf.d
+
+Chris PeBenito (76):
+      rpc: Move lines.
+      selinux: Add a secure_mode_setbool Boolean.
+      Remove additional unused modules
+      Rules.modular/Rules.monolithic: Fix intdented labeling statement moves.
+      selinux: Change generic Boolean type to boolean_t.
+      selinux: Set regular file for labeled Booleans genfscons.
+      selinux: Add dontaudits when secure mode Booleans are enabled.
+      kernel: Add dontaudits when secure_mode_insmod is enabled.
+      authlogin: Add tunable for allowing shadow access on non-PAM systems.
+      authlogin: Remove redundant rule in auth_domtrans_chk_passwd().
+      Create stale.yml
+      stale.yml: Fix labels with spaces.
+      authlogin: Deprecate auth_domtrans_chk_passwd().
+      init: Add support for systemd StandardInputText.
+      .gitignore: Ignore vscode data dir.
+      .gitignore: Remove duplicate lines.
+      Revert "systemd.if minor fix"
+      systemd: Drop second parameter in systemd_tmpfilesd_managed().
+      staff, sysadm, unprivuser: Move lines.
+      xserver: Move fc lines.
+      radvd: Whitespace fix.
+      virt: Move lines.
+      Bump module versions for release.
+
+Christian Göttsche (1):
+      Use correct interface or template declaration
+
+Dave Sugar (2):
+      systemd.if minor fix
+      Resolve when building monolithic on RHEL7
+
+Fabrice Fontaine (5):
+      policy/modules/services/minidlna.te: make xdg optional
+      policy/modules/services/ftp.te: make ssh optional
+      policy/modules/services/cvs.te: make inetd optional
+      policy/modules/services/ifplugd.te: make netutils optional
+      policy/modules/apps/wireshark.te: make xdg optional
+
+Jonathan Davies (13):
+      staff.te: Allow staff access to the virt stream, needed for when the
+         sockets are access remotely over SSH.
+      logging.if: Added interfaces for watching all and audit logs.
+      roles: Added log watching permissions to secadm and sysadm.
+      irc.te: Allow irc_t access to unix_dgram_socket sendto to allow clients to
+         connect to a SOCKS proxy.
+      screen.if: Added interface to allow executing sock file.
+      irc.te: Allowed client access to screen runtime sock file.
+      dmesg.te: Added files_read_etc_files() as some distros store terminfo
+         files in /etc/.
+      devices.fc: Added missing Xen character files.
+      sysadm.te: Allow sysadm_t to read/write Xen character devices so userspace
+         tooling works.
+      sysnetwork: dhcpc_t: Added corenet_sendrecv_icmp_packets()
+      radvd.te: Added corenet_sendrecv_icmp_packets().
+      dhcp.te: Added corenet_sendrecv_icmp_packets().
+      virt: Defined a virt_common_runtime_t type for the new common/system.token
+         file and added permissions to virtd_t and virtlogd_t.
+
+Kenton Groombridge (36):
+      dovecot, postfix: add missing accesses
+      various: systemd user fixes and additional support
+      systemd, fail2ban: allow fail2ban to watch journal
+      fail2ban: allow reading vm overcommit sysctl
+      usbguard: various fixes
+      redis: allow reading certs
+      rngd: allow reading sysfs
+      getty: various fixes
+      modutils: allow kmod to read src_t symlinks
+      devices, userdomain: dontaudit userdomain setattr on null device nodes
+      spamassassin: allow rspamd to read network sysctls
+      redis: allow reading net and vm overcommit sysctls
+      devices, userdomain: dontaudit userdomain setattr on null device nodes
+      files, init, systemd: various fixes
+      ssh: allow ssh_keygen_t to read localization
+      devicekit: allow devicekit_disk_t to setsched
+      udev: various fixes
+      init: modify interface to allow reading all pipes
+      iptables: allow reading initrc pipes
+      wireguard: allow running iptables
+      bootloader, filesystem: various fixes for grub
+      mount: allow getattr on dos filesystems
+      init, mount: allow systemd to watch utab
+      init, systemd: allow logind to watch utmp
+      logging: allow auditd to use nsswitch
+      logging: allow auditd to getattr on audisp-remote binary
+      systemd: allow systemd-resolved to manage its own sock files
+      systemd: add policy for systemd-sysctl
+      init, udev: various fixes for systemd
+      udev: allow systemd-vconsole-setup to sys_tty_config
+      various: several dontaudits
+      sysadm, systemd: various fixes
+      authlogin: add new type for pwd.lock and others
+      init: allow systemd to rw shadow lock files
+      filesystem, init: allow systemd to create pstore dirs
+      bootloader, devices: dontaudit grub writing on legacy efi variables
+
+Krzysztof Nowicki (15):
+      Fix interface naming convention (plural predicates)
+      Allow systemd to relabel startup-important directories
+      Allow execution of shell-scripted systemd generators
+      Also grant directory permissions in sysnet_manage_config
+      Allow use of systemd UNIX sockets created at initrd execution
+      Fix systemd-journal-flush service
+      Allow systemd-tmpfilesd populating of /var/lib/dbus
+      When using systemd_tmpfilesd_managed also grant directory permissions
+      Enable factory directory support in systemd-tmpfilesd
+      Allow systemd-tmpfilesd to relabel generic files inside /etc
+      Allow systemd-tmpfilesd to set attributes of /var/lock
+      Mark lvm_lock_t as systemd_tmpfilesd-managed
+      Allow systemd-tmpfilesd handle faillog directory
+      Fix setting-up sandbox environment for systemd-networkd
+      Allow systemd-tmpfilesd to access nsswitch information
+
+Markus Linnala (13):
+      policy: init: there is no enabled_mls, it is enable_mls
+      policy: files: files_spool_filetrans: doc: change param from file to
+         file_type
+      policy devices: dev_filetrans: doc: change param from file to file_type
+      policy gnome: gnome_dbus_chat_gconfd: doc: does not have 1st param of
+         role_prefix
+      policy chromium: chromium_tmp_filetrans: doc: add missing 2nd param
+         documentation
+      policy gpg: doc: add documents for all *filterans parameters
+      policy seunshare: seunshare_role: parameters usage partially mixed
+      policy kismet: kismer_role: parameter order mixed in kismet_run
+      policy: interfaces: doc: indent param blocks consistently
+      policy avahi: avahi_filetrans_pid: doc: add missing params
+      policy: xserver: xserver_dbus_chat: fix require
+      policy:ssh: ssh_server_template: fix require
+      policy: files: files_get_etc_unit_status/files_{start,stop}_etc_service:
+         fix require
+
+Russell Coker (1):
+      blkmapd
+
+Xiongwei Song (1):
+      Add ubifs to filesystem policy
+
+Yi Zhao (1):
+      roles: move dbus_role_template to userdom_common_user_template
+
+* Wed Feb 03 2021 Chris PeBenito <pebenito@ieee.org> - 2.20210203
+(GalaxyMaster) (1):
+      added policy for systemd-socket-proxyd
+
+0xC0ncord (1):
+      userdomain, xserver: move xdg rules to userdom_xdg_user_template
+
+Anthony PERARD (1):
+      xen: Allow xenstored to map /proc/xen/xsd_kva
+
+Antoine Tenart (15):
+      udev: allow udevadm to retrieve xattrs
+      locallogin: allow login to get attributes of procfs
+      logging: allow systemd-journal to write messages to the audit socket
+      sysnetwork: allow to read network configuration files
+      dbus: add two interfaces to allow reading from directories and named
+         sockets
+      dbus: allow clients to list runtime dirs and named sockets
+      systemd: add extra systemd_generator_t rules
+      systemd: allow systemd-hwdb to search init runtime directories
+      systemd: allow systemd-network to get attributes of fs
+      systemd: allow systemd-resolve to read in tmpfs
+      corecommands: add entry for Busybox shell
+      systemd: allow systemd-getty-generator to read and write unallocated ttys
+      systemd: allow systemd-network to list the runtime directory
+      ntp: allow systemd-timesyn to watch dbus objects
+      ntp: allow systemd-timesyn to setfscreate
+
+Chris PeBenito (117):
+      Merge branch 'acpid_shutdown' of https://github.com/jpds/refpolicy into
+         jpds-acpid_shutdown
+      .travis.yml: Point selint at only the policy dir.
+      corecommands, dbus, locallogin, logging, sysnetwork, systemd, udev: Module
+         version bump.
+      systemd: Move systemd-pstore block up in alphabetical order.
+      Switch to GitHub actions for CI actions.
+      systemd: Whitespace changes.
+      systemd: Rename systemd_connectto_socket_proxyd_unix_sockets() to
+         systemd_stream_connect_socket_proxyd().
+      Drop criteria on github actions.
+      userdomain: Fix error in calling userdom_xdg_user_template().
+      systemd: Add systemd-tty-ask watch for /run/systemd/ask-password.
+      Makefile: Add -E to setfiles labeling targets.
+      udev: Drop udev_tbl_t.
+      udev: Systemd 246 merged udev and udevadm executables.
+      devicekit: Udisks uses udevadm, it does not exec udev.
+      Remove modules for programs that are deprecated or no longer supported.
+      chromium: Whitespace changes.
+      chromium: Move naclhelper lines.
+      certbot: Whitespace changes.
+      certbot: Drop aliases since they have never had the old names in
+         refpolicy.
+      certbot: Reorder fc lines.
+      miscfiles: Rename miscfiles_manage_generic_tls_privkey_lnk_files.
+      userdomain: Move lines.
+      certbot: Fix lint issues.
+      memlockd: Move lines.
+      memlockd: Whitespace fixes.
+      memlockd: Fix lint issue.
+      file_patterns.spt: Add a mmap_manage_files_pattern().
+      apache, mysql, postgrey, samba, squid: Apply new
+         mmap_manage_files_pattern().
+      devicekit, jabber, samba: Move lines.
+      cron: Make backup call for system_cronjob_t optional.
+      samba: Fix samba_runtime_t alias use.
+      samba: Move service interface definitions.
+      sysnetwork: Merge dhcpc_manage_samba tunable block with existing samba
+         block.
+      samba: Add missing userspace class requirements in unit interfaces.
+      apache: Fix lint error.
+      apache: Really fix lint error.
+      aptcacher: Drop broken config interfaces.
+      samba: Fix lint error.
+         0xC0ncord/feature/sudodomain_http_connect_boolean
+         0xC0ncord/bugfix/systemd_system_custom_unit_fc
+      dpkg, aptcatcher, milter, mysql, systemd: Rename interfaces.
+      apt, bootloader: Move lines.
+      systemd: Move lines.
+      systemd: Fix lint errors.
+      systemd: Rename systemd_use_machined_devpts().
+      Bump module versions for release.
+
+Christian Göttsche (16):
+      postfixpolicyd: split multi-class rule
+      init/systemd: allow systemd to map the SELinux status page
+      selinux: add selinux_use_status_page and deprecate
+         selinux_map_security_files
+      genhomedircon: drop backwards compatibility section
+      genhomedircon: require match for home directory name
+      genhomedircon: drop unused functions
+      genhomedircon: generate file contexts for %{USERNAME} and %{USERID}
+      genhomedircon: misc pylint cleanup
+      genhomedircon: improve error messages for min uid search
+      Rules.monolithic: ignore version mismatch
+      gitignore: ignore monolithic generated files
+      Preset OUTPUT_POLICY to 32
+      Rules.monolithic: do not suppress load_policy warning messages
+      Rules.monolithic: tweak checkpolicy arguments
+      Rules.monolithic: drop dead variable
+      Rules.monolithic: add missing phony declarations
+
+Daniel Burgener (4):
+      Allow init to mount over the system bus
+      Allow systemd-ask-password to watch files
+      Use self keyword when an AV rule source type matches destination
+      Fix typo in comment
+
+Dannick Pomerleau (1):
+      access_vectors: Add new capabilities to cap2
+
+Dave Sugar (9):
+      Looks like this got dropped in pull request #294
+      Allow snmpd to read hwdata
+      Updates for corosync to work in enforcing
+      To get pacemaker working in enforcing
+      pacemaker systemd permissions
+      Allow pacemaker to map/read/write corosync shared memory files
+      Allow systemd-modules-load to search kernel keys
+      pcs_snmpd_agent_t fix denials to allow it to read needed queues
+      Work with xdg module disabled
+
+David Schadlich (1):
+      add policy for pcs_snmp_agent
+
+Deepak Rawat (1):
+      Add selinux-policy for systemd-pstore service
+
+Dominick Grift (1):
+      bind: add a few fc specs for unbound
+
+Guido Trentalancia (1):
+      Add LVM module permissions needed to open cryptsetup devices.
+
+Jason Zaman (5):
+      userdomain: Add watch on home dirs
+      getty: allow watching file /run/agetty.reload
+      Add transition on gentoo init_t to openrc
+      init: upstream fcontexts from gentoo policy
+      systemd: make remaining dbus_* optional
+
+Jonathan Davies (8):
+      acpi.te: Allow acpid_t to shutdown the system - this is required to handle
+         shutdown calls from libvirt. Fixes #298.
+      acpi.te: Removed unnecessary init_write_initctl().
+      userdomain.if: Marked usbguard user modify tunable as optional so usbguard
+         may be excluded.
+      portage: Added /var/cache/distfiles path.
+      init: Added fcontext for openrc-init.
+      init: Added fcontext for openrc-shutdown.
+      apps/screen.fc: Added fcontext for tmux xdg directory.
+      apps/screen.te: Allow screen to search xdg directories.
+
+Kenton Groombridge (11):
+      devices: add interface for IOCTL on input devices
+      virt: add boolean to allow evdev passthrough
+      stunnel: add log type and rules
+      fail2ban: allow reading systemd journal
+      spamassassin: add rspamd support and tunable
+      apache: add interface for list dir perms on httpd content
+      sudo: add tunable for HTTP connections
+      init: label systemd units in /etc
+      certbot: add support for acme.sh
+      lvm: add lvm_tmpfs_t type and rules
+      Various fixes
+
+Peter Morrow (1):
+      selinux: add selinux_get_all_booleans() interface
+
+Richard Haines (1):
+      Ensure correct monolithic binary policy is loaded
+
+Russell Coker (11):
+      base chrome/chromium patch fixed
+      latest iteration of certbot policy as patch
+      yet more strict patches fixed
+      remove deprecated from 20190201
+      more Chrome stuff
+      latest memlockd patch
+      misc services patches with changes Dominick and Chris wanted
+      misc network patches with Dominick's changes*2
+      new version of filetrans patch
+      misc apps and admin patches
+      machined
+
+Yi Zhao (1):
+      sysnet: allow dhcpcd to create socket file
+
+bauen1 (4):
+      systemd: private type for /run/systemd/userdb
+      authlogin: connect to userdb
+      systemd-logind: utilize nsswitch
+      selint: fix S-010
+
+* Tue Aug 18 2020 Chris PeBenito <pebenito@ieee.org> - 2.20200818
+Alexander Miroshnichenko (2):
+      openvpn: more versatile file context regex for ipp.txt
+      openvpn: update file context regex for ipp.txt
+
+Chris PeBenito (153):
+      Makefile: Warn if policy.xml xmllint check does not run.
+      networkmanager: Fix interface commenting.
+      Makefile: Remove shell brace expansion in ctags target.
+      dbus: Rename tunable to dbus_pass_tuntap_fd.
+      spamassassin: Move systemd interfaces.
+      spamassassin: Rename systemd interfaces.
+      spamassassin: Add missing class requires in systemd interfaces.
+      spamassassin: Remove unnecessary brackets in type alias.
+      pulseaudio: Drop call to nonexistant interface.
+      genhomedircon: Drop Python 2 compatibility code.
+      systemd: Merge generator domains.
+      .travis.yml: Add CI tests with no unconfined.
+      Rename "pid" interfaces to "runtime" interfaces.
+      Update callers for "pid" to "runtime" interface rename.
+      Move user definitions to the right place during compilation.
+      Makefile: Give a value to build options so they can be used in ifelse.
+      init: Revise init_startstop_service() build option blocks.
+      kernel: Drop unlabeled_t as a files_mountpoint().
+      selinuxuntil, userdomain: Restore relabelfrom access for unlabeled files.
+      files: Restore mounton access to files_mounton_all_mountpoints().
+      filesystem: Create a filesystem image concept.
+      kernel, fstools, lvm, mount: Update to use filesystem image interfaces.
+      Bump module versions for release.
+
+Christian Göttsche (29):
+      Rules: allow the usage of class sets in context_defaults
+      Correct estimate kernel version for polcap genfs_seclabel_symlinks
+      Makefile: generate temporary documentation files in separate directory
+      Ignore temporary documentation file directory in git
+      Override old all_interfaces.conf.tmp file
+      samba: fix wrong interface context smbd_runtime_t
+      chromium: drop dead conditional block
+      example: use module name matching file name
+      consolesetup: drop unused requires
+      unconfined: clarify unconfined_t stub usage in unconfined_domain_noaudit()
+      portage: drop bizarre conditional TODO blocks
+      init/systemd: move systemd_manage_all_units to init_manage_all_units
+      tpm2: small fixes
+      files/logging: move var_run_t filecontext to defining module
+      files/miscfiles: move usr_t filecontext to defining module
+      chromium/libraries: move lib_t filecontext to defining module
+      apache: use correct content types in apache_manage_all_user_content()
+      can_exec(): move from misc_macros to misc_patterns
+      Makefile: remove obsolete .SUFFIXES
+      Makefile: add target build-interface-db
+      devices/storage: quote arguments to tunable_policy
+      apache: quote gen_tunable name argument
+      Correct some misspellings
+      Fix several misspellings
+      whitespace cleanup
+      travis-ci: add SELint
+      work on SELint issues
+      files/modutils: unify modules_object_t usage into files module
+      travis: resolve Linter tags
+
+Daniel Burgener (10):
+      Add dnl to end of interface declaration.  This reduces the number of blank
+         lines in intermediate files and matches the way templates are defined.
+      Allow systemd-coredump to stat mountpoints.
+      Change incorrect template definitions into interface definitions
+      Add divert to generated_definitions creation, and fix all_interfaces.conf
+         divert creation.
+      Fix mismatches between object class and permission macro.
+      Switch pipe reading on domtrans to inherited only
+      Simplify collection of ssh rules to domtrans_pattern macro
+      Fix a few places where command line applications were only granted one of
+         tty or pty permissions and could be used from either
+      Remove the second copy of a permission in instances where the exact same
+         permission is repeated twice in a row
+      Remove out of date "hack" from stunnel.  The underlying problem needing a
+         require was fixed back in 2011, so using corenet_tcp_bind_stunnel_port
+         would be an option now, but stunnel_t already has
+         corenet_tcp_bind_all_ports, so this access is redundant.
+
+Dave Sugar (8):
+      Add interface to read/write /dev/ipmi
+      Update labeling in /dev/
+      Setup generic generator attribute and change generator types.
+      fix require from 5b78c1c86bedf322fa6a08e5d68e7e8a6b85f026
+      Setup domain for tpm2_* binaries
+      Interfaces needed to support IMA/EVM keys
+      Resolve neverallow failure introduced in #273
+      Interfaces for tpm2
+
+David Sommerseth (1):
+      dbus: Add tunable - dbus_can_pass_tuntap_fd
+
+Florian Schmidt (1):
+      corenetwork: fix winshadow port number
+
+Guido Trentalancia (5):
+      This patch improves a previous commit by restricting down the permissions
+         to write the wireless device in order to prevent a possible Denial of
+         Service (DoS) attack from an unprivileged process bringing down the
+         wireless interfaces.
+      mozilla: add watch perms
+      wm: add watch perms
+      getty: add watch perms
+      userdomain: add watch perms
+
+Laurent Bigonville (5):
+      Add an interface to allow the specified domain to mmap the general network
+         configuration files
+      Add policy for apt-cacher-ng
+      Add policy for acngtool
+      Label bluetooth daemon as bluetooth_exec_t
+      Label /usr/libexec/packagekitd as apt_exec_t on debian
+
+McSim85 (1):
+      add rule for the management socket file fixed comments from  @bauen1
+
+Nicolas Iooss (5):
+      Vagrantfile: remove older installed modules before "make install"
+      systemd: make systemd --user run generators without transition
+      systemd: allow sd-executor to manage its memfd files
+      devices: label /dev/sysdig0
+      sysnetwork: allow using "ip netns"
+
+Russell Coker (2):
+      pulseaudio patch
+      latest ver of trivial mail server patch
+
+Topi Miettinen (13):
+      Make raw memory access tunable
+      Add usbguard
+      Don't allow creating regular files in /dev
+      Python string fix
+      gennetfilter: generate nft tables with --nft
+      gennetfilter: handle port ranges
+      Allow systemd-networkd to handle ICMP and DHCP packets
+      gennetfilter: add rules for ICMP/ICMPv6 packets
+      wm: add KWin
+      Build and install Netfilter rules
+      bootloader: add rEFInd and systemd-boot
+      netutils: allow ping to send and receive ICMP packets
+      Remove unlabeled packet access
+
+Vilgot (1):
+      Portage update
+
+Vilgot Fredenberg (1):
+      Remove old exception
+
+Yi Zhao (2):
+      Remove duplicated rules
+      xserver: allow xserver_t to connect to resmgrd
+
+bauen1 (59):
+      logging: allow syslogd to remove stale socket file
+      systemd-user-runtime-dir: add required permissions
+      mozilla: allow firefox to use user namespaces for sandboxing
+      modutils: allow init to execute kmod with nnp
+      fix unescaped dot introduced by 47b44a0fc720cecf6df576e274f610514203a5da
+      allow init_t access to own keyring
+      allow init_t to link kernel_t key
+      allow normal users to use 'systemd-run'
+      ssh: fix for debian wrapper script
+      bird: fixes for bird 2.0
+      apache: add nginx to policy
+      ntpd: fixes for systemd-timesyncd after linux 5.4
+      define lockdown class and access
+      dirmngr: allow to probe for tor
+      dirmngr: also requires access to /dev/urandom
+      dirmngr: ~/.gnupg/crls.d might not exist
+      application: applications can be executed from ssh without pty
+      systemd: allow regular users to run systemd-analyze
+      quota: allow quota to modify /aquota even if immutable
+      init: read default context during boot
+      lvm: create /etc/lvm/archive if it doesn't exist
+      corecommands: fix atrild label
+      systemd-fstab-generator needs to know about all mountpoints
+      semanage: create directories for new policies
+      dnsmasq: watch for new dns resolvers
+      init: allow systemd to setup mount namespaces
+      init: make initrc_t a init_domain to simplify the policy
+      init: allow systemd to activate journald-audit.socket
+      setrans: allow label translation for all domains.
+      files: add files_watch_etc_symlinks interface
+      init: watch /etc/localtime even if it's a symlink
+      corecommands: proper label for unattended-upgrades helpers
+      filesystem: pathcon for matching tracefs mount
+      lvm-activation-generator also needs to execute lvm
+      systemd: allow systemd-user-runtime-dir to do its job
+      init: fix init_manage_pid_symlinks to grant more than just create
+         permissions
+      init: replace call to init_domtrans_script
+      systemd-sysusers: add policy
+      allow most common permissions for systemd sandboxing options
+      terminal: cleanup term_create interfaces
+      logrotate.service sandbox required permissions
+      udev.service sandbox required permissions
+      systemd-timesyncd.service sandbox requried permissions
+      systemd-logind.service sandbox required permissions
+      init: fix systemd boot
+      postfix: add filetrans for sendmail and postfix for aliases db operations
+      systemd: fixed systemd_rfkill_t denial spam
+      thunderbird: label files under /tmp
+      init: systemd will run chkpwd to start user@1000
+      authlogin: unix_chkpwd is linked to libselinux
+      systemd: maintain /memfd:systemd-state
+      dpkg: allow dpkg frontends to acquire lock by labeling it correctly
+      systemd: systemd --user add essential permissions
+      dpkg: dpkg scripts are part of dpkg and therefor also an application
+         domain
+      gpg: don't allow gpg-agent to read /proc/kcore
+      corecommands: correct label for debian ssh-agent helper script
+      systemd: systemd-tempfiles will relabel tmpfs if mounted over e.g. /tmp
+      Remove the ada module, it is unecessary and not touched since ~2008
+      dpkg: domaintrans to sysusers if necessary
+
 * Sat Feb 29 2020 Chris PeBenito <pebenito@ieee.org> - 2.20200229
 Alexander Miroshnichenko (1):
       Add knot module
@@ -2233,4 +3792,3 @@ Sven Vermeulen (27):
       Allow initrc_t to read stunnel configuration
       Introduce exec-check interfaces for passwd binaries and useradd binaries
       chfn_t reads in file context information and executes nscd
-

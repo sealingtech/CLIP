@@ -5,9 +5,9 @@
 ##	Execute a domain transition to run memcached.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed to transition.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`memcached_domtrans',`
@@ -22,7 +22,7 @@ interface(`memcached_domtrans',`
 ########################################
 ## <summary>
 ##	Create, read, write, and delete
-##	memcached pid files.
+##	memcached runtime files.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -30,32 +30,13 @@ interface(`memcached_domtrans',`
 ##	</summary>
 ## </param>
 #
-interface(`memcached_manage_pid_files',`
+interface(`memcached_manage_runtime_files',`
 	gen_require(`
 		type memcached_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	manage_files_pattern($1, memcached_runtime_t, memcached_runtime_t)
-')
-
-########################################
-## <summary>
-##	Read memcached pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`memcached_read_pid_files',`
-	gen_require(`
-		type memcached_runtime_t;
-	')
-
-	files_search_pids($1)
-	allow $1 memcached_runtime_t:file read_file_perms;
 ')
 
 ########################################
@@ -74,7 +55,7 @@ interface(`memcached_stream_connect',`
 		type memcached_t, memcached_runtime_t;
 	')
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, memcached_runtime_t, memcached_runtime_t, memcached_t)
 ')
 
@@ -125,6 +106,6 @@ interface(`memcached_admin',`
 
 	init_startstop_service($1, $2, memcached_t, memcached_initrc_exec_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, memcached_runtime_t)
 ')

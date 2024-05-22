@@ -1,4 +1,4 @@
-policy_module(awstats, 1.5.0)
+policy_module(awstats)
 
 ########################################
 #
@@ -78,7 +78,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	nscd_dontaudit_search_pid(awstats_t)
+	nscd_dontaudit_search_runtime(awstats_t)
 ')
 
 optional_policy(`

@@ -1,4 +1,4 @@
-policy_module(miscfiles, 1.17.2)
+policy_module(miscfiles)
 
 ########################################
 #
@@ -36,6 +36,10 @@ files_type(hwdata_t)
 type locale_t;
 files_type(locale_t)
 
+optional_policy(`
+	container_mountpoint(locale_t)
+')
+
 #
 # man_t is the type for the man directories.
 #
@@ -43,7 +47,7 @@ type man_t alias catman_t;
 files_type(man_t)
 
 optional_policy(`
-	systemd_tmpfilesd_managed(man_t, dir)
+	systemd_tmpfilesd_managed(man_t)
 ')
 
 type man_cache_t;

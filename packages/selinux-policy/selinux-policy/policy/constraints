@@ -91,7 +91,7 @@ constrain process { transition dyntransition noatsecure siginh rlimitinh }
 (
 	u1 == u2
 	or ( t1 == can_change_process_identity and t2 == process_user_target )
-       	or ( t1 == cron_source_domain and ( t2 == cron_job_domain or u2 == system_u ) )
+	or ( t1 == cron_source_domain and ( t2 == cron_job_domain or u2 == system_u ) )
 	or ( t1 == can_system_change and u2 == system_u )
 	or ( t1 == process_uncond_exempt )
 );
@@ -100,34 +100,9 @@ constrain process { transition dyntransition noatsecure siginh rlimitinh }
 (
 	r1 == r2
 	or ( t1 == can_change_process_role and t2 == process_user_target )
-   	or ( t1 == cron_source_domain and t2 == cron_job_domain )
+	or ( t1 == cron_source_domain and t2 == cron_job_domain )
 	or ( t1 == can_system_change and r2 == system_r )
 	or ( t1 == process_uncond_exempt )
-);
-
-constrain process dyntransition
-(
-	u1 == u2
-	or ( t1 == can_change_process_identity and t2 == process_user_target )
-);
-
-constrain process dyntransition
-(
-	r1 == r2
-	or ( t1 == can_change_process_identity and t2 == process_user_target )
-);
-
-# Constrain access to memory mapping file objects
-# One scenario in which this is useful is for a series of 
-# filters where, once filterA is done processing/modifying it, it passes
-# it to filterB. If filterA had memory mapped the file, it
-# could make changes after filterB had begun processing the file giving filterA
-# the opporunity to send malicious or sensitive information compromising the security
-# goals of the system.
-# Use the "files_not_mappable_file(<type_name>)" interface call to prevent mapping of a file type.
-constrain { dir file blk_file chr_file fifo_file } { map }
-(
-	t2 != not_mappable_file_type
 );
 
 # These permissions do not have ubac constraints:
@@ -164,13 +139,11 @@ exempted_ubac_constraint(key_socket, ubacsock)
 exempted_ubac_constraint(unix_stream_socket, ubacsock)
 exempted_ubac_constraint(unix_dgram_socket, ubacsock)
 exempted_ubac_constraint(netlink_route_socket, ubacsock)
-exempted_ubac_constraint(netlink_firewall_socket, ubacsock)
 exempted_ubac_constraint(netlink_tcpdiag_socket, ubacsock)
 exempted_ubac_constraint(netlink_nflog_socket, ubacsock)
 exempted_ubac_constraint(netlink_xfrm_socket, ubacsock)
 exempted_ubac_constraint(netlink_selinux_socket, ubacsock)
 exempted_ubac_constraint(netlink_audit_socket, ubacsock)
-exempted_ubac_constraint(netlink_ip6fw_socket, ubacsock)
 exempted_ubac_constraint(netlink_dnrt_socket, ubacsock)
 exempted_ubac_constraint(netlink_kobject_uevent_socket, ubacsock)
 exempted_ubac_constraint(appletalk_socket, ubacsock)

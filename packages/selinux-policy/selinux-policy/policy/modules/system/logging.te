@@ -1,9 +1,17 @@
-policy_module(logging, 1.31.6)
+policy_module(logging)
 
 ########################################
 #
 # Declarations
 #
+
+## <desc>
+## <p>
+## Allows syslogd internet domain sockets
+## functionality (dangerous).
+## </p>
+## </desc>
+gen_tunable(logging_syslog_can_network, false)
 
 attribute logfile;
 
@@ -31,7 +39,7 @@ type auditd_initrc_exec_t;
 init_script_file(auditd_initrc_exec_t)
 
 type auditd_runtime_t alias auditd_var_run_t;
-files_pid_file(auditd_runtime_t)
+files_runtime_file(auditd_runtime_t)
 
 type auditd_unit_t;
 init_unit_file(auditd_unit_t)
@@ -45,7 +53,7 @@ type audisp_remote_exec_t;
 logging_dispatcher_domain(audisp_remote_t, audisp_remote_exec_t)
 
 type audisp_runtime_t alias audisp_var_run_t;
-files_pid_file(audisp_runtime_t)
+files_runtime_file(audisp_runtime_t)
 
 type devlog_t;
 files_type(devlog_t)
@@ -56,7 +64,7 @@ type klogd_exec_t;
 init_daemon_domain(klogd_t, klogd_exec_t)
 
 type klogd_runtime_t alias klogd_var_run_t;
-files_pid_file(klogd_runtime_t)
+files_runtime_file(klogd_runtime_t)
 
 type klogd_tmp_t;
 files_tmp_file(klogd_tmp_t)
@@ -74,7 +82,7 @@ type syslogd_initrc_exec_t;
 init_script_file(syslogd_initrc_exec_t)
 
 type syslogd_runtime_t alias syslogd_var_run_t;
-files_pid_file(syslogd_runtime_t)
+files_runtime_file(syslogd_runtime_t)
 
 type syslogd_tmp_t;
 files_tmp_file(syslogd_tmp_t)
@@ -89,13 +97,13 @@ type var_log_t;
 logging_log_file(var_log_t)
 files_mountpoint(var_log_t)
 
-ifdef(`enable_mcs',`
-	init_ranged_daemon_domain(auditd_t, auditd_exec_t, s0 - mcs_systemhigh)
-	init_ranged_daemon_domain(syslogd_t, syslogd_exec_t, s0 - mcs_systemhigh)
-')
 ifdef(`enable_mls',`
 	init_ranged_daemon_domain(auditd_t, auditd_exec_t, mls_systemhigh)
 	init_ranged_daemon_domain(syslogd_t, syslogd_exec_t, mls_systemhigh)
+')
+
+optional_policy(`
+	systemd_tmpfilesd_managed(var_log_t)
 ')
 
 ########################################
@@ -118,16 +126,16 @@ files_getattr_all_dirs(auditctl_t)
 files_getattr_all_files(auditctl_t)
 files_read_etc_files(auditctl_t)
 
+kernel_dontaudit_getattr_proc(auditctl_t)
 kernel_read_kernel_sysctls(auditctl_t)
 kernel_read_proc_symlinks(auditctl_t)
+kernel_read_system_state(auditctl_t)
 kernel_setsched(auditctl_t)
-kernel_getattr_proc(auditctl_t)
 
 domain_read_all_domains_state(auditctl_t)
 domain_use_interactive_fds(auditctl_t)
 
 mls_file_read_all_levels(auditctl_t)
-selinux_search_fs(auditctl_t)
 
 term_use_all_terms(auditctl_t)
 
@@ -140,6 +148,9 @@ miscfiles_read_localization(auditctl_t)
 
 ifdef(`init_systemd',`
 	init_rw_stream_sockets(auditctl_t)
+
+	systemd_list_userdb_runtime_dirs(auditctl_t)
+	systemd_stream_connect_userdb(auditctl_t)
 ')
 
 optional_policy(`
@@ -170,7 +181,11 @@ allow auditd_t var_log_t:dir search_dir_perms;
 
 manage_files_pattern(auditd_t, auditd_runtime_t, auditd_runtime_t)
 manage_sock_files_pattern(auditd_t, auditd_runtime_t, auditd_runtime_t)
-files_pid_filetrans(auditd_t, auditd_runtime_t, { file sock_file })
+files_runtime_filetrans(auditd_t, auditd_runtime_t, { file sock_file })
+
+# Needs to be able to getattr on the audisp-remote binary to verify
+# the plugin configuration.
+allow auditd_t audisp_remote_exec_t:file getattr;
 
 kernel_read_kernel_sysctls(auditd_t)
 # Needs to be able to run dispatcher.  see /etc/audit/auditd.conf
@@ -182,6 +197,8 @@ dev_read_sysfs(auditd_t)
 fs_getattr_all_fs(auditd_t)
 fs_search_auto_mountpoints(auditd_t)
 fs_rw_anon_inodefs_files(auditd_t)
+
+selinux_search_fs(auditctl_t)
 
 corenet_all_recvfrom_netlabel(auditd_t)
 corenet_tcp_sendrecv_generic_if(auditd_t)
@@ -242,10 +259,6 @@ optional_policy(`
 	systemd_status_power_units(auditd_t)
 ')
 
-optional_policy(`
-	udev_read_db(auditd_t)
-')
-
 ########################################
 #
 # audit dispatcher local policy
@@ -260,7 +273,7 @@ allow audisp_t self:unix_dgram_socket create_socket_perms;
 allow audisp_t auditd_t:unix_stream_socket rw_socket_perms;
 
 manage_sock_files_pattern(audisp_t, audisp_runtime_t, audisp_runtime_t)
-files_pid_filetrans(audisp_t, audisp_runtime_t, sock_file)
+files_runtime_filetrans(audisp_t, audisp_runtime_t, sock_file)
 
 kernel_read_system_state(audisp_t)
 
@@ -332,7 +345,7 @@ manage_files_pattern(klogd_t, klogd_tmp_t, klogd_tmp_t)
 files_tmp_filetrans(klogd_t, klogd_tmp_t,{ file dir })
 
 manage_files_pattern(klogd_t, klogd_runtime_t, klogd_runtime_t)
-files_pid_filetrans(klogd_t, klogd_runtime_t, file)
+files_runtime_filetrans(klogd_t, klogd_runtime_t, file)
 
 kernel_read_system_state(klogd_t)
 kernel_read_messages(klogd_t)
@@ -370,10 +383,6 @@ ifdef(`distro_ubuntu',`
 ')
 
 optional_policy(`
-	udev_read_db(klogd_t)
-')
-
-optional_policy(`
 	seutil_sigchld_newrole(klogd_t)
 ')
 
@@ -385,9 +394,9 @@ optional_policy(`
 # chown fsetid for syslog-ng
 # sys_admin for the integrated klog of syslog-ng and metalog
 # sys_nice for rsyslog
-# cjp: why net_admin!
-allow syslogd_t self:capability { chown dac_override fsetid net_admin setgid setuid sys_admin sys_nice sys_resource sys_tty_config };
+allow syslogd_t self:capability { chown dac_override fsetid setgid setuid sys_admin sys_nice sys_resource sys_tty_config };
 dontaudit syslogd_t self:capability { sys_ptrace };
+dontaudit syslogd_t self:cap_userns { kill sys_ptrace };
 # setpgid for metalog
 # setrlimit for syslog-ng
 # getsched for syslog-ng
@@ -399,16 +408,14 @@ allow syslogd_t self:unix_dgram_socket create_socket_perms;
 allow syslogd_t self:unix_stream_socket create_stream_socket_perms;
 allow syslogd_t self:unix_dgram_socket sendto;
 allow syslogd_t self:fifo_file rw_fifo_file_perms;
-allow syslogd_t self:udp_socket create_socket_perms;
-allow syslogd_t self:tcp_socket create_stream_socket_perms;
 
 allow syslogd_t syslog_conf_t:file read_file_perms;
 allow syslogd_t syslog_conf_t:dir list_dir_perms;
 
 # Create and bind to /dev/log or /var/run/log.
 allow syslogd_t devlog_t:sock_file manage_sock_file_perms;
-files_pid_filetrans(syslogd_t, devlog_t, sock_file)
-init_pid_filetrans(syslogd_t, devlog_t, sock_file, "dev-log")
+files_runtime_filetrans(syslogd_t, devlog_t, sock_file)
+init_runtime_filetrans(syslogd_t, devlog_t, sock_file, "dev-log")
 
 # create/append log files.
 manage_files_pattern(syslogd_t, var_log_t, var_log_t)
@@ -420,7 +427,7 @@ files_search_spool(syslogd_t)
 allow syslogd_t var_log_t:dir { create setattr };
 
 # for systemd but can not be conditional
-files_pid_filetrans(syslogd_t, syslogd_tmp_t, dir, "log")
+files_runtime_filetrans(syslogd_t, syslogd_tmp_t, dir, "log")
 
 # manage temporary files
 manage_dirs_pattern(syslogd_t, syslogd_tmp_t, syslogd_tmp_t)
@@ -435,12 +442,11 @@ files_search_var_lib(syslogd_t)
 
 # manage runtime files
 allow syslogd_t syslogd_runtime_t:dir create_dir_perms;
-allow syslogd_t syslogd_runtime_t:sock_file { create setattr unlink };
+allow syslogd_t syslogd_runtime_t:sock_file manage_sock_file_perms;
 allow syslogd_t syslogd_runtime_t:file map;
 manage_files_pattern(syslogd_t, syslogd_runtime_t, syslogd_runtime_t)
-files_pid_filetrans(syslogd_t, syslogd_runtime_t, file)
+files_runtime_filetrans(syslogd_t, syslogd_runtime_t, file)
 
-kernel_read_crypto_sysctls(syslogd_t)
 kernel_read_system_state(syslogd_t)
 kernel_read_network_state(syslogd_t)
 kernel_read_kernel_sysctls(syslogd_t)
@@ -455,29 +461,6 @@ kernel_change_ring_buffer_level(syslogd_t)
 kernel_read_ring_buffer(syslogd_t)
 # /initrd is not umounted before minilog starts
 kernel_dontaudit_search_unlabeled(syslogd_t)
-
-corenet_all_recvfrom_netlabel(syslogd_t)
-corenet_udp_sendrecv_generic_if(syslogd_t)
-corenet_udp_sendrecv_generic_node(syslogd_t)
-corenet_udp_bind_generic_node(syslogd_t)
-corenet_udp_bind_syslogd_port(syslogd_t)
-# syslog-ng can listen and connect on tcp port 514 (rsh)
-corenet_tcp_sendrecv_generic_if(syslogd_t)
-corenet_tcp_sendrecv_generic_node(syslogd_t)
-corenet_tcp_bind_generic_node(syslogd_t)
-corenet_tcp_bind_rsh_port(syslogd_t)
-corenet_tcp_connect_rsh_port(syslogd_t)
-# Allow users to define additional syslog ports to connect to
-corenet_tcp_bind_syslogd_port(syslogd_t)
-corenet_tcp_connect_syslogd_port(syslogd_t)
-corenet_tcp_connect_postgresql_port(syslogd_t)
-corenet_tcp_connect_mysqld_port(syslogd_t)
-
-# syslog-ng can send or receive logs
-corenet_sendrecv_syslogd_client_packets(syslogd_t)
-corenet_sendrecv_syslogd_server_packets(syslogd_t)
-corenet_sendrecv_postgresql_client_packets(syslogd_t)
-corenet_sendrecv_mysqld_client_packets(syslogd_t)
 
 dev_filetrans(syslogd_t, devlog_t, sock_file)
 dev_read_sysfs(syslogd_t)
@@ -515,9 +498,6 @@ auth_use_nsswitch(syslogd_t)
 
 init_use_fds(syslogd_t)
 
-# cjp: this doesnt make sense
-logging_send_syslog_msg(syslogd_t)
-
 miscfiles_read_localization(syslogd_t)
 
 seutil_read_config(syslogd_t)
@@ -527,10 +507,11 @@ userdom_dontaudit_search_user_home_dirs(syslogd_t)
 
 ifdef(`init_systemd',`
 	# for systemd-journal
+	allow syslogd_t self:capability audit_control;
 	allow syslogd_t self:netlink_audit_socket connected_socket_perms;
 	allow syslogd_t self:capability2 audit_read;
 	allow syslogd_t self:capability { chown setgid setuid sys_ptrace };
-	allow syslogd_t self:netlink_audit_socket { getattr getopt read setopt write };
+	allow syslogd_t self:netlink_audit_socket { getattr getopt read setopt write nlmsg_write };
 
 	# remove /run/log/journal when switching to permanent storage
 	allow syslogd_t var_log_t:dir rmdir;
@@ -539,6 +520,7 @@ ifdef(`init_systemd',`
 	kernel_read_ring_buffer(syslogd_t)
 	kernel_rw_stream_sockets(syslogd_t)
 	kernel_rw_unix_dgram_sockets(syslogd_t)
+	kernel_rw_netlink_audit_sockets(syslogd_t)
 	kernel_use_fds(syslogd_t)
 
 	dev_read_kmsg(syslogd_t)
@@ -548,19 +530,35 @@ ifdef(`init_systemd',`
 	domain_getattr_all_domains(syslogd_t)
 	domain_read_all_domains_state(syslogd_t)
 
+	fs_list_cgroup_dirs(syslogd_t)
+	fs_watch_memory_pressure(syslogd_t)
+
 	init_create_runtime_dirs(syslogd_t)
-	init_daemon_pid_file(syslogd_runtime_t, dir, "syslogd")
+	init_daemon_runtime_file(syslogd_runtime_t, dir, "syslogd")
 	init_getattr(syslogd_t)
 	init_rename_runtime_files(syslogd_t)
 	init_delete_runtime_files(syslogd_t)
 	init_dgram_send(syslogd_t)
 	init_read_runtime_pipes(syslogd_t)
 	init_read_runtime_symlinks(syslogd_t)
+	init_read_runtime_files(syslogd_t)
 	init_read_state(syslogd_t)
 
-	systemd_manage_journal_files(syslogd_t)
+	# needed for systemd-initrd case when syslog socket is unlabelled
+	logging_send_syslog_msg(syslogd_t)
 
-	udev_read_pid_files(syslogd_t)
+	systemd_manage_journal_files(syslogd_t)
+	systemd_watch_journal_dirs(syslogd_t)
+	systemd_relabelfrom_journal_files(syslogd_t)
+	systemd_relabelto_journal_files(syslogd_t)
+
+	udev_read_runtime_files(syslogd_t)
+
+	# journald traverses /run/user/UID (which is mode 0700) to read symlinks in /run/user/UID/systemd/units/
+	allow syslogd_t self:capability dac_read_search;
+	userdom_search_user_runtime_root(syslogd_t)
+	userdom_search_user_runtime(syslogd_t)
+	systemd_read_user_runtime_lnk_files(syslogd_t)
 ')
 
 ifdef(`distro_gentoo',`
@@ -568,6 +566,11 @@ ifdef(`distro_gentoo',`
 	# and high priority messages to /dev/tty12
 	# and chown/chgrp/chmod /dev/tty12, which is denied
 	term_dontaudit_setattr_unallocated_ttys(syslogd_t)
+')
+
+ifdef(`distro_redhat',`
+	# EL9 configures with --enable-libcap-ng
+	allow syslogd_t self:capability setpcap;
 ')
 
 ifdef(`distro_suse',`
@@ -579,6 +582,35 @@ ifdef(`distro_ubuntu',`
 	optional_policy(`
 		unconfined_domain(syslogd_t)
 	')
+')
+
+tunable_policy(`logging_syslog_can_network',`
+	allow syslogd_t self:capability { net_admin };
+	allow syslogd_t self:tcp_socket create_stream_socket_perms;
+	allow syslogd_t self:udp_socket create_socket_perms;
+
+	corenet_all_recvfrom_netlabel(syslogd_t)
+	corenet_udp_sendrecv_generic_if(syslogd_t)
+	corenet_udp_sendrecv_generic_node(syslogd_t)
+	corenet_udp_bind_generic_node(syslogd_t)
+	corenet_udp_bind_syslogd_port(syslogd_t)
+	# syslog-ng can listen and connect on tcp port 514 (rsh)
+	corenet_tcp_sendrecv_generic_if(syslogd_t)
+	corenet_tcp_sendrecv_generic_node(syslogd_t)
+	corenet_tcp_bind_generic_node(syslogd_t)
+	corenet_tcp_bind_rsh_port(syslogd_t)
+	corenet_tcp_connect_rsh_port(syslogd_t)
+	# Allow users to define additional syslog ports to connect to
+	corenet_tcp_bind_syslogd_port(syslogd_t)
+	corenet_tcp_connect_syslogd_port(syslogd_t)
+	corenet_tcp_connect_postgresql_port(syslogd_t)
+	corenet_tcp_connect_mysqld_port(syslogd_t)
+
+	# syslog-ng can send or receive logs
+	corenet_sendrecv_syslogd_client_packets(syslogd_t)
+	corenet_sendrecv_syslogd_server_packets(syslogd_t)
+	corenet_sendrecv_postgresql_client_packets(syslogd_t)
+	corenet_sendrecv_mysqld_client_packets(syslogd_t)
 ')
 
 optional_policy(`
@@ -607,12 +639,6 @@ optional_policy(`
 
 optional_policy(`
 	seutil_sigchld_newrole(syslogd_t)
-')
-
-optional_policy(`
-	udev_read_db(syslogd_t)
-	# for systemd-journal to read seat data from /run/udev/data
-	udev_read_pid_files(syslogd_t)
 ')
 
 optional_policy(`

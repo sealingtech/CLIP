@@ -22,9 +22,9 @@ interface(`dbus_stub',`
 ##	Execute dbus in the caller domain.
 ## </summary>
 ## <param name="domain">
-## <summary>
+##	<summary>
 ##	Domain allowed access.
-## </summary>
+##	</summary>
 ## </param>
 #
 interface(`dbus_exec',`
@@ -63,6 +63,7 @@ template(`dbus_role_template',`
 		attribute session_bus_type;
 		type system_dbusd_t, dbusd_exec_t;
 		type session_dbusd_tmp_t, session_dbusd_home_t;
+		type session_dbusd_runtime_t;
 	')
 
 	##############################
@@ -75,6 +76,9 @@ template(`dbus_role_template',`
 	domain_entry_file($1_dbusd_t, dbusd_exec_t)
 	ubac_constrained($1_dbusd_t)
 
+	type $1_dbusd_tmpfs_t;
+	files_tmpfs_file($1_dbusd_tmpfs_t)
+
 	role $2 types $1_dbusd_t;
 
 	##############################
@@ -82,104 +86,20 @@ template(`dbus_role_template',`
 	# Local policy
 	#
 
-	allow $3 $1_dbusd_t:unix_stream_socket connectto;
-	# MJM: i saw staff_systemd_t require these, but not sure why
-	allow $3 $1_dbusd_t:unix_stream_socket { bind listen setopt };
-
+	allow $3 $1_dbusd_t:unix_stream_socket { create_stream_socket_perms connectto };
 	allow $3 $1_dbusd_t:dbus { send_msg acquire_svc };
 	allow $3 $1_dbusd_t:fd use;
 
-	# CLIP: removed acquire_svc for system_dbusd_t
-	allow $3 system_dbusd_t:dbus { send_msg };
+	dontaudit $1_dbusd_t self:process getcap;
+	dontaudit $1_dbusd_t self:cap_userns sys_ptrace;
 
-	kernel_getattr_proc($1_dbusd_t)
-
-	allow $3 { session_dbusd_home_t session_dbusd_tmp_t }:dir { manage_dir_perms relabel_dir_perms };
-	allow $3 { session_dbusd_home_t session_dbusd_tmp_t }:file { manage_file_perms relabel_file_perms };
-	userdom_list_user_home_content($1_dbusd_t)
-	userdom_user_home_dir_filetrans($3, session_dbusd_home_t, dir, ".dbus")
-
-	domtrans_pattern($3, dbusd_exec_t, $1_dbusd_t)
-
-	ps_process_pattern($3, $1_dbusd_t)
-	allow $3 $1_dbusd_t:process { ptrace signal_perms };
-
-	allow $1_dbusd_t $3:process { signal sigkill getcap };
-	allow $1_dbusd_t self:process getcap;
-
-	corecmd_bin_domtrans($1_dbusd_t, $3)
-	corecmd_shell_domtrans($1_dbusd_t, $3)
-
-	auth_use_nsswitch($1_dbusd_t)
-
-	# MJM: this should only get used for users that are allowed to login to X
-	optional_policy(`
-		xdg_read_data_dirs($1_dbusd_t)
-	')
-
-	ifdef(`hide_broken_symptoms',`
-		dontaudit $3 $1_dbusd_t:netlink_selinux_socket { read write };
-	')
-
-	optional_policy(`
-		systemd_read_logind_pids($1_dbusd_t)
-	')
-')
-
-########################################
-## <summary>
-##	Role access for dbus.
-##	This is a copy of dbus_role_template but without
-##	the type declarations and transitions to the user
-##	domain.
-## </summary>
-## <param name="role_prefix">
-##	<summary>
-##	The prefix of the user role (e.g., user
-##	is the prefix for user_r).
-##	</summary>
-## </param>
-## <param name="role">
-##	<summary>
-##	Role allowed access
-##	</summary>
-## </param>
-## <param name="domain">
-##	<summary>
-##	User domain for the role
-##	</summary>
-## </param>
-#
-template(`dbus_session_run',`
-	gen_require(`
-		class dbus { send_msg acquire_svc };
-		attribute session_bus_type;
-		type system_dbusd_t, dbusd_exec_t;
-		type session_dbusd_tmp_t, session_dbusd_home_t;
-		type $1_dbusd_t;
-	')
-
-	##############################
-	#
-	# Local policy
-	#
-
-	allow $3 $1_dbusd_t:unix_stream_socket connectto;
-	# MJM: i saw staff_systemd_t require these, but not sure why
-	allow $3 $1_dbusd_t:unix_stream_socket { create bind listen setopt };
-
-	allow $3 $1_dbusd_t:dbus { send_msg acquire_svc };
-	allow $3 $1_dbusd_t:fd use;
-
-	kernel_getattr_proc($1_dbusd_t)
-
-	# CLIP: removed acquire_svc for system_dbusd_t
-	allow $3 system_dbusd_t:dbus { send_msg };
+	allow $3 system_dbusd_t:dbus { send_msg acquire_svc };
+	dontaudit $3 $1_dbusd_t:netlink_selinux_socket { read write };
 
 	allow $3 { session_dbusd_home_t session_dbusd_tmp_t }:dir { manage_dir_perms relabel_dir_perms };
 	allow $3 { session_dbusd_home_t session_dbusd_tmp_t }:file { manage_file_perms relabel_file_perms };
+	allow $3 session_dbusd_runtime_t:sock_file { manage_sock_file_perms relabel_sock_file_perms };
 	userdom_user_home_dir_filetrans($3, session_dbusd_home_t, dir, ".dbus")
-	userdom_list_user_home_content($1_dbusd_t)
 
 	domtrans_pattern($3, dbusd_exec_t, $1_dbusd_t)
 
@@ -187,18 +107,31 @@ template(`dbus_session_run',`
 	allow $3 $1_dbusd_t:process { ptrace signal_perms };
 
 	allow $1_dbusd_t $3:process sigkill;
-	allow $1_dbusd_t self:process getcap;
+	allow $1_dbusd_t session_dbusd_tmp_t:sock_file manage_sock_file_perms;
+	allow $1_dbusd_t self:unix_stream_socket connectto;
 
-	allow $1_dbusd_t $3:unix_stream_socket { read write };
+	allow $1_dbusd_t $1_dbusd_tmpfs_t:file mmap_rw_inherited_file_perms;
+
+	files_read_etc_runtime_files($1_dbusd_t)
+
+	fs_tmpfs_filetrans($1_dbusd_t, $1_dbusd_tmpfs_t, file)
+
+	kernel_getattr_proc($1_dbusd_t)
+
+	corecmd_bin_domtrans($1_dbusd_t, $3)
+	corecmd_shell_domtrans($1_dbusd_t, $3)
+
+	selinux_use_status_page($1_dbusd_t)
 
 	auth_use_nsswitch($1_dbusd_t)
 
-	ifdef(`hide_broken_symptoms',`
-		dontaudit $3 $1_dbusd_t:netlink_selinux_socket { read write };
-	')
+	dbus_exec($1_dbusd_t)
 
 	optional_policy(`
-		systemd_read_logind_pids($1_dbusd_t)
+		systemd_read_logind_runtime_files($1_dbusd_t)
+		systemd_user_daemon_domain($1, dbusd_exec_t, $1_dbusd_t)
+		systemd_user_send_systemd_notify($1, $1_dbusd_t)
+		systemd_user_unix_stream_activated_socket($1_dbusd_t, session_dbusd_runtime_t)
 	')
 ')
 
@@ -229,10 +162,13 @@ interface(`dbus_system_bus_client',`
 	read_files_pattern($1, system_dbusd_var_lib_t, system_dbusd_var_lib_t)
 	read_lnk_files_pattern($1, system_dbusd_var_lib_t, system_dbusd_var_lib_t)
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	stream_connect_pattern($1, system_dbusd_runtime_t, system_dbusd_runtime_t, system_dbusd_t)
 
 	dbus_read_config($1)
+	dbus_list_system_bus_runtime($1)
+	dbus_read_system_bus_runtime_named_sockets($1)
+	dbus_rw_session_tmp_sockets($1)
 ')
 
 #######################################
@@ -272,7 +208,7 @@ interface(`dbus_connect_all_session_bus',`
 ##	</summary>
 ## </param>
 #
-interface(`dbus_connect_spec_session_bus',`
+template(`dbus_connect_spec_session_bus',`
 	gen_require(`
 		type $1_dbusd_t;
 		class dbus acquire_svc;
@@ -305,6 +241,8 @@ interface(`dbus_all_session_bus_client',`
 
 	allow $1 session_bus_type:unix_stream_socket connectto;
 	allow $1 session_bus_type:fd use;
+
+	dbus_rw_session_tmp_sockets($1)
 ')
 
 #######################################
@@ -324,7 +262,7 @@ interface(`dbus_all_session_bus_client',`
 ##	</summary>
 ## </param>
 #
-interface(`dbus_spec_session_bus_client',`
+template(`dbus_spec_session_bus_client',`
 	gen_require(`
 		attribute dbusd_session_bus_client;
 		type $1_dbusd_t;
@@ -377,13 +315,51 @@ interface(`dbus_send_all_session_bus',`
 ##	</summary>
 ## </param>
 #
-interface(`dbus_send_spec_session_bus',`
+template(`dbus_send_spec_session_bus',`
 	gen_require(`
 		type $1_dbusd_t;
 		class dbus send_msg;
 	')
 
 	allow $2 $1_dbusd_t:dbus send_msg;
+')
+
+#######################################
+## <summary>
+##  Allow the specified domain to get the
+##  attributes of the session dbus sock file.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`dbus_getattr_session_runtime_socket',`
+	gen_require(`
+		type session_dbusd_runtime_t;
+	')
+
+	allow $1 session_dbusd_runtime_t:sock_file getattr;
+')
+
+#######################################
+## <summary>
+##  Allow the specified domain to write to
+##  the session dbus sock file.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`dbus_write_session_runtime_socket',`
+	gen_require(`
+		type session_dbusd_runtime_t;
+	')
+
+	allow $1 session_dbusd_runtime_t:sock_file write;
 ')
 
 ########################################
@@ -441,7 +417,7 @@ interface(`dbus_relabel_lib_dirs',`
 	')
 
 	files_search_var_lib($1)
-	allow $1 system_dbusd_var_lib_t:dir { relabelfrom relabelto };
+	allow $1 system_dbusd_var_lib_t:dir relabel_dir_perms;
 ')
 
 ########################################
@@ -515,7 +491,7 @@ interface(`dbus_all_session_domain',`
 ##	</summary>
 ## </param>
 #
-interface(`dbus_spec_session_domain',`
+template(`dbus_spec_session_domain',`
 	gen_require(`
 		type $1_dbusd_t;
 	')
@@ -528,7 +504,7 @@ interface(`dbus_spec_session_domain',`
 
 ########################################
 ## <summary>
-##	Acquire service for self
+##	Acquire service on the DBUS system bus.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -538,13 +514,11 @@ interface(`dbus_spec_session_domain',`
 #
 interface(`dbus_connect_system_bus',`
 	gen_require(`
+		type system_dbusd_t;
 		class dbus acquire_svc;
 	')
 
-	# CLIP: This is modified for because all services
-	# receive a specific label.  Therefore no service
-	# should be acquired on the system dbus type.
-	allow $1 self:dbus acquire_svc;
+	allow $1 system_dbusd_t:dbus acquire_svc;
 ')
 
 ########################################
@@ -612,6 +586,8 @@ interface(`dbus_system_domain',`
 
 	role system_r types $1;
 
+        dontaudit $1 system_dbusd_t:netlink_selinux_socket { read write };
+
 	domtrans_pattern(system_dbusd_t, $2, $1)
 
 	dbus_system_bus_client($1)
@@ -623,10 +599,6 @@ interface(`dbus_system_domain',`
 
 	ifdef(`init_systemd',`
 		init_daemon_domain($1, $2)
-	')
-
-	ifdef(`hide_broken_symptoms', `
-		dontaudit $1 system_dbusd_t:netlink_selinux_socket { read write };
 	')
 ')
 
@@ -688,6 +660,43 @@ interface(`dbus_watch_system_bus_runtime_dirs',`
 
 ########################################
 ## <summary>
+##	Read system bus runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`dbus_read_system_bus_runtime_files',`
+	gen_require(`
+		type system_dbusd_runtime_t;
+	')
+
+	allow $1 system_dbusd_runtime_t:file read;
+')
+
+
+########################################
+## <summary>
+##	List system bus runtime directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`dbus_list_system_bus_runtime',`
+	gen_require(`
+		type system_dbusd_runtime_t;
+	')
+
+	allow $1 system_dbusd_runtime_t:dir list_dir_perms;
+')
+
+########################################
+## <summary>
 ##	Watch system bus runtime named sockets.
 ## </summary>
 ## <param name="domain">
@@ -702,6 +711,61 @@ interface(`dbus_watch_system_bus_runtime_named_sockets',`
 	')
 
 	allow $1 system_dbusd_runtime_t:sock_file watch;
+')
+
+########################################
+## <summary>
+##	Read system bus runtime named sockets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`dbus_read_system_bus_runtime_named_sockets',`
+	gen_require(`
+		type system_dbusd_runtime_t;
+	')
+
+	allow $1 system_dbusd_runtime_t:sock_file read;
+')
+
+#######################################
+## <summary>
+##	Do not audit attempts to write to
+##	system bus runtime named sockets.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`dbus_dontaudit_write_system_bus_runtime_named_sockets',`
+	gen_require(`
+		type system_dbusd_runtime_t;
+	')
+
+	dontaudit $1 system_dbusd_runtime_t:sock_file write;
+')
+
+########################################
+## <summary>
+##	Read and write session named sockets in the tmp directory (/tmp).
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`dbus_rw_session_tmp_sockets',`
+	gen_require(`
+		type session_dbusd_tmp_t;
+	')
+
+	rw_sock_files_pattern($1, session_dbusd_tmp_t, session_dbusd_tmp_t)
 ')
 
 ########################################

@@ -1,4 +1,4 @@
-policy_module(init, 2.8.11)
+policy_module(init)
 
 gen_require(`
 	class passwd rootok;
@@ -15,6 +15,13 @@ gen_require(`
 ## </p>
 ## </desc>
 gen_tunable(init_upstart, false)
+
+## <desc>
+## <p>
+## Enable systemd to create mountpoints.
+## </p>
+## </desc>
+gen_tunable(init_create_mountpoints, false)
 
 ## <desc>
 ## <p>
@@ -35,6 +42,7 @@ attribute init_path_unit_loc_type;
 attribute init_script_domain_type;
 attribute init_script_file_type;
 attribute init_run_all_scripts_domain;
+attribute init_linkable_keyring_type;
 attribute systemdunit;
 attribute initrc_transition_domain;
 
@@ -44,6 +52,9 @@ attribute systemprocess;
 
 # Mark file type as a daemon pid file
 attribute daemonpidfile;
+
+type init_random_seed_t;
+files_type(init_random_seed_t)
 
 #
 # init_t is the domain of the init process.
@@ -55,12 +66,18 @@ domain_entry_file(init_t, init_exec_t)
 kernel_domtrans_to(init_t, init_exec_t)
 role system_r types init_t;
 
+optional_policy(`
+	# required by calico
+	kubernetes_mountpoint(init_t)
+')
+
 #
 # init_runtime_t is the type for /var/run/shutdown.pid and /var/run/systemd.
 #
 type init_runtime_t alias init_var_run_t;
-files_pid_file(init_runtime_t)
+files_runtime_file(init_runtime_t)
 init_mountpoint(init_runtime_t)
+init_unit_file(init_runtime_t)
 
 #
 # init_var_lib_t is the type for /var/lib/systemd.
@@ -103,7 +120,7 @@ type initrc_lock_t;
 files_lock_file(initrc_lock_t)
 
 type initrc_runtime_t alias initrc_var_run_t;
-files_pid_file(initrc_runtime_t)
+files_runtime_file(initrc_runtime_t)
 
 type initrc_state_t;
 files_type(initrc_state_t)
@@ -111,20 +128,24 @@ files_type(initrc_state_t)
 type initrc_tmp_t;
 files_tmp_file(initrc_tmp_t)
 
+type init_tmpfs_t;
+files_tmpfs_file(init_tmpfs_t)
+
 type initrc_var_log_t;
 logging_log_file(initrc_var_log_t)
 
 type systemd_unit_t;
 init_unit_file(systemd_unit_t)
 
+type systemd_transient_unit_t;
+init_unit_file(systemd_transient_unit_t)
+
 ifdef(`distro_gentoo',`
 	type rc_exec_t;
 	domain_entry_file(initrc_t, rc_exec_t)
+	domtrans_pattern(init_t, rc_exec_t, initrc_t)
 ')
 
-ifdef(`enable_mcs',`
-	kernel_ranged_domtrans_to(init_t, init_exec_t, s0 - mcs_systemhigh)
-')
 ifdef(`enable_mls',`
 	kernel_ranged_domtrans_to(init_t, init_exec_t, s0 - mls_systemhigh)
 ')
@@ -148,17 +169,15 @@ allow init_t self:fifo_file rw_fifo_file_perms;
 
 # Re-exec itself
 can_exec(init_t, init_exec_t)
-# executing content in /run/initramfs
-manage_files_pattern(init_t, initrc_state_t, initrc_state_t)
-can_exec(init_t, initrc_state_t)
-
-
 
 allow init_t initrc_t:unix_stream_socket connectto;
 
+# Mostly for systemd. Allow init to link to various keyrings
+allow init_t init_linkable_keyring_type:key link;
+
 # For /var/run/shutdown.pid.
 allow init_t init_runtime_t:file manage_file_perms;
-files_pid_filetrans(init_t, init_runtime_t, file)
+files_runtime_filetrans(init_t, init_runtime_t, file)
 
 # for /run/initctl
 allow init_t init_runtime_t:fifo_file manage_fifo_file_perms;
@@ -168,15 +187,17 @@ allow init_t init_runtime_t:lnk_file manage_lnk_file_perms;
 
 allow init_t initctl_t:fifo_file manage_fifo_file_perms;
 dev_filetrans(init_t, initctl_t, fifo_file)
-files_pid_filetrans(init_t, initctl_t, fifo_file)
+files_runtime_filetrans(init_t, initctl_t, fifo_file)
 
 # Modify utmp.
 allow init_t initrc_runtime_t:file { rw_file_perms setattr };
 
+allow init_t init_tmpfs_t:file manage_file_perms;
+fs_tmpfs_filetrans(init_t, init_tmpfs_t, file)
+
 kernel_read_system_state(init_t)
 kernel_share_state(init_t)
 kernel_dontaudit_search_unlabeled(init_t)
-kernel_rw_stream_sockets(init_t)
 
 corecmd_exec_chroot(init_t)
 corecmd_exec_bin(init_t)
@@ -193,9 +214,9 @@ domain_signull_all_domains(init_t)
 domain_sigstop_all_domains(init_t)
 domain_sigchld_all_domains(init_t)
 
-files_read_usr_files(init_t)
 files_read_etc_files(init_t)
-files_rw_generic_pids(init_t)
+files_mmap_read_kernel_modules(init_t)
+files_rw_runtime_files(init_t)
 files_manage_etc_runtime_files(init_t)
 files_etc_filetrans_etc_runtime(init_t, file)
 # Run /etc/X11/prefdm:
@@ -210,7 +231,6 @@ fs_list_inotifyfs(init_t)
 fs_write_ramfs_sockets(init_t)
 
 mcs_process_set_categories(init_t)
-mcs_killall(init_t)
 
 mls_file_read_all_levels(init_t)
 mls_file_write_all_levels(init_t)
@@ -228,8 +248,6 @@ term_use_all_terms(init_t)
 
 libs_rw_ld_so_cache(init_t)
 
-init_manage_var_lib_files(init_t)
-
 logging_send_syslog_msg(init_t)
 logging_rw_generic_logs(init_t)
 logging_create_devlog(init_t)
@@ -240,6 +258,11 @@ seutil_read_default_contexts(init_t)
 miscfiles_read_localization(init_t)
 
 ifdef(`init_systemd',`
+	gen_require(`
+		class service { status start stop };
+		class system { status reboot halt reload };
+	')
+
 	# handle instances where an old labeled init script is encountered.
 	typeattribute init_t init_run_all_scripts_domain;
 
@@ -248,6 +271,7 @@ ifdef(`init_systemd',`
 	allow init_t self:process { getcap setcap getsched setsched };
 	allow init_t self:unix_stream_socket { create_stream_socket_perms connectto };
 	allow init_t self:netlink_audit_socket { nlmsg_relay create_socket_perms };
+	allow init_t self:netlink_netfilter_socket create_socket_perms;
 	allow init_t self:netlink_selinux_socket create_socket_perms;
 	allow init_t self:system { status reboot halt reload };
 	# Until systemd is fixed
@@ -257,14 +281,21 @@ ifdef(`init_systemd',`
 	allow init_t self:capability2 audit_read;
 	allow init_t self:key { search setattr write };
 	allow init_t self:bpf { map_create map_read map_write prog_load prog_run };
+	allow init_t self:user_namespace create;
+	dontaudit init_t self:process { dyntransition setcurrent };
+
+	# manage the capabilities granted to namespace processes
+	allow init_t self:cap_userns { audit_write chown dac_override dac_read_search fowner fsetid ipc_lock ipc_owner kill lease linux_immutable mknod net_admin net_bind_service net_raw setfcap setgid setpcap setuid sys_admin sys_boot sys_chroot sys_module sys_nice sys_pacct sys_ptrace sys_rawio sys_resource sys_time sys_tty_config };
+	allow init_t self:cap2_userns { audit_read bpf block_suspend mac_admin mac_override perfmon syslog wake_alarm };
 
 	allow init_t init_mountpoint_type:dir_file_class_set { getattr mounton };
 
 	allow init_t init_path_unit_loc_type:{ dir file } { getattr watch };
 
-	# for /run/systemd/inaccessible/{chr,blk}
-	allow init_t init_runtime_t:blk_file { create getattr };
-	allow init_t init_runtime_t:chr_file { create getattr };
+	# for /run/systemd/inaccessible/{chr,blk,fifo}
+	allow init_t init_runtime_t:blk_file { create_blk_file_perms relabelto };
+	allow init_t init_runtime_t:chr_file { create_chr_file_perms relabelto };
+	allow init_t init_runtime_t:fifo_file { create_fifo_file_perms relabelto };
 
 	allow init_t systemprocess:process { dyntransition siginh };
 	allow init_t systemprocess:unix_stream_socket create_stream_socket_perms;
@@ -272,7 +303,7 @@ ifdef(`init_systemd',`
 
 	# setexec and setkeycreate for systemd --user
 	allow init_t self:process { getcap getsched setsched setpgid setfscreate setsockcreate setexec setkeycreate setcap setrlimit };
-	allow init_t self:capability2 { audit_read block_suspend };
+	allow init_t self:capability2 { audit_read block_suspend bpf perfmon };
 	allow init_t self:netlink_kobject_uevent_socket create_socket_perms;
 	allow init_t self:unix_dgram_socket lock;
 
@@ -291,19 +322,26 @@ ifdef(`init_systemd',`
 
 	allow daemon init_t:unix_stream_socket { append write read getattr ioctl };
 
+	# systemd must be able to renice processes in other
+	# slices when containers are started and stopped
+	domain_setpriority_all_domains(init_t)
+
 	allow init_t init_runtime_t:{ dir file } watch;
 	manage_files_pattern(init_t, init_runtime_t, init_runtime_t)
 	manage_lnk_files_pattern(init_t, init_runtime_t, init_runtime_t)
 	manage_sock_files_pattern(init_t, init_runtime_t, init_runtime_t)
 	manage_dirs_pattern(init_t, init_runtime_t, init_runtime_t)
-	# /memfd:systemd-state
-	fs_tmpfs_filetrans(init_t, init_runtime_t, file)
 
-	manage_files_pattern(init_t, systemd_unit_t, systemdunit)
+	# mounton is required for systemd-timesyncd
+	allow init_t init_var_lib_t:dir { manage_dir_perms mounton };
+	allow init_t init_var_lib_t:file manage_file_perms;
+	allow init_t init_var_lib_t:lnk_file manage_lnk_file_perms;
 
-	manage_dirs_pattern(init_t, systemd_unit_t, systemd_unit_t)
-	manage_lnk_files_pattern(init_t, systemd_unit_t, systemd_unit_t)
-	allow init_t systemd_unit_t:dir relabel_dir_perms;
+	manage_files_pattern(init_t, systemd_transient_unit_t, systemdunit)
+
+	manage_dirs_pattern(init_t, systemd_transient_unit_t, systemd_transient_unit_t)
+	manage_lnk_files_pattern(init_t, systemd_transient_unit_t, systemd_transient_unit_t)
+	allow init_t systemd_transient_unit_t:dir relabel_dir_perms;
 
 	kernel_dyntrans_to(init_t)
 	kernel_read_network_state(init_t)
@@ -312,6 +350,8 @@ ifdef(`init_systemd',`
 	kernel_read_fs_sysctls(init_t)
 	kernel_list_unlabeled(init_t)
 	kernel_load_module(init_t)
+	kernel_request_load_module(init_t)
+	kernel_rw_fs_sysctls(init_t)
 	kernel_rw_kernel_sysctl(init_t)
 	kernel_rw_net_sysctls(init_t)
 	kernel_read_all_sysctls(init_t)
@@ -321,6 +361,8 @@ ifdef(`init_systemd',`
 	kernel_setsched(init_t)
 	kernel_link_key(init_t)
 	kernel_rw_unix_sysctls(init_t)
+	kernel_rw_stream_sockets(init_t)
+	kernel_rw_unix_dgram_sockets(init_t)
 
 	# run systemd misc initializations
 	# in the initrc_t domain, as would be
@@ -335,6 +377,7 @@ ifdef(`init_systemd',`
 	dev_write_urand(init_t)
 	dev_rw_lvm_control(init_t)
 	dev_rw_autofs(init_t)
+	dev_rw_wireless(init_t)
 	dev_manage_generic_symlinks(init_t)
 	dev_manage_generic_dirs(init_t)
 	dev_manage_null_service(initrc_t)
@@ -363,40 +406,48 @@ ifdef(`init_systemd',`
 	files_getattr_all_pipes(init_t)
 	files_getattr_all_sockets(init_t)
 	files_read_all_symlinks(init_t)
-	files_read_all_pids(init_t)
+	files_read_all_runtime_files(init_t)
 	files_list_usr(init_t)
 	files_list_var(init_t)
 	files_list_var_lib(init_t)
 	files_watch_root_dirs(init_t)
-	files_search_pids(init_t)
-	files_relabel_all_pids(init_t)
-	files_relabel_all_pid_sock_files(init_t)
+	files_search_runtime(init_t)
+	files_relabel_all_runtime_dirs(init_t)
+	files_relabel_all_runtime_files(init_t)
+	files_relabel_all_runtime_symlinks(init_t)
+	files_relabel_all_runtime_sockets(init_t)
 	files_relabelto_etc_runtime_dirs(init_t)
 	files_relabelto_etc_runtime_files(init_t)
 	files_read_all_locks(init_t)
 	files_search_kernel_modules(init_t)
-	files_create_all_pid_pipes(init_t)
-	files_create_all_pid_sockets(init_t)
+	files_create_all_runtime_pipes(init_t)
+	files_create_all_runtime_sockets(init_t)
 	files_create_all_spool_sockets(init_t)
 	files_create_lock_dirs(init_t)
 	files_watch_runtime_dirs(init_t)
-	files_delete_all_pids(init_t)
+	files_delete_all_runtime_symlinks(init_t)
+	files_delete_all_runtime_files(init_t)
+	files_delete_all_runtime_dirs(init_t)
+	files_delete_all_runtime_sockets(init_t)
+	files_delete_all_runtime_pipes(init_t)
 	files_delete_all_spool_sockets(init_t)
-	files_exec_generic_pid_files(init_t)
+	files_exec_runtime(init_t)
 	files_list_locks(init_t)
 	files_list_spool(init_t)
-	files_manage_all_pid_dirs(init_t)
+	files_manage_all_runtime_dirs(init_t)
 	files_manage_generic_tmp_dirs(init_t)
-	files_manage_urandom_seed(init_t)
-	files_read_boot_files(initrc_t)
+	files_relabel_generic_tmp_dirs(init_t)
+	files_mounton_tmp(init_t)
+	files_read_boot_files(init_t)
+	files_remount_boot(init_t)
+	files_remount_etc(init_t)
 	files_relabel_all_lock_dirs(init_t)
-	files_relabel_all_pid_dirs(init_t)
-	files_relabel_all_pid_files(init_t)
 	files_search_all(init_t)
 	files_unmount_all_file_type_fs(init_t)
 	# If /etc/localtime is missing, a watch on /etc is added.
 	files_watch_etc_dirs(init_t)
 	files_watch_etc_symlinks(init_t)
+	files_dontaudit_write_var_dirs(init_t)
 
 	fs_relabel_cgroup_dirs(init_t)
 	fs_list_auto_mountpoints(init_t)
@@ -417,6 +468,11 @@ ifdef(`init_systemd',`
 	fs_remount_all_fs(init_t)
 	fs_relabelfrom_tmpfs_symlinks(init_t)
 	fs_unmount_all_fs(init_t)
+	fs_relabel_tmpfs_blk_files(init_t)
+	fs_relabel_tmpfs_chr_files(init_t)
+	fs_relabel_tmpfs_fifo_files(init_t)
+	fs_read_efivarfs_files(init_t)
+	fs_setattr_efivarfs_files(init_t)
 	# for privatetmp functions
 	fs_relabel_tmpfs_dirs(init_t)
 	fs_relabel_tmpfs_files(init_t)
@@ -425,25 +481,23 @@ ifdef(`init_systemd',`
 	# mount-setup
 	fs_unmount_autofs(init_t)
 	fs_getattr_pstore_dirs(init_t)
+	fs_create_pstore_dirs(init_t)
 	# for network namespaces
 	fs_read_nsfs_files(init_t)
+	# needed by systemd-creds
+	fs_setattr_ramfs_dirs(init_t)
 
-	# this is to relabel files created under /run/systemd/inaccessible
-	# before the policy is loaded
-	fs_relabelfrom_tmpfs_blk_file(init_t)
-	fs_relabelfrom_tmpfs_chr_file(init_t)
-	fs_relabelfrom_tmpfs_pipes(init_t)
-	allow init_t init_runtime_t:blk_file relabelto;
-	allow init_t init_runtime_t:chr_file relabelto;
-	allow init_t init_runtime_t:fifo_file relabelto;
-
+	init_manage_random_seed(init_t)
 	init_manage_all_unit_files(init_t)
 	init_read_script_state(init_t)
-	init_dbus_chat(init_t)
 
 	miscfiles_watch_localization(init_t)
 
+	# systemd watches utab in order to mount the
+	# local filesystem at boot
 	mount_watch_runtime_dirs(init_t)
+	mount_watch_runtime_files(init_t)
+	mount_watch_reads_runtime_files(init_t)
 
 	# systemd_socket_activated policy
 	mls_socket_write_all_levels(init_t)
@@ -456,6 +510,7 @@ ifdef(`init_systemd',`
 	selinux_compute_access_vector(init_t)
 	# for starting systemd --user in the right domain:
 	selinux_compute_user_contexts(init_t)
+	selinux_use_status_page(init_t)
 
 	storage_getattr_removable_dev(init_t)
 
@@ -465,8 +520,10 @@ ifdef(`init_systemd',`
 	auth_relabel_login_records(init_t)
 	auth_relabel_pam_console_data_dirs(init_t)
 	auth_domtrans_chk_passwd(init_t)
+	# for systemd dynamic users
+	auth_rw_shadow_lock(init_t)
 
-	logging_manage_pid_sockets(init_t)
+	logging_manage_runtime_sockets(init_t)
 	logging_relabelto_devlog_sock_files(init_t)
 	logging_relabel_generic_log_dirs(init_t)
 	logging_audit_socket_activation(init_t)
@@ -486,24 +543,53 @@ ifdef(`init_systemd',`
 	systemd_relabelto_journal_dirs(init_t)
 	systemd_relabelto_journal_files(init_t)
 	systemd_rw_networkd_netlink_route_sockets(init_t)
+	systemd_manage_userdb_runtime_sock_files(init_t)
+	systemd_manage_userdb_runtime_dirs(init_t)
+	systemd_manage_userdb_runtime_symlinks(init_t)
+	systemd_filetrans_userdb_runtime_dirs(init_t)
+	systemd_stream_connect_userdb(init_t)
 
 	term_create_devpts_dirs(init_t)
 	term_create_ptmx(init_t)
 	term_create_controlling_term(init_t)
-
-	# relabel /run/user because it is created before policy is loaded
-	userdom_relabelto_user_runtime_root_dirs(init_t)
+	term_setattr_unallocated_ttys(init_t)
+	term_watch_unallocated_ttys(init_t)
+	term_watch_reads_unallocated_ttys(init_t)
 
 	# udevd is a "systemd kobject uevent socket activated daemon"
 	udev_create_kobject_uevent_sockets(init_t)
 
 	# for systemd to read udev status
-	udev_read_pid_files(init_t)
+	udev_read_runtime_files(init_t)
 
-	udev_relabelto_db_sockets(init_t)
+	udev_relabel_rules_dirs(init_t)
+	udev_relabel_rules_files(init_t)
+
+	userdom_relabel_user_runtime_root_dirs(init_t)
+
+	tunable_policy(`init_create_mountpoints',`
+		allow init_t init_mountpoint_type:dir { create_dir_perms add_entry_dir_perms };
+                allow init_t init_mountpoint_type:fifo_file create_fifo_file_perms;
+		allow init_t init_mountpoint_type:sock_file create_sock_file_perms;
+		allow init_t init_mountpoint_type:lnk_file create_lnk_file_perms;
+
+		kernel_write_non_proc_init_mountpoint_files(init_t)
+		kernel_create_non_proc_init_mountpoint_files(init_t)
+	')
+
+	tunable_policy(`init_create_mountpoints && init_mounton_non_security',`
+		files_create_non_security_dirs(init_t)
+		files_create_non_security_files(init_t)
+		files_write_non_security_files(init_t)
+	')
 
 	tunable_policy(`init_mounton_non_security',`
 		files_mounton_non_security(init_t)
+	')
+
+	optional_policy(`
+		# to run systemd-boot-update
+		bootloader_domtrans(init_t)
 	')
 
 	optional_policy(`
@@ -511,7 +597,12 @@ ifdef(`init_systemd',`
 	')
 
 	optional_policy(`
+		container_remount_fs(init_t)
+	')
+
+	optional_policy(`
 		systemd_dbus_chat_logind(init_t)
+		systemd_create_logind_linger_dir(init_t)
 		systemd_search_all_user_keys(init_t)
 		systemd_create_all_user_keys(init_t)
 		systemd_write_all_user_keys(init_t)
@@ -519,6 +610,24 @@ ifdef(`init_systemd',`
 
 	optional_policy(`
 		dbus_connect_system_bus(init_t)
+		dbus_use_system_bus_fds(init_t)
+	')
+
+	optional_policy(`
+		# kubelet systemd unit reads env files in
+		# /etc/kubernetes and /var/lib/kubelet
+		container_read_var_lib_files(init_t)
+		kubernetes_read_config(init_t)
+	')
+
+	optional_policy(`
+		# var-lib-nfs-rpc_pipefs.mount creates /var/lib/nfs/rpc_pipefs
+		# if it does not exist
+		rpc_create_nfs_state_data_dirs(init_t)
+		rpc_manage_nfs_state_data(init_t)
+
+		fs_rw_nfsd_fs(initrc_t)
+		fs_rw_rpc_named_pipes(initrc_t)
 	')
 
 	optional_policy(`
@@ -568,7 +677,6 @@ ifdef(`distro_redhat',`
 optional_policy(`
 	modutils_read_module_config(init_t)
 	modutils_read_module_deps(init_t)
-	modutils_read_module_objects(init_t)
 ')
 
 optional_policy(`
@@ -596,19 +704,7 @@ optional_policy(`
 ')
 
 optional_policy(`
-	udev_read_db(init_t)
-	udev_relabelto_db(init_t)
-')
-
-optional_policy(`
 	unconfined_domain(init_t)
-')
-
-optional_policy(`
-        plymouthd_stream_connect(init_t)
-        plymouthd_exec_plymouth(init_t)
-        plymouthd_filetrans_named_content(init_t)
-	plymouth_use_plymouthd_fd(init_t)
 ')
 
 ########################################
@@ -616,10 +712,11 @@ optional_policy(`
 # Init script local policy
 #
 
-allow initrc_t self:process { getpgid setsched setpgid setrlimit getsched };
+allow initrc_t self:process { getcap getpgid setsched setpgid setrlimit getsched };
 allow initrc_t self:capability { chown dac_override dac_read_search fowner fsetid kill setgid setuid setpcap linux_immutable net_bind_service net_broadcast net_admin net_raw ipc_lock ipc_owner sys_rawio sys_chroot sys_ptrace sys_pacct sys_boot sys_nice sys_resource sys_time sys_tty_config mknod lease audit_write audit_control setfcap };
 allow initrc_t self:capability2 { wake_alarm block_suspend };
 dontaudit initrc_t self:capability sys_module; # sysctl is triggering this
+allow initrc_t self:netlink_kobject_uevent_socket create_socket_perms; # needed by rdma-ndd
 allow initrc_t self:passwd rootok;
 allow initrc_t self:key manage_key_perms;
 
@@ -648,9 +745,10 @@ manage_dirs_pattern(initrc_t, initrc_state_t, initrc_state_t)
 manage_files_pattern(initrc_t, initrc_state_t, initrc_state_t)
 manage_lnk_files_pattern(initrc_t, initrc_state_t, initrc_state_t)
 manage_fifo_files_pattern(initrc_t, initrc_state_t, initrc_state_t)
+dontaudit initrc_t initrc_state_t:chr_file { create_chr_file_perms setattr };
 
 allow initrc_t initrc_runtime_t:file manage_file_perms;
-files_pid_filetrans(initrc_t, initrc_runtime_t, file)
+files_runtime_filetrans(initrc_t, initrc_runtime_t, file)
 
 allow initrc_t daemon:process siginh;
 
@@ -666,6 +764,7 @@ manage_files_pattern(initrc_t, initrc_var_log_t, initrc_var_log_t)
 logging_log_filetrans(initrc_t, initrc_var_log_t, dir)
 
 init_write_initctl(initrc_t)
+init_manage_random_seed(initrc_t)
 
 kernel_read_system_state(initrc_t)
 kernel_read_software_raid_state(initrc_t)
@@ -685,37 +784,19 @@ kernel_mounton_unlabeled_dirs(initrc_t)
 
 files_create_lock_dirs(initrc_t)
 files_manage_all_locks(initrc_t)
-files_pid_filetrans_lock_dir(initrc_t, "lock")
+files_runtime_filetrans_lock_dir(initrc_t, "lock")
 files_read_kernel_symbol_table(initrc_t)
 files_setattr_lock_dirs(initrc_t)
 
-# for lsof which is used by alsa shutdown:
-kernel_dontaudit_getattr_message_if(initrc_t)
-kernel_stream_connect(initrc_t)
-files_read_kernel_modules(initrc_t)
-files_read_config_files(initrc_t)
-files_read_var_lib_symlinks(initrc_t)
-files_setattr_pid_dirs(initrc_t)
-
-files_exec_etc_files(initrc_t)
-files_manage_etc_symlinks(initrc_t)
-
-fs_manage_tmpfs_dirs(initrc_t)
-fs_manage_tmpfs_symlinks(initrc_t)
-fs_delete_tmpfs_files(initrc_t)
-fs_tmpfs_filetrans(initrc_t, initrc_state_t, file)
-fs_read_nfsd_files(initrc_t)
-
 corecmd_exec_all_executables(initrc_t)
 
-# SRS: remvoed for CLIP
-#corenet_all_recvfrom_netlabel(initrc_t)
-#corenet_tcp_sendrecv_all_if(initrc_t)
-#corenet_udp_sendrecv_all_if(initrc_t)
-#corenet_tcp_sendrecv_all_nodes(initrc_t)
-#corenet_udp_sendrecv_all_nodes(initrc_t)
-#corenet_tcp_connect_all_ports(initrc_t)
-#corenet_sendrecv_all_client_packets(initrc_t)
+corenet_all_recvfrom_netlabel(initrc_t)
+corenet_tcp_sendrecv_all_if(initrc_t)
+corenet_udp_sendrecv_all_if(initrc_t)
+corenet_tcp_sendrecv_all_nodes(initrc_t)
+corenet_udp_sendrecv_all_nodes(initrc_t)
+corenet_tcp_connect_all_ports(initrc_t)
+corenet_sendrecv_all_client_packets(initrc_t)
 
 dev_read_rand(initrc_t)
 dev_read_urand(initrc_t)
@@ -743,11 +824,6 @@ dev_getattr_all_chr_files(initrc_t)
 dev_rw_xserver_misc(initrc_t)
 dev_map_xserver_misc(initrc_t)
 
-fs_manage_tmpfs_chr_files(initrc_t)
-
-dev_create_sysfs_files(initrc_t)
-dev_manage_sysfs_dirs(initrc_t)
-
 domain_kill_all_domains(initrc_t)
 domain_signal_all_domains(initrc_t)
 domain_signull_all_domains(initrc_t)
@@ -770,23 +846,20 @@ files_getattr_all_symlinks(initrc_t)
 files_getattr_all_pipes(initrc_t)
 files_getattr_all_sockets(initrc_t)
 files_purge_tmp(initrc_t)
-files_manage_all_locks(initrc_t)
 files_manage_boot_files(initrc_t)
-files_read_all_pids(initrc_t)
+files_read_all_runtime_files(initrc_t)
 files_delete_root_files(initrc_t)
-files_delete_all_pids(initrc_t)
-files_delete_all_pid_dirs(initrc_t)
+files_delete_runtime_symlinks(initrc_t)
+files_delete_all_runtime_files(initrc_t)
+files_delete_all_runtime_dirs(initrc_t)
+files_delete_all_runtime_sockets(initrc_t)
+files_delete_all_runtime_pipes(initrc_t)
 files_read_etc_files(initrc_t)
 files_manage_etc_runtime_files(initrc_t)
 files_etc_filetrans_etc_runtime(initrc_t, file)
 files_exec_etc_files(initrc_t)
 files_read_usr_files(initrc_t)
-files_manage_urandom_seed(initrc_t)
 files_manage_generic_spool(initrc_t)
-# Mount and unmount file systems.
-# cjp: not sure why these are here; should use mount policy
-files_list_default(initrc_t)
-files_mounton_default(initrc_t)
 files_manage_mnt_dirs(initrc_t)
 files_manage_mnt_files(initrc_t)
 
@@ -795,8 +868,6 @@ fs_list_cgroup_dirs(initrc_t)
 fs_rw_cgroup_files(initrc_t)
 fs_list_inotifyfs(initrc_t)
 fs_register_binary_executable_type(initrc_t)
-# rhgb-console writes to ramfs
-fs_write_ramfs_pipes(initrc_t)
 # cjp: not sure why these are here; should use mount policy
 fs_mount_all_fs(initrc_t)
 fs_unmount_all_fs(initrc_t)
@@ -805,11 +876,6 @@ fs_getattr_all_fs(initrc_t)
 fs_search_all(initrc_t)
 fs_getattr_nfsd_files(initrc_t)
 
-# initrc_t needs to do a pidof which requires ptrace
-mcs_ptrace_all(initrc_t)
-mcs_file_read_all(initrc_t)
-mcs_file_write_all(initrc_t)
-mcs_killall(initrc_t)
 mcs_process_set_categories(initrc_t)
 
 mls_file_read_all_levels(initrc_t)
@@ -832,8 +898,8 @@ term_reset_tty_labels(initrc_t)
 auth_rw_login_records(initrc_t)
 auth_setattr_login_records(initrc_t)
 auth_rw_lastlog(initrc_t)
-auth_read_pam_pid(initrc_t)
-auth_delete_pam_pid(initrc_t)
+auth_read_pam_runtime_files(initrc_t)
+auth_delete_pam_runtime_files(initrc_t)
 auth_delete_pam_console_data(initrc_t)
 auth_use_nsswitch(initrc_t)
 
@@ -855,7 +921,7 @@ logging_read_audit_config(initrc_t)
 
 miscfiles_read_localization(initrc_t)
 # slapd needs to read cert files from its initscript
-miscfiles_manage_generic_cert_files(initrc_t)
+miscfiles_read_generic_certs(initrc_t)
 
 seutil_read_config(initrc_t)
 
@@ -908,11 +974,13 @@ ifdef(`distro_gentoo',`
 	dev_delete_generic_dirs(initrc_t)
 	dev_setattr_generic_dirs(initrc_t)
 
-	files_manage_all_pids(initrc_t)
+	files_manage_all_runtime_dirs(initrc_t)
+	files_manage_all_runtime_files(initrc_t)
+	files_manage_all_runtime_symlinks(initrc_t)
 	# allow bootmisc to create /var/lock/.keep.
 	files_manage_generic_locks(initrc_t)
 	files_manage_var_symlinks(initrc_t)
-	files_pid_filetrans(initrc_t, initrc_state_t, dir, "openrc")
+	files_runtime_filetrans(initrc_t, initrc_state_t, dir, "openrc")
 
 	# openrc uses tmpfs for its state data
 	fs_tmpfs_filetrans(initrc_t, initrc_state_t, { dir file fifo_file lnk_file })
@@ -929,7 +997,7 @@ ifdef(`distro_gentoo',`
 	sysnet_manage_config(initrc_t)
 
 	optional_policy(`
-		abrt_manage_pid_files(initrc_t)
+		abrt_manage_runtime_files(initrc_t)
 	')
 
 	optional_policy(`
@@ -974,9 +1042,11 @@ ifdef(`distro_redhat',`
 
 	fs_read_tmpfs_symlinks(initrc_t)
 	fs_rw_tmpfs_chr_files(initrc_t)
+	fs_manage_tmpfs_dirs(initrc_t)
+	fs_manage_tmpfs_files(initrc_t)
 
 	storage_manage_fixed_disk(initrc_t)
-	storage_dev_filetrans_fixed_disk(initrc_t)
+	storage_dev_filetrans_fixed_disk(initrc_t, blk_file)
 	storage_getattr_removable_dev(initrc_t)
 
 	# readahead asks for these
@@ -995,7 +1065,7 @@ ifdef(`distro_redhat',`
 	')
 
 	optional_policy(`
-		abrt_manage_pid_files(initrc_t)
+		abrt_manage_runtime_files(initrc_t)
 	')
 
 	optional_policy(`
@@ -1042,7 +1112,7 @@ ifdef(`distro_suse',`
 	')
 ')
 
-ifdef(`enabled_mls',`
+ifdef(`enable_mls',`
 	optional_policy(`
 		# allow init scripts to su
 		su_restricted_domain_template(initrc, initrc_t, system_r)
@@ -1050,7 +1120,11 @@ ifdef(`enabled_mls',`
 ')
 
 ifdef(`init_systemd',`
-	allow initrc_t init_t:system { start status reboot halt reload };
+	gen_require(`
+		class service { stop start status reload };
+		class system { start stop status reboot halt reload };
+	')
+	allow initrc_t init_t:system { start stop status reboot halt reload };
 
 	manage_files_pattern(initrc_t, initrc_lock_t, initrc_lock_t)
 	files_lock_filetrans(initrc_t, initrc_lock_t, file)
@@ -1063,15 +1137,18 @@ ifdef(`init_systemd',`
 	manage_dirs_pattern(initrc_t, initrc_runtime_t, initrc_runtime_t)
 	manage_chr_files_pattern(initrc_t, initrc_runtime_t, initrc_runtime_t)
 	manage_lnk_files_pattern(initrc_t, initrc_runtime_t, initrc_runtime_t)
-	files_pid_filetrans(initrc_t, initrc_runtime_t, dir_file_class_set)
+	files_runtime_filetrans(initrc_t, initrc_runtime_t, dir_file_class_set)
 
-	create_dirs_pattern(initrc_t, systemd_unit_t, systemd_unit_t)
-	allow initrc_t systemd_unit_t:service reload;
+	create_dirs_pattern(initrc_t, systemd_transient_unit_t, systemd_transient_unit_t)
+	allow initrc_t systemd_transient_unit_t:service reload;
 
 	manage_files_pattern(initrc_t, systemdunit, systemdunit)
 	manage_lnk_files_pattern(initrc_t, systemdunit, systemdunit)
 	allow initrc_t systemdunit:service reload;
 	allow initrc_t init_script_file_type:service { stop start status reload };
+
+	# Access to notify socket for services with Type=notify
+	kernel_dgram_send(initrc_t)
 
 	# run systemd misc initializations
 	# in the initrc_t domain, as would be
@@ -1083,8 +1160,8 @@ ifdef(`init_systemd',`
 	# Allow initrc_t to check /etc/fstab "service." It appears that
 	# systemd is conflating files and services.
 	files_get_etc_unit_status(initrc_t)
-	files_create_pid_dirs(initrc_t)
-	files_setattr_pid_dirs(initrc_t)
+	files_create_runtime_dirs(initrc_t)
+	files_setattr_runtime_dirs(initrc_t)
 
 	# for logsave in strict configuration
 	fstools_write_log(initrc_t)
@@ -1097,12 +1174,24 @@ ifdef(`init_systemd',`
 	logging_manage_audit_config(initrc_t)
 	# journalctl:
 	logging_watch_runtime_dirs(initrc_t)
+	logging_manage_runtime_sockets(initrc_t)
 
 	# lvm2-activation-generator checks file labels
 	seutil_read_file_contexts(initrc_t)
 
 	systemd_start_power_units(initrc_t)
 	systemd_watch_networkd_runtime_dirs(initrc_t)
+	systemd_write_notify_socket(initrc_t)
+
+	# Ensures the memory.pressure cgroup file is labelled differently, so
+	# that processes can manage it without having access to the rest of the
+	# cgroup tree. This is a special file so each open is an independent,
+	# separate instance that cannot affect already opened ones, so it is not
+	# necessary to lock it down on a process-by-process base. This is useful
+	# to allow receiving notifications when memory pressure is high, see:
+	# https://systemd.io/MEMORY_PRESSURE/
+	fs_cgroup_filetrans_memory_pressure(init_t, file, "memory.pressure")
+	fs_mounton_cgroup_files(init_t)
 
 	optional_policy(`
 		# create /var/lock/lvm/
@@ -1112,7 +1201,7 @@ ifdef(`init_systemd',`
 
 optional_policy(`
 	amavis_search_lib(initrc_t)
-	amavis_setattr_pid_files(initrc_t)
+	amavis_setattr_runtime_files(initrc_t)
 ')
 
 optional_policy(`
@@ -1128,14 +1217,10 @@ optional_policy(`
 
 optional_policy(`
 	asterisk_setattr_logs(initrc_t)
-	asterisk_setattr_pid_files(initrc_t)
 ')
 
 optional_policy(`
 	bind_read_config(initrc_t)
-
-	# for chmod in start script
-	bind_setattr_pid_dirs(initrc_t)
 ')
 
 optional_policy(`
@@ -1148,7 +1233,13 @@ optional_policy(`
 ')
 
 optional_policy(`
+	clamav_filetrans_runtime_dir(initrc_t)
 	clamav_read_config(initrc_t)
+')
+
+
+optional_policy(`
+	cockpit_manage_runtime_symlnks(initrc_t)
 ')
 
 optional_policy(`
@@ -1188,11 +1279,6 @@ optional_policy(`
 	init_dbus_chat(initrc_t)
 
 	optional_policy(`
-		consolekit_dbus_chat(initrc_t)
-		consolekit_manage_log(initrc_t)
-	')
-
-	optional_policy(`
 		networkmanager_dbus_chat(initrc_t)
 	')
 
@@ -1218,13 +1304,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	hal_write_log(initrc_t)
-')
-
-optional_policy(`
-	# init scripts run /etc/hotplug/usb.rc
-	hotplug_read_config(initrc_t)
-
 	modutils_read_module_deps(initrc_t)
 ')
 
@@ -1234,7 +1313,7 @@ optional_policy(`
 
 optional_policy(`
 	ipsec_read_config(initrc_t)
-	ipsec_manage_pid(initrc_t)
+	ipsec_manage_runtime_files(initrc_t)
 ')
 
 optional_policy(`
@@ -1344,15 +1423,16 @@ optional_policy(`
 ')
 
 optional_policy(`
-	raid_manage_mdadm_pid(initrc_t)
+	raid_manage_mdadm_runtime_files(initrc_t)
 ')
 
 optional_policy(`
 	fs_write_ramfs_sockets(initrc_t)
 	fs_search_ramfs(initrc_t)
+')
 
-	rhgb_rw_stream_sockets(initrc_t)
-	rhgb_stream_connect(initrc_t)
+optional_policy(`
+	ftp_filetrans_pure_ftpd_runtime(initrc_t)
 ')
 
 optional_policy(`
@@ -1364,16 +1444,16 @@ optional_policy(`
 	kernel_dontaudit_getattr_unlabeled_blk_files(initrc_t)
 
 	# for a bug in rm
-	files_dontaudit_write_all_pids(initrc_t)
+	files_dontaudit_write_all_runtime_files(initrc_t)
 
 	# bash tries ioctl for some reason
-	files_dontaudit_ioctl_all_pids(initrc_t)
+	files_dontaudit_ioctl_all_runtime_files(initrc_t)
 
 ')
 
 optional_policy(`
 	samba_rw_config(initrc_t)
-	samba_read_winbind_pid(initrc_t)
+	samba_read_winbind_runtime_files(initrc_t)
 ')
 
 optional_policy(`
@@ -1400,8 +1480,8 @@ optional_policy(`
 ')
 
 optional_policy(`
-	udev_manage_pid_files(initrc_t)
-	udev_manage_pid_dirs(initrc_t)
+	udev_manage_runtime_files(initrc_t)
+	udev_manage_runtime_dirs(initrc_t)
 	udev_manage_rules_files(initrc_t)
 ')
 
@@ -1480,7 +1560,7 @@ ifdef(`init_systemd',`
 	fs_search_cgroup_dirs(daemon)
 
 	# need write to /var/run/systemd/notify
-	init_write_runtime_socket(daemon)
+	systemd_write_notify_socket(daemon)
 ')
 
 tunable_policy(`init_daemons_use_tty',`

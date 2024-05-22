@@ -1,4 +1,4 @@
-policy_module(devices, 1.26.6)
+policy_module(devices)
 
 ########################################
 #
@@ -23,7 +23,11 @@ fs_xattr_type(device_t)
 fs_use_trans devtmpfs gen_context(system_u:object_r:device_t,s0);
 
 optional_policy(`
-	systemd_tmpfilesd_managed(device_t, fifo_file)
+	container_mountpoint(device_t)
+')
+
+optional_policy(`
+	systemd_tmpfilesd_managed(device_t)
 ')
 
 #
@@ -43,6 +47,10 @@ dev_node(acpi_bios_t)
 #
 type autofs_device_t;
 dev_node(autofs_device_t)
+
+optional_policy(`
+	container_mountpoint(autofs_device_t)
+')
 
 type cardmgr_dev_t;
 dev_node(cardmgr_dev_t)
@@ -119,6 +127,27 @@ type gpiochip_device_t;
 dev_node(gpiochip_device_t)
 
 #
+# Types for Hyper-V guest devices
+#
+type hyperv_kvp_device_t;
+dev_node(hyperv_kvp_device_t)
+
+type hyperv_vss_device_t;
+dev_node(hyperv_vss_device_t)
+
+#
+# Type for /dev/iio:device* (Industrial IO)
+#
+type iio_device_t;
+dev_node(iio_device_t)
+
+#
+# Type for /dev/infiniband/*
+#
+type infiniband_device_t;
+dev_node(infiniband_device_t)
+
+#
 # Type for /dev/ipmi/0
 #
 type ipmi_device_t;
@@ -129,6 +158,10 @@ dev_node(ipmi_device_t)
 #
 type kmsg_device_t;
 dev_node(kmsg_device_t)
+
+optional_policy(`
+	container_mountpoint(kmsg_device_t)
+')
 
 optional_policy(`
 	init_mountpoint(kmsg_device_t)
@@ -191,6 +224,12 @@ type mouse_device_t;
 dev_node(mouse_device_t)
 
 #
+# Serial Attached SCSI Management device
+#
+type mptctl_device_t;
+dev_node(mptctl_device_t)
+
+#
 # Type for /dev/cpu/mtrr and /proc/mtrr
 #
 type mtrr_device_t;
@@ -208,6 +247,10 @@ type null_device_t;
 dev_node(null_device_t)
 mls_trusted_object(null_device_t)
 sid devnull gen_context(system_u:object_r:null_device_t,s0)
+
+optional_policy(`
+	container_mountpoint(null_device_t)
+')
 
 #
 # Type for /dev/nvram
@@ -243,6 +286,10 @@ dev_node(qemu_device_t)
 #
 type random_device_t;
 dev_node(random_device_t)
+
+optional_policy(`
+	container_mountpoint(random_device_t)
+')
 
 type scanner_device_t;
 dev_node(scanner_device_t)
@@ -301,20 +348,29 @@ dev_node(uhid_device_t)
 type urandom_device_t;
 dev_node(urandom_device_t)
 
+optional_policy(`
+	container_mountpoint(urandom_device_t)
+')
+
 #
 # usbfs_t is the type for the /proc/bus/usb pseudofs
 #
 type usbfs_t;
 files_mountpoint(usbfs_t)
-fs_noxattr_type(usbfs_t)
+fs_pseudo_type(usbfs_t)
 genfscon usbfs / gen_context(system_u:object_r:usbfs_t,s0)
 genfscon usbdevfs / gen_context(system_u:object_r:usbfs_t,s0)
+genfscon functionfs / gen_context(system_u:object_r:usbfs_t,s0)
 
 #
 # usb_device_t is the type for /dev/bus/usb/[0-9]+/[0-9]+
 #
 type usb_device_t;
 dev_node(usb_device_t)
+
+optional_policy(`
+	container_mountpoint(usb_device_t)
+')
 
 #
 # usb_device_t is the type for /dev/usbmon
@@ -367,6 +423,10 @@ type zero_device_t;
 dev_node(zero_device_t)
 mls_trusted_object(zero_device_t)
 
+optional_policy(`
+	container_mountpoint(zero_device_t)
+')
+
 ########################################
 #
 # Rules for all device nodes
@@ -385,6 +445,6 @@ files_associate_tmp(device_node)
 #
 
 allow devices_unconfined_type self:capability sys_rawio;
-allow devices_unconfined_type device_node:blk_file { manage_blk_file_perms relabelfrom relabelto map execute quotaon mounton audit_access execmod watch };
-allow devices_unconfined_type device_node:chr_file { manage_chr_file_perms relabelfrom relabelto map execute quotaon mounton execmod audit_access watch };
-allow devices_unconfined_type mtrr_device_t:file { manage_file_perms relabelfrom relabelto map execute quotaon mounton execute_no_trans entrypoint execmod audit_access watch };
+allow devices_unconfined_type device_node:blk_file { manage_blk_file_perms relabel_blk_file_perms map execute quotaon mounton execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow devices_unconfined_type device_node:chr_file { manage_chr_file_perms relabel_chr_file_perms map execute quotaon mounton execmod watch watch_mount watch_reads watch_sb watch_with_perm };
+allow devices_unconfined_type mtrr_device_t:file { manage_file_perms relabel_file_perms exec_file_perms quotaon mounton entrypoint execmod watch watch_mount watch_reads watch_sb watch_with_perm };

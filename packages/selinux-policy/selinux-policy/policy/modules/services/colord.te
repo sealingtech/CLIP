@@ -1,4 +1,4 @@
-policy_module(colord, 1.5.2)
+policy_module(colord)
 
 ########################################
 #
@@ -31,6 +31,8 @@ allow colord_t self:netlink_kobject_uevent_socket create_socket_perms;
 allow colord_t self:tcp_socket { accept listen };
 allow colord_t self:shm create_shm_perms;
 
+can_exec(colord_t, colord_exec_t)
+
 manage_dirs_pattern(colord_t, colord_tmp_t, colord_tmp_t)
 manage_files_pattern(colord_t, colord_tmp_t, colord_tmp_t)
 files_tmp_filetrans(colord_t, colord_tmp_t, { file dir })
@@ -44,7 +46,6 @@ manage_files_pattern(colord_t, colord_var_lib_t, colord_var_lib_t)
 files_var_lib_filetrans(colord_t, colord_var_lib_t, dir)
 allow colord_t colord_var_lib_t:dir watch;
 
-kernel_read_crypto_sysctls(colord_t)
 kernel_read_device_sysctls(colord_t)
 kernel_read_network_state(colord_t)
 kernel_read_system_state(colord_t)
@@ -128,15 +129,33 @@ optional_policy(`
 ')
 
 optional_policy(`
+	snmp_read_snmp_var_lib_files(colord_t)
+')
+
+optional_policy(`
 	sysnet_exec_ifconfig(colord_t)
 ')
 
 optional_policy(`
-	udev_read_db(colord_t)
-	udev_read_pid_files(colord_t)
+	systemd_map_hwdb(colord_t)
+	systemd_read_hwdb(colord_t)
+	systemd_read_logind_sessions_files(colord_t)
+')
+
+optional_policy(`
+	udev_read_runtime_files(colord_t)
+')
+
+optional_policy(`
+	unconfined_dbus_send(colord_t)
+')
+
+optional_policy(`
+	xdg_read_data_files(colord_t)
 ')
 
 optional_policy(`
 	xserver_read_xdm_lib_files(colord_t)
+	xserver_read_xdm_state(colord_t)
 	xserver_use_xdm_fds(colord_t)
 ')

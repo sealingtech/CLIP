@@ -1,4 +1,4 @@
-policy_module(jabber, 1.15.1)
+policy_module(jabber)
 
 ########################################
 #
@@ -20,7 +20,7 @@ type jabberd_log_t;
 logging_log_file(jabberd_log_t)
 
 type jabberd_runtime_t alias jabberd_var_run_t;
-files_pid_file(jabberd_runtime_t)
+files_runtime_file(jabberd_runtime_t)
 
 type jabberd_spool_t;
 files_type(jabberd_spool_t)
@@ -39,6 +39,7 @@ allow jabberd_domain self:tcp_socket { accept listen };
 
 manage_files_pattern(jabberd_domain, jabberd_var_lib_t, jabberd_var_lib_t)
 allow jabberd_domain jabberd_var_lib_t:dir manage_dir_perms;
+allow jabberd_domain jabberd_var_lib_t:sock_file manage_sock_file_perms;
 
 kernel_read_system_state(jabberd_domain)
 
@@ -84,9 +85,10 @@ manage_files_pattern(jabberd_t, jabberd_log_t, jabberd_log_t)
 logging_log_filetrans(jabberd_t, jabberd_log_t, { file dir })
 
 manage_files_pattern(jabberd_domain, jabberd_spool_t, jabberd_spool_t)
+files_search_var_lib(jabberd_t)
 
 manage_files_pattern(jabberd_t, jabberd_runtime_t, jabberd_runtime_t)
-files_pid_filetrans(jabberd_t, jabberd_runtime_t, file)
+files_runtime_filetrans(jabberd_t, jabberd_runtime_t, file)
 
 domain_dontaudit_search_all_domains_state(jabberd_t)
 
@@ -112,6 +114,7 @@ files_read_usr_files(jabberd_t)
 
 fs_search_auto_mountpoints(jabberd_t)
 
+miscfiles_read_generic_tls_privkey(jabberd_t)
 miscfiles_read_all_certs(jabberd_t)
 
 sysnet_read_config(jabberd_t)
@@ -120,7 +123,7 @@ userdom_dontaudit_use_unpriv_user_fds(jabberd_t)
 userdom_dontaudit_search_user_home_dirs(jabberd_t)
 
 optional_policy(`
-	udev_read_db(jabberd_t)
+	certbot_read_lib(jabberd_t)
 ')
 
 ########################################

@@ -1,4 +1,4 @@
-policy_module(sblim, 1.5.1)
+policy_module(sblim)
 
 ########################################
 #
@@ -19,7 +19,7 @@ type sblim_initrc_exec_t;
 init_script_file(sblim_initrc_exec_t)
 
 type sblim_runtime_t alias sblim_var_run_t;
-files_pid_file(sblim_runtime_t)
+files_runtime_file(sblim_runtime_t)
 
 ######################################
 #

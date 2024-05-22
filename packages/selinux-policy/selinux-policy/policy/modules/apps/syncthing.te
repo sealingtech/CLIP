@@ -1,4 +1,4 @@
-policy_module(syncthing, 1.3.0)
+policy_module(syncthing)
 
 ########################################
 #
@@ -62,4 +62,3 @@ miscfiles_read_localization(syncthing_t)
 userdom_user_content_access_template(syncthing, syncthing_t)
 
 userdom_use_user_terminals(syncthing_t)
-

@@ -31,15 +31,18 @@ interface(`unconfined_domain_noaudit',`
 		class dbus all_dbus_perms;
 		class nscd all_nscd_perms;
 		class passwd all_passwd_perms;
-		class service all_service_perms;
 	')
 
 	unconfined_stub($1)
 
 	# Use most Linux capabilities
 	allow $1 self:{ capability cap_userns } { chown dac_override dac_read_search fowner fsetid kill setgid setuid setpcap linux_immutable net_bind_service net_broadcast net_admin net_raw ipc_lock ipc_owner sys_rawio sys_chroot sys_ptrace sys_pacct sys_admin sys_boot sys_nice sys_resource sys_time sys_tty_config mknod lease audit_write audit_control setfcap };
-	allow $1 self:{ capability2 cap2_userns } { syslog wake_alarm };
+	allow $1 self:{ capability2 cap2_userns } { syslog wake_alarm bpf perfmon };
 	allow $1 self:fifo_file manage_fifo_file_perms;
+
+	# Manage most namespace capabilities
+	allow $1 self:cap_userns { audit_write chown dac_override dac_read_search fowner fsetid ipc_lock ipc_owner kill lease linux_immutable mknod net_admin net_bind_service net_raw setfcap setgid setpcap setuid sys_admin sys_boot sys_chroot sys_module sys_nice sys_pacct sys_ptrace sys_rawio sys_resource sys_time sys_tty_config };
+	allow $1 self:cap2_userns { audit_read bpf block_suspend mac_admin mac_override perfmon syslog wake_alarm };
 
 	# Transition to myself, to make get_ordered_context_list happy.
 	allow $1 self:process transition;
@@ -255,49 +258,6 @@ interface(`unconfined_domtrans_to',`
 
 ########################################
 ## <summary>
-##	Setup a domain which can be manually transitioned to from unconfined.
-## </summary>
-## <desc>
-##	<p>
-##	Create a domain where unconfined sets the execution context manually (setexeccon() or runcon)
-## This allows for the
-##  manual transition from unconfined into the new domain.  This is used
-##  when automatic transitions won't work.  Used for the case where the
-##  same binary is used for multiple target domains.
-##	</p>
-## </desc>
-## <param name="domain">
-##	<summary>
-##	Type to be used as a domain.
-##	</summary>
-## </param>
-## <param name="entry_point">
-##	<summary>
-##	Type of the program being executed when starting this domain.
-##	</summary>
-## </param>
-#
-interface(`unconfined_spec_domtrans_to',`
-	gen_require(`
-		type unconfined_t;
-		role system_r;
-	')
-
-
-	domain_type($1)
-	domain_entry_file($1, $2)
-
-	role system_r types $1;
-
-	spec_domtrans_pattern(unconfined_t, $2, $1)
-
-	allow unconfined_t $1:process rlimitinh;
-
-	userdom_use_user_terminals($1)
-')
-
-########################################
-## <summary>
 ##	Allow unconfined to execute the specified program in
 ##	the specified domain.  Allow the specified domain the
 ##	unconfined role and use of unconfined user terminals.
@@ -428,6 +388,25 @@ interface(`unconfined_read_pipes',`
 
 ########################################
 ## <summary>
+##	Read unconfined domain unnamed pipes.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`unconfined_write_inherited_pipes',`
+	gen_require(`
+		type unconfined_t;
+	')
+
+	allow $1 unconfined_t:fd use;
+	allow $1 unconfined_t:fifo_file write_inherited_fifo_file_perms;
+')
+
+########################################
+## <summary>
 ##	Do not audit attempts to read unconfined domain unnamed pipes.
 ## </summary>
 ## <param name="domain">
@@ -506,9 +485,9 @@ interface(`unconfined_stream_connect',`
 ##      unconfined domain stream.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain to not audit.
-##      </summary>
+##	<summary>
+##	Domain to not audit.
+##	</summary>
 ## </param>
 #
 interface(`unconfined_dontaudit_rw_stream_sockets',`
@@ -660,29 +639,4 @@ interface(`unconfined_dbus_connect',`
 	')
 
 	allow $1 unconfined_t:dbus acquire_svc;
-')
-
-########################################
-## <summary>
-##      Allow unconfined domain to manage directories and files with a specific label.
-##      This is a reverse interface granting access to a callers resources and is used
-##      to enable third party module support.
-## </summary>
-## <param name="dir">
-##      <summary>
-##      Dir type unconfined can manage the contents of this parent dir.
-##      </summary>
-## </param>
-## <param name="file">
-##      <summary>
-##      File type unconfined can manage these files.
-##      </summary>
-## </param>
-#
-interface(`unconfined_can_manage_files',`
-        gen_require(`
-                type unconfined_t;
-        ')
-
-        manage_files_pattern(unconfined_t, $1, $2)
 ')

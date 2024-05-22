@@ -1,4 +1,4 @@
-policy_module(snmp, 1.18.1)
+policy_module(snmp)
 
 ########################################
 #
@@ -16,7 +16,7 @@ type snmpd_log_t;
 logging_log_file(snmpd_log_t)
 
 type snmpd_runtime_t alias snmpd_var_run_t;
-files_pid_file(snmpd_runtime_t)
+files_runtime_file(snmpd_runtime_t)
 
 type snmpd_var_lib_t;
 files_type(snmpd_var_lib_t)
@@ -28,6 +28,7 @@ files_type(snmpd_var_lib_t)
 
 allow snmpd_t self:capability { chown dac_override ipc_lock kill net_admin setgid setuid sys_nice sys_ptrace sys_tty_config };
 dontaudit snmpd_t self:capability { sys_module sys_tty_config };
+allow snmpd_t self:cap_userns sys_ptrace;
 allow snmpd_t self:process { signal_perms getsched setsched };
 allow snmpd_t self:fifo_file rw_fifo_file_perms;
 allow snmpd_t self:unix_stream_socket { accept connectto listen };
@@ -46,7 +47,7 @@ files_var_lib_filetrans(snmpd_t, snmpd_var_lib_t, { dir file })
 
 manage_dirs_pattern(snmpd_t, snmpd_runtime_t, snmpd_runtime_t)
 manage_files_pattern(snmpd_t, snmpd_runtime_t, snmpd_runtime_t)
-files_pid_filetrans(snmpd_t, snmpd_runtime_t, { file dir })
+files_runtime_filetrans(snmpd_t, snmpd_runtime_t, { file dir })
 
 kernel_read_device_sysctls(snmpd_t)
 kernel_read_kernel_sysctls(snmpd_t)
@@ -72,9 +73,7 @@ corenet_tcp_bind_snmp_port(snmpd_t)
 corenet_tcp_connect_snmp_port(snmpd_t)
 corenet_udp_bind_snmp_port(snmpd_t)
 
-corenet_sendrecv_snmp_client_packets(snmpd_t)
 corenet_tcp_connect_agentx_port(snmpd_t)
-corenet_sendrecv_snmp_server_packets(snmpd_t)
 corenet_tcp_bind_agentx_port(snmpd_t)
 corenet_udp_bind_agentx_port(snmpd_t)
 
@@ -110,6 +109,7 @@ init_dontaudit_write_utmp(snmpd_t)
 
 logging_send_syslog_msg(snmpd_t)
 
+miscfiles_read_hwdata(snmpd_t)
 miscfiles_read_localization(snmpd_t)
 
 seutil_dontaudit_search_config(snmpd_t)
@@ -139,10 +139,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	ricci_stream_connect_modclusterd(snmpd_t)
-')
-
-optional_policy(`
 	rpc_search_nfs_state_data(snmpd_t)
 ')
 
@@ -161,10 +157,6 @@ optional_policy(`
 
 optional_policy(`
 	squid_read_config(snmpd_t)
-')
-
-optional_policy(`
-	udev_read_db(snmpd_t)
 ')
 
 optional_policy(`

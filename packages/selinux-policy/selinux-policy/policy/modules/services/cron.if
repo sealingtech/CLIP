@@ -44,19 +44,30 @@ template(`cron_common_crontab_template',`
 ## <summary>
 ##	Role access for cron.
 ## </summary>
-## <param name="role">
+## <param name="role_prefix">
 ##	<summary>
-##	Role allowed access.
+##	The prefix of the user role (e.g., user
+##	is the prefix for user_r).
 ##	</summary>
 ## </param>
-## <param name="domain">
+## <param name="user_domain">
 ##	<summary>
 ##	User domain for the role.
 ##	</summary>
 ## </param>
+## <param name="user_exec_domain">
+##	<summary>
+##	User exec domain for execute and transition access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access
+##	</summary>
+## </param>
 ## <rolecap/>
 #
-interface(`cron_role',`
+template(`cron_role',`
 	gen_require(`
 		type cronjob_t, crontab_t, crontab_exec_t;
 		type user_cron_spool_t, crond_t;
@@ -68,7 +79,7 @@ interface(`cron_role',`
 	# Declarations
 	#
 
-	role $1 types { cronjob_t crontab_t };
+	role $4 types { cronjob_t crontab_t };
 
 	##############################
 	#
@@ -77,10 +88,10 @@ interface(`cron_role',`
 
 	domtrans_pattern($2, crontab_exec_t, crontab_t)
 
-	dontaudit crond_t $2:process { noatsecure siginh rlimitinh };
+	dontaudit crond_t $3:process { noatsecure rlimitinh siginh };
 	allow $2 crond_t:process sigchld;
 
-	allow $2 user_cron_spool_t:file { getattr read write ioctl };
+	allow $2 user_cron_spool_t:file rw_inherited_file_perms;
 
 	allow $2 crontab_t:process { ptrace signal_perms };
 	ps_process_pattern($2, crontab_t)
@@ -126,18 +137,29 @@ interface(`cron_role',`
 ## <summary>
 ##	Role access for unconfined cron.
 ## </summary>
-## <param name="role">
+## <param name="role_prefix">
 ##	<summary>
-##	Role allowed access.
+##	The prefix of the user role (e.g., user
+##	is the prefix for user_r).
 ##	</summary>
 ## </param>
-## <param name="domain">
+## <param name="user_domain">
 ##	<summary>
 ##	User domain for the role.
 ##	</summary>
 ## </param>
+## <param name="user_exec_domain">
+##	<summary>
+##	User exec domain for execute and transition access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access
+##	</summary>
+## </param>
 #
-interface(`cron_unconfined_role',`
+template(`cron_unconfined_role',`
 	gen_require(`
 		type unconfined_cronjob_t, crontab_t, crontab_exec_t;
 		type crond_t, user_cron_spool_t;
@@ -149,7 +171,7 @@ interface(`cron_unconfined_role',`
 	# Declarations
 	#
 
-	role $1 types { unconfined_cronjob_t crontab_t };
+	role $4 types { unconfined_cronjob_t crontab_t };
 
 	##############################
 	#
@@ -161,7 +183,7 @@ interface(`cron_unconfined_role',`
 	dontaudit crond_t $2:process { noatsecure siginh rlimitinh };
 	allow $2 crond_t:process sigchld;
 
-	allow $2 user_cron_spool_t:file { getattr read write ioctl };
+	allow $2 user_cron_spool_t:file rw_inherited_file_perms;
 
 	allow $2 crontab_t:process { ptrace signal_perms };
 	ps_process_pattern($2, crontab_t)
@@ -207,18 +229,29 @@ interface(`cron_unconfined_role',`
 ## <summary>
 ##	Role access for admin cron.
 ## </summary>
-## <param name="role">
+## <param name="role_prefix">
 ##	<summary>
-##	Role allowed access.
+##	The prefix of the user role (e.g., user
+##	is the prefix for user_r).
 ##	</summary>
 ## </param>
-## <param name="domain">
+## <param name="user_domain">
 ##	<summary>
 ##	User domain for the role.
 ##	</summary>
 ## </param>
+## <param name="user_exec_domain">
+##	<summary>
+##	User exec domain for execute and transition access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	Role allowed access
+##	</summary>
+## </param>
 #
-interface(`cron_admin_role',`
+template(`cron_admin_role',`
 	gen_require(`
 		type cronjob_t, crontab_exec_t, admin_crontab_t;
 		class passwd crontab;
@@ -231,7 +264,7 @@ interface(`cron_admin_role',`
 	# Declarations
 	#
 
-	role $1 types { cronjob_t admin_crontab_t };
+	role $4 types { cronjob_t admin_crontab_t };
 
 	##############################
 	#
@@ -243,7 +276,7 @@ interface(`cron_admin_role',`
 	dontaudit crond_t $2:process { noatsecure siginh rlimitinh };
 	allow $2 crond_t:process sigchld;
 
-	allow $2 user_cron_spool_t:file { getattr read write ioctl };
+	allow $2 user_cron_spool_t:file rw_inherited_file_perms;
 
 	allow $2 admin_crontab_t:process { ptrace signal_perms };
 	ps_process_pattern($2, admin_crontab_t)
@@ -296,7 +329,7 @@ interface(`cron_admin_role',`
 ########################################
 ## <summary>
 ##	Make the specified program domain
-##	accessable from the system cron jobs.
+##	accessible from the system cron jobs.
 ## </summary>
 ## <param name="domain">
 ##	<summary>
@@ -632,25 +665,6 @@ interface(`cron_search_spool',`
 
 ########################################
 ## <summary>
-##	Create, read, write, and delete
-##	crond pid files.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`cron_manage_pid_files',`
-	gen_require(`
-		type crond_runtime_t;
-	')
-
-	manage_files_pattern($1, crond_runtime_t, crond_runtime_t)
-')
-
-########################################
-## <summary>
 ##	Execute anacron in the cron
 ##	system domain.
 ## </summary>
@@ -692,9 +706,9 @@ interface(`cron_use_system_job_fds',`
 ##      Create, read, write, and delete the system spool.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`cron_manage_system_spool',`
@@ -711,9 +725,9 @@ interface(`cron_manage_system_spool',`
 ##      Read the system spool.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`cron_read_system_spool',`
@@ -731,9 +745,9 @@ interface(`cron_read_system_spool',`
 ##      Read and write crond temporary files.
 ## </summary>
 ## <param name="domain">
-##      <summary>
-##      Domain allowed access.
-##      </summary>
+##	<summary>
+##	Domain allowed access.
+##	</summary>
 ## </param>
 #
 interface(`cron_rw_tmp_files',`
@@ -742,6 +756,24 @@ interface(`cron_rw_tmp_files',`
 	')
 
 	allow $1 crond_tmp_t:file rw_file_perms;
+')
+
+########################################
+## <summary>
+##      Read and write inherited crond temporary files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`cron_rw_inherited_tmp_files',`
+	gen_require(`
+		type crond_tmp_t;
+	')
+
+	allow $1 crond_tmp_t:file rw_inherited_file_perms;
 ')
 
 ########################################
@@ -879,6 +911,24 @@ interface(`cron_dontaudit_append_system_job_tmp_files',`
 
 ########################################
 ## <summary>
+##	allow appending temporary system cron job files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to allow.
+##	</summary>
+## </param>
+#
+interface(`cron_append_system_job_tmp_files',`
+	gen_require(`
+		type system_cronjob_tmp_t;
+	')
+
+	allow $1 system_cronjob_tmp_t:file append_file_perms;
+')
+
+########################################
+## <summary>
 ##	Read and write to inherited system cron job temporary files.
 ## </summary>
 ## <param name="domain">
@@ -921,7 +971,7 @@ interface(`cron_dontaudit_write_system_job_tmp_files',`
 ## <param name="domain">
 ##	<summary>
 ##	Domain allowed access.
-## 	</summary>
+##	</summary>
 ## </param>
 ## <rolecap/>
 #
@@ -974,7 +1024,7 @@ interface(`cron_admin',`
 	admin_pattern($1, { crond_tmp_t admin_crontab_tmp_t })
 	admin_pattern($1, { crontab_tmp_t system_cronjob_tmp_t })
 
-	files_search_pids($1)
+	files_search_runtime($1)
 	admin_pattern($1, { cron_runtime_t crond_runtime_t system_cronjob_runtime_t })
 
 	files_search_locks($1)
