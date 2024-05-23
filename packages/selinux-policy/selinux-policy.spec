@@ -19,6 +19,8 @@ Source2:  rpm.macros
 Source3:  Makefile.devel
 Source4:  selinux-policy.conf
 Source5: selinux-check-proper-disable.service
+Source6: setrans-mcs.conf
+Source7: setrans-mls.conf
 Url: http:/oss.tresys.com/repos/refpolicy/
 BuildRequires: python3 gawk checkpolicy >= %{CHECKPOLICYVER} m4 policycoreutils-devel >= %{POLICYCOREUTILSVER} bzip2
 BuildRequires: make
@@ -129,7 +131,7 @@ make UNK_PERMS=%4 NAME=%1 TYPE=%2 DISTRO=%{distro} UBAC=n DIRECT_INITRC=%3 MONOL
 %{__mkdir} -p %{buildroot}%{_sharedstatedir}/selinux/%1/active/modules/disabled \
 %{__mkdir} -p %{buildroot}/%{_sysconfdir}/selinux/%1/logins \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.subs \
-if [[ %2 != "standard" ]]; then install -m0644 selinux_config/setrans-%1.conf %{buildroot}%{_sysconfdir}/selinux/%1/setrans.conf; fi \
+if [[ %2 != "standard" ]]; then install -m0644 config/appconfig-%1/setrans.conf %{buildroot}%{_sysconfdir}/selinux/%1/setrans.conf; fi \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.local \
 touch %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.local.bin \
 sefcontext_compile -o %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts.bin %{buildroot}%{_sysconfdir}/selinux/%1/contexts/files/file_contexts \
@@ -235,6 +237,8 @@ mkdir -p %{buildroot}%{_datadir}/selinux/modules/
 mkdir -p %{buildroot}%{_sharedstatedir}/selinux/%{type}
 
 make %{?_smp_mflags} clean
+cp -a %{SOURCE6} config/appconfig-mcs/setrans.conf
+cp -a %{SOURCE7} config/appconfig-mls/setrans.conf
 # installCmds NAME TYPE DIRECT_INITRC POLY UNKNOWN
 %installCmds %{type} %{type}  n y deny
 
