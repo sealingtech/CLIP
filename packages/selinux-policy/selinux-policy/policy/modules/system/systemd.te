@@ -500,15 +500,26 @@ allow systemd_generator_t self:fifo_file rw_fifo_file_perms;
 allow systemd_generator_t self:capability { dac_override sys_admin sys_resource };
 allow systemd_generator_t self:process { getcap getsched setfscreate signal };
 
+# required to generate unit files, which is sort of its thing...
+allow systemd_generator_t self:process setfscreate;
+create_dirs_pattern(systemd_generator_t, systemd_unit_t, systemd_unit_t)
+manage_files_pattern(systemd_generator_t, systemd_unit_t, systemd_unit_t)
+manage_lnk_files_pattern(systemd_generator_t, systemd_unit_t, systemd_unit_t)
+
+kernel_use_fds(systemd_generator_t)
+kernel_read_system_state(systemd_generator_t)
+kernel_read_kernel_sysctls(systemd_generator_t)
+kernel_read_crypto_sysctls(systemd_generator_t)
+
 corecmd_exec_shell(systemd_generator_t)
 corecmd_exec_bin(systemd_generator_t)
 
 dev_read_sysfs(systemd_generator_t)
-dev_write_kmsg(systemd_generator_t)
 dev_write_sysfs_dirs(systemd_generator_t)
-dev_read_urand(systemd_generator_t)
 dev_create_sysfs_files(systemd_generator_t)
 dev_write_sysfs(systemd_generator_t)
+dev_write_kmsg(systemd_generator_t)
+dev_read_urand(systemd_generator_t)
 
 files_read_etc_files(systemd_generator_t)
 files_read_etc_runtime_files(systemd_generator_t)
@@ -517,6 +528,8 @@ files_list_boot(systemd_generator_t)
 files_read_boot_files(systemd_generator_t)
 files_search_all_mountpoints(systemd_generator_t)
 files_list_usr(systemd_generator_t)
+files_read_usr_files(systemd_generator_t)
+
 files_dontaudit_getattr_all_dirs(systemd_generator_t)
 files_dontaudit_read_etc_runtime_files(systemd_generator_t)
 
@@ -554,6 +567,9 @@ storage_raw_read_removable_device(systemd_generator_t)
 # needed to resolve hostnames for NFS mounts
 sysnet_dns_name_resolve(systemd_generator_t)
 
+# SRS: generating mount units requires probing block devices
+storage_raw_read_fixed_disk(systemd_generator_t)
+
 systemd_log_parse_environment(systemd_generator_t)
 
 term_use_unallocated_ttys(systemd_generator_t)
@@ -576,6 +592,10 @@ optional_policy(`
 optional_policy(`
 	# for quadlet to access /etc/containers/systemd
 	container_search_config(systemd_generator_t)
+')
+
+optional_policy(`
+	kdump_read_config(systemd_generator_t)
 ')
 
 optional_policy(`
