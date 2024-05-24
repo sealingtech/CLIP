@@ -134,7 +134,7 @@ files_tmpfs_file(init_tmpfs_t)
 type initrc_var_log_t;
 logging_log_file(initrc_var_log_t)
 
-type systemd_unit_t;
+type systemd_unit_t alias systemd_unit_file_t;
 init_unit_file(systemd_unit_t)
 
 type systemd_transient_unit_t;
