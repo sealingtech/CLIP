@@ -1745,6 +1745,7 @@ files_read_etc_files(systemd_sysctl_t)
 fs_getattr_all_fs(systemd_sysctl_t)
 fs_search_cgroup_dirs(systemd_sysctl_t)
 fs_search_ramfs(systemd_sysctl_t)
+fs_search_tmpfs(systemd_sysctl_t)
 
 systemd_log_parse_environment(systemd_sysctl_t)
 
@@ -1853,6 +1854,7 @@ fs_list_tmpfs(systemd_tmpfiles_t)
 fs_relabelfrom_tmpfs_dirs(systemd_tmpfiles_t)
 fs_getattr_all_fs(systemd_tmpfiles_t)
 fs_search_cgroup_dirs(systemd_tmpfiles_t)
+fs_search_ramfs(systemd_tmpfiles_t)
 
 selinux_get_fs_mount(systemd_tmpfiles_t)
 selinux_use_status_page(systemd_tmpfiles_t)
