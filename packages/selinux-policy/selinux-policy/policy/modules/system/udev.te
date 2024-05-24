@@ -246,6 +246,11 @@ ifdef(`distro_gentoo',`
 ')
 
 ifdef(`distro_redhat',`
+	# rename_device keeps a lock file in /dev
+	dev_filetrans(udev_t, udev_runtime_t, file)
+
+	dev_write_sysfs_dirs(udev_t)
+
 	fs_manage_tmpfs_dirs(udev_t)
 	fs_manage_tmpfs_files(udev_t)
 	fs_manage_tmpfs_symlinks(udev_t)
