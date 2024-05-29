@@ -199,8 +199,6 @@ ifdef(`init_systemd', `
 	# gdm3 causes system_dbusd_t to want this access
 	dev_rw_dri(system_dbusd_t)
 	dev_rw_input_dev(system_dbusd_t)
-	
-	files_read_etc_runtime_files(system_dbusd_t)
 
 	files_read_etc_runtime_files(system_dbusd_t)
 

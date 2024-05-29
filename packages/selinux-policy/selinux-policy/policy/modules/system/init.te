@@ -1459,10 +1459,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	ftp_filetrans_pure_ftpd_runtime(initrc_t)
-')
-
-optional_policy(`
 	rpc_read_exports(initrc_t)
 ')
 

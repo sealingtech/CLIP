@@ -884,10 +884,10 @@ template(`userdom_common_user_template',`
 		oident_home_filetrans_oidentd_home($1_t, file, ".oidentd.conf")
 	')
 
-	optional_policy(`
+	#optional_policy(`
 		# to allow monitoring of pcmcia status
-		pcmcia_read_pid($1_t)
-	')
+	#	pcmcia_read_pid($1_t)
+	#')
 
 	optional_policy(`
 		pcscd_read_runtime_files($1_t)

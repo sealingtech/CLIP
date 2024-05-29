@@ -639,13 +639,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	fs_search_nfsd_fs(systemd_generator_t)
-	fs_rw_nfsd_fs(systemd_generator_t)
-	rpc_list_exports(systemd_generator_t)
-	rpc_read_exports(systemd_generator_t)
-')
-
-optional_policy(`
 	# needed by zfs-mount-generator
 	zfs_read_config(systemd_generator_t)
 ')
@@ -2093,49 +2086,6 @@ userdom_list_user_home_content(systemd_user_session_type)
 userdom_dontaudit_list_admin_dir(systemd_user_session_type)
 
 seutil_libselinux_linked(systemd_user_session_type)
-
-########################################
-#
-# systemd-userdbd local policy
-#
-
-allow systemd_userdbd_t self:capability { dac_read_search sys_resource };
-allow systemd_userdbd_t self:process { getcap signal };
-allow systemd_userdbd_t self:unix_stream_socket create_stream_socket_perms;
-
-stream_connect_pattern(systemd_userdbd_t, systemd_homed_runtime_t, systemd_homed_runtime_t, systemd_homed_t)
-
-manage_dirs_pattern(systemd_userdbd_t, systemd_userdbd_runtime_t, systemd_userdbd_runtime_t)
-manage_files_pattern(systemd_userdbd_t, systemd_userdbd_runtime_t, systemd_userdbd_runtime_t)
-manage_sock_files_pattern(systemd_userdbd_t, systemd_userdbd_runtime_t, systemd_userdbd_runtime_t)
-init_runtime_filetrans(systemd_userdbd_t, systemd_userdbd_runtime_t, dir)
-
-can_exec(systemd_userdbd_t, systemd_userdbd_exec_t)
-
-auth_read_shadow(systemd_userdbd_t)
-auth_use_nsswitch(systemd_userdbd_t)
-
-dev_read_urand(systemd_userdbd_t)
-
-files_read_etc_files(systemd_userdbd_t)
-files_read_etc_runtime_files(systemd_userdbd_t)
-files_read_usr_files(systemd_userdbd_t)
-
-fs_getattr_all_fs(systemd_userdbd_t)
-fs_search_cgroup_dirs(systemd_userdbd_t)
-fs_read_efivarfs_files(systemd_userdbd_t)
-
-kernel_read_system_state(systemd_userdbd_t)
-
-init_stream_connect(systemd_userdbd_t)
-init_search_runtime(systemd_userdbd_t)
-init_read_state(systemd_userdbd_t)
-
-kernel_read_kernel_sysctls(systemd_userdbd_t)
-
-seutil_search_default_contexts(systemd_userdbd_t)
-
-systemd_log_parse_environment(systemd_userdbd_t)
 
 ########################################
 #

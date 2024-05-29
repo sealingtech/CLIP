@@ -244,10 +244,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	certbot_run(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	certmaster_admin(sysadm_t, sysadm_r)
 ')
 
@@ -565,10 +561,6 @@ optional_policy(`
 
 optional_policy(`
 	ksmtuned_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
-	kubernetes_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -1284,18 +1276,6 @@ ifndef(`distro_redhat',`
 
 	optional_policy(`
 		cryfs_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
-	')
-
-	optional_policy(`
-		dirmngr_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
-	')
-
-	optional_policy(`
-		evolution_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
-	')
-
-	optional_policy(`
-		games_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`
