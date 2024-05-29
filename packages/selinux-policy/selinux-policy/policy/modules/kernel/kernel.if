@@ -1757,42 +1757,6 @@ interface(`kernel_create_non_proc_init_mountpoint_files',`
 
 ########################################
 ## <summary>
-##	Write systemd mountpoint files except proc entries.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_write_non_proc_init_mountpoint_files',`
-	gen_require(`
-		attribute proc_type;
-	')
-
-	init_write_mountpoint_files($1, -proc_type)
-')
-
-########################################
-## <summary>
-##	Create systemd mountpoint files except proc entries.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`kernel_create_non_proc_init_mountpoint_files',`
-	gen_require(`
-		attribute proc_type;
-	')
-
-	init_create_mountpoint_files($1, -proc_type)
-')
-
-########################################
-## <summary>
 ##	Do not audit attempts by caller to search
 ##	the base directory of sysctls.
 ## </summary>

@@ -463,6 +463,12 @@ optional_policy(`
 	plymouthd_read_runtime_files(kernel_t)
 	plymouthd_read_spool_files(kernel_t)
 	plymouthd_rw_lib_files(kernel_t)
+	plymouthd_manage_lib_files(kernel_t)
+	plymouthd_create_log(kernel_t)
+	plymouthd_filetrans_named_content(kernel_t)
+
+	udev_search_runtime(kernel_t)
+	udev_read_runtime_files(kernel_t)
 
 	term_use_ptmx(kernel_t)
 	term_use_unallocated_ttys(kernel_t)
