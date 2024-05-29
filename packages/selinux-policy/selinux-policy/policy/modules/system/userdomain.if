@@ -141,6 +141,10 @@ template(`userdom_base_user_template',`
 		# Allow making the stack executable via mprotect.
 		allow $1_t self:process execstack;
 	')
+	
+	tunable_policy(`user_all_users_send_syslog',`
+		logging_send_syslog_msg($1_t)
+	')
 
 	tunable_policy(`user_all_users_send_syslog',`
 		logging_send_syslog_msg($1_t)
@@ -325,6 +329,12 @@ interface(`userdom_ro_home_role',`
 	read_fifo_files_pattern($2, { user_home_t user_home_dir_t }, user_home_t)
 	read_sock_files_pattern($2, { user_home_t user_home_dir_t }, user_home_t)
 	files_list_home($2)
+	
+	allow $2 { user_home_t user_home_dir_t }:dir { watch watch_mount watch_sb watch_with_perm watch_reads };
+	allow $2 user_home_t:file { watch watch_mount watch_sb watch_with_perm watch_reads };
+	allow $2 user_home_t:lnk_file { watch watch_mount watch_sb watch_with_perm watch_reads };
+	allow $2 user_home_t:sock_file { watch watch_mount watch_sb watch_with_perm watch_reads };
+	allow $2 user_home_t:fifo_file { watch watch_mount watch_sb watch_with_perm watch_reads };
 
 	allow $2 { user_home_t user_home_dir_t }:dir { watch watch_mount watch_sb watch_with_perm watch_reads };
 	allow $2 user_home_t:file { watch watch_mount watch_sb watch_with_perm watch_reads };
@@ -446,7 +456,7 @@ interface(`userdom_manage_home_role',`
 		fs_dontaudit_manage_cifs_dirs($2)
 		fs_dontaudit_manage_cifs_files($2)
 	')
-
+	
 	optional_policy(`
 		xdg_data_filetrans($2, user_bin_t, dir, "bin")
 	')
@@ -810,7 +820,7 @@ template(`userdom_common_user_template',`
 		optional_policy(`
 			xserver_dbus_chat_xdm($1_t)
 		')
-
+		
 		optional_policy(`
 			systemd_role_template($1, $1_r, $1_t)
 		')
@@ -881,6 +891,11 @@ template(`userdom_common_user_template',`
 	')
 
 	optional_policy(`
+		# to allow monitoring of pcmcia status
+		pcmcia_read_pid($1_t)
+	')
+
+	optional_policy(`
 		pcscd_read_runtime_files($1_t)
 		pcscd_stream_connect($1_t)
 	')
@@ -913,6 +928,10 @@ template(`userdom_common_user_template',`
 
 	optional_policy(`
 		slrnpull_search_spool($1_t)
+	')
+
+	optional_policy(`
+		udev_read_runtime_files($1_t)
 	')
 
 	optional_policy(`
@@ -1021,6 +1040,7 @@ template(`userdom_login_user_template', `
 	init_dontaudit_use_fds($1_t)
 	init_dontaudit_use_script_fds($1_t)
 
+	init_rw_inherited_stream_socket($1_t)
 	libs_watch_lib_dirs($1_t)
 	libs_exec_lib_files($1_t)
 
@@ -1142,6 +1162,10 @@ template(`userdom_restricted_xwindows_user_template',`
 	selinux_get_enforce_mode($1_t)
 
 	xserver_restricted_role($1, $1_t, $1_application_exec_domain, $1_r)
+
+	optional_policy(`
+		systemd_dbus_chat_logind($1_t)
+	')
 
 	optional_policy(`
 		alsa_read_config($1_t)
@@ -1505,6 +1529,14 @@ interface(`userdom_security_admin_template',`
 
 	# Necessary for managing /boot/efi
 	fs_manage_dos_files($1)
+	
+	kernel_relabelfrom_unlabeled_dirs($1)
+	kernel_relabelfrom_unlabeled_files($1)
+	kernel_relabelfrom_unlabeled_symlinks($1)
+	kernel_relabelfrom_unlabeled_pipes($1)
+	kernel_relabelfrom_unlabeled_sockets($1)
+	kernel_relabelfrom_unlabeled_blk_devs($1)
+	kernel_relabelfrom_unlabeled_chr_devs($1)
 
 	kernel_relabelfrom_unlabeled_dirs($1)
 	kernel_relabelfrom_unlabeled_files($1)
@@ -1563,6 +1595,65 @@ interface(`userdom_security_admin_template',`
 	optional_policy(`
 		samhain_run($1, $2)
 	')
+')
+
+########################################
+## <summary>
+##	Allow user to interact with xdg content types
+## </summary>
+## <desc>
+##	<p>
+##  Create rules to allow a user to manage xdg
+##  content in a user home directory with an
+##  automatic type transition to those types.
+##	</p>
+##	<p>
+##	This is a templated interface, and should only
+##	be called from a per-userdomain template.
+##	</p>
+## </desc>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+template(`userdom_xdg_user_template',`
+	xdg_manage_all_cache($1_t)
+	xdg_relabel_all_cache($1_t)
+	xdg_watch_all_cache_dirs($1_t)
+	xdg_manage_all_config($1_t)
+	xdg_relabel_all_config($1_t)
+	xdg_watch_all_config_dirs($1_t)
+	xdg_manage_all_data($1_t)
+	xdg_relabel_all_data($1_t)
+	xdg_watch_all_data_dirs($1_t)
+
+	xdg_generic_user_home_dir_filetrans_cache($1_t, dir, ".cache")
+	xdg_generic_user_home_dir_filetrans_config($1_t, dir, ".config")
+	xdg_generic_user_home_dir_filetrans_data($1_t, dir, ".local")
+
+	xdg_generic_user_home_dir_filetrans_documents($1_t, dir, "Documents")
+	xdg_generic_user_home_dir_filetrans_downloads($1_t, dir, "Downloads")
+	xdg_generic_user_home_dir_filetrans_music($1_t, dir, "Music")
+	xdg_generic_user_home_dir_filetrans_pictures($1_t, dir, "Pictures")
+	xdg_generic_user_home_dir_filetrans_videos($1_t, dir, "Videos")
+
+	xdg_manage_documents($1_t)
+	xdg_relabel_documents($1_t)
+	xdg_watch_documents_dirs($1_t)
+	xdg_manage_downloads($1_t)
+	xdg_relabel_downloads($1_t)
+	xdg_watch_downloads_dirs($1_t)
+	xdg_manage_music($1_t)
+	xdg_relabel_music($1_t)
+	xdg_watch_music_dirs($1_t)
+	xdg_manage_pictures($1_t)
+	xdg_relabel_pictures($1_t)
+	xdg_watch_pictures_dirs($1_t)
+	xdg_manage_videos($1_t)
+	xdg_relabel_videos($1_t)
+	xdg_watch_videos_dirs($1_t)
 ')
 
 ########################################

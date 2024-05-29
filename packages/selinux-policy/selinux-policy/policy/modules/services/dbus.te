@@ -98,7 +98,7 @@ ifdef(`enable_mls',`
 #
 
 allow system_dbusd_t self:capability { dac_override setgid setpcap setuid sys_resource };
-# net_admin for changing buffer sizes
+allow system_dbusd_t self:capability net_admin;
 dontaudit system_dbusd_t self:capability { net_admin sys_tty_config };
 allow system_dbusd_t self:process { getattr getsched signal_perms setpgid getcap setcap setrlimit };
 allow system_dbusd_t self:fifo_file rw_fifo_file_perms;
@@ -199,6 +199,8 @@ ifdef(`init_systemd', `
 	# gdm3 causes system_dbusd_t to want this access
 	dev_rw_dri(system_dbusd_t)
 	dev_rw_input_dev(system_dbusd_t)
+	
+	files_read_etc_runtime_files(system_dbusd_t)
 
 	files_read_etc_runtime_files(system_dbusd_t)
 
@@ -255,7 +257,7 @@ optional_policy(`
 	systemd_read_logind_runtime_files(system_dbusd_t)
 	systemd_write_inherited_logind_inhibit_pipes(system_dbusd_t)
 	systemd_write_inherited_logind_sessions_pipes(system_dbusd_t)
-
+	
 	systemd_connect_machined(system_dbusd_t)
 	# for passing around terminal file handles for machinectl shell
 	systemd_use_inherited_machined_ptys(system_dbusd_t)

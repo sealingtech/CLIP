@@ -244,6 +244,10 @@ optional_policy(`
 ')
 
 optional_policy(`
+	certbot_run(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
 	certmaster_admin(sysadm_t, sysadm_r)
 ')
 
@@ -568,6 +572,10 @@ optional_policy(`
 ')
 
 optional_policy(`
+	kubernetes_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
 	l2tp_admin(sysadm_t, sysadm_r)
 ')
 
@@ -671,6 +679,10 @@ optional_policy(`
 
 optional_policy(`
 	mrtg_admin(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	mscan_admin(sysadm_t, sysadm_r)
 ')
 
 optional_policy(`
@@ -1244,6 +1256,10 @@ optional_policy(`
 	zfs_admin(sysadm_t, sysadm_r)
 ')
 
+optional_policy(`
+	fapolicyd_admin(sysadm_t)
+')
+
 ifndef(`distro_redhat',`
 	optional_policy(`
 		auth_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
@@ -1268,6 +1284,18 @@ ifndef(`distro_redhat',`
 
 	optional_policy(`
 		cryfs_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
+	')
+
+	optional_policy(`
+		dirmngr_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
+	')
+
+	optional_policy(`
+		evolution_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
+	')
+
+	optional_policy(`
+		games_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 	')
 
 	optional_policy(`

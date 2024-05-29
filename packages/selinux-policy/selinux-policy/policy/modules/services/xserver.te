@@ -508,6 +508,10 @@ xserver_manage_xsession_log(xdm_t)
 xserver_rw_session(xdm_t, xdm_tmpfs_t)
 xserver_unconfined(xdm_t)
 xserver_user_home_dir_filetrans_user_xsession_log(xdm_t)
+# MJM: normally this would be optional but things will not work if the
+# wm module is not present so making it required.  also, this should probably
+# involve a domain transition.
+wm_exec(xdm_t)
 
 tunable_policy(`use_nfs_home_dirs',`
 	fs_manage_nfs_dirs(xdm_t)
@@ -585,6 +589,9 @@ optional_policy(`
 
 	optional_policy(`
 		systemd_read_logind_runtime_files(xdm_t)
+		systemd_read_logind_sessions_files(xdm_t)
+		systemd_write_inherited_logind_inhibit_pipes(xdm_t)
+		systemd_write_user_runtime_sock_files(xdm_t)
 	')
 ')
 
@@ -735,6 +742,17 @@ kernel_write_proc_files(xserver_t)
 corecmd_exec_bin(xserver_t)
 corecmd_exec_shell(xserver_t)
 
+corenet_all_recvfrom_netlabel(xserver_t)
+corenet_tcp_sendrecv_generic_if(xserver_t)
+corenet_udp_sendrecv_generic_if(xserver_t)
+corenet_tcp_sendrecv_generic_node(xserver_t)
+corenet_udp_sendrecv_generic_node(xserver_t)
+corenet_tcp_bind_generic_node(xserver_t)
+corenet_tcp_bind_xserver_port(xserver_t)
+corenet_tcp_connect_all_ports(xserver_t)
+corenet_sendrecv_xserver_server_packets(xserver_t)
+corenet_sendrecv_all_client_packets(xserver_t)
+
 dev_getattr_sysfs(xserver_t)
 dev_rw_sysfs(xserver_t)
 dev_rw_mouse(xserver_t)
@@ -828,6 +846,25 @@ tunable_policy(`xserver_can_network',`
 	corenet_tcp_bind_vnc_port(xserver_t)
 ')
 
+tunable_policy(`xserver_can_network',`
+	allow xserver_t self:tcp_socket create_stream_socket_perms;
+	allow xserver_t self:udp_socket create_socket_perms;
+
+	corenet_all_recvfrom_netlabel(xserver_t)
+	corenet_tcp_sendrecv_generic_if(xserver_t)
+	corenet_udp_sendrecv_generic_if(xserver_t)
+	corenet_tcp_sendrecv_generic_node(xserver_t)
+	corenet_udp_sendrecv_generic_node(xserver_t)
+	corenet_tcp_bind_generic_node(xserver_t)
+	corenet_tcp_bind_xserver_port(xserver_t)
+	corenet_tcp_connect_all_ports(xserver_t)
+	corenet_sendrecv_xserver_server_packets(xserver_t)
+	corenet_sendrecv_all_client_packets(xserver_t)
+
+	# VNC v4 module in X server
+	corenet_tcp_bind_vnc_port(xserver_t)
+')
+
 tunable_policy(`!xserver_object_manager',`
 	# should be xserver_unconfined(xserver_t),
 	# but typeattribute doesnt work in conditionals
@@ -858,6 +895,12 @@ optional_policy(`
 ')
 
 optional_policy(`
+	rhgb_getpgid(xserver_t)
+	rhgb_signal(xserver_t)
+')
+
+optional_policy(`
+	udev_read_db(xserver_t)
 	udev_read_runtime_files(xserver_t)
 ')
 
@@ -898,6 +941,7 @@ manage_sock_files_pattern(xserver_t, xdm_tmp_t, xdm_tmp_t)
 
 # for sddm to use pam for greeter, sddm greeter needs execmod
 allow xdm_t xdm_tmpfs_t:file execmod;
+allow xserver_t xdm_tmp_t:file map;
 
 # Run Xorg.wrap
 can_exec(xserver_t, xserver_exec_t)
@@ -922,6 +966,11 @@ optional_policy(`
 
 optional_policy(`
 	resmgr_stream_connect(xserver_t)
+')
+
+optional_policy(`
+	rhgb_rw_shm(xserver_t)
+	rhgb_rw_tmpfs_files(xserver_t)
 ')
 
 ########################################
