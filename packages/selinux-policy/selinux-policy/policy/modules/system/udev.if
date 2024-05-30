@@ -244,6 +244,24 @@ interface(`udev_relabel_rules_files',`
 
 ########################################
 ## <summary>
+##	Allow process to relabelto sockets in /run/udev
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`udev_relabelto_db_sockets',`
+	gen_require(`
+		type udev_runtime_t;
+	')
+
+	allow $1 udev_runtime_t:sock_file relabelto_sock_file_perms;
+')
+
+########################################
+## <summary>
 ##	Search through udev runtime dirs.
 ## </summary>
 ## <param name="domain">
@@ -318,6 +336,7 @@ interface(`udev_read_runtime_files',`
 	files_search_runtime($1)
 	read_files_pattern($1, udev_runtime_t, udev_runtime_t)
 	read_lnk_files_pattern($1, udev_runtime_t, udev_runtime_t)
+	allow $1 udev_runtime_t:dir read;
 ')
 
 ########################################

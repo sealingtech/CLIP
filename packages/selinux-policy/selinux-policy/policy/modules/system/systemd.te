@@ -2082,9 +2082,6 @@ seutil_libselinux_linked(systemd_user_session_type)
 
 userdom_list_user_home_content(systemd_user_session_type)
 
-# ignore for spawned apps running on behalf of admins
-userdom_dontaudit_list_admin_dir(systemd_user_session_type)
-
 seutil_libselinux_linked(systemd_user_session_type)
 
 ########################################

@@ -143,7 +143,7 @@ template(`dbus_role_template',`
 	')
 
 	optional_policy(`
-		systemd_read_logind_pids($1_dbusd_t)
+		systemd_watch_logind_runtime_dirs($1_dbusd_t)
 	')
 ')
 

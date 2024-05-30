@@ -885,11 +885,6 @@ template(`userdom_common_user_template',`
 	')
 
 	optional_policy(`
-		# to allow monitoring of pcmcia status
-		pcmcia_read_pid($1_t)
-	')
-
-	optional_policy(`
 		pcscd_read_runtime_files($1_t)
 		pcscd_stream_connect($1_t)
 	')
@@ -3616,6 +3611,24 @@ interface(`userdom_manage_user_runtime_root_dirs',`
 
 	allow $1 user_runtime_root_t:dir manage_dir_perms;
 	files_search_runtime($1)
+')
+
+########################################
+## <summary>
+##	Relabel to user runtime root dirs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`userdom_relabelto_user_runtime_root_dirs',`
+	gen_require(`
+		type user_runtime_root_t;
+	')
+
+	allow $1 user_runtime_root_t:dir { relabelto };
 ')
 
 ########################################

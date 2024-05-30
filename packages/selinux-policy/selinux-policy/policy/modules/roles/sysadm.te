@@ -674,10 +674,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	mscan_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
 	mta_role(sysadm, sysadm_t, sysadm_application_exec_domain, sysadm_r)
 ')
 
@@ -1246,10 +1242,6 @@ optional_policy(`
 
 optional_policy(`
 	zfs_admin(sysadm_t, sysadm_r)
-')
-
-optional_policy(`
-	fapolicyd_admin(sysadm_t)
 ')
 
 ifndef(`distro_redhat',`

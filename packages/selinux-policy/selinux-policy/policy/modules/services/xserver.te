@@ -876,12 +876,6 @@ optional_policy(`
 ')
 
 optional_policy(`
-	rhgb_getpgid(xserver_t)
-	rhgb_signal(xserver_t)
-')
-
-optional_policy(`
-	udev_read_db(xserver_t)
 	udev_read_runtime_files(xserver_t)
 ')
 
@@ -947,11 +941,6 @@ optional_policy(`
 
 optional_policy(`
 	resmgr_stream_connect(xserver_t)
-')
-
-optional_policy(`
-	rhgb_rw_shm(xserver_t)
-	rhgb_rw_tmpfs_files(xserver_t)
 ')
 
 ########################################
