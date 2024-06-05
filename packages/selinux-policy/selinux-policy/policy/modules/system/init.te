@@ -134,7 +134,7 @@ files_tmpfs_file(init_tmpfs_t)
 type initrc_var_log_t;
 logging_log_file(initrc_var_log_t)
 
-type systemd_unit_t alias systemd_unit_file_t;
+type systemd_unit_t;
 init_unit_file(systemd_unit_t)
 
 type systemd_transient_unit_t;
@@ -144,6 +144,10 @@ ifdef(`distro_gentoo',`
 	type rc_exec_t;
 	domain_entry_file(initrc_t, rc_exec_t)
 	domtrans_pattern(init_t, rc_exec_t, initrc_t)
+')
+
+ifdef(`enable_mcs',`
+	kernel_ranged_domtrans_to(init_t, init_exec_t, s0 - mcs_systemhigh)
 ')
 
 ifdef(`enable_mls',`
@@ -169,6 +173,10 @@ allow init_t self:fifo_file rw_fifo_file_perms;
 
 # Re-exec itself
 can_exec(init_t, init_exec_t)
+
+# executing content in /run/initramfs
+manage_files_pattern(init_t, initrc_state_t, initrc_state_t)
+can_exec(init_t, initrc_state_t)
 
 allow init_t initrc_t:unix_stream_socket connectto;
 
@@ -198,6 +206,7 @@ fs_tmpfs_filetrans(init_t, init_tmpfs_t, file)
 kernel_read_system_state(init_t)
 kernel_share_state(init_t)
 kernel_dontaudit_search_unlabeled(init_t)
+kernel_rw_stream_sockets(init_t)
 
 corecmd_exec_chroot(init_t)
 corecmd_exec_bin(init_t)
@@ -214,6 +223,7 @@ domain_signull_all_domains(init_t)
 domain_sigstop_all_domains(init_t)
 domain_sigchld_all_domains(init_t)
 
+files_read_usr_files(init_t)
 files_read_etc_files(init_t)
 files_mmap_read_kernel_modules(init_t)
 files_rw_runtime_files(init_t)
@@ -247,6 +257,8 @@ selinux_set_all_booleans(init_t)
 term_use_all_terms(init_t)
 
 libs_rw_ld_so_cache(init_t)
+
+init_manage_var_lib_files(init_t)
 
 logging_send_syslog_msg(init_t)
 logging_rw_generic_logs(init_t)
@@ -331,6 +343,8 @@ ifdef(`init_systemd',`
 	manage_lnk_files_pattern(init_t, init_runtime_t, init_runtime_t)
 	manage_sock_files_pattern(init_t, init_runtime_t, init_runtime_t)
 	manage_dirs_pattern(init_t, init_runtime_t, init_runtime_t)
+	# /memfd:systemd-state
+	fs_tmpfs_filetrans(init_t, init_runtime_t, file)
 
 	# mounton is required for systemd-timesyncd
 	allow init_t init_var_lib_t:dir { manage_dir_perms mounton };
@@ -488,18 +502,20 @@ ifdef(`init_systemd',`
 	# needed by systemd-creds
 	fs_setattr_ramfs_dirs(init_t)
 
-	init_manage_random_seed(init_t)
 	# this is to relabel files created under /run/systemd/inaccessible
 	# before the policy is loaded
 	fs_relabelfrom_tmpfs_blk_file(init_t)
 	fs_relabelfrom_tmpfs_chr_file(init_t)
-	fs_relabel_tmpfs_fifo_files(init_t)
+	fs_relabelfrom_tmpfs_pipes(init_t)
 	allow init_t init_runtime_t:blk_file relabelto;
 	allow init_t init_runtime_t:chr_file relabelto;
 	allow init_t init_runtime_t:fifo_file relabelto;
 
+	init_manage_random_seed(init_t)
+	
 	init_manage_all_unit_files(init_t)
 	init_read_script_state(init_t)
+	init_dbus_chat(init_t)
 
 	miscfiles_watch_localization(init_t)
 
@@ -721,6 +737,13 @@ optional_policy(`
 	unconfined_domain(init_t)
 ')
 
+optional_policy(`
+    plymouthd_stream_connect(init_t)
+    plymouthd_exec_plymouth(init_t)
+    plymouthd_filetrans_named_content(init_t)
+	plymouth_use_plymouthd_fd(init_t)
+')
+
 ########################################
 #
 # Init script local policy
@@ -802,16 +825,33 @@ files_runtime_filetrans_lock_dir(initrc_t, "lock")
 files_read_kernel_symbol_table(initrc_t)
 files_setattr_lock_dirs(initrc_t)
 
+# for lsof which is used by alsa shutdown:
+kernel_dontaudit_getattr_message_if(initrc_t)
+kernel_stream_connect(initrc_t)
+files_read_kernel_modules(initrc_t)
+files_read_config_files(initrc_t)
+files_read_var_lib_symlinks(initrc_t)
+files_setattr_pid_dirs(initrc_t)
+
+files_exec_etc_files(initrc_t)
+files_manage_etc_symlinks(initrc_t)
+
+fs_manage_tmpfs_dirs(initrc_t)
+fs_manage_tmpfs_symlinks(initrc_t)
+fs_delete_tmpfs_files(initrc_t)
+fs_tmpfs_filetrans(initrc_t, initrc_state_t, file)
+fs_read_nfsd_files(initrc_t)
+
 corecmd_exec_all_executables(initrc_t)
 
-# SRS: removed for CLIP
-#corenet_all_recvfrom_netlabel(initrc_t)
-#corenet_tcp_sendrecv_all_if(initrc_t)
-#corenet_udp_sendrecv_all_if(initrc_t)
-#corenet_tcp_sendrecv_all_nodes(initrc_t)
-#corenet_udp_sendrecv_all_nodes(initrc_t)
-#corenet_tcp_connect_all_ports(initrc_t)
-#corenet_sendrecv_all_client_packets(initrc_t)
+# SRS: Removed for CLIP
+# corenet_all_recvfrom_netlabel(initrc_t)
+# corenet_tcp_sendrecv_all_if(initrc_t)
+# corenet_udp_sendrecv_all_if(initrc_t)
+# corenet_tcp_sendrecv_all_nodes(initrc_t)
+# corenet_udp_sendrecv_all_nodes(initrc_t)
+# corenet_tcp_connect_all_ports(initrc_t)
+# corenet_sendrecv_all_client_packets(initrc_t)
 
 dev_read_rand(initrc_t)
 dev_read_urand(initrc_t)
@@ -838,6 +878,11 @@ dev_getattr_all_blk_files(initrc_t)
 dev_getattr_all_chr_files(initrc_t)
 dev_rw_xserver_misc(initrc_t)
 dev_map_xserver_misc(initrc_t)
+
+fs_manage_tmpfs_chr_files(initrc_t)
+
+dev_create_sysfs_files(initrc_t)
+dev_manage_sysfs_dirs(initrc_t)
 
 domain_kill_all_domains(initrc_t)
 domain_signal_all_domains(initrc_t)
