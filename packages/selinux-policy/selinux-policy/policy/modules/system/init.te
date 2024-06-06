@@ -168,6 +168,9 @@ allow init_t self:capability2 { wake_alarm block_suspend };
 
 allow init_t self:fifo_file rw_fifo_file_perms;
 
+# mostly for dbus. Allow init_t to "own" itself
+allow init_t self:dbus { acquire_svc };
+
 # Re-exec itself
 can_exec(init_t, init_exec_t)
 
@@ -226,6 +229,7 @@ files_mmap_read_kernel_modules(init_t)
 files_rw_runtime_files(init_t)
 files_manage_etc_runtime_files(init_t)
 files_etc_filetrans_etc_runtime(init_t, file)
+files_write_var_run_sockets(init_t)
 # Run /etc/X11/prefdm:
 files_exec_etc_files(init_t)
 # file descriptors inherited from the rootfs:
@@ -382,6 +386,7 @@ ifdef(`init_systemd',`
 	corecmd_shell_domtrans(init_t, initrc_t)
 
 	dev_manage_input_dev(init_t)
+	dev_manage_input_dev(initrc_t)
 	dev_relabel_all_sysfs(init_t)
 	dev_relabel_generic_symlinks(init_t)
 	dev_write_kmsg(init_t)
@@ -753,7 +758,7 @@ dontaudit initrc_t self:capability sys_module; # sysctl is triggering this
 allow initrc_t self:netlink_kobject_uevent_socket create_socket_perms; # needed by rdma-ndd
 allow initrc_t self:passwd rootok;
 allow initrc_t self:key manage_key_perms;
-
+allow initrc_t self:vsock_socket { bind connect create getattr getopt read write };
 # Allow IPC with self
 allow initrc_t self:unix_dgram_socket create_socket_perms;
 allow initrc_t self:unix_stream_socket { create listen accept ioctl read getattr write setattr append bind connect getopt setopt shutdown connectto };
@@ -782,6 +787,7 @@ manage_fifo_files_pattern(initrc_t, initrc_state_t, initrc_state_t)
 dontaudit initrc_t initrc_state_t:chr_file { create_chr_file_perms setattr };
 
 allow initrc_t initrc_runtime_t:file manage_file_perms;
+allow initrc_t initrc_runtime_t:sock_file { create setattr };
 files_runtime_filetrans(initrc_t, initrc_runtime_t, file)
 
 allow initrc_t daemon:process siginh;
@@ -808,6 +814,7 @@ kernel_change_ring_buffer_level(initrc_t)
 kernel_clear_ring_buffer(initrc_t)
 kernel_get_sysvipc_info(initrc_t)
 kernel_read_all_sysctls(initrc_t)
+kernel_request_load_module(initrc_t)
 kernel_rw_all_sysctls(initrc_t)
 kernel_use_fds(initrc_t)
 # for lsof which is used by alsa shutdown:
@@ -869,6 +876,7 @@ dev_rw_lvm_control(initrc_t)
 dev_rw_generic_chr_files(initrc_t)
 dev_delete_lvm_control_dev(initrc_t)
 dev_manage_generic_symlinks(initrc_t)
+dev_rw_dri(initrc_t)
 # Wants to remove udev.tbl:
 dev_delete_generic_symlinks(initrc_t)
 dev_getattr_all_blk_files(initrc_t)
@@ -1337,6 +1345,7 @@ optional_policy(`
 
 	optional_policy(`
 		networkmanager_dbus_chat(initrc_t)
+		networkmanager_dbus_own(initrc_t)
 	')
 
 	optional_policy(`

@@ -5003,6 +5003,24 @@ interface(`files_rw_generic_tmp_sockets',`
 
 ########################################
 ## <summary>
+##	Read and write sockets in /var/run
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`files_write_var_run_sockets',`
+	gen_require(`
+		type tmp_t;
+	')
+
+	write_sock_files_pattern($1, var_run_t, var_run_t)
+')
+
+########################################
+## <summary>
 ##	Mount filesystems in the tmp directory (/tmp)
 ## </summary>
 ## <param name="domain">

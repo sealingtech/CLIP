@@ -1399,6 +1399,25 @@ interface(`systemd_watch_logind_sessions_dirs',`
 
 ######################################
 ## <summary>
+##      Write sessions files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`systemd_write_sessions_files',`
+	gen_require(`
+		type systemd_sessions_runtime_t;
+	')
+
+	init_search_run($1)
+	manaage_files_pattern($1, systemd_sessions_runtime_t);
+')
+
+######################################
+## <summary>
 ##      Read logind sessions files.
 ## </summary>
 ## <param name="domain">
