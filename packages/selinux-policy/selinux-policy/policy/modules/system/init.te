@@ -128,9 +128,6 @@ files_type(initrc_state_t)
 type initrc_tmp_t;
 files_tmp_file(initrc_tmp_t)
 
-type init_runtime_t;
-files_tmpfs_file(init_runtime_t)
-
 type initrc_var_log_t;
 logging_log_file(initrc_var_log_t)
 
