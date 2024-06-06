@@ -184,7 +184,7 @@ interface(`init_domain',`
 
 	ifdef(`init_systemd',`
 		gen_require(`
-			type init_tmpfs_t;
+			type init_runtime_t;
 		')
 
 		allow $1 init_t:unix_stream_socket { getattr read write ioctl };
@@ -193,7 +193,7 @@ interface(`init_domain',`
 
 		# StandardInputText uses a memfd rw shm segment.
 		# Cannot deny writes or it breaks.
-		allow $1 init_tmpfs_t:file rw_inherited_file_perms;
+		allow $1 init_runtime_t:file rw_inherited_file_perms;
 	')
 ')
 
@@ -323,7 +323,7 @@ interface(`init_spec_daemon_domain',`
 
 	ifdef(`init_systemd',`
 		gen_require(`
-			type init_tmpfs_t;
+			type init_runtime_t;
 		')
 
 		allow $1 init_t:unix_stream_socket { getattr read write ioctl };
@@ -332,7 +332,7 @@ interface(`init_spec_daemon_domain',`
 
 		# StandardInputText uses a memfd rw shm segment.
 		# Cannot deny writes or it breaks.
-		allow $1 init_tmpfs_t:file rw_inherited_file_perms;
+		allow $1 init_runtime_t:file rw_inherited_file_perms;
 	')
 
 	# daemons started from init will

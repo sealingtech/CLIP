@@ -128,8 +128,8 @@ files_type(initrc_state_t)
 type initrc_tmp_t;
 files_tmp_file(initrc_tmp_t)
 
-type init_tmpfs_t;
-files_tmpfs_file(init_tmpfs_t)
+type init_runtime_t;
+files_tmpfs_file(init_runtime_t)
 
 type initrc_var_log_t;
 logging_log_file(initrc_var_log_t)
@@ -200,8 +200,8 @@ files_runtime_filetrans(init_t, initctl_t, fifo_file)
 # Modify utmp.
 allow init_t initrc_runtime_t:file { rw_file_perms setattr };
 
-allow init_t init_tmpfs_t:file manage_file_perms;
-fs_tmpfs_filetrans(init_t, init_tmpfs_t, file)
+allow init_t init_runtime_t:file manage_file_perms;
+fs_tmpfs_filetrans(init_t, init_runtime_t, file)
 
 kernel_read_system_state(init_t)
 kernel_share_state(init_t)
@@ -831,7 +831,7 @@ kernel_stream_connect(initrc_t)
 files_read_kernel_modules(initrc_t)
 files_read_config_files(initrc_t)
 files_read_var_lib_symlinks(initrc_t)
-files_setattr_pid_dirs(initrc_t)
+files_setattr_runtime_dirs(initrc_t)
 
 files_exec_etc_files(initrc_t)
 files_manage_etc_symlinks(initrc_t)
