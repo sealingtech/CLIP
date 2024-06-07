@@ -291,7 +291,7 @@ ifdef(`init_systemd',`
 	allow init_t self:udp_socket create_socket_perms;
 	allow init_t self:netlink_route_socket create_netlink_socket_perms;
 	allow init_t initrc_t:unix_dgram_socket create_socket_perms;
-	allow init_t self:capability2 audit_read;
+	allow init_t self:capability2 { audit_read mac_admin };
 	allow init_t self:key { search setattr write };
 	allow init_t self:bpf { map_create map_read map_write prog_load prog_run };
 	allow init_t self:user_namespace create;
@@ -638,6 +638,7 @@ ifdef(`init_systemd',`
 		systemd_search_all_user_keys(init_t)
 		systemd_create_all_user_keys(init_t)
 		systemd_write_all_user_keys(init_t)
+		systemd_coredump_mounton_dirs(init_t)
 	')
 
 	optional_policy(`
@@ -995,6 +996,9 @@ userdom_read_user_home_content_files(initrc_t)
 # TTYs to any process in the initrc_t domain. Therefore, daemons and such
 # started from init should be placed in their own domain.
 userdom_use_inherited_user_terminals(initrc_t)
+
+# Allow init to manage keys for userdomains
+userdom_manage_all_users_keys(init_t)
 
 ifdef(`distro_debian',`
 	kernel_getattr_core_if(initrc_t)
