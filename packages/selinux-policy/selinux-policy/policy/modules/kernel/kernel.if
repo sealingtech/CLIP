@@ -2869,6 +2869,25 @@ interface(`kernel_dontaudit_list_unlabeled',`
 
 ########################################
 ## <summary>
+##	Do not audit attempts to read unlabeled dirs and files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`kernel_dontaudit_read_unlabeled',`
+	gen_require(`
+		type unlabeled_t;
+	')
+
+	dontaudit $1 unlabeled_t:dir list_dir_perms;
+	dontaudit $1 unlabeled_t:file read_file_perms;
+')
+
+########################################
+## <summary>
 ##	Read and write unlabeled directories.
 ## </summary>
 ## <param name="domain">

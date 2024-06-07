@@ -234,6 +234,7 @@ optional_policy(`
 optional_policy(`
 	dbus_system_domain(NetworkManager_t, NetworkManager_exec_t)
 	init_dbus_chat(NetworkManager_t)
+	allow NetworkManager_t self:dbus acquire_svc;
 
 	optional_policy(`
 		avahi_dbus_chat(NetworkManager_t)

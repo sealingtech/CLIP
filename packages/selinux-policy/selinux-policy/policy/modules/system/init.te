@@ -128,10 +128,13 @@ files_type(initrc_state_t)
 type initrc_tmp_t;
 files_tmp_file(initrc_tmp_t)
 
+type init_tmpfs_t;
+files_tmpfs_file(init_tmpfs_t)
+
 type initrc_var_log_t;
 logging_log_file(initrc_var_log_t)
 
-type systemd_unit_t;
+type systemd_unit_t alias systemd_unit_file_t;
 init_unit_file(systemd_unit_t)
 
 type systemd_transient_unit_t;
@@ -291,7 +294,7 @@ ifdef(`init_systemd',`
 	allow init_t self:udp_socket create_socket_perms;
 	allow init_t self:netlink_route_socket create_netlink_socket_perms;
 	allow init_t initrc_t:unix_dgram_socket create_socket_perms;
-	allow init_t self:capability2 { audit_read mac_admin };
+	allow init_t self:capability2 audit_read;
 	allow init_t self:key { search setattr write };
 	allow init_t self:bpf { map_create map_read map_write prog_load prog_run };
 	allow init_t self:user_namespace create;
@@ -742,7 +745,7 @@ optional_policy(`
 
 optional_policy(`
     plymouthd_stream_connect(init_t)
-    plymouthd_exec_plymouth(init_t)
+    plymouthd_domtrans_plymouth(init_t)
     plymouthd_filetrans_named_content(init_t)
 	plymouth_use_plymouthd_fd(init_t)
 ')
@@ -1349,7 +1352,6 @@ optional_policy(`
 
 	optional_policy(`
 		networkmanager_dbus_chat(initrc_t)
-		networkmanager_dbus_own(initrc_t)
 	')
 
 	optional_policy(`

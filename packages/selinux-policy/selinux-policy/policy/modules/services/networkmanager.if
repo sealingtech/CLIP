@@ -412,23 +412,3 @@ interface(`networkmanager_admin',`
 	files_search_tmp($1)
 	admin_pattern($1, NetworkManager_tmp_t)
 ')
-
-
-########################################
-## <summary>
-##	Allow specified domain access to "own"
-##  the NetworkManager service.
-## </summary>
-## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
-## </param>
-#
-interface(`networkmanager_dbus_own',`
-	gen_require(`
-		type NetworkManager_t;
-	')
-
-	allow $1 NetworkManager_t:dbus { acquire_svc };
-')

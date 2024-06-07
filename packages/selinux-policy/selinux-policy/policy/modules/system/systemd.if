@@ -1413,7 +1413,7 @@ interface(`systemd_write_sessions_files',`
 	')
 
 	init_search_run($1)
-	manaage_files_pattern($1, systemd_sessions_runtime_t);
+	manage_files_pattern($1, systemd_sessions_runtime_t);
 ')
 
 ######################################
