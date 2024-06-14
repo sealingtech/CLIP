@@ -145,7 +145,6 @@ template(`dbus_role_template',`
 	optional_policy(`
 		systemd_watch_logind_runtime_dirs($1_dbusd_t)
 	')
-')
 
 	optional_policy(`
 		systemd_read_logind_runtime_files($1_dbusd_t)

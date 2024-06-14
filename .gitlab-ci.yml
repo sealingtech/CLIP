@@ -14,7 +14,7 @@ stages:
   - build
   - test
 
-rpm_lint:
+rpmlint:
   stage: lint
   rules:
     # Only run rpm linter if the spec file has been modified
@@ -39,6 +39,19 @@ rpm_lint:
       " > rpmlint_whitelist.txt
     # Run rpmlint against the spec file, make sure GitLab gets the correct return code here using the echo trick
     - rpmlint -f rpmlint_whitelist.txt packages/selinux-policy/selinux-policy.spec && echo $?
+
+selint:
+  stage: lint
+  script:
+    # selint will not be able to resolve interfaces and types unless policy is compiled using the 'policy' target
+    # found in the refpol/child Makefile (<repo_root>/packages/selinux-policy/selinux-policy/Makefile).
+    # This is primarily due to the way the corenetwork module is built. Unlike other modules, the corenetwork.if
+    # and corenetwork.te files are generated during the build and are not tracked by git.
+    - echo -e "\e[0Ksection_start:`date +%s`:pol_build[collapsed=true]\r\e[0KCompile policy for dev/testing purposes"
+    - make -C packages/selinux-policy/selinux-policy policy
+    - echo -e "\e[0Ksection_end:`date +%s`:pol_build\r\e[0K"
+    # Run selint against the source policy, make sure GitLab gets the correct return code here using the echo trick
+    - selint -sr --full-path --color=on --disable=W-005 --disable=C-001 --disable=C-005 --disable=C-006 --disable=C-008 packages/selinux-policy/ && echo $?
 
 selinux_policy:
   stage: build
