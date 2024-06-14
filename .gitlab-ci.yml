@@ -1,0 +1,59 @@
+workflow:
+  rules:
+    # Prevent running duplicate pipelines of both branch and MR
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
+      when: never
+    # Prevent running a pipeline if the commit message contains -wip
+    - if: $CI_COMMIT_MESSAGE =~ /-wip/
+      when: never
+    # In all other cases, run the pipeline
+    - when: always
+
+stages:
+  - lint
+  - build
+  - test
+
+rpm_lint:
+  stage: lint
+  rules:
+    # Only run rpm linter if the spec file has been modified
+    - if: $CI_COMMIT_BRANCH || $CI_MERGE_REQUEST_IID
+      changes:
+        compare_to: 'refs/heads/RHEL9'
+        paths:
+          - 'packages/selinux-policy/selinux-policy.spec'
+  script:
+    # rpmlint does not understand that we pass pkgname, version, and release in via rpm args (--define) in the Makefile.
+    # We will not be fixing the specific rpmlint errors below, so we whitelist them.
+    # The purpose of this is to make sure to fail the GitLab pipeline if we introduce new errors to the spec file. Note that
+    # regex could be used more extensively in the whitelist, but we want to be as specific as possible in order to prevent
+    # accidently allowing more errors through.
+    - |
+      echo -ne "
+      addFilter(\"selinux-policy.spec: E: specfile-error warning: line 8: Possible unexpanded macro in: Name: %{pkgname}\")\n
+      addFilter(\"selinux-policy.spec: E: specfile-error warning: line 9: Possible unexpanded macro in: Version: %{version}\")\n
+      addFilter(\"selinux-policy.spec: E: specfile-error warning: line 10: Possible unexpanded macro in: Release: %{release}\")\n
+      addFilter(\"selinux-policy.spec: line 14: Too many levels of recursion in macro expansion. It is likely caused by recursive macro declaration.\")\n
+      addFilter(\"selinux-policy.spec: E: specfile-error error: query of specfile .+selinux-policy.spec failed, can't parse\")
+      " > rpmlint_whitelist.txt
+    # Run rpmlint against the spec file, make sure GitLab gets the correct return code here using the echo trick
+    - rpmlint -f rpmlint_whitelist.txt packages/selinux-policy/selinux-policy.spec && echo $?
+
+selinux_policy:
+  stage: build
+  interruptible: true
+  before_script:
+    # Since we are using a shell runner, ensure we are working from a clean state.
+    - make -C packages/selinux-policy/ bare
+    - rm -fr packages/selinux-policy/*.rpm
+  script:
+    - make -C packages/selinux-policy/
+  artifacts:
+      name: "selinux_rpms_${CI_COMMIT_SHORT_SHA}"
+      paths:
+        - packages/selinux-policy/*.rpm
+
+mock_install:
+  stage: test
+  script: rpm -Uvh --test packages/selinux-policy/*.rpm

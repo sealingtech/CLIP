@@ -1,11 +1,11 @@
-%define distro redhat 
+%define distro redhat
 %define polyinstatiate n
 %define monolithic n
 %define POLICYVER 33
 %define POLICYCOREUTILSVER 3.4-1
 %define CHECKPOLICYVER 3.2
 %define LIBSEMANAGEVER 3.5-2
-Name:   %{pkgname}
+Name: %{pkgname}
 Version: %{version}
 Release: %{release}
 Summary: Policy Base Configuration Data
@@ -14,10 +14,10 @@ Group: System Environment/Base
 Source: %{pkgname}-%{version}.tar.gz
 # Tool helps during policy development, to expand system m4 macros to raw allow rules
 # Git repo: https://gitlab.cee.redhat.com/SELinux/macro-expander
-Source1:  macro-expander
-Source2:  rpm.macros
-Source3:  Makefile.devel
-Source4:  selinux-policy.conf
+Source1: macro-expander
+Source2: rpm.macros
+Source3: Makefile.devel
+Source4: selinux-policy.conf
 Source5: selinux-check-proper-disable.service
 Source6: setrans-mcs.conf
 Source7: setrans-mls.conf
