@@ -426,6 +426,11 @@ kernel_dontaudit_getattr_proc(systemd_cgroups_t)
 # for /proc/cmdline
 kernel_read_system_state(systemd_cgroups_t)
 
+kernel_search_fs_sysctls(systemd_cgroups_t)
+kernel_read_crypto_sysctls(systemd_cgroups_t)
+
+fs_getattr_xattr_fs(systemd_cgroups_t)
+
 mls_fd_use_all_levels(systemd_cgroups_t)
 
 selinux_getattr_fs(systemd_cgroups_t)
@@ -510,6 +515,7 @@ kernel_read_system_state(systemd_generator_t)
 kernel_read_kernel_sysctls(systemd_generator_t)
 kernel_read_crypto_sysctls(systemd_generator_t)
 
+corecmd_getattr_bin_files(systemd_generator_t)
 corecmd_exec_shell(systemd_generator_t)
 corecmd_exec_bin(systemd_generator_t)
 
@@ -517,6 +523,7 @@ corecmd_exec_shell(systemd_generator_t)
 corecmd_exec_bin(systemd_generator_t)
 
 dev_read_sysfs(systemd_generator_t)
+dev_write_kmsg(systemd_generator_t)
 dev_write_sysfs_dirs(systemd_generator_t)
 dev_create_sysfs_files(systemd_generator_t)
 dev_write_sysfs(systemd_generator_t)
@@ -532,6 +539,7 @@ files_list_boot(systemd_generator_t)
 files_read_boot_files(systemd_generator_t)
 files_search_all_mountpoints(systemd_generator_t)
 files_list_usr(systemd_generator_t)
+files_read_usr_files(systemd_generator_t)
 files_dontaudit_getattr_all_dirs(systemd_generator_t)
 files_dontaudit_read_etc_runtime_files(systemd_generator_t)
 
@@ -629,6 +637,18 @@ optional_policy(`
 	lvm_map_config(systemd_generator_t)
 	lvm_read_config(systemd_generator_t)
 	miscfiles_read_localization(systemd_generator_t)
+')
+
+ifdef(`distro_redhat',`
+	# for /usr/lib/systemd/system-generators/selinux-autorelabel-generator.sh
+	corecmd_exec_shell(systemd_generator_t)
+	# runs selinuxenabled which checks for the selinuxfs and /etc/selinux/config
+	corecmd_exec_bin(systemd_generator_t)
+	selinux_getattr_fs(systemd_generator_t)
+	seutil_read_config(systemd_generator_t)
+	# also checks for /.autorelabel which could be labeled etc_runtime_t or root_t
+	files_read_etc_runtime_files(systemd_generator_t)
+	files_getattr_root_files(systemd_generator_t)
 ')
 
 optional_policy(`
@@ -777,6 +797,8 @@ kernel_dontaudit_getattr_proc(systemd_hostnamed_t)
 
 dev_read_sysfs(systemd_hostnamed_t)
 
+fs_getattr_xattr_fs(systemd_hostnamed_t)
+
 files_read_etc_files(systemd_hostnamed_t)
 files_read_etc_runtime_files(systemd_hostnamed_t)
 
@@ -805,6 +827,7 @@ optional_policy(`
 	dbus_connect_system_bus(systemd_hostnamed_t)
 	dbus_system_bus_client(systemd_hostnamed_t)
 	init_dbus_chat(systemd_hostnamed_t)
+	init_dbus_send_script(systemd_hostnamed_t)
 ')
 
 optional_policy(`
@@ -944,10 +967,18 @@ allow systemd_logind_t systemd_sessions_runtime_t:dir manage_dir_perms;
 allow systemd_logind_t systemd_sessions_runtime_t:file manage_file_perms;
 allow systemd_logind_t systemd_sessions_runtime_t:fifo_file manage_fifo_file_perms;
 
+allow systemd_logind_t etc_t:file manage_file_perms;
+
+allow systemd_logind_t proc_t:filesystem getattr;
+allow systemd_logind_t systemd_userdbd_runtime_t:dir read;
+
+allow systemd_logind_t self:dbus acquire_svc;
+
 stream_connect_pattern(systemd_logind_t, systemd_userdbd_runtime_t, systemd_userdbd_runtime_t, systemd_userdbd_t)
 
 kernel_dontaudit_getattr_proc(systemd_logind_t)
 kernel_read_kernel_sysctls(systemd_logind_t)
+kernel_read_crypto_sysctls(systemd_logind_t)
 
 dev_getattr_dri_dev(systemd_logind_t)
 dev_getattr_generic_usb_dev(systemd_logind_t)
@@ -1002,8 +1033,9 @@ term_setattr_unallocated_ttys(systemd_logind_t)
 term_use_unallocated_ttys(systemd_logind_t)
 
 auth_manage_faillog(systemd_logind_t)
-auth_use_nsswitch(systemd_logind_t)
+#auth_use_nsswitch(systemd_logind_t)
 
+systemd_dbus_chat_logind(systemd_logind_t)
 init_dbus_send_script(systemd_logind_t)
 init_get_all_units_status(systemd_logind_t)
 init_get_system_status(systemd_logind_t)
@@ -1071,7 +1103,8 @@ tunable_policy(`systemd_logind_get_bootloader',`
 ')
 # systemd-logind uses util-linux's blkid in order to find the ESP (EFI System Partition).
 # This reads the first sectors of fixed disk devices.
-storage_raw_read_fixed_disk_cond(systemd_logind_t, systemd_logind_get_bootloader)
+# SRS: removed for CLIP
+#storage_raw_read_fixed_disk_cond(systemd_logind_t, systemd_logind_get_bootloader)
 
 optional_policy(`
 	dbus_connect_system_bus(systemd_logind_t)
@@ -1099,6 +1132,10 @@ optional_policy(`
 ')
 
 optional_policy(`
+	wm_read_all_wm_domains_state(systemd_logind_t)
+')
+
+optional_policy(`
 	xserver_read_state(systemd_logind_t)
 	xserver_dbus_chat(systemd_logind_t)
 	xserver_dbus_chat_xdm(systemd_logind_t)
@@ -1107,6 +1144,10 @@ optional_policy(`
 
 optional_policy(`
 	unconfined_dbus_send(systemd_logind_t)
+')
+
+optional_policy(`
+	rpm_dbus_chat(systemd_logind_t)
 ')
 
 #########################################
@@ -1754,6 +1795,8 @@ seutil_read_file_contexts(systemd_sessions_t)
 
 systemd_log_parse_environment(systemd_sessions_t)
 
+allow systemd_sessions_t self:capability net_admin;
+
 ########################################
 #
 # sysctl local policy
@@ -1833,8 +1876,16 @@ allow systemd_tmpfiles_t systemd_tmpfiles_conf_type:dir search_dir_perms;
 allow systemd_tmpfiles_t systemd_tmpfiles_conf_type:file read_file_perms;
 
 kernel_getattr_proc(systemd_tmpfiles_t)
+kernel_read_crypto_sysctls(systemd_tmpfiles_t)
 kernel_read_kernel_sysctls(systemd_tmpfiles_t)
 kernel_read_network_state(systemd_tmpfiles_t)
+
+# this pops up when a policy module is disabled,
+# there is a tmpfilesd conf entry for a file from it,
+# and that file is explcitly not labeled via <<none>>,
+# eg /tmp/.font-unix when the xfs module is disabled
+kernel_dontaudit_getattr_unlabeled_files(systemd_tmpfiles_t)
+kernel_dontaudit_read_unlabeled(systemd_tmpfiles_t)
 
 dev_getattr_fs(systemd_tmpfiles_t)
 dev_manage_all_dev_nodes(systemd_tmpfiles_t)
@@ -1877,6 +1928,7 @@ files_relabelto_etc_dirs(systemd_tmpfiles_t)
 files_setattr_lock_dirs(systemd_tmpfiles_t)
 # for /etc/mtab
 files_manage_etc_symlinks(systemd_tmpfiles_t)
+files_getattr_generic_locks(systemd_tmpfiles_t)
 
 fs_list_tmpfs(systemd_tmpfiles_t)
 fs_relabelfrom_tmpfs_dirs(systemd_tmpfiles_t)
@@ -1886,6 +1938,7 @@ fs_search_cgroup_dirs(systemd_tmpfiles_t)
 selinux_get_fs_mount(systemd_tmpfiles_t)
 selinux_use_status_page(systemd_tmpfiles_t)
 
+auth_setattr_faillog_files(systemd_tmpfiles_t)
 auth_append_lastlog(systemd_tmpfiles_t)
 auth_manage_faillog(systemd_tmpfiles_t)
 auth_manage_lastlog(systemd_tmpfiles_t)
@@ -2043,6 +2096,7 @@ files_list_usr(systemd_user_session_type)
 # /etc/localtime
 files_watch_etc_symlinks(systemd_user_session_type)
 
+fs_getattr_xattr_fs(systemd_user_session_type)
 fs_getattr_cgroup(systemd_user_session_type)
 fs_getattr_tmpfs(systemd_user_session_type)
 fs_rw_cgroup_files(systemd_user_session_type)
@@ -2051,11 +2105,13 @@ fs_manage_cgroup_dirs(systemd_user_session_type)
 # for /proc/sys/fs/nr_open
 kernel_read_fs_sysctls(systemd_user_session_type)
 kernel_read_kernel_sysctls(systemd_user_session_type)
+kernel_read_crypto_sysctls(systemd_user_session_type)
 
 selinux_compute_access_vector(systemd_user_session_type)
 selinux_compute_create_context(systemd_user_session_type)
 
 storage_getattr_fixed_disk_dev(systemd_user_session_type)
+storage_getattr_removable_dev(systemd_user_session_type)
 
 # for systemd-executor
 init_exec(systemd_user_session_type)
@@ -2066,6 +2122,8 @@ init_exec(systemd_user_session_type)
 # for /run/systemd/notify
 init_dgram_send(systemd_user_session_type)
 init_signal(systemd_user_session_type)
+
+init_search_units(systemd_user_session_type)
 
 logging_send_audit_msgs(systemd_user_session_type)
 
@@ -2082,7 +2140,14 @@ seutil_libselinux_linked(systemd_user_session_type)
 
 userdom_list_user_home_content(systemd_user_session_type)
 
+# ignore for spawned apps running on behalf of admins
+userdom_dontaudit_list_admin_dir(systemd_user_session_type)
+
 seutil_libselinux_linked(systemd_user_session_type)
+
+optional_policy(`
+	xserver_read_xdm_lib_files(systemd_user_session_type)
+')
 
 ########################################
 #
@@ -2140,9 +2205,14 @@ domain_obj_id_change_exemption(systemd_user_runtime_dir_t)
 allow systemd_user_runtime_dir_t systemd_user_runtime_t:dir manage_dir_perms;
 allow systemd_user_runtime_dir_t systemd_user_runtime_t:file manage_file_perms;
 
+allow systemd_user_runtime_dir_t proc_t:filesystem getattr;
+allow systemd_user_runtime_dir_t self:capability net_admin;
+allow systemd_user_runtime_dir_t user_runtime_t:dir relabelfrom;
+
 files_read_etc_files(systemd_user_runtime_dir_t)
 files_map_etc_files(systemd_user_runtime_dir_t)
 
+fs_getattr_xattr_fs(systemd_user_runtime_dir_t)
 fs_mount_tmpfs(systemd_user_runtime_dir_t)
 fs_getattr_tmpfs(systemd_user_runtime_dir_t)
 fs_list_tmpfs(systemd_user_runtime_dir_t)
@@ -2179,9 +2249,13 @@ userdom_manage_user_tmp_files(systemd_user_runtime_dir_t)
 
 userdom_search_user_runtime_root(systemd_user_runtime_dir_t)
 userdom_user_runtime_root_filetrans_user_runtime(systemd_user_runtime_dir_t, dir)
+userdom_user_run_filetrans_user_runtime(systemd_user_runtime_dir_t, dir)
 userdom_manage_user_runtime_dirs(systemd_user_runtime_dir_t)
 userdom_mounton_user_runtime_dirs(systemd_user_runtime_dir_t)
 userdom_relabelto_user_runtime_dirs(systemd_user_runtime_dir_t)
+userdom_delete_all_user_runtime_files(systemd_user_runtime_dir_t)
+userdom_delete_all_user_runtime_dirs(systemd_user_runtime_dir_t)
+userdom_delete_all_user_runtime_named_sockets(systemd_user_runtime_dir_t)
 
 optional_policy(`
 	dbus_system_bus_client(systemd_user_runtime_dir_t)
