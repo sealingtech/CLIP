@@ -244,6 +244,26 @@ interface(`udev_relabel_rules_files',`
 
 ########################################
 ## <summary>
+##      Allow process to relabelto udev database
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`udev_relabelto_db',`
+	gen_require(`
+		type udev_runtime_t;
+	')
+
+	files_search_pids($1)
+	allow $1 udev_runtime_t:file relabelto_file_perms;
+	allow $1 udev_runtime_t:lnk_file relabelto_lnk_file_perms;
+')
+
+########################################
+## <summary>
 ##	Allow process to relabelto sockets in /run/udev
 ## </summary>
 ## <param name="domain">

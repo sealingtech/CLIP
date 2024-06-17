@@ -136,6 +136,7 @@ files_exec_etc_files(udev_t)
 files_getattr_generic_locks(udev_t)
 files_search_mnt(udev_t)
 files_dontaudit_getattr_default_files(udev_t)
+files_dontaudit_getattr_default_dirs(udev_t)
 files_dontaudit_getattr_home_dir(udev_t)
 files_dontaudit_getattr_lost_found_dirs(udev_t)
 files_dontaudit_getattr_tmp_dirs(udev_t)
@@ -246,11 +247,6 @@ ifdef(`distro_gentoo',`
 ')
 
 ifdef(`distro_redhat',`
-	# rename_device keeps a lock file in /dev
-	dev_filetrans(udev_t, udev_runtime_t, file)
-
-	dev_write_sysfs_dirs(udev_t)
-
 	fs_manage_tmpfs_dirs(udev_t)
 	fs_manage_tmpfs_files(udev_t)
 	fs_manage_tmpfs_symlinks(udev_t)
