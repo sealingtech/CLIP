@@ -34,7 +34,7 @@ role system_r types sulogin_t;
 
 allow local_login_t self:capability { chown dac_read_search dac_override fowner fsetid kill setgid setuid sys_nice sys_resource sys_tty_config };
 dontaudit local_login_t self:capability net_admin;
-allow local_login_t self:process { getcap setcap setexec setrlimit setsched };
+allow local_login_t self:process { getcap setcap setexec setrlimit setsched signal };
 allow local_login_t self:fd use;
 allow local_login_t self:fifo_file rw_fifo_file_perms;
 allow local_login_t self:sock_file read_sock_file_perms;
@@ -64,6 +64,7 @@ kernel_read_kernel_sysctls(local_login_t)
 kernel_search_key(local_login_t)
 kernel_link_key(local_login_t)
 kernel_getattr_proc(local_login_t)
+kernel_read_crypto_sysctls(local_login_t)
 
 corecmd_list_bin(local_login_t)
 # cjp: these are probably not needed:
@@ -129,6 +130,7 @@ auth_manage_pam_runtime_files(local_login_t)
 auth_manage_pam_console_data(local_login_t)
 auth_domtrans_pam_console(local_login_t)
 auth_read_pam_motd_dynamic(local_login_t)
+auth_use_pam_motd_dynamic(local_login_t)
 auth_read_shadow_history(local_login_t)
 
 # if local_login_t can not inherit fd from init it takes ages to login
@@ -139,6 +141,7 @@ miscfiles_read_localization(local_login_t)
 userdom_manage_all_users_keys(local_login_t)
 userdom_spec_domtrans_all_users(local_login_t)
 userdom_signal_all_users(local_login_t)
+userdom_search_admin_dir(local_login_t)
 userdom_search_user_home_content(local_login_t)
 userdom_use_unpriv_users_fds(local_login_t)
 userdom_sigchld_all_users(local_login_t)
@@ -277,7 +280,9 @@ userdom_use_unpriv_users_fds(sulogin_t)
 userdom_search_user_home_dirs(sulogin_t)
 userdom_use_user_ptys(sulogin_t)
 
-sysadm_shell_domtrans(sulogin_t)
+optional_policy(`
+	sysadm_shell_domtrans(sulogin_t)
+')
 
 # by default, sulogin does not use pam...
 # sulogin_pam might need to be defined otherwise
