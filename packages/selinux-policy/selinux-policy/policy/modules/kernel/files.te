@@ -44,6 +44,9 @@ attribute tmpfsfile;
 # some policies to fail to link if it is still required.
 attribute usercanread;
 
+# file types that should not be memory-mappable
+attribute not_mappable_file_type;
+
 #
 # boot_t is the type for files in /boot
 #
