@@ -88,6 +88,10 @@ set -x
 
 %include includes/early-scap-audit
 %include includes/scap-remediate
+# if we are using firewalld, enable the base settings
+if [ x"$CONFIG_ENABLE_FIREWALLD" == "xy" ]; then
+%include includes/fix-firewalld
+fi
 
 # FIXME: Change the username and password.
 #        If a hashed password is specified it will be used

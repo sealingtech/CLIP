@@ -94,6 +94,10 @@ echo "#CONFIG-BUILD-PLACEHOLDER" >> /root/clip-info.txt
 
 %include includes/early-scap-audit
 %include includes/scap-remediate
+# if we are using firewalld, enable the base settings
+if [ x"$CONFIG_ENABLE_FIREWALLD" == "xy" ]; then
+%include includes/fix-firewalld
+fi
 
 if [ x"$CONFIG_BUILD_AWS" != "xy" -o x"$CONFIG_BUILD_VPN_ENABLE_TOOR" == "xy" ]; then
 	# FIXME: Change the username and password.
