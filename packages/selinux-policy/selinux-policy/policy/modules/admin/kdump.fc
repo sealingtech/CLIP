@@ -10,3 +10,5 @@
 
 /usr/sbin/kdump	--	gen_context(system_u:object_r:kdump_exec_t,s0)
 /usr/sbin/kexec	--	gen_context(system_u:object_r:kdump_exec_t,s0)
+
+/var/lock/kdump(/.*)?   gen_context(system_u:object_r:kdump_lock_t,s0)
