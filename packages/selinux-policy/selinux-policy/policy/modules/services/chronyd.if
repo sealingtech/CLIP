@@ -361,3 +361,59 @@ interface(`chronyd_admin',`
 	files_search_runtime($1)
 	admin_pattern($1, chronyd_runtime_t)
 ')
+
+#####################################
+## <summary>
+##	Create chronyd runtime dirs.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`chronyd_create_runtime_dirs',`
+	gen_require(`
+		type chronyd_runtime_t;
+	')
+
+	create_dirs_pattern($1, var_run_t, chronyd_runtime_t)
+	chronyd_filetrans_runtime_dirs($1)
+')
+
+
+########################################
+## <summary>
+##  Transition to chronyd_runtime_t when creating dirs
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`chronyd_filetrans_runtime_dirs',`
+	gen_require(`
+		type chronyd_runtime_t;
+	')
+
+	files_runtime_filetrans($1, chronyd_runtime_t, dir, "chrony-dhcp")
+')
+
+#####################################
+## <summary>
+##	Manage chronyd runtime files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`chronyd_manage_runtime_files',`
+	gen_require(`
+		type chronyd_runtime_t;
+	')
+
+	manage_files_pattern($1, chronyd_runtime_t, chronyd_runtime_t)
+')

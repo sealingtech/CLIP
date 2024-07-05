@@ -225,6 +225,13 @@ optional_policy(`
 
 optional_policy(`
 	chronyd_domtrans_cli(NetworkManager_t)
+
+	# MAK: The chrony rpm installs the drop-in script 20-chrony-dhcp into
+	# /usr/lib/NetworkManager/dispatcher.d/20-chrony-dhcp
+	# The NetworkManager executes this script to populate NTP server information into /run/chrony-dhcp/
+	# Without a filetrans, it would inherit NetworkManager_runtime_t, making is unreadable by chrony
+	chronyd_create_runtime_dirs(NetworkManager_t)
+	chronyd_manage_runtime_files(NetworkManager_t)
 ')
 
 optional_policy(`
@@ -367,10 +374,6 @@ optional_policy(`
 	vpn_signal(NetworkManager_t)
 	vpn_signull(NetworkManager_t)
 	vpn_relabelfrom_tun_socket(NetworkManager_t)
-')
-
-optional_policy(`
-	chronyd_domtrans_cli(NetworkManager_t)
 ')
 
 ########################################
