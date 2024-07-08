@@ -788,6 +788,10 @@ udev_read_runtime_files(systemd_homework_t)
 allow systemd_hostnamed_t self:capability sys_admin;
 allow systemd_hostnamed_t self:process setfscreate;
 
+# MAK: Allow hostnamed to acquire dbus, without this, the login to root is delayed
+# and services on start (hostnamed and networkmanager) do not launch gracefully
+allow systemd_hostnamed_t self:dbus acquire_svc;
+
 fs_getattr_cgroup(systemd_hostnamed_t)
 fs_getattr_xattr_fs(systemd_hostnamed_t)
 

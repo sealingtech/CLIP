@@ -1352,6 +1352,7 @@ template(`userdom_admin_user_template',`
 	# Inherit rules for ordinary users.
 	userdom_login_user_template($1)
 	userdom_common_user_template($1)
+	systemd_admin_role_template($1)
 
 	domain_obj_id_change_exemption($1_t)
 	role system_r types $1_t;

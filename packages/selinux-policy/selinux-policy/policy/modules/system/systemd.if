@@ -2,6 +2,26 @@
 
 #########################################
 ## <summary>
+##	Template for systemd admin role domains.
+## </summary>
+## <param name="prefix">
+##	<summary>
+##	Prefix for generated admin types (often sysadm)
+##	</summary>
+## </param>
+#
+template(`systemd_admin_role_template',`
+	gen_require(`
+		type $1_systemd_t;
+	')
+
+	allow $1_systemd_t $1_systemd_t:capability sys_admin;
+	allow $1_systemd_t $1_systemd_t:capability2 { bpf perfmon };
+	allow $1_systemd_t $1_systemd_t:process setrlimit;
+')
+
+#########################################
+## <summary>
 ##	Template for systemd --user per-role domains.
 ## </summary>
 ## <param name="prefix">

@@ -112,6 +112,8 @@ optional_policy(`
 	dbus_system_domain(policykit_t, policykit_exec_t)
 	init_dbus_chat(policykit_t)
 
+	allow policykit_t self:dbus acquire_svc;
+
 	userdom_dbus_send_all_users(policykit_t)
 
 	optional_policy(`

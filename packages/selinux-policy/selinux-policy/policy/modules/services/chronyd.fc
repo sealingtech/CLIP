@@ -19,3 +19,5 @@
 /run/chronyd?(/.*)?				gen_context(system_u:object_r:chronyd_runtime_t,s0)
 /run/chronyd\.pid			--	gen_context(system_u:object_r:chronyd_runtime_t,s0)
 /run/chronyd\.sock			-s	gen_context(system_u:object_r:chronyd_runtime_t,s0)
+
+/run/chrony-dhcp?(/.*)?			gen_context(system_u:object_r:chronyd_runtime_t,s0)
