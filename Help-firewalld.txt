@@ -59,18 +59,26 @@ What does CLIP do?
 
 ===========================================================================
 How do you switch? 
-    This _should_ be pretty painless. You need to update the kickstart file,
-    kickstart/clip-WHATEVER/clip-WHATEVER.ks, to add in the file that 
-    configures firewalld and remove where CLIP disables the service in 
-    kickstart/includes/fix-bad-scap.
+    This _should_ be pretty painless. You can enable firewalld in all
+    variants or you can enable it up per variant. At present, CLIP disables
+    firewalld in all variants.
 
-    Add "%include includes/fix-firewalld" to the kickstart where all the 
-    the other includes are. 
+    To enable firewalld in a single variant you need to update that variants 
+    kickstart file, kickstart/clip-VARIANTNAME/clip-VARIANTNAME.ks, to set the 
+    environment variable CONFIG_ENABLE_FIREWALLD=y in the %post of the 
+    kickstart.
 
-    Remove where CLIP disables firewalld and enables iptables. Find
-    the lines below in the kickstart/includes/fix-bad-scap and delete them 
-    or comment them out.
-        systemctl disable firewalld
-        systemctl mask firewalld
-        systemctl enable iptables
-        systemctl enable ip6tables
+    Ths must be done beloow the two lines where the build system adds in the 
+    top level environment variables. An example of this is shown below.
+    "
+    # DO NOT REMOVE THE FOLLOWING LINE. NON-EXISTENT WARRANTY VOID IF REMOVED.
+    #CONFIG-BUILD-PLACEHOLDER
+
+    export CONFIG_ENABLE_FIREWALLD=y
+    "
+    
+    To enable firewalld globally you need to modify the CONFIG_BUILD file
+    and switch the line
+    CONFIG_ENABLE_FIREWALLD := n
+    to 
+    CONFIG_ENABLE_FIREWALLD := y

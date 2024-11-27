@@ -11,11 +11,13 @@ systemctl stop kdump.service
 systemctl disable kdump.service
 systemctl mask kdump.service
 
-# And I have yet to figure out how to use SECMARK with firewalld.
+# If we are not using firewalld, disable it and turn on iptables
+if [ x"$CONFIG_ENABLE_FIREWALLD" != "xy" ]; then
 systemctl disable firewalld
 systemctl mask firewalld
 systemctl enable iptables
 systemctl enable ip6tables
+fi
 
 # https://github.com/OpenSCAP/scap-security-guide/issues/1435
 sed -i -e 's/cbcMACs/cbc\nMACS/' /etc/ssh/sshd_config 
